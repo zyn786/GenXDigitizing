@@ -24,9 +24,10 @@ import {
 
 const DEFAULT_REDIRECT: Route = "/post-login";
 const LOGIN_ROUTE: Route = "/login";
-const FORGOT_PASSWORD_ROUTE = "/forgot-password";
-const RESET_PASSWORD_ROUTE = "/reset-password";
-const VERIFY_EMAIL_ROUTE = "/verify-email";
+const FORGOT_PASSWORD_ROUTE: Route = "/forgot-password";
+const RESET_PASSWORD_ROUTE: Route = "/reset-password";
+const VERIFY_EMAIL_ROUTE: Route = "/verify-email";
+const CLIENT_DASHBOARD_ROUTE: Route = "/client/dashboard";
 
 const forgotPasswordSchema = z.object({
   email: z.string().trim().email(),
@@ -53,23 +54,31 @@ const resendVerificationSchema = z.object({
 });
 
 function getSafeRedirect(nextValue: FormDataEntryValue | null): Route {
-  const value = typeof nextValue === "string" ? nextValue : "";
-  if (!value.startsWith("/")) return DEFAULT_REDIRECT;
+  const value = typeof nextValue === "string" ? nextValue.trim() : "";
+
+  if (!value.startsWith("/") || value.startsWith("//")) {
+    return DEFAULT_REDIRECT;
+  }
+
   return value as Route;
 }
 
 function redirectWithParams(
-  pathname: string,
+  pathname: Route,
   params: Record<string, string | undefined>
 ): never {
   const search = new URLSearchParams();
 
   for (const [key, value] of Object.entries(params)) {
-    if (value) search.set(key, value);
+    if (value) {
+      search.set(key, value);
+    }
   }
 
   const suffix = search.toString();
-  redirect(suffix ? `${pathname}?${suffix}` : pathname);
+  const target = suffix ? `${pathname}?${suffix}` : pathname;
+
+  redirect(target as Route);
 }
 
 function redirectToLogin(params: Record<string, string | undefined>): never {
@@ -116,8 +125,16 @@ export async function registerAction(formData: FormData): Promise<void> {
   });
 
   try {
-    const rawOtp = await issueEmailOtp(prisma, { identifier: email, userId: user.id });
-    await sendEmailOtpEmail({ to: email, name: user.name, code: rawOtp });
+    const rawOtp = await issueEmailOtp(prisma, {
+      identifier: email,
+      userId: user.id,
+    });
+
+    await sendEmailOtpEmail({
+      to: email,
+      name: user.name,
+      code: rawOtp,
+    });
   } catch (error) {
     console.error("Failed to send OTP email after registration", error);
   }
@@ -126,7 +143,9 @@ export async function registerAction(formData: FormData): Promise<void> {
     await signIn("email-password", {
       email,
       password: parsed.data.password,
-      redirectTo: `/verify-email?pending=1&email=${encodeURIComponent(email)}`,
+      redirectTo: `${VERIFY_EMAIL_ROUTE}?pending=1&email=${encodeURIComponent(
+        email
+      )}`,
     });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -142,7 +161,10 @@ export async function registerAction(formData: FormData): Promise<void> {
 
 export async function googleSignInAction(formData: FormData): Promise<void> {
   const redirectTo = getSafeRedirect(formData.get("redirectTo"));
-  await signIn("google", { redirectTo });
+
+  await signIn("google", {
+    redirectTo,
+  });
 }
 
 export async function signInPasswordAction(formData: FormData): Promise<void> {
@@ -151,7 +173,10 @@ export async function signInPasswordAction(formData: FormData): Promise<void> {
   const redirectTo = getSafeRedirect(formData.get("redirectTo"));
 
   if (typeof emailEntry !== "string" || typeof passwordEntry !== "string") {
-    redirectToLogin({ error: "invalid-email-or-password", next: redirectTo });
+    redirectToLogin({
+      error: "invalid-email-or-password",
+      next: redirectTo,
+    });
   }
 
   const email = emailEntry;
@@ -234,16 +259,13 @@ export async function resetPasswordAction(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
+    const emailValue = formData.get("email");
+    const tokenValue = formData.get("token");
+
     redirectWithParams(RESET_PASSWORD_ROUTE, {
       error: "invalid-reset-form",
-      email:
-        typeof formData.get("email") === "string"
-          ? String(formData.get("email"))
-          : undefined,
-      token:
-        typeof formData.get("token") === "string"
-          ? String(formData.get("token"))
-          : undefined,
+      email: typeof emailValue === "string" ? emailValue : undefined,
+      token: typeof tokenValue === "string" ? tokenValue : undefined,
     });
   }
 
@@ -351,6 +373,7 @@ export async function resendVerificationEmailAction(
     });
   } catch (error) {
     console.error("Failed to resend verification email", error);
+
     redirectWithParams(VERIFY_EMAIL_ROUTE, {
       error: "send-failed",
       email,
@@ -370,9 +393,11 @@ export async function verifyEmailOtpAction(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
+    const emailValue = formData.get("email");
+
     redirectWithParams(VERIFY_EMAIL_ROUTE, {
       error: "invalid-code",
-      email: typeof formData.get("email") === "string" ? String(formData.get("email")) : undefined,
+      email: typeof emailValue === "string" ? emailValue : undefined,
       pending: "1",
     });
   }
@@ -404,7 +429,7 @@ export async function verifyEmailOtpAction(formData: FormData): Promise<void> {
     VerificationTokenPurpose.EMAIL_VERIFICATION
   );
 
-  redirect("/client/dashboard");
+  redirect(CLIENT_DASHBOARD_ROUTE);
 }
 
 export async function resendEmailOtpAction(formData: FormData): Promise<void> {
@@ -423,19 +448,33 @@ export async function resendEmailOtpAction(formData: FormData): Promise<void> {
 
   const user = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, name: true, emailVerified: true, isActive: true },
+    select: {
+      id: true,
+      name: true,
+      emailVerified: true,
+      isActive: true,
+    },
   });
 
   if (user?.emailVerified) {
-    redirect("/client/dashboard");
+    redirect(CLIENT_DASHBOARD_ROUTE);
   }
 
   if (user?.isActive && user.id) {
     try {
-      const rawOtp = await issueEmailOtp(prisma, { identifier: email, userId: user.id });
-      await sendEmailOtpEmail({ to: email, name: user.name ?? null, code: rawOtp });
+      const rawOtp = await issueEmailOtp(prisma, {
+        identifier: email,
+        userId: user.id,
+      });
+
+      await sendEmailOtpEmail({
+        to: email,
+        name: user.name ?? null,
+        code: rawOtp,
+      });
     } catch (error) {
       console.error("Failed to resend OTP email", error);
+
       redirectWithParams(VERIFY_EMAIL_ROUTE, {
         error: "send-failed",
         email,
@@ -479,9 +518,7 @@ export async function verifyEmailAction(formData: FormData): Promise<void> {
   }
 
   await prisma.user.updateMany({
-    where: {
-      email,
-    },
+    where: { email },
     data: {
       emailVerified: new Date(),
     },
@@ -497,4 +534,8 @@ export async function verifyEmailAction(formData: FormData): Promise<void> {
     status: "verified",
     email,
   });
+}
+
+export async function forgotPasswordAction(formData: FormData): Promise<void> {
+  return requestPasswordResetAction(formData);
 }
