@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Phase 7 Patch — Notifications + Web Chat
 
 This patch adds the **Phase 7 foundation** for:
@@ -138,3 +139,7 @@ The next implementation step after merging this scaffold is:
 - **real email send via Resend**
 - **notification dispatch log**
 - **scheduled reminder worker**
+=======
+# GenXDigitizing
+Embroidery Digitizing, Vector Art &amp; Custom Patches — Delivered Production-Ready.
+>>>>>>> ae96d834ae95b2846b2f59af600155a9c9d9e0d8
