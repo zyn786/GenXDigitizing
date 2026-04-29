@@ -31,7 +31,7 @@ export async function logActivity({
         action,
         entityType,
         entityId: entityId ?? null,
-        metadata: metadata ?? undefined,
+        metadata: metadata as never,
       },
     });
   } catch {

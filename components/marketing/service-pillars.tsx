@@ -26,7 +26,7 @@ const services: ServiceDef[] = [
   {
     icon: Cpu,
     title: "Embroidery Digitizing",
-    href: "/services/embroidery-digitizing",
+    href: "/services/embroidery-digitizing" as Route,
     description:
       "Production-ready digitizing for caps, jackets, polos, left chest logos, small text, and high-detail commercial embroidery.",
     tags: ["Left Chest", "Cap / Hat", "3D Puff", "Jacket Back"],
@@ -39,7 +39,7 @@ const services: ServiceDef[] = [
   {
     icon: Shapes,
     title: "Vector Art Conversion",
-    href: "/services/vector-art",
+    href: "/services/vector-art" as Route,
     description:
       "Clean, scalable logo rebuilds for apparel decoration, print workflows, signage, and brand asset systems.",
     tags: ["JPG to Vector", "Logo Redraw", "Print-Ready", "DTF / DTG"],
@@ -52,7 +52,7 @@ const services: ServiceDef[] = [
   {
     icon: Award,
     title: "Custom Patches",
-    href: "/services/custom-patches",
+    href: "/services/custom-patches" as Route,
     description:
       "Structured patch planning for embroidered, woven, PVC, leather, and specialty patch production with approval-ready flow.",
     tags: ["Embroidered", "Chenille", "PVC / Woven", "Leather"],

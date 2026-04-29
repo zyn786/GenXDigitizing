@@ -141,7 +141,7 @@ export async function consumeVerificationToken(
 
   await db.verificationToken.deleteMany({
     where: {
-      id: record.id,
+      token: record.token,
     },
   });
 
