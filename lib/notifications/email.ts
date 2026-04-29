@@ -1,0 +1,374 @@
+import { Resend } from "resend";
+import { prisma } from "@/lib/db";
+import type { NotificationDeliveryStatus, NotificationEventType, NotificationAudience, NotificationChannel } from "@prisma/client";
+
+function getResend() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error("RESEND_API_KEY not configured.");
+  return new Resend(apiKey);
+}
+
+function from() {
+  return process.env.EMAIL_FROM ?? "GenX Digitizing <noreply@genxdigitizing.com>";
+}
+
+function appUrl() {
+  return (process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+}
+
+function esc(v: string) {
+  return v
+    .replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+}
+
+async function send(to: string, subject: string, html: string, text: string) {
+  const { error } = await getResend().emails.send({ from: from(), to, subject, html, text });
+  if (error) throw new Error(error.message || "Email send failed.");
+}
+
+function wrap(body: string) {
+  return `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827;max-width:620px;margin:0 auto;padding:24px;">
+    <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6b7280;margin-bottom:4px;">GenX Digitizing</div>
+    ${body}
+    <p style="margin-top:32px;color:#6b7280;font-size:13px;">Questions? Reply to this email or visit <a href="${appUrl()}" style="color:#374151;">${appUrl()}</a>.</p>
+  </div>`;
+}
+
+function btn(href: string, label: string) {
+  return `<p style="margin:24px 0;"><a href="${esc(href)}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#111827;color:#ffffff;text-decoration:none;font-weight:600;">${esc(label)}</a></p>`;
+}
+
+// ─── Notification log helper ──────────────────────────────────────────────────
+
+export async function writeNotificationLog(opts: {
+  eventType: NotificationEventType;
+  audience: NotificationAudience;
+  channel: NotificationChannel;
+  recipientUserId?: string | null;
+  recipientAddress?: string | null;
+  orderId?: string | null;
+  invoiceId?: string | null;
+  status: NotificationDeliveryStatus;
+  errorMessage?: string | null;
+}) {
+  try {
+    await prisma.notificationLog.create({ data: opts });
+  } catch {
+    // non-fatal — log but don't break the primary action
+  }
+}
+
+// ─── Email senders ────────────────────────────────────────────────────────────
+
+export async function sendOrderCreatedEmail(opts: {
+  to: string;
+  clientName: string;
+  orderNumber: string;
+  orderId: string;
+  serviceType: string;
+  estimatedPrice?: number | null;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/client/orders/${opts.orderId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const priceNote = opts.estimatedPrice
+    ? `Estimated price: <strong>$${opts.estimatedPrice.toFixed(2)}</strong>`
+    : "Pricing will be confirmed by our team shortly.";
+
+  const subject = `Order received — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `We've received your order ${opts.orderNumber} (${opts.serviceType}).`,
+    priceNote.replace(/<[^>]+>/g, ""),
+    "",
+    `Track your order: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Order received</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      We've received your order <strong>${esc(opts.orderNumber)}</strong> (${esc(opts.serviceType)}).
+      Our team will review it shortly and get to work.
+    </p>
+    <p style="margin:10px 0 0;">${priceNote}</p>
+    ${btn(portalUrl, "Track your order")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "ORDER_CREATED",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendProofReadyEmail(opts: {
+  to: string;
+  clientName: string;
+  orderNumber: string;
+  orderId: string;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/client/orders/${opts.orderId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const subject = `Your proof is ready — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `Great news! The proof for your order ${opts.orderNumber} is ready for your review.`,
+    "Please log in to your client portal to approve or request a revision.",
+    "",
+    `Review proof: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Your proof is ready</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      The proof for order <strong>${esc(opts.orderNumber)}</strong> is ready for your review.
+      Please log in to approve it or request a revision.
+    </p>
+    ${btn(portalUrl, "Review proof")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "PROOF_READY",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendRevisionPendingEmail(opts: {
+  to: string;
+  clientName: string;
+  orderNumber: string;
+  orderId: string;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/client/orders/${opts.orderId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const subject = `Revision request received — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `We've received your revision request for order ${opts.orderNumber} and our designer is on it.`,
+    `Check the latest update: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Revision request received</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      We've received your revision request for order <strong>${esc(opts.orderNumber)}</strong>.
+      Our designer will update the proof and notify you when it's ready.
+    </p>
+    ${btn(portalUrl, "View order")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "REVISION_PENDING",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendFilesDeliveredEmail(opts: {
+  to: string;
+  clientName: string;
+  orderNumber: string;
+  orderId: string;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/client/orders/${opts.orderId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const subject = `Your files are delivered — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `Your embroidery files for order ${opts.orderNumber} have been delivered.`,
+    "Log in to download them from your client portal.",
+    "",
+    `Download files: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Files delivered</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      Your embroidery files for order <strong>${esc(opts.orderNumber)}</strong> are ready.
+      Log in to your client portal to download them.
+    </p>
+    ${btn(portalUrl, "Download files")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "FILE_DELIVERED",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendInvoiceSentEmail(opts: {
+  to: string;
+  clientName: string;
+  invoiceNumber: string;
+  invoiceId: string;
+  orderId: string;
+  totalAmount: number;
+  currency: string;
+  dueDate: string;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/client/invoices/${opts.invoiceId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const subject = `Invoice ${opts.invoiceNumber} — ${opts.currency} ${opts.totalAmount.toFixed(2)} due`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `Invoice ${opts.invoiceNumber} for ${opts.currency} ${opts.totalAmount.toFixed(2)} is now available.`,
+    `Due: ${opts.dueDate}`,
+    "",
+    `View & pay: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">New invoice</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      Invoice <strong>${esc(opts.invoiceNumber)}</strong> for
+      <strong>${esc(opts.currency)} ${opts.totalAmount.toFixed(2)}</strong> is ready.
+      Due date: <strong>${esc(opts.dueDate)}</strong>.
+    </p>
+    ${btn(portalUrl, "View & pay invoice")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "INVOICE_SENT",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    invoiceId: opts.invoiceId,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendPaymentReceivedEmail(opts: {
+  to: string;
+  clientName: string;
+  invoiceNumber: string;
+  invoiceId: string;
+  orderId: string;
+  receiptNumber: string;
+  amount: number;
+  currency: string;
+  balanceDue: number;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/client/invoices/${opts.invoiceId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const isPaidInFull = opts.balanceDue <= 0;
+  const subject = `Payment received — ${opts.receiptNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `We've received your payment of ${opts.currency} ${opts.amount.toFixed(2)} for invoice ${opts.invoiceNumber}.`,
+    isPaidInFull ? "Your invoice is paid in full." : `Remaining balance: ${opts.currency} ${opts.balanceDue.toFixed(2)}`,
+    "",
+    `View receipt: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Payment received</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      We've received your payment of <strong>${esc(opts.currency)} ${opts.amount.toFixed(2)}</strong>
+      for invoice <strong>${esc(opts.invoiceNumber)}</strong>. Receipt: ${esc(opts.receiptNumber)}.
+    </p>
+    <p style="margin:10px 0 0;">
+      ${isPaidInFull
+        ? `<strong style="color:#059669;">Your invoice is paid in full. Thank you!</strong>`
+        : `Remaining balance: <strong>${esc(opts.currency)} ${opts.balanceDue.toFixed(2)}</strong>`
+      }
+    </p>
+    ${btn(portalUrl, "View invoice")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "PAYMENT_RECORDED",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    invoiceId: opts.invoiceId,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendFilesUnlockedEmail(opts: {
+  to: string;
+  clientName: string;
+  orderNumber: string;
+  orderId: string;
+  invoiceNumber: string;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/client/orders/${opts.orderId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const subject = `Files unlocked — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `Your payment for invoice ${opts.invoiceNumber} has been verified.`,
+    `Your embroidery files for order ${opts.orderNumber} are now available to download.`,
+    "",
+    `Download files: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Files are now available</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      Your payment for invoice <strong>${esc(opts.invoiceNumber)}</strong> has been verified.
+      Your embroidery files for order <strong>${esc(opts.orderNumber)}</strong> are now available to download.
+    </p>
+    ${btn(portalUrl, "Download files")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "FILE_DELIVERED",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}

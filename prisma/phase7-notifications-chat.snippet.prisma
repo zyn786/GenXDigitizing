@@ -1,0 +1,106 @@
+enum NotificationChannel {
+  EMAIL
+  WEB_CHAT
+}
+
+enum NotificationAudience {
+  CLIENT
+  ASSIGNED_USER
+  SHARED_OPERATIONS
+}
+
+enum NotificationEventType {
+  ORDER_RECEIVED
+  PROOF_READY
+  REVISION_REQUESTED
+  REVISION_PENDING_REMINDER
+  FILES_DELIVERED
+  INVOICE_SENT
+  PAYMENT_RECEIPT
+  PAYMENT_PENDING_REMINDER
+  INVOICE_OVERDUE
+  STATUS_DELAY_UPDATE
+  UNASSIGNED_ORDER_ALERT
+  STALLED_WORKFLOW_ALERT
+}
+
+enum ChatThreadType {
+  SUPPORT
+  ORDER
+  INVOICE
+}
+
+enum ChatMessageVisibility {
+  CLIENT_VISIBLE
+  INTERNAL_ONLY
+}
+
+model NotificationPreference {
+  id                    String   @id @default(cuid())
+  userId                String
+  nonCriticalOptOut     Boolean  @default(false)
+  emailEnabled          Boolean  @default(true)
+  webChatEnabled        Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+}
+
+model NotificationDispatch {
+  id                    String                @id @default(cuid())
+  eventType             NotificationEventType
+  audience              NotificationAudience
+  channel               NotificationChannel
+  recipient             String
+  relatedOrderId        String?
+  relatedInvoiceId      String?
+  status                String
+  errorMessage          String?
+  createdAt             DateTime              @default(now())
+}
+
+model ChatThread {
+  id                    String                @id @default(cuid())
+  type                  ChatThreadType
+  subject               String
+  clientUserId          String?
+  orderId               String?
+  invoiceId             String?
+  assignedToUserId      String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  clientUser            User?                 @relation("ChatClientUser", fields: [clientUserId], references: [id], onDelete: SetNull)
+  assignedTo            User?                 @relation("ChatAssignedUser", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  messages              ChatMessage[]
+}
+
+model ChatMessage {
+  id                    String                @id @default(cuid())
+  threadId              String
+  authorUserId          String?
+  authorName            String
+  visibility            ChatMessageVisibility
+  body                  String                @db.Text
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  thread                ChatThread            @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  attachments           ChatAttachment[]
+}
+
+model ChatAttachment {
+  id                    String   @id @default(cuid())
+  messageId             String
+  storageKey            String
+  fileName              String
+  fileType              String
+  fileSizeBytes         Int
+  bucket                String
+  createdAt             DateTime @default(now())
+
+  message               ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}

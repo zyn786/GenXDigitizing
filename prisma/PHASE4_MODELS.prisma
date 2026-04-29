@@ -1,0 +1,99 @@
+// Merge this into your existing prisma/schema.prisma when you want
+// database-backed persistence for Phase 4.
+
+enum ServiceType {
+  EMBROIDERY_DIGITIZING
+  VECTOR_ART
+  CUSTOM_PATCHES
+}
+
+enum QuoteStatus {
+  DRAFT
+  SUBMITTED
+  QUOTED
+  APPROVED
+  CONVERTED
+  CANCELLED
+}
+
+enum OrderStatus {
+  NEW
+  IN_REVIEW
+  AWAITING_PAYMENT
+  IN_PRODUCTION
+  PROOF_READY
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+enum TurnaroundType {
+  STANDARD
+  URGENT
+  SAME_DAY
+}
+
+model Service {
+  id        String       @id @default(cuid())
+  slug      String       @unique
+  name      String
+  type      ServiceType
+  isActive  Boolean      @default(true)
+  niches    ServiceNiche[]
+  quotes    Quote[]
+  orders    Order[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model ServiceNiche {
+  id        String    @id @default(cuid())
+  serviceId String
+  slug      String    @unique
+  name      String
+  configJson Json
+  service   Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  quotes    Quote[]
+  orders    Order[]
+}
+
+model Quote {
+  id           String         @id @default(cuid())
+  quoteNumber  String         @unique
+  clientId     String
+  serviceId    String
+  nicheId      String?
+  status       QuoteStatus    @default(DRAFT)
+  turnaround   TurnaroundType
+  formData     Json
+  pricingJson  Json
+  notes        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  client       ClientProfile  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service      Service        @relation(fields: [serviceId], references: [id])
+  niche        ServiceNiche?  @relation(fields: [nicheId], references: [id])
+  order        Order?
+}
+
+model Order {
+  id           String         @id @default(cuid())
+  orderNumber  String         @unique
+  clientId     String
+  quoteId      String?        @unique
+  serviceId    String
+  nicheId      String?
+  status       OrderStatus    @default(NEW)
+  turnaround   TurnaroundType
+  formData     Json
+  pricingJson  Json
+  notes        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  client       ClientProfile  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  quote        Quote?         @relation(fields: [quoteId], references: [id])
+  service      Service        @relation(fields: [serviceId], references: [id])
+  niche        ServiceNiche?  @relation(fields: [nicheId], references: [id])
+}

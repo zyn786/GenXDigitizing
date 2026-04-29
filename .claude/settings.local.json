@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(del \"F:\\\\GenXDigitizing\\\\backendsssss\")",
+      "Bash(npx prisma *)",
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "Bash(taskkill /PID 1804 /F)",
+      "Bash(pnpm add *)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":3001\")",
+      "Bash(findstr \"LISTENING\")",
+      "Bash(cmd *)",
+      "Bash(npx vitest *)",
+      "Bash(python -c \"import sys,json; [print\\(json.loads\\(l\\).get\\('message',{}\\).get\\('role',''\\) + ': ' + str\\(json.loads\\(l\\).get\\('message',{}\\).get\\('content',''\\)\\)[:300] if 'message' in json.loads\\(l\\) else json.loads\\(l\\).get\\('type',''\\)\\) for l in sys.stdin]\")"
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment variables (CRITICAL: Never commit sensitive data)
+.env
+.env.local
+.env.*.local
+.env.production.local
+
+# Build output
+.next/
+dist/
+build/
+out/
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+.nyc_output/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Vercel
+.vercel/
+
+# Database
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
