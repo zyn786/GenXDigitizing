@@ -20,7 +20,6 @@ const tickerItems = [
   "Free to Start, Cheaper to Scale",
 ];
 
-// Drop hero-bg-desktop.mp4 / hero-bg-mobile.mp4 into /public/video/ to activate
 export function HeroSection() {
   return (
     <section className="relative min-h-screen overflow-hidden -mt-20">

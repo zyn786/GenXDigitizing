@@ -18,14 +18,16 @@ const nextConfig: NextConfig = {
   experimental: {},
 
   async headers() {
+    const isProd = process.env.NODE_ENV === "production";
     return [
-      // Immutable cache for hashed static assets (JS, CSS, fonts)
-      {
+      // Immutable cache for hashed static assets — production only.
+      // In dev, filenames are not content-hashed so this would permanently cache stale bundles.
+      ...(isProd ? [{
         source: "/_next/static/(.*)",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],
-      },
+      }] : []),
       // 1-day cache for public media files
       {
         source: "/(.*\\.(?:png|jpg|jpeg|gif|webp|avif|ico|svg|mp4|webm|woff|woff2|ttf|otf))",

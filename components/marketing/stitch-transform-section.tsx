@@ -5,14 +5,6 @@ import Image from "next/image";
 import { motion, useInView } from "framer-motion";
 import { EmbroideryHoop } from "./embroidery-hoop";
 
-const images = [
-  { real: "/Digitizing/Before-1.png", digital: "/Digitizing/After-1.png" },
-  { real: "/Digitizing/Before-2.png", digital: "/Digitizing/After-2.png" },
-  { real: "/Digitizing/Before-3.png", digital: "/Digitizing/After-3.png" },
-  { real: "/Digitizing/Before-4.png", digital: "/Digitizing/After-4.png" },
-  { real: "/Digitizing/Before-5.png", digital: "/Digitizing/After-5.png" },
-  { real: "/Digitizing/Before-6.png", digital: "/Digitizing/After-6.png" },
-];
 
 function threadPath(pts: [number, number][]) {
   return pts.reduce((acc, [x, y], i) => {
@@ -43,6 +35,17 @@ export function StitchTransformSection() {
   const ref = React.useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const [activeIndex, setActiveIndex] = React.useState(0);
+
+  const cdn = process.env.NEXT_PUBLIC_ASSET_BASE_URL ?? "";
+  const images = React.useMemo(() => [
+    { real: `${cdn}/Digitizing/Before-1.png`, digital: `${cdn}/Digitizing/After-1.png` },
+    { real: `${cdn}/Digitizing/Before-2.png`, digital: `${cdn}/Digitizing/After-2.png` },
+    { real: `${cdn}/Digitizing/Before-3.png`, digital: `${cdn}/Digitizing/After-3.png` },
+    { real: `${cdn}/Digitizing/Before-4.png`, digital: `${cdn}/Digitizing/After-4.png` },
+    { real: `${cdn}/Digitizing/Before-5.png`, digital: `${cdn}/Digitizing/After-5.png` },
+    { real: `${cdn}/Digitizing/Before-6.png`, digital: `${cdn}/Digitizing/After-6.png` },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], []);
 
   return (
     <section ref={ref} className="relative overflow-hidden px-4 py-16 md:px-8 md:py-24">
@@ -97,13 +100,20 @@ export function StitchTransformSection() {
                       : "opacity-60 hover:opacity-100 hover:scale-105"
                   }`}
                 >
-                  <Image
-                    src={img.real}
-                    alt={`Preview ${i + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="64px"
-                  />
+                  {img.real ? (
+                    <Image
+                      src={img.real}
+                      alt={`Preview ${i + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="64px"
+                      unoptimized
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                    />
+                  ) : null}
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center -z-10">
+                    <span className="text-white/30 text-lg">🧵</span>
+                  </div>
                 </button>
               ))}
             </div>

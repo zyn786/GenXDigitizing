@@ -164,6 +164,7 @@ export function PortfolioClient({ items }: Props) {
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">Service:</span>
               <select
+                aria-label="Filter by service"
                 value={serviceFilter}
                 onChange={(e) => setServiceFilter(e.target.value)}
                 className="h-9 rounded-xl border border-border bg-background px-3 text-sm outline-none focus:border-ring"
@@ -179,6 +180,7 @@ export function PortfolioClient({ items }: Props) {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">Niche:</span>
                 <select
+                  aria-label="Filter by niche"
                   value={nicheFilter}
                   onChange={(e) => setNicheFilter(e.target.value)}
                   className="h-9 rounded-xl border border-border bg-background px-3 text-sm outline-none focus:border-ring"
@@ -319,6 +321,7 @@ function BeforeAfterModal({ item, onClose }: { item: PortfolioItem; onClose: () 
       >
         <button
           onClick={onClose}
+          aria-label="Close modal"
           className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition"
         >
           <X className="h-4 w-4" />

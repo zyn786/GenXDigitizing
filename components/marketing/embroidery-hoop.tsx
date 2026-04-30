@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback } from "react";
 import Image from "next/image";
 
 interface Props {
@@ -12,14 +12,20 @@ interface Props {
 }
 
 export function EmbroideryHoop({
-  realSrc      = "/Digitizing/Before-1.png",
-  digitalSrc   = "/Digitizing/After-1.png",
+  realSrc,
+  digitalSrc,
   realLabel    = "Original Artwork",
   digitalLabel = "Digitized File",
 }: Props) {
+  const cdn = process.env.NEXT_PUBLIC_ASSET_BASE_URL ?? "";
+  const effectiveRealSrc    = realSrc    ?? `${cdn}/Digitizing/Before-1.png`;
+  const effectiveDigitalSrc = digitalSrc ?? `${cdn}/Digitizing/After-1.png`;
+
   const containerRef = useRef<HTMLDivElement>(null);
-  const [pct, setPct]       = useState(50);       // 0–100, where split line sits
+  const [pct, setPct]       = useState(50);
   const [dragging, setDragging] = useState(false);
+  const [realError, setRealError] = useState(false);
+  const [digitalError, setDigitalError] = useState(false);
 
   const clamp = (v: number) => Math.min(100, Math.max(0, v));
 
@@ -60,15 +66,23 @@ export function EmbroideryHoop({
     >
       {/* ── Right layer: digital file (full width, clipped left) ── */}
       <div className="absolute inset-0">
-        <Image
-          src={digitalSrc}
-          alt={digitalLabel}
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover"
-          draggable={false}
-          priority
-        />
+        {digitalError ? (
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/30 to-violet-600/20 flex items-center justify-center">
+            <span className="text-white/20 text-6xl">🧵</span>
+          </div>
+        ) : (
+          <Image
+            src={effectiveDigitalSrc}
+            alt={digitalLabel}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+            draggable={false}
+            priority
+            unoptimized
+            onError={() => setDigitalError(true)}
+          />
+        )}
       </div>
 
       {/* ── Left layer: original artwork (clips at slider position) ── */}
@@ -76,15 +90,23 @@ export function EmbroideryHoop({
         className="absolute inset-0"
         style={{ clipPath: `inset(0 ${100 - pct}% 0 0)` }}
       >
-        <Image
-          src={realSrc}
-          alt={realLabel}
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover"
-          draggable={false}
-          priority
-        />
+        {realError ? (
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/30 to-orange-500/20 flex items-center justify-center">
+            <span className="text-white/20 text-6xl">🖼️</span>
+          </div>
+        ) : (
+          <Image
+            src={effectiveRealSrc}
+            alt={realLabel}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+            draggable={false}
+            priority
+            unoptimized
+            onError={() => setRealError(true)}
+          />
+        )}
       </div>
 
       {/* ── Divider line ── */}

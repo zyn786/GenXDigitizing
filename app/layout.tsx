@@ -20,6 +20,11 @@ export const metadata: Metadata = {
     template: `%s · ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  icons: {
+    icon: "/brand/genx-logo-black.png",
+    shortcut: "/brand/genx-logo-black.png",
+    apple: "/brand/genx-logo-black.png",
+  },
   openGraph: {
     title: siteConfig.name,
     description: siteConfig.description,
