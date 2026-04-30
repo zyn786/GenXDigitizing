@@ -39,6 +39,8 @@ function mapStatus(s: string): WorkflowStatus {
   if (s === "IN_PROGRESS") return "IN_PROGRESS";
   if (s === "PROOF_READY") return "PROOF_READY";
   if (s === "REVISION_REQUESTED") return "REVISION_REQUESTED";
+  if (s === "PAYMENT_PENDING") return "PAYMENT_PENDING";
+  if (s === "APPROVED_WAITING_PAYMENT") return "APPROVED_WAITING_PAYMENT";
   if (s === "APPROVED") return "APPROVED";
   if (s === "DELIVERED") return "DELIVERED";
   if (s === "CLOSED") return "CLOSED";
@@ -86,12 +88,25 @@ const DB_INCLUDE = {
       clientProfile: { select: { companyName: true } },
     },
   },
+  assignedTo: { select: { name: true } },
+  designProofs: {
+    include: {
+      uploadedBy: { select: { name: true } },
+    },
+    orderBy: { versionNumber: "asc" as const },
+  },
+  revisions: {
+    include: {
+      assignedDesigner: { select: { name: true } },
+    },
+    orderBy: { revisionNumber: "asc" as const },
+  },
   orderFiles: {
     include: { uploadedBy: { select: { name: true } } },
     orderBy: { createdAt: "asc" as const },
   },
   invoice: {
-    select: { filesUnlocked: true },
+    select: { id: true, filesUnlocked: true, status: true },
   },
 } as const;
 
@@ -111,10 +126,50 @@ function normalizeDbOrder(o: any): WorkflowOrder {
     priority: mapPriority(meta.deliverySpeed),
     dueLabel: parseDueLabel(o.dueAt as Date | null),
     progressPercent: (o.progressPercent as number) || getWorkflowProgress(status),
-    assignedTo: null,
+    assignedTo: (o.assignedTo?.name as string | null) ?? null,
     revisionCount: o.revisionCount as number,
-    proofVersions: [],
-    revisions: [],
+    proofVersions: ((o.designProofs ?? []) as Array<{
+      id: string;
+      versionNumber: number;
+      fileName: string;
+      revisionNote: string | null;
+      uploadedAt: Date;
+    }>).map((p) => ({
+      id: p.id,
+      versionLabel: `Version ${p.versionNumber}`,
+      note: p.revisionNote ?? p.fileName,
+      createdAt: p.uploadedAt.toISOString(),
+    })),
+    revisions: ((o.revisions ?? []) as Array<{
+      id: string;
+      revisionNumber: number;
+      revisionInstructions: string;
+      status: string;
+      attachmentUrls: string[];
+      adminNotes: string | null;
+      designerNotes: string | null;
+      assignedDesigner: { name: string | null } | null;
+      createdAt: Date;
+      requestedAt: Date;
+      assignedAt: Date | null;
+      completedAt: Date | null;
+      approvedAt: Date | null;
+    }>).map((r) => ({
+      id: r.id,
+      revisionNumber: r.revisionNumber,
+      title: `Revision #${r.revisionNumber}`,
+      body: r.revisionInstructions,
+      status: r.status as WorkflowOrder["revisions"][number]["status"],
+      attachmentUrls: r.attachmentUrls ?? [],
+      adminNotes: r.adminNotes ?? null,
+      designerNotes: r.designerNotes ?? null,
+      assignedDesignerName: r.assignedDesigner?.name ?? null,
+      createdAt: r.createdAt.toISOString(),
+      requestedAt: r.requestedAt.toISOString(),
+      assignedAt: r.assignedAt?.toISOString() ?? null,
+      completedAt: r.completedAt?.toISOString() ?? null,
+      approvedAt: r.approvedAt?.toISOString() ?? null,
+    })),
     events: [],
     files: [],
     production: {
@@ -151,6 +206,43 @@ function normalizeDbOrder(o: any): WorkflowOrder {
       createdAt: f.createdAt.toISOString(),
     })),
     filesUnlocked: (o.invoice?.filesUnlocked as boolean) ?? false,
+    proofStatus: (o.proofStatus as WorkflowOrder["proofStatus"]) ?? null,
+    designProofs: ((o.designProofs ?? []) as Array<{
+      id: string;
+      versionNumber: number;
+      fileName: string;
+      mimeType: string;
+      sizeBytes: number;
+      uploadedBy: { name: string | null } | null;
+      uploadedAt: Date;
+      sentAt: Date | null;
+      approvedByClientAt: Date | null;
+      revisionNote: string | null;
+    }>).map((p) => ({
+      id: p.id,
+      versionNumber: p.versionNumber,
+      fileName: p.fileName,
+      mimeType: p.mimeType,
+      sizeBytes: p.sizeBytes,
+      uploadedByName: p.uploadedBy?.name ?? null,
+      uploadedAt: p.uploadedAt.toISOString(),
+      sentAt: p.sentAt?.toISOString() ?? null,
+      approvedByClientAt: p.approvedByClientAt?.toISOString() ?? null,
+      revisionNote: p.revisionNote ?? null,
+    })),
+    proofFileUrl: (o.proofFileUrl as string | null) ?? null,
+    proofFileName: (o.proofFileName as string | null) ?? null,
+    proofUploadedById: (o.proofUploadedById as string | null) ?? null,
+    proofUploadedAt: (o.proofUploadedAt as Date | null)?.toISOString() ?? null,
+    proofSentById: (o.proofSentById as string | null) ?? null,
+    proofSentAt: (o.proofSentAt as Date | null)?.toISOString() ?? null,
+    proofApprovedByClientAt: (o.proofApprovedByClientAt as Date | null)?.toISOString() ?? null,
+    clientProofApprovedAt: (o.clientProofApprovedAt as Date | null)?.toISOString() ?? null,
+    clientProofApprovedById: (o.clientProofApprovedById as string | null) ?? null,
+    approvedQuoteAmount: o.approvedQuoteAmount != null ? Number(o.approvedQuoteAmount) : null,
+    paymentRequired: (o.paymentRequired as boolean) ?? false,
+    paymentStatus: (o.paymentStatus as WorkflowOrder["paymentStatus"]) ?? "NOT_REQUIRED",
+    invoiceId: (o.invoice?.id as string | null) ?? null,
   };
 }
 

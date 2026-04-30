@@ -365,6 +365,15 @@ export async function reviewPaymentProof(
         },
       });
 
+      await tx.workflowOrder.update({
+        where: { id: invoice.orderId },
+        data: {
+          paymentRequired: true,
+          paymentStatus: nextStatus === "PAID" ? "PAID" : "PENDING",
+          status: nextStatus === "PAID" ? "APPROVED" : "APPROVED_WAITING_PAYMENT",
+        },
+      }).catch(() => null);
+
       await tx.billingAuditLog.create({
         data: {
           invoiceId: invoice.id,

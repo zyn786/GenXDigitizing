@@ -52,6 +52,7 @@ export async function POST(req: Request) {
         serviceType: data.serviceCategory,
         nicheSlug: data.tierId || null,
         status: "DRAFT",
+        quoteStatus: "NEW",
         notes: JSON.stringify({
           type: "quote",
           tierLabel: data.tierLabel,

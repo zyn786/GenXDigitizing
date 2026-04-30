@@ -54,7 +54,9 @@ const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
   "/admin/audit": ShieldCheck,
   "/admin/settings": Settings,
   "/admin/designer": Briefcase,
+  "/admin/designer/revisions": RefreshCw,
   "/admin/marketing": Megaphone,
+  "/admin/revisions": RefreshCw,
 };
 
 type NavItem = { href: Route; label: string };

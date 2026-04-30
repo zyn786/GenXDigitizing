@@ -17,6 +17,7 @@ import {
 import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
 import { CancelOrderButton } from "@/components/client/cancel-order-button";
 import { ClientDownloadButton } from "@/components/client/client-download-button";
+import { ProofReviewPanel } from "@/components/client/proof-review-panel";
 import { buildTitle } from "@/lib/site";
 import { getClientOrder } from "@/lib/workflow/repository";
 import type { OrderProduction } from "@/lib/workflow/types";
@@ -64,6 +65,11 @@ export default async function ClientOrderDetailPage({
   const isCancelled = rawOrder?.status === "CANCELLED";
   const canCancel = rawOrder?.status === "SUBMITTED";
   const filesUnlocked = invoice?.filesUnlocked ?? false;
+  const canShowPayment = order.paymentRequired || order.proofStatus === "CLIENT_APPROVED" || !!order.invoiceId;
+  const latestSentProof = [...order.designProofs].reverse().find((p) => p.sentAt) ?? null;
+  const canReviewProof =
+    (order.proofStatus === "SENT_TO_CLIENT" || order.proofStatus === "CLIENT_REVIEWING") &&
+    latestSentProof;
 
   return (
     <div className="grid gap-6">
@@ -176,6 +182,24 @@ export default async function ClientOrderDetailPage({
               )}
             </CardContent>
           </Card>
+
+          {canReviewProof && latestSentProof && (
+            <Card className="rounded-[1.5rem] border-violet-500/20">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Proof review required</CardTitle>
+                <CardDescription>
+                  Please review the latest proof and either approve it or request revisions.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ProofReviewPanel
+                  orderId={order.id}
+                  proofId={latestSentProof.id}
+                  fileName={latestSentProof.fileName}
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Order specs */}
           <ClientSpecsCard production={order.production} />
@@ -291,10 +315,14 @@ export default async function ClientOrderDetailPage({
 
           <Card className="rounded-[1.5rem] border-border/80">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Invoice</CardTitle>
+              <CardTitle className="text-base">Payment</CardTitle>
             </CardHeader>
             <CardContent>
-              {hasInvoice ? (
+              {!canShowPayment ? (
+                <div className="text-sm text-muted-foreground">
+                  Payment will appear here after you approve the proof.
+                </div>
+              ) : hasInvoice ? (
                 <div className="grid gap-3">
                   <div className="text-sm font-medium">{invoice!.invoiceNumber}</div>
                   <span className="inline-block w-fit rounded-full border border-border/80 bg-secondary/80 px-2.5 py-0.5 text-[10px] font-medium capitalize">
@@ -309,7 +337,7 @@ export default async function ClientOrderDetailPage({
                 </div>
               ) : (
                 <div className="text-sm text-muted-foreground">
-                  No invoice yet. One will be created once your order is approved.
+                  Invoice is being prepared. Please refresh in a few seconds.
                 </div>
               )}
             </CardContent>

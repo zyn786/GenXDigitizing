@@ -9,6 +9,8 @@ const toneMap: Record<WorkflowStatus, string> = {
   IN_PROGRESS: "bg-amber-500/10 text-amber-200 border-amber-400/20",
   PROOF_READY: "bg-violet-500/10 text-violet-200 border-violet-400/20",
   REVISION_REQUESTED: "bg-fuchsia-500/10 text-fuchsia-200 border-fuchsia-400/20",
+  PAYMENT_PENDING: "bg-orange-500/10 text-orange-200 border-orange-400/20",
+  APPROVED_WAITING_PAYMENT: "bg-orange-500/10 text-orange-200 border-orange-400/20",
   APPROVED: "bg-emerald-500/10 text-emerald-200 border-emerald-400/20",
   DELIVERED: "bg-teal-500/10 text-teal-200 border-teal-400/20",
   CLOSED: "bg-teal-500/10 text-teal-200 border-teal-400/20",

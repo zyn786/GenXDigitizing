@@ -266,6 +266,14 @@ export async function addPayment(
       },
     });
 
+    await tx.workflowOrder.update({
+      where: { id: invoice.orderId },
+      data: {
+        paymentStatus: updatedInvoice.status === "PAID" ? "PAID" : "PENDING",
+        status: updatedInvoice.status === "PAID" ? "APPROVED" : "APPROVED_WAITING_PAYMENT",
+      },
+    }).catch(() => null);
+
     await tx.billingAuditLog.create({
       data: {
         invoiceId: invoice.id,
@@ -316,6 +324,15 @@ export async function markInvoiceSent(invoiceId: string, actor?: AuditActor) {
         status: computedStatus,
       },
     });
+
+    await tx.workflowOrder.update({
+      where: { id: invoice.orderId },
+      data: {
+        paymentRequired: true,
+        paymentStatus: updatedInvoice.status === "PAID" ? "PAID" : "PENDING",
+        status: updatedInvoice.status === "PAID" ? "APPROVED" : "APPROVED_WAITING_PAYMENT",
+      },
+    }).catch(() => null);
 
     await tx.billingAuditLog.create({
       data: {

@@ -19,6 +19,7 @@ export const siteConfig = {
       { href: "/client/orders" as Route, label: "My Orders" },
       { href: "/client/quotes" as Route, label: "Quote Requests" },
       { href: "/client/files" as Route, label: "Files" },
+      { href: "/client/revisions" as Route, label: "Revisions" },
       { href: "/client/invoices" as Route, label: "Invoices" },
       { href: "/client/support" as Route, label: "Chat & Support" },
       { href: "/client/profile" as Route, label: "My Profile" },
@@ -39,6 +40,7 @@ export function getAdminNav(role?: string | null) {
   if (r === "DESIGNER") {
     return [
       { href: "/admin/designer" as Route, label: "Dashboard" },
+      { href: "/admin/designer/revisions" as Route, label: "My Revisions" },
       { href: "/admin/designer/earnings" as Route, label: "My Earnings" },
       { href: "/admin/notifications" as Route, label: "Notifications" },
     ];
@@ -62,6 +64,7 @@ export function getAdminNav(role?: string | null) {
   const base = [
     { href: "/admin/dashboard" as Route, label: "Dashboard" },
     { href: "/admin/orders" as Route, label: "Order Queue" },
+    { href: "/admin/revisions" as Route, label: "Revisions" },
     { href: "/admin/quotes" as Route, label: "Quote Requests" },
     { href: "/admin/invoices" as Route, label: "Invoices" },
     { href: "/admin/payment-proofs" as Route, label: "Payment Proofs" },

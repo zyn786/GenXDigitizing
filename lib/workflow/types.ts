@@ -1,3 +1,34 @@
+export type ProofStatus =
+  | "NOT_UPLOADED"
+  | "UPLOADED"
+  | "INTERNAL_REVIEW"
+  | "SENT_TO_CLIENT"
+  | "CLIENT_REVIEWING"
+  | "CLIENT_APPROVED"
+  | "REVISION_REQUESTED";
+
+export type DesignProof = {
+  id: string;
+  versionNumber: number;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  uploadedByName: string | null;
+  uploadedAt: string;
+  sentAt: string | null;
+  approvedByClientAt: string | null;
+  revisionNote: string | null;
+};
+
+export type QuoteStatus =
+  | "NEW"
+  | "UNDER_REVIEW"
+  | "PRICE_SENT"
+  | "CLIENT_ACCEPTED"
+  | "CLIENT_REJECTED"
+  | "CONVERTED_TO_ORDER"
+  | "CANCELLED";
+
 export type WorkflowStatus =
   | "NEW"
   | "QUOTED"
@@ -5,13 +36,25 @@ export type WorkflowStatus =
   | "IN_PROGRESS"
   | "PROOF_READY"
   | "REVISION_REQUESTED"
+  | "PAYMENT_PENDING"
+  | "APPROVED_WAITING_PAYMENT"
   | "APPROVED"
   | "DELIVERED"
   | "CLOSED"
   | "CANCELLED";
 
 export type WorkflowPriority = "STANDARD" | "URGENT" | "SAME_DAY";
-export type RevisionStatus = "OPEN" | "IN_REVIEW" | "DONE";
+export type RevisionStatus =
+  | "REQUESTED_BY_CLIENT"
+  | "CREATED_BY_ADMIN"
+  | "UNDER_ADMIN_REVIEW"
+  | "ASSIGNED_TO_DESIGNER"
+  | "IN_PROGRESS"
+  | "REVISED_PROOF_UPLOADED"
+  | "SENT_TO_CLIENT"
+  | "APPROVED"
+  | "REJECTED"
+  | "CANCELLED";
 export type DeliveryAssetKind = "PROOF" | "FINAL";
 
 export type OrderEvent = {
@@ -32,10 +75,19 @@ export type DeliveryAsset = {
 
 export type RevisionRequest = {
   id: string;
+  revisionNumber: number;
   title: string;
   body: string;
   status: RevisionStatus;
+  attachmentUrls: string[];
+  adminNotes: string | null;
+  designerNotes: string | null;
+  assignedDesignerName: string | null;
   createdAt: string;
+  requestedAt: string;
+  assignedAt: string | null;
+  completedAt: string | null;
+  approvedAt: string | null;
 };
 
 export type ProofVersion = {
@@ -93,4 +145,19 @@ export type WorkflowOrder = {
   production: OrderProduction;
   orderFiles: OrderFile[];
   filesUnlocked: boolean;
+  proofStatus: ProofStatus | null;
+  designProofs: DesignProof[];
+  proofFileUrl: string | null;
+  proofFileName: string | null;
+  proofUploadedById: string | null;
+  proofUploadedAt: string | null;
+  proofSentById: string | null;
+  proofSentAt: string | null;
+  proofApprovedByClientAt: string | null;
+  clientProofApprovedAt: string | null;
+  clientProofApprovedById: string | null;
+  approvedQuoteAmount: number | null;
+  paymentRequired: boolean;
+  paymentStatus: "NOT_REQUIRED" | "PENDING" | "PAID";
+  invoiceId: string | null;
 };

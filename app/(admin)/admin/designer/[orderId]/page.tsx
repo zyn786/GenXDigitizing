@@ -12,6 +12,7 @@ import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
 import { OrderStatusControls } from "@/components/workflow/order-status-controls";
 import { ConversationLauncherButton } from "@/components/support/conversation-launcher-button";
 import { OrderFileUploader } from "@/components/admin/order-file-uploader";
+import { DesignerRevisionTasks } from "@/components/workflow/designer-revision-tasks";
 import { getOrderFiles } from "@/lib/payments/repository";
 import { mapDbStatus } from "@/lib/workflow/repository";
 
@@ -50,6 +51,10 @@ export default async function DesignerJobDetailPage({ params }: Props) {
       include: {
         clientUser: {
           select: { name: true, clientProfile: { select: { companyName: true } } },
+        },
+        revisions: {
+          where: { assignedDesignerId: session.user.id },
+          orderBy: { revisionNumber: "desc" },
         },
       },
     }),
@@ -241,6 +246,35 @@ export default async function DesignerJobDetailPage({ params }: Props) {
             </CardHeader>
             <CardContent>
               <OrderFileUploader orderId={job.id} initialFiles={orderFiles} />
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[1.5rem] border-border/80">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Assigned revision tasks</CardTitle>
+              <CardDescription>
+                Work on revisions assigned by admin. Upload revised proof, then mark task uploaded.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DesignerRevisionTasks
+                revisions={job.revisions.map((r) => ({
+                  id: r.id,
+                  revisionNumber: r.revisionNumber,
+                  title: `Revision #${r.revisionNumber}`,
+                  body: r.revisionInstructions,
+                  status: r.status,
+                  attachmentUrls: r.attachmentUrls,
+                  adminNotes: r.adminNotes,
+                  designerNotes: r.designerNotes,
+                  assignedDesignerName: null,
+                  createdAt: r.createdAt.toISOString(),
+                  requestedAt: r.requestedAt.toISOString(),
+                  assignedAt: r.assignedAt?.toISOString() ?? null,
+                  completedAt: r.completedAt?.toISOString() ?? null,
+                  approvedAt: r.approvedAt?.toISOString() ?? null,
+                }))}
+              />
             </CardContent>
           </Card>
         </div>

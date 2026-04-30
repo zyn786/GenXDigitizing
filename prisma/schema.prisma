@@ -38,9 +38,37 @@ enum WorkflowOrderStatus {
   IN_PROGRESS
   PROOF_READY
   REVISION_REQUESTED
+  PAYMENT_PENDING
+  APPROVED_WAITING_PAYMENT
   APPROVED
   DELIVERED
   CLOSED
+  CANCELLED
+}
+
+enum OrderPaymentStatus {
+  NOT_REQUIRED
+  PENDING
+  PAID
+}
+
+enum ProofStatus {
+  NOT_UPLOADED
+  UPLOADED
+  INTERNAL_REVIEW
+  SENT_TO_CLIENT
+  CLIENT_REVIEWING
+  CLIENT_APPROVED
+  REVISION_REQUESTED
+}
+
+enum QuoteStatus {
+  NEW
+  UNDER_REVIEW
+  PRICE_SENT
+  CLIENT_ACCEPTED
+  CLIENT_REJECTED
+  CONVERTED_TO_ORDER
   CANCELLED
 }
 
@@ -206,6 +234,11 @@ enum NotificationEventType {
   SUPPORT_THREAD_CREATED
   SUPPORT_MESSAGE_POSTED
   THREAD_ASSIGNED
+  QUOTE_PRICED
+  QUOTE_ACCEPTED
+  QUOTE_REJECTED
+  PROOF_SENT
+  REVISION_ASSIGNED
 }
 
 enum NotificationAudience {
@@ -252,6 +285,7 @@ model User {
   clientOrders        WorkflowOrder[]   @relation("ClientOrders")
   assignedOrders      WorkflowOrder[]   @relation("AssignedOrders")
   cancelledOrders     WorkflowOrder[]   @relation("CancelledOrders")
+  pricedQuotes        WorkflowOrder[]   @relation("PricedQuotes")
   createdInvoices     Invoice[]         @relation("CreatedInvoices")
   paymentsRecorded    Payment[]         @relation("RecordedPayments")
   billingAuditActions BillingAuditLog[] @relation("BillingAuditActor")
@@ -276,6 +310,24 @@ model User {
   reviewedPaymentProofs PaymentProofSubmission[] @relation("ReviewedPaymentProofs")
   orderFilesUploaded    OrderFile[]              @relation("OrderFileUploader")
   designerCommissions   DesignerCommission[]     @relation("DesignerCommissions")
+  proofUploads          DesignProof[]            @relation("ProofUploads")
+  proofSends            DesignProof[]            @relation("ProofSends")
+  requestedRevisions    OrderRevision[]          @relation("RevisionRequestedBy")
+  adminCreatedRevisions OrderRevision[]          @relation("RevisionCreatedByAdmin")
+  assignedRevisions     OrderRevision[]          @relation("RevisionAssignedDesigner")
+}
+
+enum RevisionStatus {
+  REQUESTED_BY_CLIENT
+  CREATED_BY_ADMIN
+  UNDER_ADMIN_REVIEW
+  ASSIGNED_TO_DESIGNER
+  IN_PROGRESS
+  REVISED_PROOF_UPLOADED
+  SENT_TO_CLIENT
+  APPROVED
+  REJECTED
+  CANCELLED
 }
 
 model Account {
@@ -431,19 +483,87 @@ model WorkflowOrder {
   estimatedPrice       Decimal?            @db.Decimal(12, 2)
   quantity             Int                 @default(1)
 
+  // Proof workflow
+  proofFileUrl         String?
+  proofFileName        String?
+  proofUploadedById    String?
+  proofUploadedAt      DateTime?
+  proofSentById        String?
+  proofSentAt          DateTime?
+  proofApprovedByClientAt DateTime?
+  clientProofApprovedAt DateTime?
+  clientProofApprovedById String?
+  proofStatus          ProofStatus?
+
+  // Quote-specific fields (populated when status = DRAFT)
+  quoteStatus          QuoteStatus?
+  quotedAmount         Decimal?            @db.Decimal(12, 2)
+  approvedQuoteAmount  Decimal?            @db.Decimal(12, 2)
+  quoteCurrency        String?             @default("USD")
+  pricedByUserId       String?
+  pricedAt             DateTime?
+  clientRespondedAt    DateTime?
+  internalNotes        String?             @db.Text
+  clientMessage        String?             @db.Text
+  quoteRejectionReason String?             @db.Text
+  paymentRequired      Boolean             @default(false)
+  paymentStatus        OrderPaymentStatus  @default(NOT_REQUIRED)
+
   clientUser            User                   @relation("ClientOrders", fields: [clientUserId], references: [id], onDelete: Cascade)
   assignedTo            User?                  @relation("AssignedOrders", fields: [assignedToUserId], references: [id], onDelete: SetNull)
   cancelledBy           User?                  @relation("CancelledOrders", fields: [cancelledByUserId], references: [id], onDelete: SetNull)
+  pricedBy              User?                  @relation("PricedQuotes", fields: [pricedByUserId], references: [id], onDelete: SetNull)
   invoice               Invoice?
   chatThread            ChatThread?
   notificationLogs      NotificationLog[]
   notificationOverrides NotificationOverride[]
   orderFiles            OrderFile[]
+  designProofs          DesignProof[]
+  revisions             OrderRevision[]
   designerCommission    DesignerCommission?
 
   @@index([clientUserId])
   @@index([assignedToUserId])
   @@index([cancelledByUserId])
+  @@index([pricedByUserId])
+  @@index([status])
+  @@index([quoteStatus])
+  @@index([proofUploadedById])
+  @@index([proofSentById])
+  @@index([clientProofApprovedById])
+  @@index([paymentStatus])
+}
+
+model OrderRevision {
+  id                   String         @id @default(cuid())
+  orderId              String
+  clientId             String
+  requestedById        String?
+  createdByAdminId     String?
+  assignedDesignerId   String?
+  revisionNumber       Int            @default(1)
+  revisionInstructions String         @db.Text
+  attachmentUrls       String[]
+  status               RevisionStatus @default(REQUESTED_BY_CLIENT)
+  adminNotes           String?        @db.Text
+  designerNotes        String?        @db.Text
+  requestedAt          DateTime       @default(now())
+  assignedAt           DateTime?
+  completedAt          DateTime?
+  approvedAt           DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  order            WorkflowOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  client           User?         @relation("RevisionRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  createdByAdmin   User?         @relation("RevisionCreatedByAdmin", fields: [createdByAdminId], references: [id], onDelete: SetNull)
+  assignedDesigner User?         @relation("RevisionAssignedDesigner", fields: [assignedDesignerId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([clientId])
+  @@index([requestedById])
+  @@index([createdByAdminId])
+  @@index([assignedDesignerId])
   @@index([status])
 }
 
@@ -990,6 +1110,35 @@ model OrderFile {
 
   @@index([orderId])
   @@index([uploadedByUserId])
+}
+
+// ─── Design Proofs ────────────────────────────────────────────────────────────
+
+model DesignProof {
+  id                 String    @id @default(cuid())
+  orderId            String
+  versionNumber      Int       @default(1)
+  fileName           String
+  objectKey          String    @unique
+  bucket             String
+  mimeType           String
+  sizeBytes          Int
+  uploadedByUserId   String?
+  uploadedAt         DateTime  @default(now())
+  sentByUserId       String?
+  sentAt             DateTime?
+  approvedByClientAt DateTime?
+  revisionNote       String?   @db.Text
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  order      WorkflowOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  uploadedBy User?         @relation("ProofUploads", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  sentBy     User?         @relation("ProofSends", fields: [sentByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([uploadedByUserId])
+  @@index([sentByUserId])
 }
 
 // ─── Pricing Config (admin-controlled key-value settings) ────────────────────

@@ -8,6 +8,8 @@ export function getWorkflowStatusLabel(status: WorkflowStatus): string {
     case "IN_PROGRESS": return "In progress";
     case "PROOF_READY": return "Proof ready";
     case "REVISION_REQUESTED": return "Revision requested";
+    case "PAYMENT_PENDING": return "Payment pending";
+    case "APPROVED_WAITING_PAYMENT": return "Approved, awaiting payment";
     case "APPROVED": return "Approved";
     case "DELIVERED": return "Delivered";
     case "CLOSED": return "Closed";
@@ -23,6 +25,8 @@ export function getWorkflowProgress(status: WorkflowStatus): number {
     case "IN_PROGRESS": return 50;
     case "PROOF_READY": return 70;
     case "REVISION_REQUESTED": return 75;
+    case "PAYMENT_PENDING": return 82;
+    case "APPROVED_WAITING_PAYMENT": return 85;
     case "APPROVED": return 90;
     case "DELIVERED": return 100;
     case "CLOSED": return 100;

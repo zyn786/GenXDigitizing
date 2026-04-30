@@ -189,6 +189,73 @@ export async function sendRevisionPendingEmail(opts: {
   });
 }
 
+export async function sendRevisionRequestedAdminEmail(opts: {
+  orderId: string;
+  orderNumber: string;
+  clientName: string;
+}) {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+  const portalUrl = `${appUrl()}/admin/orders/${opts.orderId}`;
+  const subject = `Revision requested — ${opts.orderNumber}`;
+  const text = [
+    `${opts.clientName} requested a revision for order ${opts.orderNumber}.`,
+    "",
+    `Review request: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Client requested revision</h1>
+    <p style="margin:16px 0 0;">
+      <strong>${esc(opts.clientName)}</strong> requested a revision for order
+      <strong>${esc(opts.orderNumber)}</strong>.
+    </p>
+    ${btn(portalUrl, "Review revision")}
+  `);
+
+  await send(adminEmail, subject, html, text);
+}
+
+export async function sendRevisionAssignedDesignerEmail(opts: {
+  to: string;
+  designerName: string;
+  orderId: string;
+  orderNumber: string;
+  revisionNumber: number;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/admin/designer/${opts.orderId}`;
+  const firstName = opts.designerName.split(" ")[0] || "there";
+  const subject = `Revision assigned — ${opts.orderNumber} (R${opts.revisionNumber})`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `You have been assigned revision #${opts.revisionNumber} for order ${opts.orderNumber}.`,
+    `Open your job: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Revision assigned</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      You have been assigned revision <strong>#${opts.revisionNumber}</strong> for order
+      <strong>${esc(opts.orderNumber)}</strong>.
+    </p>
+    ${btn(portalUrl, "Open assigned job")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "REVISION_ASSIGNED",
+    audience: "ASSIGNED_USER",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
 export async function sendFilesDeliveredEmail(opts: {
   to: string;
   clientName: string;
@@ -329,6 +396,109 @@ export async function sendPaymentReceivedEmail(opts: {
     orderId: opts.orderId,
     status: "SENT",
   });
+}
+
+export async function sendQuotePricedEmail(opts: {
+  to: string;
+  clientName: string;
+  quoteNumber: string;
+  quoteId: string;
+  quotedAmount: number;
+  currency: string;
+  clientMessage?: string | null;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/client/quotes/${opts.quoteId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const subject = `Your quote is ready — ${opts.quoteNumber}`;
+  const amountLabel = `${opts.currency} ${opts.quotedAmount.toFixed(2)}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `We've reviewed your request ${opts.quoteNumber} and have a price ready for you.`,
+    `Quoted amount: ${amountLabel}`,
+    opts.clientMessage ? `\nMessage from our team:\n${opts.clientMessage}` : "",
+    "",
+    `Review and accept your quote: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Your quote is ready</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      We've reviewed your request <strong>${esc(opts.quoteNumber)}</strong>.
+      Here is your quoted price:
+    </p>
+    <p style="margin:16px 0;font-size:22px;font-weight:700;">${esc(amountLabel)}</p>
+    ${opts.clientMessage
+      ? `<div style="margin:12px 0;padding:14px 16px;border-left:3px solid #c4952a;background:#fefce8;">
+          <p style="margin:0;font-size:14px;color:#374151;">${esc(opts.clientMessage)}</p>
+        </div>`
+      : ""}
+    <p style="margin:10px 0 0;font-size:14px;color:#6b7280;">
+      Please log in to your client portal to accept or decline this quote.
+    </p>
+    ${btn(portalUrl, "Review quote")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "QUOTE_PRICED",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.quoteId,
+    status: "SENT",
+  });
+}
+
+export async function sendQuoteResponseEmail(opts: {
+  quoteNumber: string;
+  quoteId: string;
+  clientName: string;
+  action: "accept" | "reject";
+  reason?: string | null;
+}) {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+
+  const portalUrl = `${appUrl()}/admin/orders/${opts.quoteId}`;
+  const isAccept = opts.action === "accept";
+  const subject = isAccept
+    ? `Quote accepted — ${opts.quoteNumber}`
+    : `Quote declined — ${opts.quoteNumber}`;
+
+  const text = [
+    isAccept
+      ? `${opts.clientName} accepted quote ${opts.quoteNumber}. It is ready to convert to an active order.`
+      : `${opts.clientName} declined quote ${opts.quoteNumber}.`,
+    opts.reason ? `Reason: ${opts.reason}` : "",
+    "",
+    `View quote: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">
+      Quote ${isAccept ? "accepted" : "declined"}
+    </h1>
+    <p style="margin:16px 0 0;">
+      <strong>${esc(opts.clientName)}</strong> has
+      ${isAccept ? "accepted" : "declined"} quote
+      <strong>${esc(opts.quoteNumber)}</strong>.
+    </p>
+    ${opts.reason
+      ? `<p style="margin:10px 0 0;">Reason: <em>${esc(opts.reason)}</em></p>`
+      : ""}
+    ${isAccept
+      ? `<p style="margin:10px 0 0;color:#059669;font-weight:600;">
+           Ready to convert to an active order.
+         </p>`
+      : ""}
+    ${btn(portalUrl, "Open in admin panel")}
+  `);
+
+  await send(adminEmail, subject, html, text).catch(() => {});
 }
 
 export async function sendFilesUnlockedEmail(opts: {

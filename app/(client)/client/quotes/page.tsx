@@ -1,28 +1,33 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { FileQuestion, ArrowRight, Clock, CheckCircle, XCircle } from "lucide-react";
+import type { Route } from "next";
+import { FileQuestion, Clock, CheckCircle, XCircle, Send, ArrowRight } from "lucide-react";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { buildTitle } from "@/lib/site";
 import { Card, CardContent } from "@/components/ui/card";
+import type { QuoteStatus } from "@/lib/workflow/types";
 
-export const metadata: Metadata = {
-  title: buildTitle("Quote Requests"),
-};
-
+export const metadata: Metadata = { title: buildTitle("Quote Requests") };
 export const dynamic = "force-dynamic";
 
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; classes: string; Icon: typeof Clock }> = {
-    DRAFT: { label: "Quote Pending", classes: "border-amber-400/30 bg-amber-500/10 text-amber-300", Icon: Clock },
-    SUBMITTED: { label: "Under Review", classes: "border-blue-400/30 bg-blue-500/10 text-blue-300", Icon: Clock },
-    IN_PROGRESS: { label: "Being Prepared", classes: "border-violet-400/30 bg-violet-500/10 text-violet-300", Icon: Clock },
-    DELIVERED: { label: "Quote Ready", classes: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300", Icon: CheckCircle },
-    CANCELLED: { label: "Cancelled", classes: "border-red-400/30 bg-red-500/10 text-red-300", Icon: XCircle },
-  };
-  const cfg = map[status] ?? map.DRAFT;
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; classes: string; Icon: React.ElementType }
+> = {
+  NEW:                { label: "Pending review",   classes: "border-amber-400/30 bg-amber-500/10 text-amber-300",   Icon: Clock         },
+  UNDER_REVIEW:       { label: "Under review",     classes: "border-blue-400/30 bg-blue-500/10 text-blue-300",     Icon: Clock         },
+  PRICE_SENT:         { label: "Price ready",      classes: "border-violet-400/30 bg-violet-500/10 text-violet-300", Icon: Send         },
+  CLIENT_ACCEPTED:    { label: "Accepted",         classes: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300", Icon: CheckCircle },
+  CLIENT_REJECTED:    { label: "Declined",         classes: "border-red-400/30 bg-red-500/10 text-red-300",        Icon: XCircle       },
+  CONVERTED_TO_ORDER: { label: "Order created",   classes: "border-teal-400/30 bg-teal-500/10 text-teal-300",      Icon: CheckCircle   },
+  CANCELLED:          { label: "Cancelled",        classes: "border-border/60 bg-secondary/40 text-muted-foreground", Icon: XCircle    },
+};
+
+function QuoteStatusBadge({ status }: { status: QuoteStatus | null }) {
+  const cfg = STATUS_CONFIG[status ?? "NEW"] ?? STATUS_CONFIG.NEW;
   const Icon = cfg.Icon;
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${cfg.classes}`}>
@@ -35,22 +40,17 @@ function StatusBadge({ status }: { status: string }) {
 function parseServiceLabel(serviceType: string): string {
   const map: Record<string, string> = {
     EMBROIDERY_DIGITIZING: "Embroidery Digitizing",
-    VECTOR_REDRAW: "Vector Redraw",
-    COLOR_SEPARATION: "Color Separation",
-    DTF_SCREEN_PRINT: "DTF / Screen Print Setup",
+    VECTOR_REDRAW:         "Vector Redraw",
+    COLOR_SEPARATION:      "Color Separation",
+    DTF_SCREEN_PRINT:      "DTF / Screen Print Setup",
   };
   return map[serviceType] ?? serviceType.replaceAll("_", " ");
 }
 
-function parseMeta(notes: string | null): { quantity?: number; totalPrice?: number; description?: string } {
+function parseMeta(notes: string | null): { description?: string } {
   if (!notes) return {};
   try {
-    const parsed = JSON.parse(notes);
-    return {
-      quantity: parsed.quantity,
-      totalPrice: parsed.totalPrice,
-      description: parsed.description,
-    };
+    return JSON.parse(notes) as { description?: string };
   } catch {
     return {};
   }
@@ -63,10 +63,24 @@ export default async function QuoteRequestsPage() {
   const quotes = await prisma.workflowOrder.findMany({
     where: {
       clientUserId: session.user.id,
-      status: { in: ["DRAFT", "SUBMITTED", "IN_PROGRESS", "DELIVERED", "CANCELLED"] },
-      notes: { contains: '"type":"quote"' },
+      OR: [
+        { quoteStatus: { not: null } },
+        { status: "DRAFT", notes: { contains: '"type":"quote"' } },
+      ],
     },
     orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      orderNumber: true,
+      title: true,
+      serviceType: true,
+      quoteStatus: true,
+      quotedAmount: true,
+      quoteCurrency: true,
+      pricedAt: true,
+      notes: true,
+      createdAt: true,
+    },
   });
 
   return (
@@ -101,35 +115,61 @@ export default async function QuoteRequestsPage() {
         <div className="grid gap-3">
           {quotes.map((quote) => {
             const meta = parseMeta(quote.notes);
+            const isPriceSent = quote.quoteStatus === "PRICE_SENT";
             return (
-              <Card key={quote.id} className="rounded-[1.5rem] border-border/80">
-                <CardContent className="p-5">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs font-mono text-muted-foreground">{quote.orderNumber}</span>
-                        <StatusBadge status={quote.status} />
+              <Link
+                key={quote.id}
+                href={`/client/quotes/${quote.id}` as Route}
+                className="block"
+              >
+                <Card
+                  className={`rounded-[1.5rem] border-border/80 transition hover:border-primary/40 hover:bg-card/90 ${
+                    isPriceSent ? "border-violet-500/30 bg-violet-500/5" : ""
+                  }`}
+                >
+                  <CardContent className="p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-mono text-xs text-muted-foreground">{quote.orderNumber}</span>
+                          <QuoteStatusBadge status={quote.quoteStatus as QuoteStatus | null} />
+                          {isPriceSent && (
+                            <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-2.5 py-0.5 text-[11px] font-medium text-violet-300">
+                              Action required
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1.5 text-base font-semibold">{quote.title}</div>
+                        <div className="mt-1 text-sm text-muted-foreground">
+                          {parseServiceLabel(quote.serviceType)}
+                        </div>
+                        {meta.description && (
+                          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                            {meta.description}
+                          </p>
+                        )}
                       </div>
-                      <div className="mt-1.5 text-base font-semibold">{quote.title}</div>
-                      <div className="mt-1 text-sm text-muted-foreground">{parseServiceLabel(quote.serviceType)}</div>
-                      {meta.description && (
-                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{meta.description}</p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      {meta.totalPrice != null && (
-                        <div className="text-lg font-semibold">${meta.totalPrice.toFixed(2)}</div>
-                      )}
-                      {meta.quantity != null && (
-                        <div className="text-xs text-muted-foreground">Qty: {meta.quantity}</div>
-                      )}
-                      <div className="mt-1 text-xs text-muted-foreground">
-                        {new Date(quote.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      <div className="flex items-center gap-4 text-right">
+                        <div>
+                          {quote.quotedAmount != null ? (
+                            <div className="text-lg font-semibold">
+                              {quote.quoteCurrency ?? "USD"} {Number(quote.quotedAmount).toFixed(2)}
+                            </div>
+                          ) : null}
+                          <div className="mt-1 text-xs text-muted-foreground">
+                            {new Date(quote.createdAt).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </div>
+                        </div>
+                        <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/40" />
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             );
           })}
         </div>

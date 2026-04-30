@@ -4,6 +4,7 @@ import type { Route } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
+import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { ConversationLauncherButton } from "@/components/support/conversation-launcher-button";
 import {
@@ -16,11 +17,13 @@ import {
 import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
 import { OrderStatusControls } from "@/components/workflow/order-status-controls";
 import { DesignerAssignControl } from "@/components/workflow/designer-assign-control";
-import { ConvertQuoteButton } from "@/components/workflow/convert-quote-button";
+import { QuotePricePanel } from "@/components/workflow/quote-price-panel";
+import { ProofPanel } from "@/components/workflow/proof-panel";
+import { RevisionAdminPanel } from "@/components/workflow/revision-admin-panel";
 import { OrderFileUploader } from "@/components/admin/order-file-uploader";
 import { buildTitle } from "@/lib/site";
 import { getAdminOrder } from "@/lib/workflow/repository";
-import type { OrderProduction } from "@/lib/workflow/types";
+import type { OrderProduction, QuoteStatus } from "@/lib/workflow/types";
 
 type AdminOrderDetailPageProps = {
   params: Promise<{ orderId: string }>;
@@ -37,6 +40,8 @@ export default async function AdminOrderDetailPage({
   params,
 }: AdminOrderDetailPageProps) {
   const { orderId } = await params;
+  const session = await auth();
+  const canSendProof = ["SUPER_ADMIN", "MANAGER"].includes(String(session?.user?.role ?? ""));
 
   const [order, invoice, rawOrder, designers] = await Promise.all([
     getAdminOrder(orderId),
@@ -52,6 +57,15 @@ export default async function AdminOrderDetailPage({
         cancelReason: true,
         cancelledBy: { select: { name: true } },
         assignedToUserId: true,
+        quoteStatus: true,
+        quotedAmount: true,
+        quoteCurrency: true,
+        internalNotes: true,
+        clientMessage: true,
+        pricedAt: true,
+        pricedBy: { select: { name: true } },
+        clientRespondedAt: true,
+        quoteRejectionReason: true,
       },
     }),
     prisma.user.findMany({
@@ -141,6 +155,31 @@ export default async function AdminOrderDetailPage({
                 orderId={order.id}
                 initialFiles={order.orderFiles}
               />
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[1.5rem] border-border/80">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Proof workflow</CardTitle>
+              <CardDescription>Upload, review, send, and track client proof responses.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProofPanel
+                orderId={order.id}
+                proofStatus={order.proofStatus}
+                proofs={order.designProofs}
+                canSend={canSendProof}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[1.5rem] border-border/80">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Revision requests</CardTitle>
+              <CardDescription>Review, assign, and manage revision tasks.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RevisionAdminPanel orderId={order.id} revisions={order.revisions} designers={designers} />
             </CardContent>
           </Card>
 
@@ -276,15 +315,54 @@ export default async function AdminOrderDetailPage({
             </CardContent>
           </Card>
 
+          <Card className="rounded-[1.5rem] border-border/80">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Proof approval & payment</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Proof approved by client</span>
+                <span>{order.clientProofApprovedAt ? "Yes" : "No"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Approved amount</span>
+                <span>{order.approvedQuoteAmount != null ? `$${order.approvedQuoteAmount.toFixed(2)}` : "—"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Payment required</span>
+                <span>{order.paymentRequired ? "Yes" : "No"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Payment status</span>
+                <span>{order.paymentStatus}</span>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Actions */}
           <Card className="rounded-[1.5rem] border-border/80">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Actions</CardTitle>
-              <CardDescription>Workflow controls for this order.</CardDescription>
+              <CardTitle className="text-base">
+                {rawOrder?.status === "DRAFT" ? "Quote management" : "Actions"}
+              </CardTitle>
+              {rawOrder?.status !== "DRAFT" && (
+                <CardDescription>Workflow controls for this order.</CardDescription>
+              )}
             </CardHeader>
             <CardContent className="grid gap-2">
               {rawOrder?.status === "DRAFT" ? (
-                <ConvertQuoteButton orderId={order.id} />
+                <QuotePricePanel
+                  orderId={order.id}
+                  quoteStatus={(rawOrder.quoteStatus as QuoteStatus) ?? null}
+                  quotedAmount={rawOrder.quotedAmount != null ? Number(rawOrder.quotedAmount) : null}
+                  quoteCurrency={rawOrder.quoteCurrency ?? null}
+                  internalNotes={rawOrder.internalNotes ?? null}
+                  clientMessage={rawOrder.clientMessage ?? null}
+                  pricedAt={rawOrder.pricedAt?.toISOString() ?? null}
+                  pricedByName={rawOrder.pricedBy?.name ?? null}
+                  clientRespondedAt={rawOrder.clientRespondedAt?.toISOString() ?? null}
+                  quoteRejectionReason={rawOrder.quoteRejectionReason ?? null}
+                />
               ) : (
                 <OrderStatusControls orderId={order.id} status={order.status} />
               )}
