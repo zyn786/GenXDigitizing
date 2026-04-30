@@ -168,16 +168,16 @@ export const serviceSummaries: ServiceSummary[] = [
     title: "Custom Patches",
     eyebrow: "Patches",
     summary:
-      "Premium patch service presentation for embroidered, chenille, woven, PVC, and leather patch orders with structured specification paths.",
+      "Embroidered, chenille, woven, PVC, and leather patch production — specification, proofing, and delivery-ready artwork for programs of any scale.",
     lead:
-      "Designed to help the brand look established before the full ordering engine lands, while still giving prospects clear options and production confidence.",
+      "Structured for patch programs from a single emblem to a full product line. We handle specification, proofing, and file prep so your production runs without surprises.",
     bullets: [
-      "Embroidered patch positioning",
-      "Chenille patch presentations",
+      "Embroidered patch specification and proofing",
+      "Chenille patches with dimensional fill",
       "Woven, PVC, and leather options",
       "Backing and border configuration",
-      "Quantity-aware quoting",
-      "Future shipping workflow compatibility",
+      "Quantity-aware pricing and bulk runs",
+      "Repeat order and re-run support",
     ],
     niches: ["embroidered-patches", "chenille-patches"],
     process: [
@@ -278,7 +278,7 @@ export const nicheSummaries: NicheSummary[] = [
     serviceTitle: "Embroidery Digitizing",
     title: "3D Puff Digitizing",
     summary:
-      "Presented as a specialty premium service for bold raised logos with depth-aware sequencing and cleaner foam coverage.",
+      "A specialty technique for bold, raised logos — foam-backed stitch programming with depth-aware sequencing and clean edge coverage.",
     useCases: [
       "Streetwear hats",
       "Brand drops",
@@ -344,7 +344,7 @@ export const nicheSummaries: NicheSummary[] = [
     serviceTitle: "Custom Patches",
     title: "Embroidered Patches",
     summary:
-      "Built for brands that need patch-first storytelling with clear positioning around edge finish, backing options, and production consistency.",
+      "Production specs for embroidered patches — merrowed or hot-cut borders, backing selection, and stitch density mapped for your program.",
     useCases: [
       "Uniform patches",
       "Brand tags",
@@ -366,7 +366,7 @@ export const nicheSummaries: NicheSummary[] = [
     serviceTitle: "Custom Patches",
     title: "Chenille Patches",
     summary:
-      "Presented as a statement product for varsity, streetwear, and collectible patch programs with a richer tactile look.",
+      "Cut chenille with dimensional fill — a premium technique for varsity, streetwear, and collectible patch programs.",
     useCases: [
       "Varsity products",
       "Streetwear collections",
@@ -390,41 +390,28 @@ export const portfolioItems: PortfolioItem[] = [
     title: "Luxury Cap Puff Digitizing",
     tag: "3D Puff",
     before: "Flat logo source with weak contrast and no stitch depth planning.",
-    after: "Raised cap-ready file concept with clearer geometry, stronger depth cues, and premium presentation.",
+    after: "Raised cap-ready puff file with clean geometry, strong depth, and defined edge coverage.",
   },
   {
     slug: "restaurant-chest-logo-cleanup",
     title: "Restaurant Chest Logo Cleanup",
     tag: "Left Chest",
     before: "Busy raster logo with small details at risk in embroidery.",
-    after: "Production-aware chest logo concept focused on legibility and clean garment placement.",
+    after: "Clean left-chest logo file tuned for legibility and consistent stitch quality across garments.",
   },
   {
     slug: "streetwear-chenille-patch-system",
     title: "Streetwear Chenille Patch System",
     tag: "Patch",
     before: "Loose concept art without patch production framing.",
-    after: "Premium patch presentation showing hierarchy, tactile storytelling, and finished product direction.",
+    after: "Structured patch spec showing stitch hierarchy, material layering, and backing configuration.",
   },
 ];
 
-export const testimonials = [
-  {
-    name: "Avery Chen",
-    company: "Northline Uniforms",
-    text: "The site immediately feels more premium than the usual digitizing vendors, and the service paths are much easier for clients to understand.",
-  },
-  {
-    name: "Mason Ortiz",
-    company: "Heritage Stitch Co.",
-    text: "This gives us a serious public presence before the full backend lands. It already feels like a real product company, not a basic service site.",
-  },
-  {
-    name: "Layla Brooks",
-    company: "Patch District",
-    text: "The patch and embroidery positioning is clearer, and the before/after storytelling makes the offer easier to trust.",
-  },
-];
+// TODO: Replace with real client testimonials before launch.
+// Structure: { name: string; company: string; text: string }
+// Re-enable TestimonialsSection in components/marketing/testimonials-section.tsx once real quotes are ready.
+export const testimonials: Array<{ name: string; company: string; text: string }> = [];
 
 export const faqItems = [
   {

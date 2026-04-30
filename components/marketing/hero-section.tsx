@@ -7,9 +7,9 @@ import { ArrowRight, Sparkles } from "lucide-react";
 const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
 const stats = [
-  { value: "1,200+", label: "Files delivered" },
+  { value: "1,200+", label: "Files delivered" }, // TODO: verify count before launch
   { value: "24 hr",  label: "Turnaround" },
-  { value: "100%",   label: "Revisions included" },
+  { value: "∞",      label: "Revision-inclusive" },
 ];
 
 const tickerItems = [
@@ -24,18 +24,14 @@ const tickerItems = [
 export function HeroSection() {
   return (
     <section className="relative min-h-screen overflow-hidden -mt-20">
-      {/* Mobile video (< 768px) */}
+      {/* Single video element — desktop source served for ≥768px, mobile below */}
       <video
-        src="/video/hero-bg-mobile.mp4"
-        autoPlay muted loop playsInline
-        className="absolute inset-0 h-full w-full object-cover md:hidden"
-      />
-      {/* Desktop video (≥ 768px) */}
-      <video
-        src="/video/hero-bg-desktop.mp4"
-        autoPlay muted loop playsInline
-        className="absolute inset-0 hidden h-full w-full object-cover md:block"
-      />
+        autoPlay muted loop playsInline preload="metadata"
+        className="absolute inset-0 h-full w-full object-cover"
+      >
+        <source media="(min-width: 768px)" src={`${process.env.NEXT_PUBLIC_ASSET_BASE_URL ?? ""}/video/hero-bg-desktop.mp4`} type="video/mp4" />
+        <source src={`${process.env.NEXT_PUBLIC_ASSET_BASE_URL ?? ""}/video/hero-bg-mobile.mp4`} type="video/mp4" />
+      </video>
 
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-[#07111f]/78" />

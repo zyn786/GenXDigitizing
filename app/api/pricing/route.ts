@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { DEFAULT_PRICING_CATALOG } from "@/lib/pricing/catalog";
 import type { PricingCatalog } from "@/lib/pricing/catalog";
 
+export const revalidate = 3600;
+
 export async function GET() {
   try {
     const [categories, addons, delivery] = await Promise.all([

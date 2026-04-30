@@ -90,5 +90,5 @@ export function getAdminNav(role?: string | null) {
 }
 
 export function buildTitle(page: string) {
-  return `${page} · ${siteConfig.name}`;
+  return page;
 }

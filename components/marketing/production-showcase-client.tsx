@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { assetUrl } from "@/lib/asset-url";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -87,10 +88,8 @@ function canonicalKey(key: string) {
 
 function getS3Url(key: string | null): string | null {
   if (!key) return null;
-  const bucket = process.env.NEXT_PUBLIC_S3_BUCKET ?? "";
-  const region = process.env.NEXT_PUBLIC_S3_REGION ?? "us-east-1";
-  if (!bucket) return null;
-  return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+  if (!process.env.NEXT_PUBLIC_ASSET_BASE_URL) return null;
+  return assetUrl(key);
 }
 
 // ─── Main component ────────────────────────────────────────────────────────────

@@ -38,7 +38,7 @@ export default function PrivacyPolicyPage() {
               <li>To process and fulfill your digitizing, vector art, and patch orders</li>
               <li>To communicate order status, proofs, and delivery updates</li>
               <li>To send invoices, receipts, and billing notifications</li>
-              <li>To provide client portal access and support chat functionality</li>
+              <li>To provide client portal access and support ticket functionality</li>
               <li>To improve our platform, services, and customer experience</li>
               <li>To comply with applicable legal obligations</li>
             </ul>
@@ -68,7 +68,7 @@ export default function PrivacyPolicyPage() {
               We use industry-standard encryption in transit (TLS) and at rest. Access to customer
               data within our team is role-based and limited to what is necessary to deliver your
               service. Despite these measures, no system is completely secure — if you have concerns,
-              contact us at support@genxdigitizing.com.
+              contact us at info@genxdigitizing.com.
             </p>
           </LegalSection>
 
@@ -76,7 +76,7 @@ export default function PrivacyPolicyPage() {
             <p>
               Depending on your jurisdiction, you may have the right to access, correct, or delete
               your personal information. To exercise these rights, contact us at
-              support@genxdigitizing.com and we will respond within a reasonable time frame.
+              info@genxdigitizing.com and we will respond within a reasonable time frame.
             </p>
           </LegalSection>
 

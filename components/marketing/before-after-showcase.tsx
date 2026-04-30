@@ -7,20 +7,20 @@ import { portfolioItems } from "@/lib/marketing-data";
 
 const whyPoints = [
   {
-    title: "Niche-aware service presentation",
-    desc: "Each service group is framed for the way real decorators and print shops actually buy.",
+    title: "Every service type covered",
+    desc: "Embroidery digitizing, vector art, and custom patches — all handled in one place.",
   },
   {
-    title: "Secure workflow narrative",
-    desc: "Public messaging prepares prospects for private uploads, proofs, and delivery.",
+    title: "Proof-first, revision-inclusive",
+    desc: "Every job gets a production proof before delivery. Revisions run until you approve.",
   },
   {
-    title: "Premium trust language",
-    desc: "The site feels polished and deliberate instead of generic or low-trust.",
+    title: "Trusted by decorators and print shops",
+    desc: "Fast turnarounds, clear specs, and files your machine operators can run without callbacks.",
   },
   {
-    title: "Future-ready information architecture",
-    desc: "Content structure built to extend into the quote engine, dashboards, and CMS.",
+    title: "Built for teams of any size",
+    desc: "From single one-off orders to high-volume runs — pricing and workflow scale with you.",
   },
 ];
 

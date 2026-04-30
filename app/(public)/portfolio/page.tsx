@@ -6,7 +6,7 @@ import { PortfolioHeroSection } from "@/components/marketing/portfolio-hero-sect
 import { PortfolioClient } from "./portfolio-client";
 
 export const metadata: Metadata = {
-  title: "Portfolio · GenX Digitizing",
+  title: "Portfolio",
   description:
     "Browse before and after examples of our embroidery digitizing, vector art, and custom patch work.",
 };

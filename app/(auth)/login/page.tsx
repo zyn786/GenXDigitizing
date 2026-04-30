@@ -103,9 +103,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
                 <div className="grid max-w-2xl gap-4 pt-4 sm:grid-cols-3">
                   {[
-                    ["1,200+", "Files delivered"],
+                    ["1,200+", "Files delivered"], // TODO: verify count before launch
                     ["24 hr", "Standard turnaround"],
-                    ["100%", "Revision included"],
+                    ["∞", "Revision-inclusive"],
                   ].map(([value, label]) => (
                     <div
                       key={label}

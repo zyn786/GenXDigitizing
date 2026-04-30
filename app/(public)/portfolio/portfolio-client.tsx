@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { assetUrl } from "@/lib/asset-url";
 
 type PortfolioItem = {
   id: string;
@@ -45,6 +46,17 @@ const NICHE_LABELS: Record<string, string> = {
   "pvc-patches": "PVC",
 };
 
+const PLACEHOLDER_ITEMS: PortfolioItem[] = [
+  { id: "ph1", title: "Left Chest Logo",         serviceKey: "EMBROIDERY_DIGITIZING", nicheSlug: "left-chest-logo",     description: "Clean satin-stitch left chest for corporate apparel and uniforms.",            tags: ["Left Chest", "Logo"],        isFeatured: false, beforeImageKey: null, afterImageKey: null },
+  { id: "ph2", title: "Jacket Back Hero Print",  serviceKey: "EMBROIDERY_DIGITIZING", nicheSlug: "jacket-back",         description: "Large multi-colour jacket back with density mapping for fleece and twill.",    tags: ["Jacket Back", "Large"],      isFeatured: true,  beforeImageKey: null, afterImageKey: null },
+  { id: "ph3", title: "Logo Vector Redraw",      serviceKey: "VECTOR_ART",            nicheSlug: "jpg-to-vector",       description: "Print-ready vector rebuilt from low-resolution raster artwork.",               tags: ["Vector", "DTF"],             isFeatured: false, beforeImageKey: null, afterImageKey: null },
+  { id: "ph4", title: "3D Puff Cap Logo",        serviceKey: "EMBROIDERY_DIGITIZING", nicheSlug: "3d-puff",             description: "Foam-backed 3D puff digitizing for cap front placement.",                     tags: ["3D Puff", "Cap"],            isFeatured: false, beforeImageKey: null, afterImageKey: null },
+  { id: "ph5", title: "Embroidered Badge Patch", serviceKey: "CUSTOM_PATCHES",        nicheSlug: "embroidered-patches", description: "Merrowed border badge patch with sew-on backing and full coverage fill.",       tags: ["Patch", "Embroidered"],      isFeatured: false, beforeImageKey: null, afterImageKey: null },
+  { id: "ph6", title: "Full Back Jacket Design", serviceKey: "EMBROIDERY_DIGITIZING", nicheSlug: "full-back",           description: "Detailed full back embroidery with multi-colour fill and gradient blending.", tags: ["Full Back", "Multi-Color"],  isFeatured: false, beforeImageKey: null, afterImageKey: null },
+  { id: "ph7", title: "Hat Crown Embroidery",    serviceKey: "EMBROIDERY_DIGITIZING", nicheSlug: "cap-hat-logo",        description: "Structured crown embroidery for fitted and snapback caps.",                   tags: ["Cap", "Crown"],              isFeatured: false, beforeImageKey: null, afterImageKey: null },
+  { id: "ph8", title: "DTF Print-Ready Art",     serviceKey: "VECTOR_ART",            nicheSlug: "print-ready-artwork", description: "DTF and screen-print ready vector file with spot-colour separation.",        tags: ["DTF", "Print"],              isFeatured: false, beforeImageKey: null, afterImageKey: null },
+];
+
 const ACCENTS = [
   "from-indigo-500/10 to-violet-500/5",
   "from-emerald-500/10 to-teal-500/5",
@@ -58,15 +70,15 @@ const ALL_SERVICES = Object.entries(SERVICE_LABELS).map(([k, v]) => ({ key: k, l
 
 function getS3Url(key: string | null) {
   if (!key) return null;
-  const bucket = process.env.NEXT_PUBLIC_S3_BUCKET ?? "";
-  const region = process.env.NEXT_PUBLIC_S3_REGION ?? "us-east-1";
-  if (!bucket) return null;
-  return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+  if (!process.env.NEXT_PUBLIC_ASSET_BASE_URL) return null;
+  return assetUrl(key);
 }
 
 type Props = { items: PortfolioItem[] };
 
 export function PortfolioClient({ items }: Props) {
+  const pool = items.length > 0 ? items : PLACEHOLDER_ITEMS;
+
   const [search, setSearch] = React.useState("");
   const [serviceFilter, setServiceFilter] = React.useState("");
   const [nicheFilter, setNicheFilter] = React.useState("");
@@ -75,14 +87,14 @@ export function PortfolioClient({ items }: Props) {
 
   const availableNiches = React.useMemo(() => {
     const niches = new Set<string>();
-    for (const item of items) {
+    for (const item of pool) {
       if (item.nicheSlug) niches.add(item.nicheSlug);
     }
     return Array.from(niches);
-  }, [items]);
+  }, [pool]);
 
   const filtered = React.useMemo(() => {
-    let result = items;
+    let result = pool;
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -184,7 +196,7 @@ export function PortfolioClient({ items }: Props) {
         {/* Results count */}
         {hasFilters && (
           <div className="mb-4 text-sm text-muted-foreground">
-            Showing {filtered.length} of {items.length} portfolio items
+            Showing {filtered.length} of {pool.length} portfolio items
           </div>
         )}
 

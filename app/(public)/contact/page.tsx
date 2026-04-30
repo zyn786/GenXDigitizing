@@ -6,7 +6,7 @@ import { ContactFormPanel } from "@/components/marketing/contact-form-panel";
 import { ContactHeroSection } from "@/components/marketing/contact-hero-section";
 
 export const metadata: Metadata = {
-  title: "Contact · GenX Digitizing",
+  title: "Contact",
   description:
     "Send a project inquiry or get a quote. We reply within one business day.",
 };

@@ -39,6 +39,12 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 
+# Large media assets served from CDN (upload to S3, do not commit)
+public/video/*.mp4
+public/video/*.msi
+public/digitizing/After-*.png
+public/digitizing/Before-*.png
+
 # Logs
 logs/
 *.log

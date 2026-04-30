@@ -17,6 +17,7 @@ export function SiteLogo({
 
   const width = compact ? 160 : 220;
   const height = compact ? 52 : 72;
+  const sizes = compact ? "160px" : "220px";
   const imageClass = compact
     ? "h-8 w-auto object-contain"
     : "h-12 w-auto object-contain md:h-14";
@@ -29,6 +30,7 @@ export function SiteLogo({
           alt={siteConfig.name}
           width={width}
           height={height}
+          sizes={sizes}
           className={`${imageClass} dark:hidden`}
           priority
         />
@@ -37,6 +39,7 @@ export function SiteLogo({
           alt={siteConfig.name}
           width={width}
           height={height}
+          sizes={sizes}
           className={`${imageClass} hidden dark:block`}
           priority
         />

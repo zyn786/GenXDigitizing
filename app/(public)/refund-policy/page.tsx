@@ -64,7 +64,7 @@ export default function RefundPolicyPage() {
 
           <LegalSection title="How to request a refund">
             <p>
-              Contact us at support@genxdigitizing.com or through your client portal with your
+              Contact us at info@genxdigitizing.com or through your client portal with your
               order reference number and a description of the issue. We respond within one
               business day and aim to resolve billing disputes fairly and quickly.
             </p>

@@ -82,7 +82,7 @@ export default function TermsPage() {
 
           <LegalSection title="Contact">
             <p>
-              For questions about these terms, contact us at support@genxdigitizing.com or
+              For questions about these terms, contact us at info@genxdigitizing.com or
               through your client portal support thread.
             </p>
           </LegalSection>

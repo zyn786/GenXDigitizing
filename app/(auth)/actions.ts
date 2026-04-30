@@ -78,7 +78,7 @@ function redirectWithParams(
   const suffix = search.toString();
   const target = suffix ? `${pathname}?${suffix}` : pathname;
 
-  redirect(target as Route);
+  redirect(target as never);
 }
 
 function redirectToLogin(params: Record<string, string | undefined>): never {
