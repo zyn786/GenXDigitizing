@@ -4,6 +4,30 @@
 
 ---
 
+## Executive Summary (What the website currently includes)
+
+GenX Digitizing is a full-stack production platform with three major surfaces:
+
+1. **Public marketing site** for discovery, service education, pricing, portfolio, and lead/contact capture.
+2. **Client portal** for quotes, orders, invoices, file delivery, and support chat.
+3. **Admin/staff workspace** for operations: order production, billing, support, marketing, notifications, and audit trails.
+
+### Core user journey
+
+- Visitor lands on the public site, reviews services/portfolio/pricing, and submits a quote or order.
+- Authenticated client tracks order progress, approves proofs, pays invoice, and downloads final files.
+- Staff processes orders, uploads outputs, verifies payment proofs, and unlocks file delivery.
+
+### What this document includes
+
+- Every major route (public, auth, client, admin)
+- Key UI modules and workflow states
+- API map for frontend/backend integration
+- Data model overview and role-based access
+- Integrations (S3/R2, Resend, OAuth) and required environment variables
+
+---
+
 ## Table of Contents
 
 1. [Tech Stack](#tech-stack)
