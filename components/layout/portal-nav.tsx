@@ -37,6 +37,7 @@ const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
   "/client/files": FolderOpen,
   "/client/revisions": RefreshCw,
   "/client/invoices": FileText,
+  "/client/reports": BarChart3,
   "/client/support": MessageCircle,
   "/client/profile": UserCircle,
   "/admin/dashboard": LayoutDashboard,

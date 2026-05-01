@@ -6,6 +6,8 @@ const toneMap: Record<WorkflowStatus, string> = {
   NEW: "bg-white/10 text-white/75 border-white/10",
   QUOTED: "bg-sky-500/10 text-sky-200 border-sky-400/20",
   SUBMITTED: "bg-blue-500/10 text-blue-200 border-blue-400/20",
+  UNDER_REVIEW: "bg-sky-500/10 text-sky-200 border-sky-400/20",
+  ASSIGNED_TO_DESIGNER: "bg-indigo-500/10 text-indigo-200 border-indigo-400/20",
   IN_PROGRESS: "bg-amber-500/10 text-amber-200 border-amber-400/20",
   PROOF_READY: "bg-violet-500/10 text-violet-200 border-violet-400/20",
   REVISION_REQUESTED: "bg-fuchsia-500/10 text-fuchsia-200 border-fuchsia-400/20",

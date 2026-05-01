@@ -15,6 +15,7 @@ export const quoteOrderSchema = z.object({
   serviceType: z.enum([
     "EMBROIDERY_DIGITIZING",
     "VECTOR_ART",
+    "COLOR_SEPARATION_DTF",
     "CUSTOM_PATCHES",
   ]),
   nicheSlug: z.string().min(1),

@@ -30,10 +30,10 @@ const services: ServiceDef[] = [
     description:
       "Production-ready digitizing for caps, jackets, polos, left chest logos, small text, and high-detail commercial embroidery.",
     tags: ["Left Chest", "Cap / Hat", "3D Puff", "Jacket Back"],
-    iconColor: "text-indigo-400",
+    iconColor: "text-indigo-300",
     iconBg: "bg-indigo-500/15",
     accentColor: "bg-indigo-500",
-    tagStyle: "border-indigo-500/20 bg-indigo-500/10 text-indigo-300",
+    tagStyle: "border-indigo-500/25 bg-indigo-500/10 text-indigo-200",
     bgImage: "/services/embroidery-bg.jpg",
   },
   {
@@ -43,10 +43,10 @@ const services: ServiceDef[] = [
     description:
       "Clean, scalable logo rebuilds for apparel decoration, print workflows, signage, and brand asset systems.",
     tags: ["JPG to Vector", "Logo Redraw", "Print-Ready", "DTF / DTG"],
-    iconColor: "text-violet-400",
+    iconColor: "text-violet-300",
     iconBg: "bg-violet-500/15",
     accentColor: "bg-violet-500",
-    tagStyle: "border-violet-500/20 bg-violet-500/10 text-violet-300",
+    tagStyle: "border-violet-500/25 bg-violet-500/10 text-violet-200",
     bgImage: "/services/vector-art-bg.jpg",
   },
   {
@@ -56,160 +56,171 @@ const services: ServiceDef[] = [
     description:
       "Structured patch planning for embroidered, woven, PVC, leather, and specialty patch production with approval-ready flow.",
     tags: ["Embroidered", "Chenille", "PVC / Woven", "Leather"],
-    iconColor: "text-amber-400",
+    iconColor: "text-amber-300",
     iconBg: "bg-amber-500/15",
     accentColor: "bg-amber-500",
-    tagStyle: "border-amber-500/20 bg-amber-500/10 text-amber-300",
+    tagStyle: "border-amber-500/25 bg-amber-500/10 text-amber-200",
     bgImage: "/services/patches-bg.jpg",
   },
 ];
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.12 } },
-};
-const cardVariant = {
-  hidden: { opacity: 0, y: 28 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease } },
+  show: {
+    transition: {
+      staggerChildren: 0.12,
+    },
+  },
 };
 
-// ── Individual card — needs its own state for image-load tracking ──────────────
+const cardVariant = {
+  hidden: {
+    opacity: 0,
+    y: 28,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.55,
+      ease,
+    },
+  },
+};
+
 function ServiceCard({ service }: { service: ServiceDef }) {
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const Icon = service.icon;
 
   return (
-    <motion.div
+    <motion.article
       variants={cardVariant}
-      className="group relative overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-[#0d1425] shadow-[0_8px_32px_rgba(0,0,0,0.45)] transition-all duration-[350ms] hover:-translate-y-1.5 hover:shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
+      className="group relative min-h-[430px] overflow-hidden rounded-[1.8rem] border border-white/[0.08] bg-[#0d1425] shadow-[0_10px_36px_rgba(0,0,0,0.42)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_26px_70px_rgba(0,0,0,0.62)]"
     >
-
-      {/* ── Shimmer skeleton — shows on hover while image is still loading ── */}
       <div
         className={[
-          "absolute inset-0 z-0 transition-opacity duration-300",
+          "absolute inset-0 z-0 transition-opacity duration-500",
           !imageLoaded
             ? "opacity-0 group-hover:opacity-100"
-            : "opacity-0 pointer-events-none",
+            : "pointer-events-none opacity-0",
         ].join(" ")}
       >
-        {/* Base dark fill */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 to-slate-900/80" />
-        {/* Sweeping shimmer highlight */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-800/90 to-slate-950/90" />
         <div className="absolute inset-0 overflow-hidden">
-          <div className="shimmer-sweep absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+          <div className="shimmer-sweep absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
         </div>
       </div>
 
-      {/* ── Background image — fades in on hover once loaded ── */}
       <div
         className={[
-          "absolute inset-0 z-0 transition-opacity duration-[400ms]",
-          imageLoaded ? "opacity-0 group-hover:opacity-100" : "opacity-0",
+          "absolute inset-0 z-0 transition-opacity duration-700",
+          imageLoaded ? "opacity-35 group-hover:opacity-100" : "opacity-0",
         ].join(" ")}
       >
         <Image
           src={service.bgImage}
           alt={service.title}
           fill
-          className="object-cover scale-[1.04] transition-transform duration-[500ms] group-hover:scale-100"
+          className="scale-110 object-cover transition-transform duration-700 ease-out group-hover:scale-100"
           sizes="(max-width: 1024px) 100vw, 33vw"
           onLoad={() => setImageLoaded(true)}
         />
       </div>
 
-      {/* Dark overlay — fades in with the image to keep text readable */}
-      <div
-        className={[
-          "absolute inset-0 z-[1] bg-[#07111f]/72 transition-opacity duration-[400ms]",
-          imageLoaded ? "opacity-0 group-hover:opacity-100" : "opacity-0",
-        ].join(" ")}
-      />
+      {/* Main readability overlay */}
+      <div className="absolute inset-0 z-[1] bg-[#07111f]/70 transition-opacity duration-500 group-hover:bg-[#07111f]/35" />
 
-      {/* ── Card content ── */}
-      <div className="relative z-10 flex h-full flex-col p-8">
+      {/* Black gradient behind text */}
+      <div className="absolute inset-x-0 bottom-0 z-[2] h-[72%] bg-gradient-to-t from-black/90 via-black/55 to-transparent opacity-70 transition-opacity duration-500 group-hover:opacity-100" />
 
-        {/* Accent bar */}
-        <div className={`mb-7 h-0.5 w-10 rounded-full ${service.accentColor}`} />
+      {/* Subtle top glow */}
+      <div className="absolute inset-x-0 top-0 z-[2] h-32 bg-gradient-to-b from-white/[0.08] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-        {/* Icon chip */}
-        <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl ${service.iconBg}`}>
-          <Icon className={`h-6 w-6 ${service.iconColor}`} />
+      <div className="relative z-10 flex min-h-[430px] flex-col p-7 md:p-8">
+        <div className="flex items-start justify-between gap-4">
+          <div className={`h-0.5 w-12 rounded-full ${service.accentColor}`} />
+
+          <div
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] ${service.iconBg} backdrop-blur`}
+          >
+            <Icon className={`h-6 w-6 ${service.iconColor}`} />
+          </div>
         </div>
 
-        {/* Title — scales up on hover */}
-        <h3 className="origin-left text-xl font-bold text-white transition-transform duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.07]">
-          {service.title}
-        </h3>
+        <div className="mt-auto">
+          <div className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-3">
+            <h3 className="max-w-[15rem] origin-left text-xl font-bold leading-tight tracking-tight text-white transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.12]">
+              {service.title}
+            </h3>
 
-        {/* Description */}
-        <p className="mt-3 flex-1 text-sm leading-6 text-white/50 transition-colors duration-[350ms] group-hover:text-white/65">
-          {service.description}
-        </p>
+            <p className="mt-3 max-w-sm text-sm leading-6 text-white/58 transition-colors duration-500 group-hover:text-white/82">
+              {service.description}
+            </p>
+          </div>
 
-        {/* Tags */}
-        <div className="mt-5 flex flex-wrap gap-2">
-          {service.tags.map((tag) => (
-            <span
-              key={tag}
-              className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors duration-300 ${service.tagStyle}`}
+          <div className="mt-5 flex flex-wrap gap-2 transition-transform duration-500 group-hover:translate-y-3">
+            {service.tags.map((tag) => (
+              <span
+                key={tag}
+                className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] backdrop-blur transition-colors duration-300 ${service.tagStyle}`}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-6 translate-y-4 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-3 group-hover:opacity-100">
+            <Link
+              href={service.href}
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/45 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur-md transition-all duration-300 hover:gap-3 hover:bg-black/65"
             >
-              {tag}
-            </span>
-          ))}
+              View service details
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
-
-        {/* CTA link */}
-        <Link
-          href={service.href}
-          className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-white/50 transition-all duration-300 hover:gap-3 group-hover:text-white/90"
-        >
-          View service details
-          <ArrowRight className="h-4 w-4" />
-        </Link>
       </div>
 
-      {/* Inner border glow on hover */}
-      <div className="pointer-events-none absolute inset-0 rounded-[1.75rem] border border-white/0 transition-colors duration-[350ms] group-hover:border-white/[0.12]" />
-    </motion.div>
+      <div className="pointer-events-none absolute inset-0 z-20 rounded-[1.8rem] border border-white/0 transition-colors duration-500 group-hover:border-white/[0.16]" />
+    </motion.article>
   );
 }
 
-// ── Section ────────────────────────────────────────────────────────────────────
 export function ServicePillars() {
   return (
-    <section className="px-4 py-12 md:px-8 md:py-16">
-      {/* Shimmer keyframe — scoped here so it doesn't pollute globals */}
+    <section className="px-4 py-16 md:px-8 md:py-24">
       <style>{`
         @keyframes shimmer-sweep {
-          0%   { transform: translateX(-120%); }
+          0% { transform: translateX(-120%); }
           100% { transform: translateX(220%); }
         }
+
         .shimmer-sweep {
           animation: shimmer-sweep 1.6s ease-in-out infinite;
         }
       `}</style>
 
       <div className="page-shell">
-        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.55, ease }}
-          className="mb-10 max-w-2xl"
+          className="mb-12 max-w-2xl"
         >
           <div className="section-eyebrow">Services</div>
+
           <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
             Built for production-ready artwork, not just attractive mockups.
           </h2>
+
           <p className="mt-4 text-base leading-7 text-muted-foreground">
-            Every service is structured to move from quote to production with clear specs,
-            consistent quality, and a revision process that actually works.
+            Every service is structured to move from quote to production with
+            clear specs, consistent quality, and a revision process that
+            actually works.
           </p>
         </motion.div>
 
-        {/* Cards grid */}
         <motion.div
           variants={container}
           initial="hidden"

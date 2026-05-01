@@ -103,6 +103,7 @@ function mapOrderFile(
     bucket: row.bucket,
     mimeType: row.mimeType,
     sizeBytes: row.sizeBytes,
+    fileType: (row.fileType as "PROOF_PREVIEW" | "FINAL_FILE") ?? "FINAL_FILE",
     uploadedByName: row.uploadedBy?.name ?? null,
     createdAt: row.createdAt.toISOString(),
   };
@@ -401,9 +402,9 @@ export async function reviewPaymentProof(
 
 // ─── Order Files ──────────────────────────────────────────────────────────────
 
-export async function getOrderFiles(orderId: string) {
+export async function getOrderFiles(orderId: string, fileType?: "PROOF_PREVIEW" | "FINAL_FILE") {
   const rows = await prisma.orderFile.findMany({
-    where: { orderId },
+    where: { orderId, ...(fileType ? { fileType } : {}) },
     include: { uploadedBy: { select: { name: true } } },
     orderBy: { createdAt: "asc" },
   });
@@ -436,6 +437,7 @@ export async function createOrderFile(input: {
   bucket: string;
   mimeType: string;
   sizeBytes: number;
+  fileType?: "PROOF_PREVIEW" | "FINAL_FILE";
 }) {
   const row = await prisma.orderFile.create({
     data: {
@@ -446,6 +448,7 @@ export async function createOrderFile(input: {
       bucket: input.bucket,
       mimeType: input.mimeType,
       sizeBytes: input.sizeBytes,
+      fileType: input.fileType ?? "FINAL_FILE",
     },
     include: { uploadedBy: { select: { name: true } } },
   });

@@ -55,9 +55,12 @@ export default async function DesignerDashboardPage() {
 
   const SERVICE_LABELS: Record<string, string> = {
     EMBROIDERY_DIGITIZING: "Embroidery Digitizing",
-    VECTOR_REDRAW: "Vector Redraw",
-    COLOR_SEPARATION: "Color Separation",
-    DTF_SCREEN_PRINT: "DTF / Screen Print",
+    VECTOR_ART: "Vector Art Conversion",
+    COLOR_SEPARATION_DTF: "Color Separation / DTF Screen Setup",
+    CUSTOM_PATCHES: "Custom Patches",
+    VECTOR_REDRAW: "Vector Art Conversion",
+    COLOR_SEPARATION: "Color Separation / DTF Screen Setup",
+    DTF_SCREEN_PRINT: "Color Separation / DTF Screen Setup",
   };
 
   return (

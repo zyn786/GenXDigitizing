@@ -28,7 +28,10 @@ export async function GET() {
 
   const items = await prisma.portfolioItem.findMany({
     orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-    include: { createdBy: { select: { name: true } } },
+    include: {
+      createdBy:  { select: { name: true } },
+      approvedBy: { select: { name: true } },
+    },
   });
 
   return NextResponse.json({ ok: true, items });
@@ -46,11 +49,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: "Invalid data." }, { status: 400 });
   }
 
+  const isSuperAdmin = session.user.role === "SUPER_ADMIN";
+  const approvalStatus = isSuperAdmin ? "APPROVED" : "PENDING_APPROVAL";
+  const isVisible = isSuperAdmin ? (parsed.data.isVisible ?? true) : false;
+
   const item = await prisma.portfolioItem.create({
     data: {
       ...parsed.data,
       tags: parsed.data.tags ?? [],
       createdByUserId: session.user.id ?? null,
+      approvalStatus,
+      isVisible,
+      ...(isSuperAdmin ? { approvedByUserId: session.user.id, approvedAt: new Date() } : {}),
     },
   });
 

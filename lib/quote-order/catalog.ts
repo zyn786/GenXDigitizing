@@ -64,19 +64,16 @@ export const serviceCatalog = [
     label: "Embroidery Digitizing",
     basePrice: 12,
     niches: [
-      { slug: "left-chest-logo",    label: "Left Chest Logo"    },
-      { slug: "cap-hat-logo",       label: "Cap / Hat Logo"     },
-      { slug: "large-design",       label: "Large Design"       },
-      { slug: "jacket-back",        label: "Jacket Back"        },
-      { slug: "3d-puff",            label: "3D Puff"            },
-      { slug: "3d-puff-jacket-back", label: "3D Puff Jacket Back" },
-      { slug: "sleeve",             label: "Sleeve"             },
-      { slug: "full-back",          label: "Full Back"          },
+      { slug: "cap",          label: "Cap"                    },
+      { slug: "left-chest",   label: "Left Chest"             },
+      { slug: "standard-4-6", label: "Standard (4\" – 6\")"   },
+      { slug: "jacket-back",  label: "Jacket Back"            },
+      { slug: "large-8-12",   label: "Large (8\" – 12\")"     },
     ],
     hints: [
       "Best for embroidery-ready stitch files.",
-      "LC & Hat designs: up to 5 inches. Large & Jacket Back: up to 12 inches.",
-      "3D Puff Jacket Back is a separate service type with premium pricing.",
+      "Cap & Left Chest: up to 5 inches. Jacket Back & Large: up to 12 inches.",
+      "3D Puff available as an add-on for any placement.",
     ],
   },
   {
@@ -87,11 +84,23 @@ export const serviceCatalog = [
       { slug: "jpg-to-vector",        label: "JPG to Vector"        },
       { slug: "print-ready-artwork",  label: "Print-Ready Artwork"  },
       { slug: "logo-redraw",          label: "Logo Redraw"          },
-      { slug: "color-separation",     label: "Color Separation"     },
     ],
     hints: [
       "Best for redraws, print files, and clean scalable artwork.",
       "Great for DTF, DTG, and screen print preparation.",
+    ],
+  },
+  {
+    type: "COLOR_SEPARATION_DTF",
+    label: "Color Separation / DTF Screen Setup",
+    basePrice: 15,
+    niches: [
+      { slug: "color-separation", label: "Color Separation"   },
+      { slug: "dtf-screen-setup", label: "DTF Screen Setup"   },
+    ],
+    hints: [
+      "Best for color separation and DTF print file preparation.",
+      "Supports screen print and direct-to-film setups.",
     ],
   },
   {

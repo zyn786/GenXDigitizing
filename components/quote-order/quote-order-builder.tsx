@@ -19,6 +19,7 @@ import {
 } from "@/lib/quote-order/catalog";
 import { computeQuotePricing } from "@/lib/quote-order/pricing";
 import { quoteOrderSchema, type QuoteOrderInput } from "@/schemas/quote-order";
+import { ReferenceFileUploader, type RefFile } from "@/components/shared/reference-file-uploader";
 
 type BuilderMode = "quote" | "order";
 
@@ -104,6 +105,7 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
   const [savingState, setSavingState] = React.useState("");
   const [orderResult, setOrderResult] = React.useState<{ orderNumber: string; isFreeDesign: boolean } | null>(null);
   const [showAdvanced, setShowAdvanced] = React.useState(false);
+  const [refFiles, setRefFiles] = React.useState<RefFile[]>([]);
 
   const pricing = React.useMemo(() => computeQuotePricing(values), [values]);
   const service = getServiceByType(values.serviceType);
@@ -163,7 +165,7 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(parsed.data),
+      body: JSON.stringify({ ...parsed.data, referenceFiles: refFiles }),
     });
 
     if (res.status === 401) {
@@ -513,19 +515,47 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
                   )}
                 </div>
 
-                {/* ── Order Rules Info ─────────────────────────────────── */}
-                <div className="rounded-[1.5rem] border border-white/8 bg-white/[0.04] p-4">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/45">
+                {/* ── Service Policy ───────────────────────────────────── */}
+                <div className="rounded-[1.5rem] border border-indigo-400/20 bg-gradient-to-br from-indigo-500/[0.07] to-white/[0.03] p-5">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-indigo-300/80">
                     <Package className="h-3.5 w-3.5" />
-                    Order rules
+                    Our Service Policy
                   </div>
-                  <ul className="mt-3 grid gap-1.5 text-xs text-white/55">
-                    <li>✓ LC to LC same-size adjustment &amp; color change are <strong className="text-white/75">free</strong></li>
-                    <li>✓ Changing from Left Chest to Jacket Back counts as a <strong className="text-white/75">new design / new order</strong></li>
-                    <li>✓ First design for new clients is <strong className="text-white/75">free</strong> (one per account)</li>
-                    <li>✓ Bulk discounts: 5+ orders = 5% off, 10+ = 10% off, 25+ = 15% off, 50+ = 20% off</li>
-                    <li>✓ 3D Puff Jacket Back is a <strong className="text-white/75">separate premium service</strong> — not the same as standard 3D Puff</li>
+                  <ul className="mt-4 grid gap-2.5">
+                    <li className="flex items-start gap-3 text-sm text-white/70">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/10 text-[10px] font-bold text-emerald-400">✓</span>
+                      <span><strong className="text-white/90">Unlimited revisions</strong> — we work with you until you are completely satisfied.</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm text-white/70">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/10 text-[10px] font-bold text-emerald-400">✓</span>
+                      <span><strong className="text-white/90">LC to LC same-size adjustment is free</strong> — no extra charge for minor size tweaks within the same placement.</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm text-white/70">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/10 text-[10px] font-bold text-emerald-400">✓</span>
+                      <span><strong className="text-white/90">Color change is free</strong> — thread color updates are included at no cost.</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm text-white/70">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-amber-400/30 bg-amber-500/10 text-[10px] font-bold text-amber-400">!</span>
+                      <span><strong className="text-white/90">LC to Jacket Back = new design / new order</strong> — changing placement type requires a fresh order.</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm text-white/70">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-amber-400/30 bg-amber-500/10 text-[10px] font-bold text-amber-400">!</span>
+                      <span><strong className="text-white/90">Big size or placement changes may need a new order</strong> — major resizes or placement switches are treated as new designs.</span>
+                    </li>
                   </ul>
+                </div>
+
+                {/* ── Reference Files ─────────────────────────────────── */}
+                <div>
+                  <SectionLabel>Reference Files</SectionLabel>
+                  <p className="mb-3 text-xs text-white/45">
+                    Upload your artwork, logo files, or any reference images. Optional but helps us get started faster.
+                  </p>
+                  <ReferenceFileUploader
+                    files={refFiles}
+                    onChange={setRefFiles}
+                    maxFiles={10}
+                  />
                 </div>
 
                 {/* ── Submit ──────────────────────────────────────────── */}

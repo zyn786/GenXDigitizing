@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import type { WorkflowOrder, WorkflowStatus, WorkflowPriority } from "@/lib/workflow/types";
+import type { WorkflowOrder, WorkflowStatus, WorkflowPriority, QuoteStatus, ProofStatus, OrderPaymentStatus, OrderRevision } from "@/lib/workflow/types";
 import { getWorkflowProgress } from "@/lib/workflow/status";
 
 const SERVICE_LABELS: Record<string, string> = {
@@ -36,6 +36,8 @@ export function mapDbStatus(s: string): WorkflowStatus {
 
 function mapStatus(s: string): WorkflowStatus {
   if (s === "SUBMITTED") return "SUBMITTED";
+  if (s === "UNDER_REVIEW") return "UNDER_REVIEW";
+  if (s === "ASSIGNED_TO_DESIGNER") return "ASSIGNED_TO_DESIGNER";
   if (s === "IN_PROGRESS") return "IN_PROGRESS";
   if (s === "PROOF_READY") return "PROOF_READY";
   if (s === "REVISION_REQUESTED") return "REVISION_REQUESTED";
@@ -86,6 +88,9 @@ const DB_INCLUDE = {
       clientProfile: { select: { companyName: true } },
     },
   },
+  assignedTo: {
+    select: { id: true, name: true },
+  },
   orderFiles: {
     include: { uploadedBy: { select: { name: true } } },
     orderBy: { createdAt: "asc" as const },
@@ -93,12 +98,43 @@ const DB_INCLUDE = {
   invoice: {
     select: { filesUnlocked: true },
   },
+  orderRevisions: {
+    include: {
+      requestedBy: { select: { name: true } },
+      assignedTo: { select: { name: true } },
+    },
+    orderBy: { createdAt: "desc" as const },
+  },
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeDbOrder(o: any): WorkflowOrder {
   const meta = parseNotes(o.notes as string | null);
   const status = mapStatus(o.status as string);
+
+  const orderRevisions: OrderRevision[] = ((o.orderRevisions ?? []) as Array<{
+    id: string;
+    status: string;
+    clientNotes: string | null;
+    adminNotes: string | null;
+    versionLabel: string | null;
+    requestedBy: { name: string | null } | null;
+    assignedTo: { name: string | null } | null;
+    assignedAt: Date | null;
+    completedAt: Date | null;
+    createdAt: Date;
+  }>).map((r) => ({
+    id: r.id,
+    status: r.status as OrderRevision["status"],
+    clientNotes: r.clientNotes,
+    adminNotes: r.adminNotes,
+    versionLabel: r.versionLabel,
+    requestedByName: r.requestedBy?.name ?? null,
+    assignedToName: r.assignedTo?.name ?? null,
+    assignedAt: r.assignedAt ? r.assignedAt.toISOString() : null,
+    completedAt: r.completedAt ? r.completedAt.toISOString() : null,
+    createdAt: r.createdAt.toISOString(),
+  }));
 
   return {
     id: o.id as string,
@@ -108,13 +144,19 @@ function normalizeDbOrder(o: any): WorkflowOrder {
     clientName: (o.clientUser?.name as string | null) ?? "Client",
     companyName: (o.clientUser?.clientProfile?.companyName as string | null) ?? null,
     status,
+    quoteStatus: (o.quoteStatus as QuoteStatus | null) ?? null,
+    proofStatus: (o.proofStatus as ProofStatus) ?? "NOT_UPLOADED",
+    paymentStatus: (o.paymentStatus as OrderPaymentStatus) ?? "NOT_REQUIRED",
+    quotedPrice: o.quotedPrice != null ? Number(o.quotedPrice) : null,
     priority: mapPriority(meta.deliverySpeed),
     dueLabel: parseDueLabel(o.dueAt as Date | null),
     progressPercent: (o.progressPercent as number) || getWorkflowProgress(status),
-    assignedTo: null,
+    assignedTo: (o.assignedTo?.name as string | null) ?? null,
+    assignedToName: (o.assignedTo?.name as string | null) ?? null,
     revisionCount: o.revisionCount as number,
     proofVersions: [],
     revisions: [],
+    orderRevisions,
     events: [],
     files: [],
     production: {

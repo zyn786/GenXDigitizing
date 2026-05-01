@@ -20,6 +20,7 @@ export const siteConfig = {
       { href: "/client/quotes" as Route, label: "Quote Requests" },
       { href: "/client/files" as Route, label: "Files" },
       { href: "/client/invoices" as Route, label: "Invoices" },
+      { href: "/client/reports" as Route, label: "Reports" },
       { href: "/client/support" as Route, label: "Chat & Support" },
       { href: "/client/profile" as Route, label: "My Profile" },
     ],

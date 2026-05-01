@@ -124,20 +124,33 @@ export function PortfolioClient({ items }: Props) {
 
         {/* Search & filter bar */}
         <div className="mb-8 flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search portfolio…"
+              placeholder="Search by title, service, tag, or description…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-11 w-full rounded-2xl border border-border bg-card pl-10 pr-4 text-sm outline-none focus:border-ring focus:ring-1 focus:ring-ring transition"
+              className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 pl-11 pr-4 text-sm text-white placeholder:text-white/30 outline-none backdrop-blur-sm transition focus:border-white/20 focus:bg-white/8 focus:ring-2 focus:ring-white/10"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`inline-flex h-11 items-center gap-2 rounded-2xl border px-4 text-sm transition ${showFilters ? "border-ring bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground hover:text-foreground"}`}
+            className={`inline-flex h-12 items-center gap-2 rounded-2xl border px-4 text-sm backdrop-blur-sm transition ${
+              showFilters
+                ? "border-white/20 bg-white/10 text-white"
+                : "border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white"
+            }`}
           >
             <SlidersHorizontal className="h-4 w-4" />
             Filters
@@ -151,23 +164,23 @@ export function PortfolioClient({ items }: Props) {
           {hasFilters && (
             <button
               onClick={clearFilters}
-              className="inline-flex h-11 items-center gap-2 rounded-2xl border border-border bg-card px-4 text-sm text-muted-foreground transition hover:text-destructive hover:border-destructive/40"
+              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white/50 backdrop-blur-sm transition hover:border-red-500/30 hover:text-red-400"
             >
               <X className="h-4 w-4" />
-              Clear
+              Clear all
             </button>
           )}
         </div>
 
         {showFilters && (
-          <div className="mb-6 flex flex-wrap gap-3 rounded-[1.75rem] border border-border bg-card/50 p-4 backdrop-blur">
+          <div className="mb-6 flex flex-wrap gap-3 rounded-[1.75rem] border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Service:</span>
+              <span className="text-xs text-white/40">Service:</span>
               <select
                 aria-label="Filter by service"
                 value={serviceFilter}
                 onChange={(e) => setServiceFilter(e.target.value)}
-                className="h-9 rounded-xl border border-border bg-background px-3 text-sm outline-none focus:border-ring"
+                className="h-9 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white outline-none focus:border-white/20 backdrop-blur-sm"
               >
                 <option value="">All services</option>
                 {ALL_SERVICES.map((s) => (
@@ -178,12 +191,12 @@ export function PortfolioClient({ items }: Props) {
 
             {availableNiches.length > 0 && (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Niche:</span>
+                <span className="text-xs text-white/40">Niche:</span>
                 <select
                   aria-label="Filter by niche"
                   value={nicheFilter}
                   onChange={(e) => setNicheFilter(e.target.value)}
-                  className="h-9 rounded-xl border border-border bg-background px-3 text-sm outline-none focus:border-ring"
+                  className="h-9 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white outline-none focus:border-white/20 backdrop-blur-sm"
                 >
                   <option value="">All niches</option>
                   {availableNiches.map((n) => (

@@ -4,19 +4,27 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { buildTitle } from "@/lib/site";
+import { AdminProofReviewToggle } from "@/components/admin/admin-proof-review-toggle";
 
 export const metadata: Metadata = { title: buildTitle("Settings") };
+export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
   if (session.user.role !== "SUPER_ADMIN") redirect("/admin/dashboard");
 
-  const [clientCount, staffCount, orderCount] = await Promise.all([
+  const [clientCount, staffCount, orderCount, proofReviewConfig] = await Promise.all([
     prisma.user.count({ where: { role: "CLIENT" } }),
     prisma.user.count({ where: { role: { not: "CLIENT" } } }),
     prisma.workflowOrder.count({ where: { status: { notIn: ["DRAFT"] } } }),
+    prisma.pricingConfig.findUnique({
+      where: { key: "admin_proof_review_enabled" },
+      select: { value: true },
+    }),
   ]);
+
+  const adminProofReviewEnabled = proofReviewConfig?.value !== "false";
 
   const sections = [
     {
@@ -93,6 +101,25 @@ export default async function AdminSettingsPage() {
               >
                 Review →
               </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Workflow settings */}
+      <section>
+        <h2 className="mb-4 text-lg font-semibold">Workflow settings</h2>
+        <div className="overflow-hidden rounded-[2rem] border border-border/80 bg-card/70">
+          <div className="divide-y divide-border/80">
+            <div className="flex flex-wrap items-start justify-between gap-4 px-5 py-4">
+              <div className="flex-1">
+                <div className="font-medium">Admin review before proof sent</div>
+                <div className="mt-1 max-w-lg text-xs text-muted-foreground">
+                  When ON, designer proofs must be reviewed and approved by an Admin or Manager before
+                  the client receives them. When OFF, designers can send proofs directly to clients.
+                </div>
+              </div>
+              <AdminProofReviewToggle enabled={adminProofReviewEnabled} />
             </div>
           </div>
         </div>

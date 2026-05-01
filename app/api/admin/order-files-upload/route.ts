@@ -6,6 +6,7 @@ import { createPutSignedUrl, getDefaultBucket, sanitizeFileName } from "@/lib/s3
 import { orderFileUploadIntentSchema } from "@/lib/payments/schemas";
 
 const DESIGNER_ROLES = ["SUPER_ADMIN", "MANAGER", "DESIGNER"];
+const PROOF_PREVIEW_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -15,10 +16,24 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json().catch(() => null);
+
+  // Extract fileType before schema validation (it's an extension not in the base schema)
+  const rawFileType = body?.fileType;
+  const fileType: "PROOF_PREVIEW" | "FINAL_FILE" =
+    rawFileType === "PROOF_PREVIEW" ? "PROOF_PREVIEW" : "FINAL_FILE";
+
   const parsed = orderFileUploadIntentSchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid payload.", issues: parsed.error.issues }, { status: 400 });
+  }
+
+  // Validate mime type for proof previews
+  if (fileType === "PROOF_PREVIEW" && !PROOF_PREVIEW_MIME_TYPES.includes(parsed.data.mimeType.toLowerCase())) {
+    return NextResponse.json(
+      { error: "Proof preview images must be JPG or PNG only." },
+      { status: 400 }
+    );
   }
 
   const bucket = getDefaultBucket();
@@ -26,11 +41,12 @@ export async function POST(req: Request) {
 
   const safeName = sanitizeFileName(parsed.data.fileName);
   const datePrefix = new Date().toISOString().slice(0, 10);
-  const objectKey = `order-files/${datePrefix}/${randomUUID()}-${safeName}`;
+  const folder = fileType === "PROOF_PREVIEW" ? "proof-previews" : "order-files";
+  const objectKey = `${folder}/${datePrefix}/${randomUUID()}-${safeName}`;
 
   try {
     const uploadUrl = await createPutSignedUrl(bucket, objectKey, parsed.data.mimeType);
-    return NextResponse.json({ uploadUrl, objectKey, bucket }, { status: 201 });
+    return NextResponse.json({ uploadUrl, objectKey, bucket, fileType }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to create upload intent." }, { status: 500 });
   }

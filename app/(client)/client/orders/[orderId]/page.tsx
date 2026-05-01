@@ -16,10 +16,15 @@ import {
 } from "@/components/ui/card";
 import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
 import { CancelOrderButton } from "@/components/client/cancel-order-button";
+import { ClientEditOrderModal } from "@/components/client/client-edit-order-modal";
 import { ClientDownloadButton } from "@/components/client/client-download-button";
+import { ClientProofReview } from "@/components/workflow/client-proof-review";
+import { PaymentGatePanel } from "@/components/workflow/payment-gate-panel";
+import { WorkflowTimeline } from "@/components/workflow/workflow-timeline";
 import { buildTitle } from "@/lib/site";
 import { getClientOrder } from "@/lib/workflow/repository";
 import type { OrderProduction } from "@/lib/workflow/types";
+import { ClientReferenceFilesSection } from "@/components/client/client-reference-files-section";
 
 type ClientOrderDetailPageProps = {
   params: Promise<{ orderId: string }>;
@@ -40,7 +45,7 @@ export default async function ClientOrderDetailPage({
   const session = await auth();
   if (!session?.user?.id) redirect("/login?next=/client/orders");
 
-  const [order, invoice, rawOrder] = await Promise.all([
+  const [order, invoice, rawOrder, referenceFiles] = await Promise.all([
     getClientOrder(orderId, session.user.id),
     prisma.invoice.findFirst({
       where: { orderId },
@@ -50,10 +55,25 @@ export default async function ClientOrderDetailPage({
       where: { id: orderId, clientUserId: session.user.id },
       select: {
         status: true,
+        quoteStatus: true,
+        proofStatus: true,
+        paymentStatus: true,
         cancelledAt: true,
         cancelReason: true,
         cancelledBy: { select: { name: true } },
+        notes: true,
+        placement: true,
+        fabricType: true,
+        designHeightIn: true,
+        designWidthIn: true,
+        colorQuantity: true,
+        specialInstructions: true,
       },
+    }),
+    prisma.clientReferenceFile.findMany({
+      where: { orderId },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, fileName: true, mimeType: true, sizeBytes: true, createdAt: true },
     }),
   ]);
 
@@ -64,6 +84,9 @@ export default async function ClientOrderDetailPage({
   const isCancelled = rawOrder?.status === "CANCELLED";
   const canCancel = rawOrder?.status === "SUBMITTED";
   const filesUnlocked = invoice?.filesUnlocked ?? false;
+
+  const proofStatus = rawOrder?.proofStatus ?? "NOT_UPLOADED";
+  const paymentStatus = rawOrder?.paymentStatus ?? "NOT_REQUIRED";
 
   return (
     <div className="grid gap-6">
@@ -81,9 +104,7 @@ export default async function ClientOrderDetailPage({
             <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
               {order.reference}
             </div>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-              {order.title}
-            </h1>
+            <h1 className="mt-1 text-3xl font-semibold tracking-tight">{order.title}</h1>
             <div className="mt-2 text-sm text-muted-foreground">
               {order.serviceLabel}
               {order.companyName ? ` · ${order.companyName}` : ""}
@@ -97,17 +118,13 @@ export default async function ClientOrderDetailPage({
       <Card className="rounded-[1.5rem] border-border/80">
         <CardContent className="p-5">
           <div className="mb-2 flex items-center justify-between">
-            <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-              Progress
-            </div>
+            <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Progress</div>
             <div className="text-sm font-medium">{order.progressPercent}%</div>
           </div>
           <div className="h-2 rounded-full bg-secondary">
             <div
               className="h-2 rounded-full bg-primary transition-all"
-              style={{
-                width: `${Math.max(6, Math.min(order.progressPercent, 100))}%`,
-              }}
+              style={{ width: `${Math.max(6, Math.min(order.progressPercent, 100))}%` }}
             />
           </div>
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -120,8 +137,30 @@ export default async function ClientOrderDetailPage({
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr] lg:items-start">
-        {/* Main detail */}
+        {/* Main */}
         <div className="grid gap-4">
+          {/* Proof review — shown when proof is in review or client action needed */}
+          {(rawOrder?.status === "PROOF_READY" ||
+            proofStatus === "CLIENT_APPROVED" ||
+            proofStatus === "REVISION_REQUESTED" ||
+            proofStatus === "PENDING_ADMIN_PROOF_REVIEW") && (
+            <Card className="rounded-[1.5rem] border-border/80">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Proof review</CardTitle>
+                <CardDescription>
+                  Review your proof files below and approve or request changes.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ClientProofReview
+                  orderId={order.id}
+                  proofStatus={proofStatus as "NOT_UPLOADED" | "UPLOADED" | "INTERNAL_REVIEW" | "SENT_TO_CLIENT" | "CLIENT_REVIEWING" | "CLIENT_APPROVED" | "REVISION_REQUESTED"}
+                  orderStatus={rawOrder?.status ?? order.status}
+                />
+              </CardContent>
+            </Card>
+          )}
+
           {/* Delivery files */}
           <Card className="rounded-[1.5rem] border-border/80">
             <CardHeader className="pb-3">
@@ -141,8 +180,10 @@ export default async function ClientOrderDetailPage({
                 <div className="flex items-center gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
                   <Lock className="h-4 w-4 shrink-0 text-amber-400" />
                   <p className="text-sm text-amber-300">
-                    Files are locked. Pay your invoice and submit a payment proof to unlock downloads.
-                    {hasInvoice && (
+                    Files are locked. {proofStatus !== "CLIENT_APPROVED"
+                      ? "Approve your proof to unlock payment and then download."
+                      : "Submit payment to unlock your files."}
+                    {hasInvoice && proofStatus === "CLIENT_APPROVED" && (
                       <>
                         {" "}
                         <Link
@@ -177,55 +218,43 @@ export default async function ClientOrderDetailPage({
             </CardContent>
           </Card>
 
+          {/* Reference files — client can view their uploads and add more */}
+          <ClientReferenceFilesSection
+            orderId={orderId}
+            initialFiles={referenceFiles.map((f) => ({
+              ...f,
+              createdAt: f.createdAt.toISOString(),
+            }))}
+            userId={session.user.id}
+          />
+
           {/* Order specs */}
           <ClientSpecsCard production={order.production} />
 
-          {/* Proof versions */}
-          {order.proofVersions.length > 0 && (
+          {/* Revision history */}
+          {order.orderRevisions.length > 0 && (
             <Card className="rounded-[1.5rem] border-border/80">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Proofs</CardTitle>
+                <CardTitle className="text-base">Revision history</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-2">
-                {order.proofVersions.map((pv) => (
-                  <div
-                    key={pv.id}
-                    className="rounded-2xl border border-border/80 bg-secondary/60 px-4 py-3 text-sm"
-                  >
-                    <div className="font-medium">{pv.versionLabel}</div>
-                    {pv.note && (
-                      <div className="mt-0.5 text-xs text-muted-foreground">{pv.note}</div>
-                    )}
-                    <div className="mt-1 text-[10px] text-muted-foreground/60">
-                      {new Date(pv.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Revision requests */}
-          {order.revisions.length > 0 && (
-            <Card className="rounded-[1.5rem] border-border/80">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Revision requests</CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-2">
-                {order.revisions.map((rev) => (
+                {order.orderRevisions.map((rev) => (
                   <div
                     key={rev.id}
                     className="rounded-2xl border border-border/80 bg-secondary/60 px-4 py-3 text-sm"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <div className="font-medium">{rev.title}</div>
+                      <div className="font-medium">{rev.versionLabel ?? "Revision"}</div>
                       <span className="shrink-0 rounded-full border border-border/80 bg-background px-2.5 py-0.5 text-[10px] font-medium capitalize">
-                        {rev.status.toLowerCase()}
+                        {rev.status.toLowerCase().replace(/_/g, " ")}
                       </span>
                     </div>
-                    {rev.body && (
-                      <div className="mt-1 text-xs text-muted-foreground">{rev.body}</div>
+                    {rev.clientNotes && (
+                      <div className="mt-1 text-xs text-muted-foreground">{rev.clientNotes}</div>
                     )}
+                    <div className="mt-1 text-[10px] text-muted-foreground/60">
+                      {new Date(rev.createdAt).toLocaleDateString()}
+                    </div>
                   </div>
                 ))}
               </CardContent>
@@ -260,7 +289,7 @@ export default async function ClientOrderDetailPage({
 
         {/* Sidebar */}
         <div className="grid gap-4 self-start">
-          {/* Cancellation info */}
+          {/* Cancellation */}
           {isCancelled && rawOrder?.cancelledAt && (
             <Card className="rounded-[1.5rem] border-red-500/20 bg-red-500/5">
               <CardHeader className="pb-3">
@@ -289,32 +318,41 @@ export default async function ClientOrderDetailPage({
             </Card>
           )}
 
+          {/* Workflow timeline */}
           <Card className="rounded-[1.5rem] border-border/80">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Invoice</CardTitle>
+              <CardTitle className="text-base">Order status</CardTitle>
             </CardHeader>
             <CardContent>
-              {hasInvoice ? (
-                <div className="grid gap-3">
-                  <div className="text-sm font-medium">{invoice!.invoiceNumber}</div>
-                  <span className="inline-block w-fit rounded-full border border-border/80 bg-secondary/80 px-2.5 py-0.5 text-[10px] font-medium capitalize">
-                    {invoice!.status.toLowerCase()}
-                  </span>
-                  <Link
-                    href={`/client/invoices/${invoice!.id}` as Route}
-                    className="inline-flex h-9 items-center justify-center rounded-full bg-primary px-4 text-xs font-medium text-primary-foreground transition hover:opacity-90"
-                  >
-                    Open invoice
-                  </Link>
-                </div>
-              ) : (
-                <div className="text-sm text-muted-foreground">
-                  No invoice yet. One will be created once your order is approved.
-                </div>
-              )}
+              <WorkflowTimeline
+                orderStatus={rawOrder?.status ?? order.status}
+                quoteStatus={rawOrder?.quoteStatus ?? order.quoteStatus}
+                proofStatus={proofStatus as "NOT_UPLOADED" | "UPLOADED" | "INTERNAL_REVIEW" | "SENT_TO_CLIENT" | "CLIENT_REVIEWING" | "CLIENT_APPROVED" | "REVISION_REQUESTED"}
+                paymentStatus={paymentStatus as "NOT_REQUIRED" | "PAYMENT_PENDING" | "PAYMENT_SUBMITTED" | "PAYMENT_UNDER_REVIEW" | "PAID" | "PARTIALLY_PAID" | "REJECTED" | "REFUNDED"}
+                filesUnlocked={filesUnlocked}
+              />
             </CardContent>
           </Card>
 
+          {/* Payment gate */}
+          <Card className="rounded-[1.5rem] border-border/80">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Payment</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PaymentGatePanel
+                proofStatus={proofStatus as "NOT_UPLOADED" | "UPLOADED" | "INTERNAL_REVIEW" | "SENT_TO_CLIENT" | "CLIENT_REVIEWING" | "CLIENT_APPROVED" | "REVISION_REQUESTED"}
+                paymentStatus={paymentStatus as "NOT_REQUIRED" | "PAYMENT_PENDING" | "PAYMENT_SUBMITTED" | "PAYMENT_UNDER_REVIEW" | "PAID" | "PARTIALLY_PAID" | "REJECTED" | "REFUNDED"}
+                invoiceId={invoice?.id ?? null}
+                invoiceNumber={invoice?.invoiceNumber ?? null}
+                invoiceStatus={invoice?.status ?? null}
+                filesUnlocked={filesUnlocked}
+                orderId={order.id}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Actions */}
           <Card className="rounded-[1.5rem] border-border/80">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Actions</CardTitle>
@@ -332,6 +370,28 @@ export default async function ClientOrderDetailPage({
                 orderId={order.id}
                 label="Open conversation"
               />
+              {rawOrder?.status === "SUBMITTED" && (
+                <>
+                  <div className="my-1 h-px bg-border/60" />
+                  <ClientEditOrderModal
+                    orderId={orderId}
+                    initialData={{
+                      title: order.title,
+                      notes: rawOrder.notes ?? null,
+                      placement: rawOrder.placement ?? null,
+                      fabricType: rawOrder.fabricType ?? null,
+                      designHeightIn: rawOrder.designHeightIn != null ? Number(rawOrder.designHeightIn) : null,
+                      designWidthIn: rawOrder.designWidthIn != null ? Number(rawOrder.designWidthIn) : null,
+                      colorQuantity: rawOrder.colorQuantity ?? null,
+                      specialInstructions: rawOrder.specialInstructions ?? null,
+                    }}
+                    initialFiles={referenceFiles.map((f) => ({
+                      ...f,
+                      createdAt: f.createdAt.toISOString(),
+                    }))}
+                  />
+                </>
+              )}
               {!isCancelled && (
                 canCancel ? (
                   <>

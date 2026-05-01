@@ -33,8 +33,8 @@ export default function HomePage() {
       <ScrollSectionNav sections={SECTIONS} />
 
       <div id="home">         <HeroSection />           </div>
-      <div id="services">     <StitchTransformSection /> </div>
       <div id="what-we-do">   <ServicePillars />         </div>
+      <div id="services">     <StitchTransformSection /> </div>
       <div id="our-work">     <ProductionShowcaseSection /></div>
       <div id="why-us">       <WhyScaffoldMatters />     </div>
       <div id="how-it-works"> <DeliverySequence />       </div>

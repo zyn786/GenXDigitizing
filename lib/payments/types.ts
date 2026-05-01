@@ -54,6 +54,7 @@ export type OrderFileRecord = {
   bucket: string;
   mimeType: string;
   sizeBytes: number;
+  fileType: "PROOF_PREVIEW" | "FINAL_FILE";
   uploadedByName: string | null;
   createdAt: string;
 };

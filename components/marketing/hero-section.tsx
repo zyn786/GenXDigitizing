@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { usePreloader } from "@/components/layout/site-preloader";
+import { DirectOrderModal } from "@/components/marketing/direct-order-modal";
 
 const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -21,6 +23,8 @@ const tickerItems = [
 ];
 
 export function HeroSection() {
+  const { isRevealing } = usePreloader();
+
   return (
     <section className="relative min-h-screen overflow-hidden -mt-20">
       {/* Single video element — desktop source served for ≥768px, mobile below */}
@@ -28,8 +32,8 @@ export function HeroSection() {
         autoPlay muted loop playsInline preload="metadata"
         className="absolute inset-0 h-full w-full object-cover"
       >
-        <source media="(min-width: 768px)" src={`${process.env.NEXT_PUBLIC_ASSET_BASE_URL ?? ""}/video/hero-bg-desktop.mp4`} type="video/mp4" />
-        <source src={`${process.env.NEXT_PUBLIC_ASSET_BASE_URL ?? ""}/video/hero-bg-mobile.mp4`} type="video/mp4" />
+        <source media="(min-width: 768px)" src={`/video/hero-bg-desktop.mp4`} type="video/mp4" />
+        <source src={`/video/hero-bg-mobile.mp4`} type="video/mp4" />
       </video>
 
       {/* Dark overlay */}
@@ -45,7 +49,7 @@ export function HeroSection() {
         {/* Eyebrow pill */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={isRevealing ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.55, ease }}
           className="mb-7 inline-flex items-center gap-2 rounded-full border border-indigo-400/25 bg-indigo-500/[0.13] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.25em] text-indigo-300 backdrop-blur-xl"
         >
@@ -57,7 +61,7 @@ export function HeroSection() {
         {/* Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={isRevealing ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
           transition={{ duration: 0.65, delay: 0.1, ease }}
           className="max-w-4xl text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-[3.75rem] lg:leading-[1.08]"
         >
@@ -70,7 +74,7 @@ export function HeroSection() {
         {/* Subtitle */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={isRevealing ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.55, delay: 0.2, ease }}
           className="mt-6 max-w-[38rem] text-base leading-7 text-white/55"
         >
@@ -81,7 +85,7 @@ export function HeroSection() {
         {/* CTA buttons + trust line */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={isRevealing ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.55, delay: 0.3, ease }}
           className="mt-8 flex flex-col items-center gap-3"
         >
@@ -93,6 +97,7 @@ export function HeroSection() {
               Get a free quote
               <ArrowRight className="h-4 w-4" />
             </Link>
+            <DirectOrderModal mode="order" />
             <Link
               href="/portfolio"
               className="inline-flex h-12 items-center gap-2 rounded-full border border-white/[0.16] bg-white/[0.07] px-7 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:border-white/[0.28] hover:bg-white/[0.12] active:scale-[0.98]"
@@ -108,7 +113,7 @@ export function HeroSection() {
         {/* Stats — glass card */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={isRevealing ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
           transition={{ duration: 0.55, delay: 0.42, ease }}
           className="mt-10 flex overflow-hidden rounded-2xl border border-white/[0.1] bg-white/[0.05] backdrop-blur-sm divide-x divide-white/[0.08]"
         >

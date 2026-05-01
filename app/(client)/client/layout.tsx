@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { headers } from "next/headers";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
@@ -14,6 +15,7 @@ const getCachedUserVerification = cache(async (userId: string) => {
       name: true,
       email: true,
       emailVerified: true,
+      onboardingComplete: true,
       accounts: { where: { type: "oauth" }, select: { id: true }, take: 1 },
     },
   });
@@ -53,6 +55,19 @@ export default async function ClientLayout({
   if (!isEmailVerified) {
     const email = encodeURIComponent(session.user.email ?? "");
     redirect(`/verify-email?pending=1&email=${email}`);
+  }
+
+  // Block portal access until profile setup is complete (skip if already on onboarding page)
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+  const isOnboarding = pathname.startsWith("/client/onboarding");
+  if (!dbUser?.onboardingComplete && !isOnboarding) {
+    redirect("/client/onboarding");
+  }
+
+  // Onboarding page renders standalone (no sidebar shell)
+  if (isOnboarding) {
+    return <>{children}</>;
   }
 
   const badges: Record<string, number> = {};

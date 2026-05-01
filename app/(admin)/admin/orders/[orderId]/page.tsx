@@ -4,6 +4,7 @@ import type { Route } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
+import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { ConversationLauncherButton } from "@/components/support/conversation-launcher-button";
 import {
@@ -18,9 +19,15 @@ import { OrderStatusControls } from "@/components/workflow/order-status-controls
 import { DesignerAssignControl } from "@/components/workflow/designer-assign-control";
 import { ConvertQuoteButton } from "@/components/workflow/convert-quote-button";
 import { OrderFileUploader } from "@/components/admin/order-file-uploader";
+import { ProofSendPanel } from "@/components/workflow/proof-send-panel";
+import { AdminProofReviewPanel } from "@/components/workflow/admin-proof-review-panel";
+import { RevisionManager } from "@/components/workflow/revision-manager";
+import { AdminPaymentApproval } from "@/components/workflow/admin-payment-approval";
+import { WorkflowTimeline } from "@/components/workflow/workflow-timeline";
 import { buildTitle } from "@/lib/site";
 import { getAdminOrder } from "@/lib/workflow/repository";
 import type { OrderProduction } from "@/lib/workflow/types";
+import { ReferenceFilesViewer } from "@/components/shared/reference-files-viewer";
 
 type AdminOrderDetailPageProps = {
   params: Promise<{ orderId: string }>;
@@ -37,21 +44,44 @@ export default async function AdminOrderDetailPage({
   params,
 }: AdminOrderDetailPageProps) {
   const { orderId } = await params;
+  const session = await auth();
+  const userRole = session?.user?.role ?? null;
 
-  const [order, invoice, rawOrder, designers] = await Promise.all([
+  const [order, invoice, rawOrder, designers, referenceFiles, proofReviewSetting] = await Promise.all([
     getAdminOrder(orderId),
     prisma.invoice.findFirst({
       where: { orderId },
-      select: { id: true, invoiceNumber: true, status: true, clientEmail: true },
+      select: {
+        id: true,
+        invoiceNumber: true,
+        status: true,
+        clientEmail: true,
+        filesUnlocked: true,
+        proofSubmissions: {
+          where: { status: "PENDING" },
+          orderBy: { submittedAt: "desc" },
+          select: {
+            id: true,
+            amountClaimed: true,
+            clientNotes: true,
+            submittedAt: true,
+          },
+        },
+      },
     }),
     prisma.workflowOrder.findUnique({
       where: { id: orderId },
       select: {
         status: true,
+        quoteStatus: true,
+        proofStatus: true,
+        paymentStatus: true,
+        quotedPrice: true,
         cancelledAt: true,
         cancelReason: true,
         cancelledBy: { select: { name: true } },
         assignedToUserId: true,
+        proofReviewNote: true,
       },
     }),
     prisma.user.findMany({
@@ -59,13 +89,29 @@ export default async function AdminOrderDetailPage({
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
+    prisma.clientReferenceFile.findMany({
+      where: { orderId },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true, fileName: true, mimeType: true, sizeBytes: true,
+        uploaderEmail: true, createdAt: true,
+      },
+    }),
+    prisma.pricingConfig.findUnique({
+      where: { key: "admin_proof_review_enabled" },
+      select: { value: true },
+    }),
   ]);
 
   if (!order) notFound();
 
-  const invoiceHref = invoice
-    ? (`/admin/invoices/${invoice.id}` as Route)
-    : null;
+  const invoiceHref = invoice ? (`/admin/invoices/${invoice.id}` as Route) : null;
+  const canManagePayment = userRole === "SUPER_ADMIN" || userRole === "MANAGER";
+  const requiresAdminReview = proofReviewSetting?.value === "true";
+  const showAdminReviewPanel =
+    rawOrder?.proofStatus === "PENDING_ADMIN_PROOF_REVIEW" ||
+    rawOrder?.proofStatus === "PROOF_REJECTED_BY_ADMIN" ||
+    rawOrder?.proofStatus === "PROOF_APPROVED_BY_ADMIN";
 
   return (
     <div className="grid gap-6">
@@ -83,9 +129,7 @@ export default async function AdminOrderDetailPage({
             <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
               {order.reference}
             </div>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-              {order.title}
-            </h1>
+            <h1 className="mt-1 text-3xl font-semibold tracking-tight">{order.title}</h1>
             <div className="mt-2 text-sm text-muted-foreground">
               {order.serviceLabel} · {order.clientName}
               {order.companyName ? ` · ${order.companyName}` : ""}
@@ -99,17 +143,13 @@ export default async function AdminOrderDetailPage({
       <Card className="rounded-[1.5rem] border-border/80">
         <CardContent className="p-5">
           <div className="mb-2 flex items-center justify-between">
-            <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-              Progress
-            </div>
+            <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Progress</div>
             <div className="text-sm font-medium">{order.progressPercent}%</div>
           </div>
           <div className="h-2 rounded-full bg-secondary">
             <div
               className="h-2 rounded-full bg-primary transition-all"
-              style={{
-                width: `${Math.max(6, Math.min(order.progressPercent, 100))}%`,
-              }}
+              style={{ width: `${Math.max(6, Math.min(order.progressPercent, 100))}%` }}
             />
           </div>
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -127,46 +167,78 @@ export default async function AdminOrderDetailPage({
           {/* Production specs */}
           <ProductionSpecsCard production={order.production} />
 
-          {/* File uploader (designer) */}
+          {/* Client reference files */}
           <Card className="rounded-[1.5rem] border-border/80">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Delivery files</CardTitle>
+              <CardTitle className="text-base">Client reference files</CardTitle>
               <CardDescription>
-                Upload final embroidery files for this order.
-                {!invoice?.id && " Files will be locked until payment is confirmed."}
+                Files uploaded by the client with their order.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <OrderFileUploader
-                orderId={order.id}
-                initialFiles={order.orderFiles}
+              <ReferenceFilesViewer
+                files={referenceFiles.map((f) => ({
+                  ...f,
+                  createdAt: f.createdAt.toISOString(),
+                }))}
+                downloadRoute="admin"
               />
             </CardContent>
           </Card>
 
-          {/* Proof versions */}
-          {order.proofVersions.length > 0 && (
+          {/* File uploader */}
+          <Card className="rounded-[1.5rem] border-border/80">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Design files</CardTitle>
+              <CardDescription>
+                Upload proof and final files. Files are locked until payment is confirmed.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <OrderFileUploader
+                orderId={order.id}
+                initialFiles={order.orderFiles}
+              />
+
+              {/* Send proof control */}
+              <div className="border-t border-border/60 pt-4">
+                <div className="mb-2 text-xs font-medium text-muted-foreground">Proof delivery</div>
+                <ProofSendPanel
+                  orderId={order.id}
+                  proofStatus={order.proofStatus}
+                  orderStatus={order.status}
+                  fileCount={order.orderFiles.length}
+                  requiresAdminReview={requiresAdminReview}
+                />
+              </div>
+
+              {/* Admin proof review (when proof is pending admin review) */}
+              {showAdminReviewPanel && (userRole === "SUPER_ADMIN" || userRole === "MANAGER") && (
+                <div className="border-t border-border/60 pt-4">
+                  <div className="mb-2 text-xs font-medium text-muted-foreground">Admin proof review</div>
+                  <AdminProofReviewPanel
+                    orderId={order.id}
+                    proofStatus={order.proofStatus as "PENDING_ADMIN_PROOF_REVIEW" | "PROOF_APPROVED_BY_ADMIN" | "PROOF_REJECTED_BY_ADMIN"}
+                    proofReviewNote={rawOrder?.proofReviewNote ?? null}
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Revision manager */}
+          {(["REVISION_REQUESTED", "IN_PROGRESS"].includes(order.status) || order.orderRevisions.length > 0) && (
             <Card className="rounded-[1.5rem] border-border/80">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Proofs</CardTitle>
+                <CardTitle className="text-base">Revisions</CardTitle>
+                <CardDescription>Manage client revision requests and designer assignments.</CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-2">
-                {order.proofVersions.map((pv) => (
-                  <div
-                    key={pv.id}
-                    className="rounded-2xl border border-border/80 bg-secondary/60 px-4 py-3 text-sm"
-                  >
-                    <div className="font-medium">{pv.versionLabel}</div>
-                    {pv.note && (
-                      <div className="mt-0.5 text-xs text-muted-foreground">
-                        {pv.note}
-                      </div>
-                    )}
-                    <div className="mt-1 text-[10px] text-muted-foreground/60">
-                      {new Date(pv.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                ))}
+              <CardContent>
+                <RevisionManager
+                  orderId={order.id}
+                  revisions={order.orderRevisions}
+                  designers={designers}
+                />
               </CardContent>
             </Card>
           )}
@@ -175,7 +247,7 @@ export default async function AdminOrderDetailPage({
           {order.events.length > 0 && (
             <Card className="rounded-[1.5rem] border-border/80">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Timeline</CardTitle>
+                <CardTitle className="text-base">Activity timeline</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-2">
                 {order.events.map((ev) => (
@@ -185,9 +257,7 @@ export default async function AdminOrderDetailPage({
                   >
                     <div className="font-medium">{ev.title}</div>
                     {ev.body && (
-                      <div className="mt-0.5 text-xs text-muted-foreground">
-                        {ev.body}
-                      </div>
+                      <div className="mt-0.5 text-xs text-muted-foreground">{ev.body}</div>
                     )}
                     <div className="mt-1 text-[10px] text-muted-foreground/60">
                       {new Date(ev.at).toLocaleString()}
@@ -201,7 +271,7 @@ export default async function AdminOrderDetailPage({
 
         {/* Sidebar */}
         <div className="grid gap-4 self-start">
-          {/* Cancellation info */}
+          {/* Cancellation */}
           {rawOrder?.cancelledAt && (
             <Card className="rounded-[1.5rem] border-red-500/20 bg-red-500/5">
               <CardHeader className="pb-3">
@@ -230,6 +300,22 @@ export default async function AdminOrderDetailPage({
             </Card>
           )}
 
+          {/* Workflow timeline */}
+          <Card className="rounded-[1.5rem] border-border/80">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Workflow</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <WorkflowTimeline
+                orderStatus={order.status}
+                quoteStatus={order.quoteStatus}
+                proofStatus={order.proofStatus}
+                paymentStatus={order.paymentStatus}
+                filesUnlocked={invoice?.filesUnlocked ?? false}
+              />
+            </CardContent>
+          </Card>
+
           {/* Designer assignment */}
           <Card className="rounded-[1.5rem] border-border/80">
             <CardHeader className="pb-3">
@@ -244,6 +330,37 @@ export default async function AdminOrderDetailPage({
             </CardContent>
           </Card>
 
+          {/* Payment approval */}
+          {(order.proofStatus === "CLIENT_APPROVED" || order.paymentStatus !== "NOT_REQUIRED") && (
+            <Card className="rounded-[1.5rem] border-border/80">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Payment</CardTitle>
+                {!canManagePayment && (
+                  <CardDescription>Super Admin or Manager can approve payments.</CardDescription>
+                )}
+              </CardHeader>
+              <CardContent>
+                {canManagePayment ? (
+                  <AdminPaymentApproval
+                    orderId={order.id}
+                    paymentStatus={order.paymentStatus}
+                    pendingProofs={(invoice?.proofSubmissions ?? []).map((p) => ({
+                      id: p.id,
+                      amountClaimed: Number(p.amountClaimed),
+                      clientNotes: p.clientNotes,
+                      submittedAt: p.submittedAt.toISOString(),
+                    }))}
+                    filesUnlocked={invoice?.filesUnlocked ?? false}
+                  />
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Payment status: {order.paymentStatus.toLowerCase().replace(/_/g, " ")}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Invoice */}
           <Card className="rounded-[1.5rem] border-border/80">
             <CardHeader className="pb-3">
@@ -253,9 +370,7 @@ export default async function AdminOrderDetailPage({
               {invoice ? (
                 <div className="grid gap-3">
                   <div className="text-sm font-medium">{invoice.invoiceNumber}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {invoice.clientEmail}
-                  </div>
+                  <div className="text-xs text-muted-foreground">{invoice.clientEmail}</div>
                   <span className="inline-block w-fit rounded-full border border-border/80 bg-secondary/80 px-2.5 py-0.5 text-[10px] font-medium capitalize">
                     {invoice.status.toLowerCase()}
                   </span>
@@ -269,9 +384,7 @@ export default async function AdminOrderDetailPage({
                   )}
                 </div>
               ) : (
-                <div className="text-sm text-muted-foreground">
-                  No invoice yet.
-                </div>
+                <div className="text-sm text-muted-foreground">No invoice yet.</div>
               )}
             </CardContent>
           </Card>
@@ -312,9 +425,7 @@ export default async function AdminOrderDetailPage({
 function MetaStat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-        {label}
-      </div>
+      <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
       <div className="mt-1 text-sm font-medium">{value}</div>
     </div>
   );
@@ -348,7 +459,6 @@ function ProductionSpecsCard({ production }: { production: OrderProduction }) {
         <CardDescription>Order requirements from the client.</CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Summary row */}
         <div className="mb-4 flex flex-wrap gap-2">
           <Chip label={`Qty: ${production.quantity}`} />
           {production.isFreeDesign && <Chip label="Free design" color="emerald" />}
@@ -382,12 +492,8 @@ function ProductionSpecsCard({ production }: { production: OrderProduction }) {
             {production.colorQuantity && (
               <SpecRow label="Thread colors" value={`${production.colorQuantity}`} />
             )}
-            {production.threadBrand && (
-              <SpecRow label="Thread brand" value={production.threadBrand} />
-            )}
-            {production.colorDetails && (
-              <SpecRow label="Color details" value={production.colorDetails} />
-            )}
+            {production.threadBrand && <SpecRow label="Thread brand" value={production.threadBrand} />}
+            {production.colorDetails && <SpecRow label="Color details" value={production.colorDetails} />}
             {production.trims && <SpecRow label="Trims" value={production.trims} />}
           </div>
         )}

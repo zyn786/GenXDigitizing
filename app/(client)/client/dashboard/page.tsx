@@ -223,10 +223,10 @@ export default async function ClientDashboardPage() {
               Ready to start? Request a quote or place a direct order.
             </p>
             <div className="mt-5 flex justify-center gap-3">
-              <Link href="/quote" className="btn-primary text-xs">
+              <Link href="/client/quote" className="btn-primary text-xs">
                 Get a quote
               </Link>
-              <Link href="/order" className="btn-outline text-xs">
+              <Link href="/client/order" className="btn-outline text-xs">
                 Direct order
               </Link>
             </div>

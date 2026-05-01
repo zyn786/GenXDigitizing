@@ -7,8 +7,9 @@ import { prisma } from "@/lib/db";
 type RouteProps = { params: Promise<{ orderId: string }> };
 
 const DESIGNER_ROLES = ["SUPER_ADMIN", "MANAGER", "DESIGNER"];
+const PROOF_PREVIEW_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
-export async function GET(_req: Request, { params }: RouteProps) {
+export async function GET(req: Request, { params }: RouteProps) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ ok: false }, { status: 401 });
   if (!DESIGNER_ROLES.includes(String(session.user.role ?? ""))) {
@@ -16,7 +17,15 @@ export async function GET(_req: Request, { params }: RouteProps) {
   }
 
   const { orderId } = await params;
-  const files = await getOrderFiles(orderId);
+
+  const url = new URL(req.url);
+  const rawFileType = url.searchParams.get("fileType");
+  const fileType =
+    rawFileType === "PROOF_PREVIEW" || rawFileType === "FINAL_FILE"
+      ? (rawFileType as "PROOF_PREVIEW" | "FINAL_FILE")
+      : undefined;
+
+  const files = await getOrderFiles(orderId, fileType);
   return NextResponse.json({ ok: true, files });
 }
 
@@ -38,10 +47,21 @@ export async function POST(req: Request, { params }: RouteProps) {
     bucket?: string;
     mimeType?: string;
     sizeBytes?: number;
+    fileType?: string;
   } | null;
 
   if (!body?.fileName || !body?.objectKey || !body?.bucket || !body?.mimeType || typeof body?.sizeBytes !== "number") {
     return NextResponse.json({ ok: false, message: "Missing required fields." }, { status: 400 });
+  }
+
+  const fileType: "PROOF_PREVIEW" | "FINAL_FILE" =
+    body.fileType === "PROOF_PREVIEW" ? "PROOF_PREVIEW" : "FINAL_FILE";
+
+  if (fileType === "PROOF_PREVIEW" && !PROOF_PREVIEW_MIME_TYPES.includes(body.mimeType.toLowerCase())) {
+    return NextResponse.json(
+      { ok: false, message: "Proof preview images must be JPG or PNG only." },
+      { status: 400 }
+    );
   }
 
   try {
@@ -53,6 +73,7 @@ export async function POST(req: Request, { params }: RouteProps) {
       bucket: body.bucket,
       mimeType: body.mimeType,
       sizeBytes: body.sizeBytes,
+      fileType,
     });
     return NextResponse.json({ ok: true, file }, { status: 201 });
   } catch (err) {

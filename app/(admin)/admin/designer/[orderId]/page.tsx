@@ -12,8 +12,11 @@ import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
 import { OrderStatusControls } from "@/components/workflow/order-status-controls";
 import { ConversationLauncherButton } from "@/components/support/conversation-launcher-button";
 import { OrderFileUploader } from "@/components/admin/order-file-uploader";
+import { ProofSendPanel } from "@/components/workflow/proof-send-panel";
 import { getOrderFiles } from "@/lib/payments/repository";
 import { mapDbStatus } from "@/lib/workflow/repository";
+import { ReferenceFilesViewer } from "@/components/shared/reference-files-viewer";
+import type { ProofStatus } from "@/lib/workflow/types";
 
 type Props = { params: Promise<{ orderId: string }> };
 
@@ -33,9 +36,12 @@ const PLACEMENT_LABELS: Record<string, string> = {
 
 const SERVICE_LABELS: Record<string, string> = {
   EMBROIDERY_DIGITIZING: "Embroidery Digitizing",
-  VECTOR_REDRAW: "Vector Redraw",
-  COLOR_SEPARATION: "Color Separation",
-  DTF_SCREEN_PRINT: "DTF / Screen Print",
+  VECTOR_ART: "Vector Art Conversion",
+  COLOR_SEPARATION_DTF: "Color Separation / DTF Screen Setup",
+  CUSTOM_PATCHES: "Custom Patches",
+  VECTOR_REDRAW: "Vector Art Conversion",
+  COLOR_SEPARATION: "Color Separation / DTF Screen Setup",
+  DTF_SCREEN_PRINT: "Color Separation / DTF Screen Setup",
 };
 
 export default async function DesignerJobDetailPage({ params }: Props) {
@@ -44,7 +50,7 @@ export default async function DesignerJobDetailPage({ params }: Props) {
 
   const { orderId } = await params;
 
-  const [job, orderFiles] = await Promise.all([
+  const [job, orderFiles, referenceFiles, proofReviewSetting] = await Promise.all([
     prisma.workflowOrder.findFirst({
       where: { id: orderId, assignedToUserId: session.user.id },
       include: {
@@ -54,11 +60,24 @@ export default async function DesignerJobDetailPage({ params }: Props) {
       },
     }),
     getOrderFiles(orderId),
+    prisma.clientReferenceFile.findMany({
+      where: { orderId },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true, fileName: true, mimeType: true, sizeBytes: true,
+        uploaderEmail: true, createdAt: true,
+      },
+    }),
+    prisma.pricingConfig.findUnique({
+      where: { key: "admin_proof_review_enabled" },
+      select: { value: true },
+    }),
   ]);
 
   if (!job) notFound();
 
   const status = mapDbStatus(job.status);
+  const requiresAdminReview = proofReviewSetting?.value !== "false";
 
   const now = Date.now();
   const due = job.dueAt ? job.dueAt.getTime() - now : null;
@@ -231,16 +250,57 @@ export default async function DesignerJobDetailPage({ params }: Props) {
             </Card>
           )}
 
-          {/* Completed files */}
+          {/* Client reference files */}
           <Card className="rounded-[1.5rem] border-border/80">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Completed files</CardTitle>
+              <CardTitle className="text-base">Client reference files</CardTitle>
               <CardDescription>
-                Upload deliverables here. Files are locked for the client until their payment is approved.
+                Reference images and files uploaded by the client.
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <ReferenceFilesViewer
+                files={referenceFiles.map((f) => ({
+                  ...f,
+                  createdAt: f.createdAt.toISOString(),
+                }))}
+                downloadRoute="designer"
+              />
+            </CardContent>
+          </Card>
+
+          {/* Proof preview & final files */}
+          <Card className="rounded-[1.5rem] border-border/80">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Proof previews & final files</CardTitle>
+              <CardDescription>
+                Upload proof preview images (JPG/PNG) for client review, and final production files (DST, PES, etc.).
+                Final files are locked until payment is approved.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
               <OrderFileUploader orderId={job.id} initialFiles={orderFiles} />
+
+              {/* Proof send control */}
+              <div className="border-t border-border/60 pt-4">
+                <div className="mb-2 text-xs font-medium text-muted-foreground">Proof submission</div>
+                <ProofSendPanel
+                  orderId={job.id}
+                  proofStatus={job.proofStatus as ProofStatus}
+                  orderStatus={job.status}
+                  fileCount={orderFiles.filter((f) => f.fileType === "PROOF_PREVIEW").length}
+                  requiresAdminReview={requiresAdminReview}
+                />
+
+              </div>
+
+              {/* Show admin rejection note if applicable */}
+              {job.proofStatus === "PROOF_REJECTED_BY_ADMIN" && job.proofReviewNote && (
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm">
+                  <div className="mb-1 font-medium text-red-400">Admin feedback on your proof</div>
+                  <p className="text-xs text-muted-foreground">{job.proofReviewNote}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

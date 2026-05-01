@@ -69,12 +69,17 @@ export async function sendOrderCreatedEmail(opts: {
   serviceType: string;
   estimatedPrice?: number | null;
   recipientUserId?: string | null;
+  isGuest?: boolean;
 }) {
-  const portalUrl = `${appUrl()}/client/orders/${opts.orderId}`;
   const firstName = opts.clientName.split(" ")[0] || "there";
   const priceNote = opts.estimatedPrice
     ? `Estimated price: <strong>$${opts.estimatedPrice.toFixed(2)}</strong>`
     : "Pricing will be confirmed by our team shortly.";
+
+  // Guests get the public tracking page; logged-in clients get the portal
+  const trackingUrl = opts.isGuest
+    ? `${appUrl()}/order-status?number=${encodeURIComponent(opts.orderNumber)}&email=${encodeURIComponent(opts.to)}`
+    : `${appUrl()}/client/orders/${opts.orderId}`;
 
   const subject = `Order received — ${opts.orderNumber}`;
   const text = [
@@ -83,7 +88,7 @@ export async function sendOrderCreatedEmail(opts: {
     `We've received your order ${opts.orderNumber} (${opts.serviceType}).`,
     priceNote.replace(/<[^>]+>/g, ""),
     "",
-    `Track your order: ${portalUrl}`,
+    `Track your order: ${trackingUrl}`,
   ].join("\n");
 
   const html = wrap(`
@@ -94,7 +99,12 @@ export async function sendOrderCreatedEmail(opts: {
       Our team will review it shortly and get to work.
     </p>
     <p style="margin:10px 0 0;">${priceNote}</p>
-    ${btn(portalUrl, "Track your order")}
+    ${btn(trackingUrl, "Track your order")}
+    ${opts.isGuest ? `<p style="margin:14px 0 0;font-size:13px;color:#94a3b8;">
+      No account needed — this link is unique to your order and email.<br/>
+      Want full portal access?
+      <a href="${appUrl()}/register" style="color:#818cf8;">Create a free account</a>.
+    </p>` : ""}
   `);
 
   await send(opts.to, subject, html, text);
@@ -331,6 +341,353 @@ export async function sendPaymentReceivedEmail(opts: {
   });
 }
 
+export async function sendQuoteSentEmail(opts: {
+  to: string;
+  clientName: string;
+  orderNumber: string;
+  orderId: string;
+  quotedPrice: number;
+  serviceType: string;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/client/quotes/${opts.orderId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const subject = `Your quote is ready — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `Great news! We've reviewed your quote request for ${opts.serviceType}.`,
+    `Your quoted price is $${opts.quotedPrice.toFixed(2)}.`,
+    "",
+    `Please log in to review and accept or decline: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Your quote is ready</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      We've reviewed your quote request for <strong>${esc(opts.serviceType)}</strong>.
+      Your quoted price is <strong>$${opts.quotedPrice.toFixed(2)}</strong>.
+    </p>
+    <p style="margin:10px 0 0;">
+      Please review and accept or decline this quote from your client portal.
+    </p>
+    ${btn(portalUrl, "Review quote")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "QUOTE_SENT",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendQuoteAcceptedEmail(opts: {
+  to: string;
+  adminName: string;
+  orderNumber: string;
+  orderId: string;
+  clientName: string;
+  quotedPrice: number;
+  recipientUserId?: string | null;
+}) {
+  const adminUrl = `${appUrl()}/admin/orders/${opts.orderId}`;
+  const firstName = opts.adminName.split(" ")[0] || "Admin";
+  const subject = `Quote accepted — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `${opts.clientName} has accepted quote ${opts.orderNumber} at $${opts.quotedPrice.toFixed(2)}.`,
+    `View the order: ${adminUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Quote accepted</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      <strong>${esc(opts.clientName)}</strong> has accepted quote
+      <strong>${esc(opts.orderNumber)}</strong> at <strong>$${opts.quotedPrice.toFixed(2)}</strong>.
+      The order is now active in the production queue.
+    </p>
+    ${btn(adminUrl, "View order")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "QUOTE_ACCEPTED",
+    audience: "OPS_QUEUE",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendProofSentEmail(opts: {
+  to: string;
+  clientName: string;
+  orderNumber: string;
+  orderId: string;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/client/orders/${opts.orderId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const subject = `Proof ready for your review — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `Your proof for order ${opts.orderNumber} is ready.`,
+    "Please log in to approve it or request a revision.",
+    "",
+    `Review proof: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Your proof is ready</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      The proof for order <strong>${esc(opts.orderNumber)}</strong> is ready for your review.
+      Please approve it or request a revision from your client portal.
+    </p>
+    ${btn(portalUrl, "Review proof")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "PROOF_SENT",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendProofApprovedPaymentRequiredEmail(opts: {
+  to: string;
+  clientName: string;
+  orderNumber: string;
+  orderId: string;
+  invoiceId?: string | null;
+  amount: number;
+  currency: string;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = opts.invoiceId
+    ? `${appUrl()}/client/invoices/${opts.invoiceId}`
+    : `${appUrl()}/client/orders/${opts.orderId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const subject = `Proof approved — payment required — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `You approved the proof for order ${opts.orderNumber}. Your final files will be available once payment is confirmed.`,
+    `Amount due: ${opts.currency} ${opts.amount.toFixed(2)}`,
+    "",
+    `Submit payment: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Proof approved — payment required</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      You've approved the proof for order <strong>${esc(opts.orderNumber)}</strong>.
+      Your final embroidery files will be unlocked once payment is confirmed.
+    </p>
+    <p style="margin:10px 0 0;">
+      Amount due: <strong>${esc(opts.currency)} ${opts.amount.toFixed(2)}</strong>
+    </p>
+    ${btn(portalUrl, "Submit payment")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "PAYMENT_REQUIRED",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendRevisionAssignedEmail(opts: {
+  to: string;
+  designerName: string;
+  orderNumber: string;
+  orderId: string;
+  clientNotes?: string | null;
+  recipientUserId?: string | null;
+}) {
+  const adminUrl = `${appUrl()}/admin/designer/${opts.orderId}`;
+  const firstName = opts.designerName.split(" ")[0] || "Designer";
+  const subject = `Revision assigned — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `A revision has been assigned to you for order ${opts.orderNumber}.`,
+    opts.clientNotes ? `Client notes: ${opts.clientNotes}` : "",
+    "",
+    `View order: ${adminUrl}`,
+  ].filter(Boolean).join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Revision assigned to you</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      A revision has been assigned to you for order <strong>${esc(opts.orderNumber)}</strong>.
+    </p>
+    ${opts.clientNotes ? `<p style="margin:10px 0 0;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:13px;">${esc(opts.clientNotes)}</p>` : ""}
+    ${btn(adminUrl, "View order")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "REVISION_ASSIGNED",
+    audience: "ASSIGNED_USER",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendPaymentSubmittedEmail(opts: {
+  to: string;
+  adminName: string;
+  orderNumber: string;
+  orderId: string;
+  clientName: string;
+  amount: number;
+  currency: string;
+  recipientUserId?: string | null;
+}) {
+  const adminUrl = `${appUrl()}/admin/payment-proofs`;
+  const firstName = opts.adminName.split(" ")[0] || "Admin";
+  const subject = `Payment submitted — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `${opts.clientName} submitted payment of ${opts.currency} ${opts.amount.toFixed(2)} for order ${opts.orderNumber}.`,
+    `Review: ${adminUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Payment submitted</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      <strong>${esc(opts.clientName)}</strong> submitted payment of
+      <strong>${esc(opts.currency)} ${opts.amount.toFixed(2)}</strong>
+      for order <strong>${esc(opts.orderNumber)}</strong>.
+    </p>
+    ${btn(adminUrl, "Review payment")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "PAYMENT_SUBMITTED",
+    audience: "OPS_QUEUE",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendNewOrderOpsEmail(opts: {
+  to: string;
+  orderNumber: string;
+  orderId: string;
+  clientName: string;
+  clientEmail: string;
+  serviceType: string;
+  isGuest?: boolean;
+}) {
+  const adminUrl = `${appUrl()}/admin/orders/${opts.orderId}`;
+  const subject = `New order received — ${opts.orderNumber}`;
+  const guestNote = opts.isGuest ? " (guest checkout)" : "";
+  const text = [
+    `New order ${opts.orderNumber} received${guestNote}.`,
+    `Client: ${opts.clientName} <${opts.clientEmail}>`,
+    `Service: ${opts.serviceType}`,
+    `View order: ${adminUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">New order received</h1>
+    <p style="margin:16px 0 0;">
+      Order <strong>${esc(opts.orderNumber)}</strong>${esc(guestNote)} requires your attention.
+    </p>
+    <p style="margin:10px 0 0;">
+      <strong>Client:</strong> ${esc(opts.clientName)} &lt;${esc(opts.clientEmail)}&gt;<br/>
+      <strong>Service:</strong> ${esc(opts.serviceType)}
+    </p>
+    ${btn(adminUrl, "View order")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "ORDER_CREATED",
+    audience: "OPS_QUEUE",
+    channel: "EMAIL",
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendNewQuoteOpsEmail(opts: {
+  to: string;
+  orderNumber: string;
+  orderId: string;
+  clientName: string;
+  clientEmail: string;
+  serviceType: string;
+  isGuest?: boolean;
+}) {
+  const adminUrl = `${appUrl()}/admin/quotes/${opts.orderId}`;
+  const subject = `New quote request — ${opts.orderNumber}`;
+  const guestNote = opts.isGuest ? " (guest)" : "";
+  const text = [
+    `New quote request ${opts.orderNumber}${guestNote}.`,
+    `Client: ${opts.clientName} <${opts.clientEmail}>`,
+    `Service: ${opts.serviceType}`,
+    `Review: ${adminUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">New quote request</h1>
+    <p style="margin:16px 0 0;">
+      Quote <strong>${esc(opts.orderNumber)}</strong>${esc(guestNote)} is waiting for pricing.
+    </p>
+    <p style="margin:10px 0 0;">
+      <strong>Client:</strong> ${esc(opts.clientName)} &lt;${esc(opts.clientEmail)}&gt;<br/>
+      <strong>Service:</strong> ${esc(opts.serviceType)}
+    </p>
+    ${btn(adminUrl, "Price this quote")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "QUOTE_SENT",
+    audience: "OPS_QUEUE",
+    channel: "EMAIL",
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
 export async function sendFilesUnlockedEmail(opts: {
   to: string;
   clientName: string;
@@ -365,6 +722,176 @@ export async function sendFilesUnlockedEmail(opts: {
   await writeNotificationLog({
     eventType: "FILE_DELIVERED",
     audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendWorkStartedEmail(opts: {
+  to: string;
+  clientName: string;
+  orderNumber: string;
+  orderId: string;
+  designerName: string;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/client/orders/${opts.orderId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const subject = `Work started on your order — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `Our designer ${opts.designerName} has been assigned to order ${opts.orderNumber} and work has begun.`,
+    "You'll be notified when your proof is ready for review.",
+    "",
+    `Track your order: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Work has started</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      Our designer <strong>${esc(opts.designerName)}</strong> has been assigned to your order
+      <strong>${esc(opts.orderNumber)}</strong> and work has begun.
+      You'll be notified when your proof is ready for review.
+    </p>
+    ${btn(portalUrl, "Track your order")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "WORK_STARTED",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendProofPendingAdminReviewEmail(opts: {
+  to: string;
+  adminName: string;
+  orderNumber: string;
+  orderId: string;
+  designerName: string;
+  recipientUserId?: string | null;
+}) {
+  const adminUrl = `${appUrl()}/admin/orders/${opts.orderId}`;
+  const firstName = opts.adminName.split(" ")[0] || "Admin";
+  const subject = `Proof ready for admin review — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `Designer ${opts.designerName} has uploaded a proof for order ${opts.orderNumber}.`,
+    "The proof is waiting for your review before being sent to the client.",
+    "",
+    `Review proof: ${adminUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Proof pending your review</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      Designer <strong>${esc(opts.designerName)}</strong> has uploaded a proof for order
+      <strong>${esc(opts.orderNumber)}</strong>.
+      Please review and approve (sends to client) or reject with feedback.
+    </p>
+    ${btn(adminUrl, "Review proof")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "PROOF_ADMIN_REVIEW_PENDING",
+    audience: "OPS_QUEUE",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendProofApprovedByAdminEmail(opts: {
+  to: string;
+  designerName: string;
+  orderNumber: string;
+  orderId: string;
+  recipientUserId?: string | null;
+}) {
+  const adminUrl = `${appUrl()}/admin/designer/${opts.orderId}`;
+  const firstName = opts.designerName.split(" ")[0] || "Designer";
+  const subject = `Proof approved — sent to client — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `Your proof for order ${opts.orderNumber} has been approved by admin and sent to the client.`,
+    `View order: ${adminUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Proof approved &amp; sent to client</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      Your proof for order <strong>${esc(opts.orderNumber)}</strong> has been approved by admin
+      and sent to the client for review. You'll be notified of the client's decision.
+    </p>
+    ${btn(adminUrl, "View order")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "PROOF_ADMIN_APPROVED",
+    audience: "ASSIGNED_USER",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+export async function sendProofRejectedByAdminEmail(opts: {
+  to: string;
+  designerName: string;
+  orderNumber: string;
+  orderId: string;
+  reviewNote: string;
+  recipientUserId?: string | null;
+}) {
+  const adminUrl = `${appUrl()}/admin/designer/${opts.orderId}`;
+  const firstName = opts.designerName.split(" ")[0] || "Designer";
+  const subject = `Proof needs revision (admin review) — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `Your proof for order ${opts.orderNumber} requires changes before it can be sent to the client.`,
+    `Admin feedback: ${opts.reviewNote}`,
+    "",
+    `Update proof: ${adminUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Proof needs revision</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      Your proof for order <strong>${esc(opts.orderNumber)}</strong> requires changes before
+      it can be sent to the client.
+    </p>
+    <p style="margin:10px 0 0;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:13px;">
+      <strong>Admin feedback:</strong><br/>${esc(opts.reviewNote)}
+    </p>
+    ${btn(adminUrl, "Update proof")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "PROOF_ADMIN_REJECTED",
+    audience: "ASSIGNED_USER",
     channel: "EMAIL",
     recipientUserId: opts.recipientUserId ?? null,
     recipientAddress: opts.to,

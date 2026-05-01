@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { isAppAdminRole } from "@/lib/auth/session";
 import { logActivity } from "@/lib/activity/logger";
+import { sendWorkStartedEmail, writeNotificationLog } from "@/lib/notifications/email";
 
 type Props = { params: Promise<{ orderId: string }> };
 
@@ -47,10 +48,55 @@ export async function PATCH(request: Request, { params }: Props) {
     return NextResponse.json({ ok: false, message: "Order not found." }, { status: 404 });
   }
 
-  await prisma.workflowOrder.update({
-    where: { id: orderId },
-    data: { assignedToUserId: designerId },
-  });
+  if (designerId !== null) {
+    const updatedOrder = await prisma.workflowOrder.update({
+      where: { id: orderId },
+      data: {
+        assignedToUserId: designerId,
+        status: "ASSIGNED_TO_DESIGNER",
+        progressPercent: 35,
+      },
+      include: {
+        clientUser: { select: { id: true, name: true, email: true } },
+        assignedTo: { select: { name: true } },
+      },
+    });
+
+    // Send work-started email to client
+    if (updatedOrder.clientUser?.email) {
+      try {
+        await sendWorkStartedEmail({
+          to: updatedOrder.clientUser.email,
+          clientName: updatedOrder.clientUser.name ?? "Valued Customer",
+          orderNumber: updatedOrder.orderNumber,
+          orderId: updatedOrder.id,
+          designerName: updatedOrder.assignedTo?.name ?? "our designer",
+          recipientUserId: updatedOrder.clientUser.id,
+        });
+      } catch (err) {
+        await writeNotificationLog({
+          eventType: "WORK_STARTED",
+          audience: "CLIENT",
+          channel: "EMAIL",
+          recipientUserId: updatedOrder.clientUser.id,
+          recipientAddress: updatedOrder.clientUser.email,
+          orderId: updatedOrder.id,
+          status: "FAILED",
+          errorMessage: err instanceof Error ? err.message : "Unknown error",
+        });
+      }
+    }
+  } else {
+    await prisma.workflowOrder.update({
+      where: { id: orderId },
+      data: {
+        assignedToUserId: null,
+        status: "UNDER_REVIEW",
+        progressPercent: 20,
+        proofReviewNote: null,
+      },
+    });
+  }
 
   await logActivity({
     actor: { id: session.user.id, email: session.user.email ?? undefined, role: session.user.role ?? undefined },

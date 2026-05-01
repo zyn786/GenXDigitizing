@@ -35,6 +35,8 @@ enum VerificationTokenPurpose {
 enum WorkflowOrderStatus {
   DRAFT
   SUBMITTED
+  UNDER_REVIEW
+  ASSIGNED_TO_DESIGNER
   IN_PROGRESS
   PROOF_READY
   REVISION_REQUESTED
@@ -42,6 +44,64 @@ enum WorkflowOrderStatus {
   DELIVERED
   CLOSED
   CANCELLED
+}
+
+enum OrderFileType {
+  PROOF_PREVIEW
+  FINAL_FILE
+}
+
+enum QuoteStatus {
+  NEW
+  UNDER_REVIEW
+  PRICE_SENT
+  CLIENT_ACCEPTED
+  CLIENT_REJECTED
+  CONVERTED_TO_ORDER
+  CANCELLED
+}
+
+enum ProofStatus {
+  NOT_UPLOADED
+  UPLOADED
+  INTERNAL_REVIEW
+  PENDING_ADMIN_PROOF_REVIEW
+  PROOF_APPROVED_BY_ADMIN
+  PROOF_REJECTED_BY_ADMIN
+  SENT_TO_CLIENT
+  CLIENT_REVIEWING
+  CLIENT_APPROVED
+  REVISION_REQUESTED
+}
+
+enum OrderRevisionStatus {
+  REQUESTED_BY_CLIENT
+  CREATED_BY_ADMIN
+  UNDER_ADMIN_REVIEW
+  ASSIGNED_TO_DESIGNER
+  IN_PROGRESS
+  REVISED_PROOF_UPLOADED
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderPaymentStatus {
+  NOT_REQUIRED
+  PAYMENT_PENDING
+  PAYMENT_SUBMITTED
+  PAYMENT_UNDER_REVIEW
+  PAID
+  PARTIALLY_PAID
+  REJECTED
+  REFUNDED
+}
+
+enum PortfolioApprovalStatus {
+  PENDING_APPROVAL
+  APPROVED
+  DECLINED
+  DRAFT
+  ARCHIVED
 }
 
 enum InvoiceStatus {
@@ -206,6 +266,20 @@ enum NotificationEventType {
   SUPPORT_THREAD_CREATED
   SUPPORT_MESSAGE_POSTED
   THREAD_ASSIGNED
+  QUOTE_SENT
+  QUOTE_ACCEPTED
+  QUOTE_REJECTED
+  PROOF_SENT
+  PROOF_APPROVED
+  REVISION_ASSIGNED
+  PAYMENT_REQUIRED
+  PAYMENT_SUBMITTED
+  PAYMENT_APPROVED
+  FILES_UNLOCKED
+  WORK_STARTED
+  PROOF_ADMIN_REVIEW_PENDING
+  PROOF_ADMIN_APPROVED
+  PROOF_ADMIN_REJECTED
 }
 
 enum NotificationAudience {
@@ -265,8 +339,9 @@ model User {
   notificationPreferences NotificationPreference[]
   notificationLogs        NotificationLog[]        @relation("NotificationRecipientLogs")
 
-  portfolioItems   PortfolioItem[]     @relation("PortfolioCreator")
-  activityLogs     ActivityLog[]       @relation("ActivityLogActor")
+  portfolioItems          PortfolioItem[] @relation("PortfolioCreator")
+  approvedPortfolioItems  PortfolioItem[] @relation("PortfolioApprover")
+  activityLogs            ActivityLog[]   @relation("ActivityLogActor")
   createdCoupons   Coupon[]            @relation("CouponCreator")
   approvedCoupons  Coupon[]            @relation("CouponApprover")
   createdCampaigns MarketingCampaign[] @relation("CampaignCreator")
@@ -276,6 +351,9 @@ model User {
   reviewedPaymentProofs PaymentProofSubmission[] @relation("ReviewedPaymentProofs")
   orderFilesUploaded    OrderFile[]              @relation("OrderFileUploader")
   designerCommissions   DesignerCommission[]     @relation("DesignerCommissions")
+  revisionRequests      OrderRevision[]          @relation("RevisionRequester")
+  revisionAssignments   OrderRevision[]          @relation("RevisionAssignee")
+  referenceFilesUploaded ClientReferenceFile[]   @relation("ReferenceFileUploader")
 }
 
 model Account {
@@ -431,6 +509,25 @@ model WorkflowOrder {
   estimatedPrice       Decimal?            @db.Decimal(12, 2)
   quantity             Int                 @default(1)
 
+  // Quote lifecycle fields
+  quoteStatus          QuoteStatus?
+  quotedPrice          Decimal?            @db.Decimal(12, 2)
+  pricedAt             DateTime?
+  pricedByUserId       String?
+  quoteAcceptedAt      DateTime?
+  quoteRejectedAt      DateTime?
+  quoteClientNotes     String?             @db.Text
+
+  // Proof lifecycle fields
+  proofStatus          ProofStatus         @default(NOT_UPLOADED)
+  proofSentAt          DateTime?
+  proofSentByUserId    String?
+  proofApprovedAt      DateTime?
+  proofReviewNote      String?             @db.Text
+
+  // Payment lifecycle (denormalized for easy querying)
+  paymentStatus        OrderPaymentStatus  @default(NOT_REQUIRED)
+
   clientUser            User                   @relation("ClientOrders", fields: [clientUserId], references: [id], onDelete: Cascade)
   assignedTo            User?                  @relation("AssignedOrders", fields: [assignedToUserId], references: [id], onDelete: SetNull)
   cancelledBy           User?                  @relation("CancelledOrders", fields: [cancelledByUserId], references: [id], onDelete: SetNull)
@@ -439,7 +536,9 @@ model WorkflowOrder {
   notificationLogs      NotificationLog[]
   notificationOverrides NotificationOverride[]
   orderFiles            OrderFile[]
+  orderRevisions        OrderRevision[]
   designerCommission    DesignerCommission?
+  clientReferenceFiles  ClientReferenceFile[]
 
   @@index([clientUserId])
   @@index([assignedToUserId])
@@ -853,27 +952,34 @@ model DeliveryOption {
 // ─── Portfolio ────────────────────────────────────────────────────────────────
 
 model PortfolioItem {
-  id             String   @id @default(cuid())
+  id             String                  @id @default(cuid())
   title          String
   serviceKey     String
   nicheSlug      String?
-  description    String?  @db.Text
+  description    String?                 @db.Text
   beforeImageKey String?
   afterImageKey  String?
   tags           String[]
-  isFeatured     Boolean  @default(false)
-  isVisible      Boolean  @default(true)
-  sortOrder      Int      @default(0)
+  isFeatured     Boolean                 @default(false)
+  isVisible      Boolean                 @default(true)
+  sortOrder      Int                     @default(0)
   seoTitle       String?
-  seoDescription String?  @db.Text
+  seoDescription String?                 @db.Text
   createdByUserId String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  approvalStatus  PortfolioApprovalStatus @default(APPROVED)
+  approvedByUserId String?
+  approvedAt      DateTime?
+  declineReason   String?                @db.Text
+  declinedAt      DateTime?
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
 
-  createdBy User? @relation("PortfolioCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  createdBy  User? @relation("PortfolioCreator",  fields: [createdByUserId],  references: [id], onDelete: SetNull)
+  approvedBy User? @relation("PortfolioApprover", fields: [approvedByUserId], references: [id], onDelete: SetNull)
 
   @@index([serviceKey, isVisible])
   @@index([isVisible, sortOrder])
+  @@index([approvalStatus, isVisible])
 }
 
 // ─── Activity Log ─────────────────────────────────────────────────────────────
@@ -982,6 +1088,7 @@ model OrderFile {
   bucket           String
   mimeType         String
   sizeBytes        Int
+  fileType         OrderFileType @default(FINAL_FILE)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -1016,6 +1123,53 @@ model BulkDiscountRule {
   updatedAt       DateTime @updatedAt
 
   @@index([isActive, minQty])
+}
+
+// ─── Order Revisions ──────────────────────────────────────────────────────────
+
+// ─── Client Reference Files (uploaded with orders as reference images) ───────
+
+model ClientReferenceFile {
+  id               String   @id @default(cuid())
+  orderId          String
+  uploaderUserId   String?
+  uploaderEmail    String?
+  fileName         String
+  objectKey        String   @unique
+  bucket           String
+  mimeType         String
+  sizeBytes        Int
+  createdAt        DateTime @default(now())
+
+  order    WorkflowOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  uploader User?         @relation("ReferenceFileUploader", fields: [uploaderUserId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([uploaderUserId])
+}
+
+model OrderRevision {
+  id                String              @id @default(cuid())
+  orderId           String
+  status            OrderRevisionStatus @default(REQUESTED_BY_CLIENT)
+  requestedByUserId String?
+  assignedToUserId  String?
+  assignedByUserId  String?
+  clientNotes       String?             @db.Text
+  adminNotes        String?             @db.Text
+  versionLabel      String?
+  assignedAt        DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  order       WorkflowOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  requestedBy User?         @relation("RevisionRequester", fields: [requestedByUserId], references: [id], onDelete: SetNull)
+  assignedTo  User?         @relation("RevisionAssignee", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([assignedToUserId])
+  @@index([status])
 }
 
 // ─── Payment Proof Submissions ────────────────────────────────────────────────

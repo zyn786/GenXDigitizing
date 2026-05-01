@@ -17,6 +17,10 @@ type PortfolioItem = {
   sortOrder: number;
   createdAt: Date;
   createdBy: { name: string | null } | null;
+  approvalStatus: string;
+  approvedAt: Date | null;
+  declineReason: string | null;
+  approvedBy: { name: string | null } | null;
 };
 
 const SERVICE_OPTIONS = [
@@ -54,14 +58,58 @@ const NICHE_OPTIONS: Record<string, Array<{ value: string; label: string }>> = {
   ],
 };
 
-export function PortfolioManager({ initialItems }: { initialItems: PortfolioItem[] }) {
+const APPROVAL_BADGE: Record<string, string> = {
+  PENDING_APPROVAL: "border-amber-400/30 bg-amber-500/10 text-amber-300",
+  APPROVED:         "border-emerald-400/30 bg-emerald-500/10 text-emerald-300",
+  DECLINED:         "border-red-400/30 bg-red-500/10 text-red-300",
+  DRAFT:            "border-white/10 bg-white/5 text-white/50",
+  ARCHIVED:         "border-white/10 bg-white/5 text-white/40",
+};
+const APPROVAL_LABEL: Record<string, string> = {
+  PENDING_APPROVAL: "Pending review",
+  APPROVED:         "Approved",
+  DECLINED:         "Declined",
+  DRAFT:            "Draft",
+  ARCHIVED:         "Archived",
+};
+
+type Tab = "all" | "pending" | "approved" | "declined";
+
+export function PortfolioManager({
+  initialItems,
+  userRole,
+}: {
+  initialItems: PortfolioItem[];
+  userRole: string;
+}) {
   const router = useRouter();
+  const isSuperAdmin = userRole === "SUPER_ADMIN";
+
   const [items, setItems] = useState<PortfolioItem[]>(initialItems);
+  const [tab, setTab] = useState<Tab>("all");
   const [showForm, setShowForm] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [declineTarget, setDeclineTarget] = useState<string | null>(null);
+  const [declineReason, setDeclineReason] = useState("");
+  const [decliningSaving, setDecliningSaving] = useState(false);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+
+  const counts = {
+    all: items.length,
+    pending: items.filter((i) => i.approvalStatus === "PENDING_APPROVAL").length,
+    approved: items.filter((i) => i.approvalStatus === "APPROVED").length,
+    declined: items.filter((i) => i.approvalStatus === "DECLINED").length,
+  };
+
+  const visible = items.filter((item) => {
+    if (tab === "pending") return item.approvalStatus === "PENDING_APPROVAL";
+    if (tab === "approved") return item.approvalStatus === "APPROVED";
+    if (tab === "declined") return item.approvalStatus === "DECLINED";
+    return true;
+  });
 
   async function toggleField(
     itemId: string,
@@ -110,6 +158,64 @@ export function PortfolioManager({ initialItems }: { initialItems: PortfolioItem
     }
   }
 
+  async function approveItem(itemId: string) {
+    setApprovingId(itemId);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/portfolio/${itemId}/approve`, { method: "POST" });
+      const json = await res.json() as { ok: boolean; message?: string };
+      if (!json.ok) {
+        setError(json.message ?? "Approve failed.");
+      } else {
+        setItems((prev) =>
+          prev.map((i) =>
+            i.id === itemId
+              ? { ...i, approvalStatus: "APPROVED", isVisible: true, declineReason: null }
+              : i
+          )
+        );
+      }
+    } catch {
+      setError("Network error.");
+    } finally {
+      setApprovingId(null);
+    }
+  }
+
+  async function declineItem(itemId: string) {
+    if (!declineReason.trim() || declineReason.trim().length < 5) {
+      setError("Decline reason must be at least 5 characters.");
+      return;
+    }
+    setDecliningSaving(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/portfolio/${itemId}/decline`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: declineReason.trim() }),
+      });
+      const json = await res.json() as { ok: boolean; message?: string };
+      if (!json.ok) {
+        setError(json.message ?? "Decline failed.");
+      } else {
+        setItems((prev) =>
+          prev.map((i) =>
+            i.id === itemId
+              ? { ...i, approvalStatus: "DECLINED", isVisible: false, declineReason: declineReason.trim() }
+              : i
+          )
+        );
+        setDeclineTarget(null);
+        setDeclineReason("");
+      }
+    } catch {
+      setError("Network error.");
+    } finally {
+      setDecliningSaving(false);
+    }
+  }
+
   function onItemCreated(item: PortfolioItem) {
     setItems((prev) => [item, ...prev]);
     setShowForm(false);
@@ -146,108 +252,198 @@ export function PortfolioManager({ initialItems }: { initialItems: PortfolioItem
         />
       )}
 
+      {/* Tabs */}
+      <div className="flex gap-1 rounded-2xl border border-border/80 bg-card/70 p-1">
+        {(["all", "pending", "approved", "declined"] as Tab[]).map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTab(t)}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition ${
+              tab === t
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t === "all" ? "All" : t === "pending" ? "Pending" : t === "approved" ? "Approved" : "Declined"}
+            {counts[t] > 0 && (
+              <span
+                className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                  tab === t
+                    ? "bg-white/20 text-white"
+                    : t === "pending"
+                    ? "bg-amber-500/20 text-amber-400"
+                    : "bg-secondary/80 text-muted-foreground"
+                }`}
+              >
+                {counts[t]}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Items list */}
-      {items.length === 0 && !showForm ? (
+      {visible.length === 0 ? (
         <div className="rounded-[2rem] border border-border/80 bg-card/70 px-5 py-16 text-center text-sm text-muted-foreground">
-          No portfolio items yet. Add your first item above.
+          {tab === "pending"
+            ? "No items pending approval."
+            : tab === "approved"
+            ? "No approved items yet."
+            : tab === "declined"
+            ? "No declined items."
+            : "No portfolio items yet. Add your first item above."}
         </div>
       ) : (
         <div className="overflow-hidden rounded-[2rem] border border-border/80 bg-card/70">
-          <div className="hidden grid-cols-[1fr_1fr_auto_auto_auto_auto] gap-4 border-b border-border/80 px-5 py-3 text-xs uppercase tracking-[0.2em] text-muted-foreground sm:grid">
-            <div>Title</div>
-            <div>Service</div>
-            <div>Tags</div>
-            <div>Featured</div>
-            <div>Visible</div>
-            <div></div>
-          </div>
-
           <div className="divide-y divide-border/80">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="grid grid-cols-1 gap-2 px-5 py-4 text-sm sm:grid-cols-[1fr_1fr_auto_auto_auto_auto] sm:items-center"
-              >
-                <div>
-                  <p className="font-medium">{item.title}</p>
-                  {item.description && (
-                    <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
-                      {item.description}
+            {visible.map((item) => (
+              <div key={item.id} className="grid gap-3 px-5 py-4 text-sm">
+                {/* Row 1: title + approval badge + actions */}
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium">{item.title}</p>
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${APPROVAL_BADGE[item.approvalStatus] ?? ""}`}
+                      >
+                        {APPROVAL_LABEL[item.approvalStatus] ?? item.approvalStatus}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {SERVICE_OPTIONS.find((s) => s.value === item.serviceKey)?.label ?? item.serviceKey}
                     </p>
-                  )}
-                  {item.createdBy?.name && (
-                    <p className="mt-0.5 text-xs text-muted-foreground opacity-60">
-                      by {item.createdBy.name}
-                    </p>
-                  )}
-                </div>
+                    {item.description && (
+                      <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground opacity-70">
+                        {item.description}
+                      </p>
+                    )}
+                    <div className="mt-1 flex flex-wrap gap-1.5 text-xs text-muted-foreground">
+                      {item.createdBy?.name && (
+                        <span>Uploaded by {item.createdBy.name}</span>
+                      )}
+                      {item.approvedBy?.name && item.approvalStatus === "APPROVED" && (
+                        <span className="text-emerald-400/70">· Approved by {item.approvedBy.name}</span>
+                      )}
+                      {item.approvalStatus === "DECLINED" && item.declineReason && (
+                        <span className="text-red-400/70">· Declined: {item.declineReason}</span>
+                      )}
+                    </div>
+                  </div>
 
-                <div className="text-xs text-muted-foreground">
-                  {SERVICE_OPTIONS.find((s) => s.value === item.serviceKey)?.label ??
-                    item.serviceKey}
-                </div>
+                  {/* Actions column */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {item.tags.slice(0, 2).map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-secondary/60 px-2 py-0.5 text-xs text-muted-foreground"
+                      >
+                        {tag}
+                      </span>
+                    ))}
 
-                <div className="flex flex-wrap gap-1">
-                  {item.tags.slice(0, 3).map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-secondary/60 px-2 py-0.5 text-xs text-muted-foreground"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  {item.tags.length > 3 && (
-                    <span className="text-xs text-muted-foreground">+{item.tags.length - 3}</span>
-                  )}
-                </div>
+                    <ToggleButton
+                      active={item.isFeatured}
+                      activeLabel="Featured"
+                      inactiveLabel="Feature"
+                      activeClass="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                      disabled={togglingId === item.id}
+                      onClick={() => toggleField(item.id, "isFeatured", item.isFeatured)}
+                    />
 
-                <ToggleButton
-                  active={item.isFeatured}
-                  activeLabel="Featured"
-                  inactiveLabel="Feature"
-                  activeClass="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
-                  disabled={togglingId === item.id}
-                  onClick={() => toggleField(item.id, "isFeatured", item.isFeatured)}
-                />
+                    <ToggleButton
+                      active={item.isVisible}
+                      activeLabel="Visible"
+                      inactiveLabel="Hidden"
+                      activeClass="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                      disabled={togglingId === item.id}
+                      onClick={() => toggleField(item.id, "isVisible", item.isVisible)}
+                    />
 
-                <ToggleButton
-                  active={item.isVisible}
-                  activeLabel="Visible"
-                  inactiveLabel="Hidden"
-                  activeClass="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
-                  disabled={togglingId === item.id}
-                  onClick={() => toggleField(item.id, "isVisible", item.isVisible)}
-                />
-
-                <div className="flex items-center gap-2">
-                  {confirmDeleteId === item.id ? (
-                    <>
+                    {/* Approve / Decline — SUPER_ADMIN only */}
+                    {isSuperAdmin && item.approvalStatus !== "APPROVED" && (
                       <button
                         type="button"
-                        disabled={deletingId === item.id}
-                        onClick={() => deleteItem(item.id)}
-                        className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/20 disabled:opacity-50"
+                        disabled={approvingId === item.id}
+                        onClick={() => approveItem(item.id)}
+                        className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50"
                       >
-                        {deletingId === item.id ? "Deleting…" : "Confirm"}
+                        {approvingId === item.id ? "Approving…" : "Approve"}
+                      </button>
+                    )}
+                    {isSuperAdmin && item.approvalStatus !== "DECLINED" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDeclineTarget(item.id);
+                          setDeclineReason("");
+                        }}
+                        className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/20"
+                      >
+                        Decline
+                      </button>
+                    )}
+
+                    {confirmDeleteId === item.id ? (
+                      <>
+                        <button
+                          type="button"
+                          disabled={deletingId === item.id}
+                          onClick={() => deleteItem(item.id)}
+                          className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/20 disabled:opacity-50"
+                        >
+                          {deletingId === item.id ? "Deleting…" : "Confirm"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="text-xs text-muted-foreground hover:text-foreground"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteId(item.id)}
+                        className="rounded-full px-3 py-1 text-xs text-muted-foreground hover:bg-red-500/10 hover:text-red-400"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Inline decline form */}
+                {declineTarget === item.id && (
+                  <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
+                    <p className="mb-2 text-xs font-medium text-red-300">Decline reason</p>
+                    <textarea
+                      rows={2}
+                      value={declineReason}
+                      onChange={(e) => setDeclineReason(e.target.value)}
+                      placeholder="Explain why this item is being declined…"
+                      className="w-full rounded-xl border border-border/80 bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-red-500/40"
+                    />
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        type="button"
+                        disabled={decliningSaving}
+                        onClick={() => declineItem(item.id)}
+                        className="rounded-full bg-red-500/10 px-4 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/20 disabled:opacity-50"
+                      >
+                        {decliningSaving ? "Saving…" : "Confirm decline"}
                       </button>
                       <button
                         type="button"
-                        onClick={() => setConfirmDeleteId(null)}
+                        onClick={() => setDeclineTarget(null)}
                         className="text-xs text-muted-foreground hover:text-foreground"
                       >
                         Cancel
                       </button>
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setConfirmDeleteId(item.id)}
-                      className="rounded-full px-3 py-1 text-xs text-muted-foreground hover:bg-red-500/10 hover:text-red-400"
-                    >
-                      Delete
-                    </button>
-                  )}
-                </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -322,7 +518,6 @@ function AddItemForm({
       tags,
       isFeatured: fd.get("isFeatured") === "on",
       sortOrder: parseInt((fd.get("sortOrder") as string) || "0", 10),
-      isVisible: true,
       beforeImageKey: beforeUpload?.status === "done" ? beforeUpload.objectKey : undefined,
       afterImageKey: afterUpload?.status === "done" ? afterUpload.objectKey : undefined,
     };

@@ -1,11 +1,24 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { quoteOrderSchema } from "@/schemas/quote-order";
 import { computeQuotePricing } from "@/lib/quote-order/pricing";
 import { getAllPricingConfig, getActiveBulkDiscountRules } from "@/lib/pricing/config";
 import { logActivity } from "@/lib/activity/logger";
-import { sendOrderCreatedEmail, writeNotificationLog } from "@/lib/notifications/email";
+import { sendOrderCreatedEmail, sendNewOrderOpsEmail, writeNotificationLog } from "@/lib/notifications/email";
+
+const refFileSchema = z.object({
+  fileName: z.string().min(1),
+  objectKey: z.string().min(1),
+  bucket: z.string().min(1),
+  mimeType: z.string().min(1),
+  sizeBytes: z.number().int().positive(),
+});
+
+const orderWithFilesSchema = quoteOrderSchema.extend({
+  referenceFiles: z.array(refFileSchema).max(10).default([]),
+});
 
 function generateOrderNumber() {
   const ts = Date.now().toString(36).toUpperCase();
@@ -21,7 +34,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => null);
-  const parsed = quoteOrderSchema.safeParse(body);
+  const parsed = orderWithFilesSchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -112,6 +125,21 @@ export async function POST(request: Request) {
     },
   }).catch(() => null);
 
+  // Save reference files if any
+  if (data.referenceFiles.length > 0) {
+    await prisma.clientReferenceFile.createMany({
+      data: data.referenceFiles.map((f) => ({
+        orderId: order.id,
+        uploaderUserId: userId,
+        fileName: f.fileName,
+        objectKey: f.objectKey,
+        bucket: f.bucket,
+        mimeType: f.mimeType,
+        sizeBytes: f.sizeBytes,
+      })),
+    });
+  }
+
   await logActivity({
     actor: { id: userId, email: session.user.email ?? null, role: session.user.role ?? null },
     action: "order.created",
@@ -148,6 +176,24 @@ export async function POST(request: Request) {
         status: "FAILED",
         errorMessage: err instanceof Error ? err.message : "Unknown error",
       });
+    }
+  }
+
+  // Ops notification
+  const opsEmail = process.env.OPS_EMAIL ?? process.env.ADMIN_EMAIL;
+  if (opsEmail && session.user.email) {
+    try {
+      await sendNewOrderOpsEmail({
+        to: opsEmail,
+        orderNumber: order.orderNumber,
+        orderId: order.id,
+        clientName: session.user.name ?? session.user.email,
+        clientEmail: session.user.email,
+        serviceType: data.serviceType,
+        isGuest: false,
+      });
+    } catch {
+      // non-fatal
     }
   }
 
