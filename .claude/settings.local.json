@@ -16,7 +16,11 @@
       "Bash(Get-ChildItem -Path \"E:\\\\Hello\\\\GenXDigitizing\" -Force)",
       "Bash(Select-Object Name, FullName)",
       "Bash(pnpm typecheck *)",
-      "Bash(pnpm build *)"
+      "Bash(pnpm build *)",
+      "Bash(pnpm prisma *)",
+      "Bash(pnpm lint *)",
+      "Bash(pnpm dlx *)",
+      "Bash(prisma validate *)"
     ]
   }
 }
