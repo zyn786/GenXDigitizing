@@ -25,6 +25,8 @@ export function DashboardMobileNav({ items, badges, user, initials }: Props) {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname();
 
+  // Close mobile nav on route change — standard pattern
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => { setOpen(false); }, [pathname]);
 
   React.useEffect(() => {

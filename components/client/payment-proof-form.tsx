@@ -180,7 +180,7 @@ export function PaymentProofForm({
 
       {hasPendingProof && (
         <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-4 text-sm text-amber-400">
-          Your payment proof is currently under review. We'll unlock your files once approved.
+          Your payment proof is currently under review. We&rsquo;ll unlock your files once approved.
         </div>
       )}
 
@@ -278,6 +278,7 @@ export function PaymentProofForm({
               onClick={() => fileInputRef.current?.click()}
             >
               {previewUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- blob URL not compatible with next/image
                 <img src={previewUrl} alt="Proof preview" className="mx-auto max-h-48 rounded-xl object-contain" />
               ) : (
                 <div className="text-sm text-muted-foreground">

@@ -19,7 +19,7 @@ export default async function DesignerDashboardPage() {
 
   const designerId = session.user.id;
 
-  const [activeJobs, allJobs, commissions, staffProfile] = await Promise.all([
+  const [activeJobs, commissions, staffProfile] = await Promise.all([
     prisma.workflowOrder.findMany({
       where: {
         assignedToUserId: designerId,
@@ -30,7 +30,6 @@ export default async function DesignerDashboardPage() {
         clientUser: { select: { name: true, clientProfile: { select: { companyName: true } } } },
       },
     }),
-    prisma.workflowOrder.count({ where: { assignedToUserId: designerId } }),
     prisma.designerCommission.findMany({
       where: { designerId },
       select: { amount: true, status: true },
@@ -135,6 +134,8 @@ export default async function DesignerDashboardPage() {
           ) : (
             <div className="grid gap-3">
               {activeJobs.map((job) => {
+                // Server component — Date.now() is request-scoped and deterministic
+                // eslint-disable-next-line react-hooks/purity
                 const now = Date.now();
                 const due = job.dueAt ? job.dueAt.getTime() - now : null;
                 const dueLabel = !job.dueAt

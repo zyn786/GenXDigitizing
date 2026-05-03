@@ -114,9 +114,8 @@ function StepIndicator({ current }: { current: number }) {
   return (
     <div className="flex items-center gap-0 px-6 pb-4 pt-2">
       {STEPS.map((s, i) => {
-        const done    = current > s.num;
-        const active  = current === s.num;
-        const pending = current < s.num;
+        const done   = current > s.num;
+        const active = current === s.num;
         return (
           <React.Fragment key={s.num}>
             <div className="flex flex-col items-center gap-1">

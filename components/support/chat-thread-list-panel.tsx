@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 
 import type { ChatThreadListItem } from "@/lib/chat/types";
 
@@ -63,7 +64,7 @@ export function ChatThreadListPanel({
               return (
                 <Link
                   key={thread.id}
-                  href={getThreadHref(mode, thread.id) as any}
+                  href={getThreadHref(mode, thread.id) as Route}
                   className={`block rounded-[1.75rem] border p-4 transition ${
                     active
                       ? "border-primary/30 bg-primary/5"

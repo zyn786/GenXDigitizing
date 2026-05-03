@@ -35,7 +35,7 @@ export function ContactDetailsPanel() {
       <CardHeader>
         <CardTitle className="text-xl">How we work together</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Fast replies, clear proofs, and revisions until you're satisfied.
+          Fast replies, clear proofs, and revisions until you&rsquo;re satisfied.
         </p>
       </CardHeader>
       <CardContent className="grid gap-3">

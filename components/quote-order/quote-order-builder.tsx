@@ -323,7 +323,7 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
                         <option value="" className="text-slate-950">— Select placement —</option>
                         {PLACEMENT_OPTIONS.map((p) => (
                           <option key={p.value} value={p.value} className="text-slate-950">
-                            {p.label} (max {p.maxSizeIn}")
+                            {p.label} (max {p.maxSizeIn}&Prime;)
                           </option>
                         ))}
                       </select>
@@ -623,7 +623,7 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
                   <div className="text-xs uppercase tracking-[0.22em] text-white/45">Placement guide</div>
                   <h3 className="mt-2 font-semibold">{placementMeta.label}</h3>
                   <div className="mt-2 text-xs text-white/55">
-                    Maximum recommended size: <strong className="text-white/80">{placementMeta.maxSizeIn}"</strong>
+                    Maximum recommended size: <strong className="text-white/80">{placementMeta.maxSizeIn}&Prime;</strong>
                   </div>
                   {placementMeta.is3DPuffJacketBack && (
                     <div className="mt-2 rounded-xl border border-violet-400/20 bg-violet-500/10 px-3 py-2 text-xs text-violet-200">

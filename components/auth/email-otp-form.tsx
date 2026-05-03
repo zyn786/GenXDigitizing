@@ -48,15 +48,10 @@ type Props = {
 export function EmailOtpForm({ email, errorMessage }: Props) {
   const [digits, setDigits] = React.useState<string[]>(Array(6).fill(""));
   const inputRefs = React.useRef<Array<HTMLInputElement | null>>([]);
-  const [localError, setLocalError] = React.useState<string | null>(null);
   const [inputSuccess, setInputSuccess] = React.useState(false);
 
   const otp = digits.join("");
   const isFull = digits.every((d) => /^\d$/.test(d));
-
-  React.useEffect(() => {
-    if (isFull) setLocalError(null);
-  }, [isFull]);
 
   function setDigit(index: number, value: string) {
     setDigits((prev) => {
@@ -110,7 +105,7 @@ export function EmailOtpForm({ email, errorMessage }: Props) {
     setTimeout(() => inputRefs.current[focusIdx]?.focus(), 0);
   }
 
-  const displayError = localError ?? errorMessage;
+  const displayError = errorMessage;
 
   return (
     <div className="mt-8 space-y-6">

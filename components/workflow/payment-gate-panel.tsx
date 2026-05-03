@@ -10,7 +10,6 @@ export function PaymentGatePanel({
   invoiceNumber,
   invoiceStatus,
   filesUnlocked,
-  orderId,
 }: {
   proofStatus: ProofStatus;
   paymentStatus: OrderPaymentStatus;
@@ -18,7 +17,6 @@ export function PaymentGatePanel({
   invoiceNumber: string | null;
   invoiceStatus: string | null;
   filesUnlocked: boolean;
-  orderId: string;
 }) {
   if (filesUnlocked || paymentStatus === "PAID") {
     return (
@@ -56,7 +54,7 @@ export function PaymentGatePanel({
           <span className="text-sm font-medium text-amber-300">Payment pending invoice</span>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          You've approved the proof. Our team is preparing your invoice — it will appear here shortly.
+          You&rsquo;ve approved the proof. Our team is preparing your invoice — it will appear here shortly.
         </p>
       </div>
     );

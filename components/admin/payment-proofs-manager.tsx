@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 import type { PaymentProofRecord } from "@/lib/payments/types";
 
@@ -20,12 +21,6 @@ const STATUS_COLORS: Record<ProofStatus, string> = {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString();
-}
-
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export function PaymentProofsManager({
@@ -179,11 +174,15 @@ export function PaymentProofsManager({
               <div className="text-sm text-muted-foreground">Loading image…</div>
             )}
             {proofImageUrl ? (
-              <img
-                src={proofImageUrl}
-                alt="Payment proof"
-                className="max-h-96 w-full rounded-xl object-contain"
-              />
+              <div className="relative h-96 w-full">
+                <Image
+                  src={proofImageUrl}
+                  alt="Payment proof"
+                  fill
+                  className="rounded-xl object-contain"
+                  unoptimized
+                />
+              </div>
             ) : !loadingImageId && (
               <div className="text-sm text-muted-foreground">Image unavailable.</div>
             )}

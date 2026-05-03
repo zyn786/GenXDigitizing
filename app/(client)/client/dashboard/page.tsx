@@ -8,7 +8,6 @@ import { auth } from "@/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getClientInvoices } from "@/lib/billing/repository";
 import { getClientOrders } from "@/lib/workflow/repository";
-import { getPricingCatalog } from "@/lib/pricing/catalog";
 import { buildTitle } from "@/lib/site";
 import { DashboardActions } from "@/components/client/dashboard-actions";
 
@@ -22,10 +21,9 @@ export default async function ClientDashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?next=/client/dashboard");
 
-  const [orders, invoices, pricingCatalog] = await Promise.all([
+  const [orders, invoices] = await Promise.all([
     getClientOrders(session.user.id),
     getClientInvoices(session.user.id),
-    getPricingCatalog(),
   ]);
 
   const firstName = session.user.name?.split(" ")[0] ?? "there";
@@ -135,7 +133,7 @@ export default async function ClientDashboardPage() {
               Start something new
             </div>
             <div className="mt-3">
-              <DashboardActions catalog={pricingCatalog} />
+              <DashboardActions />
             </div>
           </CardContent>
         </Card>

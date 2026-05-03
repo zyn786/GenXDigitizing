@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import type { Route } from "next";
 import {
   X,
   CheckCircle,
@@ -301,9 +303,9 @@ export function QuoteModal({ open, onClose, catalog }: Props) {
                 </p>
               </div>
               <div className="flex gap-3">
-                <a href="/client/quotes" className="inline-flex h-11 items-center rounded-full bg-white px-6 text-sm font-bold text-slate-950">
+                <Link href={"/client/quotes" as Route} className="inline-flex h-11 items-center rounded-full bg-white px-6 text-sm font-bold text-slate-950">
                   View Quote Requests
-                </a>
+                </Link>
                 <button onClick={resetForm} className="inline-flex h-11 items-center rounded-full border border-white/15 px-6 text-sm font-semibold text-white/70 transition hover:text-white">
                   New Quote
                 </button>

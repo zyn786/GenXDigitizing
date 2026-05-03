@@ -10,7 +10,8 @@ export function ScrollSectionNav({ sections }: { sections: SectionEntry[] }) {
   const [active, setActive] = React.useState(sections[0]?.id ?? "");
   const [mounted, setMounted] = React.useState(false);
 
-  // Portal needs document — only mount client-side
+  // Portal needs document — only mount client-side; canonical mount-detection pattern
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => { setMounted(true); }, []);
 
   React.useEffect(() => {

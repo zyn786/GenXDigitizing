@@ -66,6 +66,8 @@ export function DirectOrderModal({ mode = "order", prefillName, prefillEmail, is
   const [orderNumber, setOrderNumber] = React.useState("");
   const [errors, setErrors]       = React.useState<Partial<Record<keyof FormState, string>>>({});
 
+  // Canonical mount-detection pattern — portal needs document
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => { setMounted(true); }, []);
 
   // Body scroll lock + Escape

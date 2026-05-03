@@ -10,15 +10,14 @@ const PORTFOLIO_TEASERS = [
 ];
 
 export function SplashScreen() {
-  const [visible, setVisible] = React.useState(true);
+  const [visible, setVisible] = React.useState(() => {
+    if (typeof window === "undefined") return true;
+    return !sessionStorage.getItem("genx-splash-seen");
+  });
   const [fading, setFading] = React.useState(false);
 
   React.useEffect(() => {
-    const hasSeenSplash = sessionStorage.getItem("genx-splash-seen");
-    if (hasSeenSplash) {
-      setVisible(false);
-      return;
-    }
+    if (!visible) return;
 
     const fadeTimer = setTimeout(() => setFading(true), 2000);
     const hideTimer = setTimeout(() => {
@@ -30,7 +29,7 @@ export function SplashScreen() {
       clearTimeout(fadeTimer);
       clearTimeout(hideTimer);
     };
-  }, []);
+  }, [visible]);
 
   if (!visible) return null;
 

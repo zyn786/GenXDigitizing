@@ -225,7 +225,6 @@ export default async function ClientOrderDetailPage({
               ...f,
               createdAt: f.createdAt.toISOString(),
             }))}
-            userId={session.user.id}
           />
 
           {/* Order specs */}
@@ -347,7 +346,6 @@ export default async function ClientOrderDetailPage({
                 invoiceNumber={invoice?.invoiceNumber ?? null}
                 invoiceStatus={invoice?.status ?? null}
                 filesUnlocked={filesUnlocked}
-                orderId={order.id}
               />
             </CardContent>
           </Card>

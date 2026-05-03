@@ -31,7 +31,7 @@ export function ClientProofReview({
           <span className="text-sm font-medium text-amber-300">Proof under review</span>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          Our team is reviewing your proof before sending it to you. You'll be notified shortly.
+          Our team is reviewing your proof before sending it to you. You&rsquo;ll be notified shortly.
         </p>
       </div>
     );
@@ -59,7 +59,7 @@ export function ClientProofReview({
           <span className="text-sm font-medium text-fuchsia-300">Revision requested</span>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          Your revision request has been received. We'll notify you when the updated proof is ready.
+          Your revision request has been received. We&rsquo;ll notify you when the updated proof is ready.
         </p>
       </div>
     );

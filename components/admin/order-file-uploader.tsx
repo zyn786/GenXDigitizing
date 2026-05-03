@@ -161,7 +161,7 @@ export function OrderFileUploader({
       )}
 
       <div className="rounded-[1.5rem] border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-xs text-amber-400">
-        Files uploaded here are locked until the client's invoice payment is approved.
+        Files uploaded here are locked until the client&rsquo;s invoice payment is approved.
         The client cannot download them until an admin approves their payment proof.
       </div>
 
@@ -190,7 +190,7 @@ export function OrderFileUploader({
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-border/60 bg-secondary/20 px-4 py-8 text-center text-sm text-muted-foreground">
-          No files uploaded yet. Click "Upload file" to add completed work.
+          No files uploaded yet. Click &ldquo;Upload file&rdquo; to add completed work.
         </div>
       )}
     </div>

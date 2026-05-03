@@ -2,9 +2,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { Package, FileQuestion } from "lucide-react";
 
-import type { PricingCatalog } from "@/lib/pricing/catalog";
-
-export function DashboardActions({ catalog: _catalog }: { catalog?: PricingCatalog }) {
+export function DashboardActions() {
   return (
     <div className="flex flex-col gap-2 sm:flex-row">
       <Link

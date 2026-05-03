@@ -79,6 +79,8 @@ export default async function DesignerJobDetailPage({ params }: Props) {
   const status = mapDbStatus(job.status);
   const requiresAdminReview = proofReviewSetting?.value !== "false";
 
+  // Server component — Date.now() is request-scoped and deterministic
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
   const due = job.dueAt ? job.dueAt.getTime() - now : null;
   const dueLabel = !job.dueAt

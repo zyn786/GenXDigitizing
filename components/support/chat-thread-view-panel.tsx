@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { Paperclip, Pencil, Send, X } from "lucide-react";
+import { Paperclip, Pencil, Send } from "lucide-react";
 
 import type {
   ChatPresenceRecord,

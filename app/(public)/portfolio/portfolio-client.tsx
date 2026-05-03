@@ -108,7 +108,7 @@ export function PortfolioClient({ items }: Props) {
     if (serviceFilter) result = result.filter((item) => item.serviceKey === serviceFilter);
     if (nicheFilter) result = result.filter((item) => item.nicheSlug === nicheFilter);
     return result;
-  }, [items, search, serviceFilter, nicheFilter]);
+  }, [pool, search, serviceFilter, nicheFilter]);
 
   const hasFilters = search || serviceFilter || nicheFilter;
 

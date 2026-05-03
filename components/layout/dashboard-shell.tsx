@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SiteLogo } from "@/components/branding/site-logo";
-import { PortalNav } from "@/components/layout/portal-nav";
+import { PortalNav, PortalNavMobile } from "@/components/layout/portal-nav";
 import { DashboardMobileNav } from "@/components/layout/dashboard-mobile-nav";
 import { DashboardMain } from "@/components/layout/dashboard-main";
 import { LogoutButton } from "@/components/ui/logout-button";
@@ -88,6 +88,11 @@ export function DashboardShell({ mode, role, children, user, badges }: Dashboard
           </div>
         </div>
       </header>
+
+      {/* Mobile nav strip — visible below lg, hidden on desktop */}
+      <div className="sticky top-14 md:top-16 z-30 border-b border-border/80 bg-background/90 px-4 py-2 backdrop-blur-xl lg:hidden">
+        <PortalNavMobile items={nav} badges={badges} />
+      </div>
 
       {/* Body */}
       <div className="page-shell grid gap-6 py-6 md:gap-8 md:py-8 lg:grid-cols-[260px_1fr] lg:min-h-[calc(100vh-4rem)]">

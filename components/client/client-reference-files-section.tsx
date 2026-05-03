@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { FileImage, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { FileImage, Plus, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReferenceFileUploader, type RefFile } from "@/components/shared/reference-file-uploader";
 
@@ -16,7 +16,6 @@ type InitialFile = {
 type Props = {
   orderId: string;
   initialFiles: InitialFile[];
-  userId: string;
 };
 
 function formatBytes(b: number) {
@@ -25,7 +24,7 @@ function formatBytes(b: number) {
   return `${(b / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function ClientReferenceFilesSection({ orderId, initialFiles, userId }: Props) {
+export function ClientReferenceFilesSection({ orderId, initialFiles }: Props) {
   const [showUpload, setShowUpload] = React.useState(false);
   const [newFiles, setNewFiles] = React.useState<RefFile[]>([]);
   const [saving, setSaving] = React.useState(false);

@@ -7,7 +7,12 @@ const INACTIVITY_LIMIT_MS = 60 * 60 * 1000; // 1 hour
 const STORAGE_KEY = "genx-last-activity";
 
 export function InactivityLogout() {
-  const lastActivityRef = useRef<number>(Date.now());
+  const lastActivityRef = useRef<number>(0);
+
+  // Initialize ref on mount — Date.now() inside useEffect avoids render-purity violation
+  useEffect(() => {
+    lastActivityRef.current = Date.now();
+  }, []);
 
   useEffect(() => {
     const stamp = () => {

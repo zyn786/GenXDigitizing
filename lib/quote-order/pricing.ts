@@ -32,8 +32,6 @@ const DEFAULT_BULK_RULES = [
   { minQty: 25, discountPercent: 15 },
   { minQty: 50, discountPercent: 20 },
 ];
-const PUFF_JACKET_BACK_SURCHARGE = 23;
-
 export type PricingOptions = {
   stitchRatePer1000?: number;
   stitchPricingEnabled?: boolean;

@@ -23,7 +23,8 @@ export function SiteHeader() {
   const isHomePage = pathname === "/";
   const transparent = isHomePage && !scrolled;
 
-  // Close on route change
+  // Close mobile menu on route change — standard pattern
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   // Scroll detection

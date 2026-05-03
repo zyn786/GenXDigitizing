@@ -35,6 +35,7 @@ export function PreloaderProvider({ children }: { children: ReactNode }) {
   // Synchronously check before first paint — avoids flash on returning visits
   useLayoutEffect(() => {
     if (sessionStorage.getItem("genx-splash-seen")) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsRevealing(true);
       setSkip(true);
     }
@@ -71,6 +72,8 @@ function SitePreloaderInner({ onReveal }: { onReveal: () => void }) {
   const [phase, setPhase] = useState<Phase>("entering");
   const prefersReduced = useReducedMotion();
   const revealRef = useRef(onReveal);
+  // Keep ref in sync for callbacks that read latest onReveal
+  // eslint-disable-next-line react-hooks/refs
   revealRef.current = onReveal;
 
   useEffect(() => {

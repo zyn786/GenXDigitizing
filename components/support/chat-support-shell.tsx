@@ -46,6 +46,7 @@ export function ChatSupportShell({
   const [savingEdit, setSavingEdit] = useState(false);
 
   // Keep draftRef current so interval callbacks always read latest draft value
+  // eslint-disable-next-line react-hooks/refs
   draftRef.current = draft;
 
   const selectedThreadId = useMemo(
@@ -138,9 +139,13 @@ export function ChatSupportShell({
   useEffect(() => {
     if (!selectedThreadId) return;
 
+    // Data-fetching on thread selection — standard React pattern.
+    // Functions below internally call setState via async request handlers.
+    /* eslint-disable react-hooks/set-state-in-effect */
     void markRead(selectedThreadId);
     void fetchThreadDetail(selectedThreadId);
     void fetchPresence(selectedThreadId);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     const timer = window.setInterval(() => {
       void fetchThreadDetail(selectedThreadId);
@@ -322,6 +327,7 @@ export function ChatSupportShell({
               mode === "admin" && internalOnly
                 ? "INTERNAL_ONLY"
                 : "CLIENT_VISIBLE",
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             attachments: previousAttachments.map(({ tempId, ...rest }) => rest),
           }),
         }

@@ -67,7 +67,7 @@ export function ClientQuoteRespond({
           <span className="text-sm font-medium text-red-300">Quote declined</span>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          You declined this quote. Contact us if you'd like to discuss further.
+          You declined this quote. Contact us if you&rsquo;d like to discuss further.
         </p>
       </div>
     );
@@ -76,7 +76,7 @@ export function ClientQuoteRespond({
   if (quoteStatus !== "PRICE_SENT") {
     return (
       <div className="text-sm text-muted-foreground">
-        Your quote is being reviewed. We'll notify you when pricing is ready.
+        Your quote is being reviewed. We&rsquo;ll notify you when pricing is ready.
       </div>
     );
   }
@@ -87,7 +87,7 @@ export function ClientQuoteRespond({
         <div className="text-xs uppercase tracking-[0.2em] text-amber-400 mb-1">Quoted price</div>
         <div className="text-3xl font-semibold">${quotedPrice.toFixed(2)}</div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Accept this quote to move your design into production. If the price doesn't work for you, you can decline and contact us to discuss.
+          Accept this quote to move your design into production. If the price doesn&rsquo;t work for you, you can decline and contact us to discuss.
         </p>
       </div>
 
