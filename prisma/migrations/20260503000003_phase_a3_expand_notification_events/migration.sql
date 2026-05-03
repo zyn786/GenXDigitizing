@@ -1,0 +1,16 @@
+-- Phase A.3 -- Expand NotificationEventType with 13 new event values
+
+ALTER TYPE "NotificationEventType" ADD VALUE 'QUOTE_SENT';
+ALTER TYPE "NotificationEventType" ADD VALUE 'QUOTE_ACCEPTED';
+ALTER TYPE "NotificationEventType" ADD VALUE 'QUOTE_REJECTED';
+ALTER TYPE "NotificationEventType" ADD VALUE 'PROOF_SENT';
+ALTER TYPE "NotificationEventType" ADD VALUE 'PROOF_APPROVED';
+ALTER TYPE "NotificationEventType" ADD VALUE 'REVISION_ASSIGNED';
+ALTER TYPE "NotificationEventType" ADD VALUE 'PAYMENT_REQUIRED';
+ALTER TYPE "NotificationEventType" ADD VALUE 'PAYMENT_SUBMITTED';
+ALTER TYPE "NotificationEventType" ADD VALUE 'PAYMENT_APPROVED';
+ALTER TYPE "NotificationEventType" ADD VALUE 'FILES_UNLOCKED';
+ALTER TYPE "NotificationEventType" ADD VALUE 'WORK_STARTED';
+ALTER TYPE "NotificationEventType" ADD VALUE 'PROOF_ADMIN_REVIEW_PENDING';
+ALTER TYPE "NotificationEventType" ADD VALUE 'PROOF_ADMIN_APPROVED';
+ALTER TYPE "NotificationEventType" ADD VALUE 'PROOF_ADMIN_REJECTED';
