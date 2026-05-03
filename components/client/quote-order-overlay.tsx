@@ -4,9 +4,14 @@ import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { QuoteOrderBuilder } from "@/components/quote-order/quote-order-builder";
 
-type Props = { mode: "order" | "quote" };
+type Props = {
+  mode: "order" | "quote";
+  flowContext?: "guest" | "client";
+  userName?: string;
+  userEmail?: string;
+};
 
-export function QuoteOrderOverlay({ mode }: Props) {
+export function QuoteOrderOverlay({ mode, flowContext, userName, userEmail }: Props) {
   const router = useRouter();
 
   return (
@@ -18,7 +23,12 @@ export function QuoteOrderOverlay({ mode }: Props) {
       >
         <X className="h-5 w-5" />
       </button>
-      <QuoteOrderBuilder mode={mode} />
+      <QuoteOrderBuilder
+        mode={mode}
+        flowContext={flowContext}
+        userName={userName}
+        userEmail={userEmail}
+      />
     </div>
   );
 }

@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Upload } from "lucide-react";
 import { usePreloader } from "@/components/layout/site-preloader";
-import { DirectOrderModal } from "@/components/marketing/direct-order-modal";
 
 const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -97,7 +96,13 @@ export function HeroSection() {
               Get a free quote
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <DirectOrderModal mode="order" />
+            <Link
+              href="/order"
+              className="inline-flex h-12 items-center gap-2 rounded-full border border-white/[0.16] bg-white px-7 text-sm font-semibold text-slate-950 shadow-[0_4px_24px_rgba(255,255,255,0.15)] transition-all hover:bg-white/90 hover:shadow-[0_8px_32px_rgba(255,255,255,0.20)] active:scale-[0.98]"
+            >
+              Place Direct Order
+              <Upload className="h-4 w-4" />
+            </Link>
             <Link
               href="/portfolio"
               className="inline-flex h-12 items-center gap-2 rounded-full border border-white/[0.16] bg-white/[0.07] px-7 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:border-white/[0.28] hover:bg-white/[0.12] active:scale-[0.98]"

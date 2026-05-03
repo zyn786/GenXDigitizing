@@ -22,6 +22,7 @@ export const quoteOrderSchema = z.object({
   turnaround: z.enum(["STANDARD", "URGENT", "SAME_DAY"]),
   customerName: z.string().min(2),
   email: z.email(),
+  phone: z.string().max(30).optional().or(z.literal("")),
   companyName: z.string().trim().optional().or(z.literal("")),
   designTitle: z.string().min(2),
   notes: z.string().trim().optional().or(z.literal("")),

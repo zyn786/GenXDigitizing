@@ -22,6 +22,7 @@ import { quoteOrderSchema, type QuoteOrderInput } from "@/schemas/quote-order";
 import { ReferenceFileUploader, type RefFile } from "@/components/shared/reference-file-uploader";
 
 type BuilderMode = "quote" | "order";
+type FlowContext = "guest" | "client";
 
 function getDraftKey(mode: BuilderMode) {
   return `genx-v2-${mode}-draft`;
@@ -35,6 +36,7 @@ function buildDefaultValues(mode: BuilderMode): QuoteOrderInput {
     turnaround: "STANDARD",
     customerName: "",
     email: "",
+    phone: "",
     companyName: "",
     designTitle: "",
     notes: "",
@@ -97,10 +99,26 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
+export function QuoteOrderBuilder({
+  mode,
+  flowContext,
+  userName,
+  userEmail,
+}: {
+  mode: BuilderMode;
+  flowContext?: FlowContext;
+  userName?: string;
+  userEmail?: string;
+}) {
   const draftKey = React.useMemo(() => getDraftKey(mode), [mode]);
 
-  const [values, setValues] = React.useState<QuoteOrderInput>(() => getInitialValues(mode));
+  const [values, setValues] = React.useState<QuoteOrderInput>(() => {
+    const init = getInitialValues(mode);
+    if (flowContext === "client") {
+      return { ...init, customerName: userName ?? "", email: userEmail ?? "" };
+    }
+    return init;
+  });
   const [submitState, setSubmitState] = React.useState<{ type: "idle" | "success" | "error"; text: string }>({ type: "idle", text: "" });
   const [savingState, setSavingState] = React.useState("");
   const [orderResult, setOrderResult] = React.useState<{ orderNumber: string; isFreeDesign: boolean } | null>(null);
@@ -161,7 +179,14 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
       return;
     }
 
-    const endpoint = mode === "quote" ? "/api/quote" : "/api/order";
+    const endpoint =
+      flowContext === "guest" && mode === "order"
+        ? "/api/guest/order"
+        : flowContext === "guest" && mode === "quote"
+          ? "/api/guest/quote"
+          : mode === "quote"
+            ? "/api/quote"
+            : "/api/order";
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -169,7 +194,8 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
     });
 
     if (res.status === 401) {
-      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+      const next = flowContext === "client" ? "/client/orders/new" : window.location.pathname;
+      window.location.href = `/login?next=${encodeURIComponent(next)}`;
       return;
     }
 
@@ -191,6 +217,7 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
   }
 
   if (orderResult) {
+    const isGuest = flowContext === "guest";
     return (
       <main className="relative min-h-screen overflow-hidden bg-[#070816] text-white flex items-center justify-center px-4">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(83,173,255,0.22),transparent_20%),radial-gradient(circle_at_bottom_right,rgba(190,90,255,0.20),transparent_24%)]" />
@@ -211,19 +238,43 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
             <div className="text-xs uppercase tracking-[0.2em] text-white/45">Reference number</div>
             <div className="mt-2 font-mono text-xl font-bold text-white">{orderResult.orderNumber}</div>
           </div>
+          {isGuest && (
+            <p className="mt-4 text-sm text-white/50">
+              Check your email for confirmation. We&apos;ll be in touch shortly.
+            </p>
+          )}
           <div className="mt-6 flex gap-3">
-            <Link
-              href={"/client/orders" as Route}
-              className="flex-1 rounded-full bg-white py-3 text-sm font-bold text-slate-950 transition hover:bg-white/90"
-            >
-              View My Orders
-            </Link>
-            <button
-              onClick={() => { setOrderResult(null); setValues(buildDefaultValues(mode)); }}
-              className="flex-1 rounded-full border border-white/10 bg-white/[0.05] py-3 text-sm text-white transition hover:bg-white/[0.1]"
-            >
-              New Order
-            </button>
+            {isGuest ? (
+              <>
+                <a
+                  href={`/order-status?number=${encodeURIComponent(orderResult.orderNumber)}&email=${encodeURIComponent(values.email)}`}
+                  className="flex-1 rounded-full bg-white py-3 text-sm font-bold text-slate-950 transition hover:bg-white/90"
+                >
+                  Track your order
+                </a>
+                <Link
+                  href={"/register" as Route}
+                  className="flex-1 rounded-full border border-white/10 bg-white/[0.05] py-3 text-sm text-white transition hover:bg-white/[0.1]"
+                >
+                  Create account
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={"/client/orders" as Route}
+                  className="flex-1 rounded-full bg-white py-3 text-sm font-bold text-slate-950 transition hover:bg-white/90"
+                >
+                  View My Orders
+                </Link>
+                <Link
+                  href={"/client/orders/new" as Route}
+                  className="flex-1 rounded-full border border-white/10 bg-white/[0.05] py-3 text-sm text-white transition hover:bg-white/[0.1]"
+                >
+                  New Order
+                </Link>
+              </>
+            )}
           </div>
         </section>
       </main>
@@ -240,25 +291,47 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="text-sm uppercase tracking-[0.22em] text-white/45">
-                {mode === "quote" ? "Get a quote" : "Place an order"}
+                {flowContext === "client"
+                  ? "Client portal"
+                  : mode === "quote"
+                    ? "Get a quote"
+                    : "Place an order"}
               </div>
               <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">
-                {mode === "quote" ? "Request a Quote" : "Start a Direct Order"}
+                {flowContext === "client"
+                  ? "New Order"
+                  : mode === "quote"
+                    ? "Request a Quote"
+                    : "Start a Direct Order"}
               </h1>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-white/60 md:text-base">
-                {mode === "quote"
-                  ? "Tell us about your artwork and we'll send a firm price within one business day."
-                  : "Submit your artwork and production requirements — we'll confirm turnaround and start production."}
+                {flowContext === "client"
+                  ? "Submit your artwork and production requirements from your account."
+                  : mode === "quote"
+                    ? "Tell us about your artwork and we'll send a firm price within one business day."
+                    : "Submit your artwork and production requirements — we'll confirm turnaround and start production."}
               </p>
             </div>
-            <div className="flex gap-3">
-              <Link href={"/quote" as Route} className={`inline-flex h-11 items-center rounded-full border px-5 text-sm font-medium transition ${mode === "quote" ? "border-white/20 bg-white text-slate-950" : "border-white/10 bg-white/5 text-white hover:bg-white/10"}`}>
-                Quote
-              </Link>
-              <Link href={"/order" as Route} className={`inline-flex h-11 items-center rounded-full border px-5 text-sm font-medium transition ${mode === "order" ? "border-white/20 bg-white text-slate-950" : "border-white/10 bg-white/5 text-white hover:bg-white/10"}`}>
-                Order
-              </Link>
-            </div>
+            {/* Client identity card */}
+            {flowContext === "client" && userName && (
+              <div className="rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-3 backdrop-blur-sm">
+                <div className="text-[10px] uppercase tracking-[0.18em] text-white/35">Ordering as</div>
+                <div className="mt-1 text-sm font-semibold text-white">{userName}</div>
+                {userEmail && (
+                  <div className="text-xs text-white/40">{userEmail}</div>
+                )}
+              </div>
+            )}
+            {flowContext !== "client" && (
+              <div className="flex gap-3">
+                <Link href={"/quote" as Route} className={`inline-flex h-11 items-center rounded-full border px-5 text-sm font-medium transition ${mode === "quote" ? "border-white/20 bg-white text-slate-950" : "border-white/10 bg-white/5 text-white hover:bg-white/10"}`}>
+                  Quote
+                </Link>
+                <Link href={"/order" as Route} className={`inline-flex h-11 items-center rounded-full border px-5 text-sm font-medium transition ${mode === "order" ? "border-white/20 bg-white text-slate-950" : "border-white/10 bg-white/5 text-white hover:bg-white/10"}`}>
+                  Order
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
@@ -289,25 +362,44 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
                 </div>
 
                 {/* ── Contact ─────────────────────────────────────────── */}
+                {flowContext !== "client" && (
+                  <div>
+                    <SectionLabel>Contact</SectionLabel>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <label className={LabelClass()}>
+                        <span className="text-sm text-white/70">Your name <span className="text-red-400">*</span></span>
+                        <input value={values.customerName} onChange={(e) => update("customerName", e.target.value)} placeholder="Alex Chen" className={InputClass()} />
+                      </label>
+                      <label className={LabelClass()}>
+                        <span className="text-sm text-white/70">Email <span className="text-red-400">*</span></span>
+                        <input type="email" value={values.email} onChange={(e) => update("email", e.target.value)} placeholder="studio@example.com" className={InputClass()} />
+                      </label>
+                      <label className={LabelClass()}>
+                        <span className="text-sm text-white/70">Company name</span>
+                        <input value={values.companyName ?? ""} onChange={(e) => update("companyName", e.target.value)} placeholder="Your studio or brand" className={InputClass()} />
+                      </label>
+                      <label className={LabelClass()}>
+                        <span className="text-sm text-white/70">Phone / WhatsApp</span>
+                        <input type="tel" value={values.phone ?? ""} onChange={(e) => update("phone", e.target.value)} placeholder="+1 555 000 0000" className={InputClass()} />
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Design title — always shown */}
                 <div>
-                  <SectionLabel>Contact</SectionLabel>
+                  <SectionLabel>Design</SectionLabel>
                   <div className="grid gap-4 md:grid-cols-2">
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Your name <span className="text-red-400">*</span></span>
-                      <input value={values.customerName} onChange={(e) => update("customerName", e.target.value)} placeholder="Alex Chen" className={InputClass()} />
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Email <span className="text-red-400">*</span></span>
-                      <input type="email" value={values.email} onChange={(e) => update("email", e.target.value)} placeholder="studio@example.com" className={InputClass()} />
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Company name</span>
-                      <input value={values.companyName ?? ""} onChange={(e) => update("companyName", e.target.value)} placeholder="Your studio or brand" className={InputClass()} />
-                    </label>
                     <label className={LabelClass()}>
                       <span className="text-sm text-white/70">Design title <span className="text-red-400">*</span></span>
                       <input value={values.designTitle} onChange={(e) => update("designTitle", e.target.value)} placeholder="Spring cap front logo" className={InputClass()} />
                     </label>
+                    {flowContext === "client" && (
+                      <label className={LabelClass()}>
+                        <span className="text-sm text-white/70">Company name</span>
+                        <input value={values.companyName ?? ""} onChange={(e) => update("companyName", e.target.value)} placeholder="Your studio or brand" className={InputClass()} />
+                      </label>
+                    )}
                   </div>
                 </div>
 
@@ -565,7 +657,7 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
                     Save draft
                   </button>
                   <button type="submit" className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-slate-950 transition hover:bg-white/90">
-                    {mode === "quote" ? "Submit Quote Request" : "Submit Direct Order"}
+                    {mode === "quote" ? "Submit Quote Request" : flowContext === "client" ? "Place Order from My Account" : "Submit Direct Order"}
                     <ArrowRight className="h-4 w-4" />
                   </button>
                   {savingState && <span className="text-sm text-emerald-300">{savingState}</span>}
