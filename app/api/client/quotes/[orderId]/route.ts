@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
 import { sendOrderCreatedEmail, writeNotificationLog } from "@/lib/notifications/email";
+import { applyOrderIntakeValidation } from "@/lib/workflow/order-intake-validator";
 
 type Props = { params: Promise<{ orderId: string }> };
 
@@ -56,6 +57,14 @@ export async function POST(request: Request, { params }: Props) {
       entityType: "WorkflowOrder",
       entityId: orderId,
       metadata: { orderNumber: order.orderNumber },
+    });
+
+    // Order intake validation — ensure production details are present when quote becomes an order
+    await applyOrderIntakeValidation({
+      orderId,
+      actor: { id: session.user.id, email: session.user.email ?? undefined, role: session.user.role ?? undefined },
+    }).catch(() => {
+      // non-fatal
     });
 
     const clientEmail = order.clientUser?.email;

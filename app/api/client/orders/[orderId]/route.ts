@@ -4,11 +4,12 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
+import { applyOrderIntakeValidation } from "@/lib/workflow/order-intake-validator";
 
 type Props = { params: Promise<{ orderId: string }> };
 
 const CANCELLABLE_STATUSES = new Set(["SUBMITTED", "DRAFT"]);
-const EDITABLE_STATUSES = new Set(["SUBMITTED"]);
+const EDITABLE_STATUSES = new Set(["SUBMITTED", "DRAFT"]);
 
 const cancelSchema = z.object({
   action: z.literal("cancel"),
@@ -119,6 +120,14 @@ export async function PATCH(request: Request, { params }: Props) {
     entityType: "WorkflowOrder",
     entityId: orderId,
     metadata: { updatedFields: Object.keys(parsed.data).filter((k) => k !== "action") },
+  });
+
+  // Re-validate order intake — status may change to DRAFT if missing details, or SUBMITTED if now complete
+  await applyOrderIntakeValidation({
+    orderId,
+    actor: { id: session.user.id, email: session.user.email ?? undefined, role: session.user.role ?? undefined },
+  }).catch(() => {
+    // non-fatal — validation failure should not break the edit response
   });
 
   return NextResponse.json({ ok: true });

@@ -7,6 +7,7 @@ import { computeQuotePricing } from "@/lib/quote-order/pricing";
 import { getAllPricingConfig, getActiveBulkDiscountRules } from "@/lib/pricing/config";
 import { logActivity } from "@/lib/activity/logger";
 import { sendOrderCreatedEmail, sendNewOrderOpsEmail, writeNotificationLog } from "@/lib/notifications/email";
+import { applyOrderIntakeValidation } from "@/lib/workflow/order-intake-validator";
 
 const refFileSchema = z.object({
   fileName: z.string().min(1),
@@ -196,6 +197,14 @@ export async function POST(request: Request) {
       // non-fatal
     }
   }
+
+  // Order intake validation — set status to DRAFT if production details are missing
+  await applyOrderIntakeValidation({
+    orderId: order.id,
+    actor: { id: userId, email: session.user.email ?? undefined, role: session.user.role ?? undefined },
+  }).catch(() => {
+    // non-fatal — validation failure should not break the order creation response
+  });
 
   return NextResponse.json({
     ok: true,

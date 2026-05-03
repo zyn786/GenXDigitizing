@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
+import { applyOrderIntakeValidation } from "@/lib/workflow/order-intake-validator";
 import {
   sendOrderCreatedEmail,
   sendNewOrderOpsEmail,
@@ -194,6 +195,14 @@ export async function POST(request: Request) {
       // non-fatal
     }
   }
+
+  // Order intake validation — set status to DRAFT if production details are missing
+  await applyOrderIntakeValidation({
+    orderId: order.id,
+    actor: { id: userId, email: data.email, role: "CLIENT" },
+  }).catch(() => {
+    // non-fatal — validation failure should not break the order creation response
+  });
 
   return NextResponse.json({
     ok: true,

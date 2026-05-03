@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
+import { applyOrderIntakeValidation } from "@/lib/workflow/order-intake-validator";
 
 const orderSchema = z.object({
   serviceCategory: z.enum(["EMBROIDERY_DIGITIZING", "VECTOR_REDRAW", "COLOR_SEPARATION", "DTF_SCREEN_PRINT"]),
@@ -89,6 +90,14 @@ export async function POST(req: Request) {
       entityType: "WorkflowOrder",
       entityId: order.id,
       metadata: { orderNumber: order.orderNumber, service: data.serviceCategory, totalPrice: data.totalPrice },
+    });
+
+    // Order intake validation — set status to DRAFT if production details are missing
+    await applyOrderIntakeValidation({
+      orderId: order.id,
+      actor: { id: session.user.id, email: session.user.email ?? undefined, role: session.user.role ?? undefined },
+    }).catch(() => {
+      // non-fatal — validation failure should not break the order creation response
     });
 
     return NextResponse.json({ success: true, orderId: order.id, orderNumber: order.orderNumber }, { status: 201 });
