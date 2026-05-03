@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { Route } from "next";
 import { redirect, notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ClipboardList } from "lucide-react";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
@@ -137,6 +137,11 @@ export default async function DesignerJobDetailPage({ params }: Props) {
           <OrderStatusBadge status={status} />
         </div>
       </section>
+
+      {/* Order intake status banner */}
+      {job.status === "SUBMITTED" && (
+        <AdminIntakeReadyBanner notes={job.notes} />
+      )}
 
       {/* Progress */}
       <Card className="rounded-[1.5rem] border-border/80">
@@ -370,5 +375,56 @@ function Chip({
     <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${colors[color]}`}>
       {label}
     </span>
+  );
+}
+
+/** Parse intake validation data from order notes JSON. */
+function parseIntakeFromNotes(
+  notes: string | null
+): { isComplete: boolean; missingFields: string[] } | null {
+  if (!notes) return null;
+  try {
+    const parsed = JSON.parse(notes);
+    const v = parsed?.intakeValidation;
+    if (!v || typeof v.isComplete !== "boolean") return null;
+    return {
+      isComplete: v.isComplete,
+      missingFields: Array.isArray(v.missingFields) ? v.missingFields : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Banner shown on admin detail page when the order is in SUBMITTED status (ready for review). */
+function AdminIntakeReadyBanner({ notes }: { notes: string | null }) {
+  const intake = parseIntakeFromNotes(notes);
+  const missingFields = intake?.missingFields ?? [];
+
+  return (
+    <div className="rounded-[1.5rem] border border-sky-500/20 bg-sky-500/5 p-5">
+      <div className="flex items-start gap-3">
+        <ClipboardList className="mt-0.5 h-5 w-5 shrink-0 text-sky-400" />
+        <div className="min-w-0">
+          <div className="text-sm font-semibold text-sky-300">
+            Intake validation passed
+          </div>
+          <p className="mt-1 text-sm leading-relaxed text-sky-200/70">
+            This order has all required fields submitted by the client and is ready for review.
+            {missingFields.length > 0 && (
+              <span className="block mt-1 text-amber-300">
+                Note: {missingFields.join(", ")} {missingFields.length === 1 ? "is" : "are"} still marked as missing.
+              </span>
+            )}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-300">
+              <CheckCircle2 className="h-3 w-3" />
+              Ready to assign
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

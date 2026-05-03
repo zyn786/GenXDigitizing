@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { Route } from "next";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Clock, RefreshCw, Lock } from "lucide-react";
+import { ArrowLeft, Clock, RefreshCw, Lock, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
@@ -88,6 +88,9 @@ export default async function ClientOrderDetailPage({
   const proofStatus = rawOrder?.proofStatus ?? "NOT_UPLOADED";
   const paymentStatus = rawOrder?.paymentStatus ?? "NOT_REQUIRED";
 
+  // Parse intake validation data from notes
+  const intakeData = parseIntakeFromNotes(rawOrder?.notes ?? null);
+
   return (
     <div className="grid gap-6">
       {/* Header */}
@@ -113,6 +116,14 @@ export default async function ClientOrderDetailPage({
           <OrderStatusBadge status={order.status} />
         </div>
       </section>
+
+      {/* Order intake status banner */}
+      {(rawOrder?.status === "DRAFT" || rawOrder?.status === "SUBMITTED") && (
+        <IntakeBanner
+          status={rawOrder.status}
+          missingFields={intakeData?.missingFields ?? []}
+        />
+      )}
 
       {/* Progress */}
       <Card className="rounded-[1.5rem] border-border/80">
@@ -368,11 +379,12 @@ export default async function ClientOrderDetailPage({
                 orderId={order.id}
                 label="Open conversation"
               />
-              {rawOrder?.status === "SUBMITTED" && (
+              {(rawOrder?.status === "DRAFT" || rawOrder?.status === "SUBMITTED") && (
                 <>
                   <div className="my-1 h-px bg-border/60" />
                   <ClientEditOrderModal
                     orderId={orderId}
+                    status={rawOrder?.status ?? undefined}
                     initialData={{
                       title: order.title,
                       notes: rawOrder.notes ?? null,
@@ -537,5 +549,79 @@ function Chip({
     <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${colors[color]}`}>
       {label}
     </span>
+  );
+}
+
+/** Parse intake validation data embedded in order notes JSON. */
+function parseIntakeFromNotes(
+  notes: string | null
+): { isComplete: boolean; missingFields: string[] } | null {
+  if (!notes) return null;
+  try {
+    const parsed = JSON.parse(notes);
+    const v = parsed?.intakeValidation;
+    if (!v || typeof v.isComplete !== "boolean") return null;
+    return {
+      isComplete: v.isComplete,
+      missingFields: Array.isArray(v.missingFields) ? v.missingFields : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Banner shown on the client order detail page for DRAFT or SUBMITTED intake status. */
+function IntakeBanner({
+  status,
+  missingFields,
+}: {
+  status: string;
+  missingFields: string[];
+}) {
+  const isDraft = status === "DRAFT";
+
+  if (isDraft) {
+    return (
+      <div className="rounded-[1.5rem] border border-amber-500/20 bg-amber-500/5 p-5">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-amber-300">
+              Order needs details
+            </div>
+            <p className="mt-1 text-sm leading-relaxed text-amber-200/70">
+              Your order is missing some required details before our team can review it.
+              {missingFields.length > 0 && (
+                <span>
+                  {" "}Please provide: <strong className="text-amber-200">{missingFields.join(", ")}</strong>.
+                </span>
+              )}
+            </p>
+            <p className="mt-2 text-xs text-amber-200/50">
+              Use the <strong>Edit order</strong> button in the sidebar to add the missing information.
+              Once complete, the order will be automatically submitted for review.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // SUBMITTED
+  return (
+    <div className="rounded-[1.5rem] border border-emerald-500/20 bg-emerald-500/5 p-5">
+      <div className="flex items-start gap-3">
+        <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
+        <div className="min-w-0">
+          <div className="text-sm font-semibold text-emerald-300">
+            Order is ready
+          </div>
+          <p className="mt-1 text-sm leading-relaxed text-emerald-200/70">
+            Your order has all the required details and is ready for our team to review.
+            We will get back to you shortly.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

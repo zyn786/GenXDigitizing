@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, FileText, MessageCircle, Package, RefreshCw, FileQuestion } from "lucide-react";
+import { ArrowRight, FileText, MessageCircle, Package, RefreshCw, FileQuestion, AlertTriangle } from "lucide-react";
 
 import { auth } from "@/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -202,9 +202,16 @@ export default async function ClientDashboardPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="rounded-full border border-border/80 bg-background px-3 py-1 text-xs capitalize">
-                      {String(o.status ?? "").replaceAll("_", " ").toLowerCase()}
-                    </span>
+                    {String(o.status) === "DRAFT" ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-300">
+                        <AlertTriangle className="h-3 w-3" />
+                        Needs details
+                      </span>
+                    ) : (
+                      <span className="rounded-full border border-border/80 bg-background px-3 py-1 text-xs capitalize">
+                        {String(o.status ?? "").replaceAll("_", " ").toLowerCase()}
+                      </span>
+                    )}
                     <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
                   </div>
                 </Link>

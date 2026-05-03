@@ -1,4 +1,5 @@
 export type WorkflowStatus =
+  | "DRAFT"
   | "NEW"
   | "QUOTED"
   | "SUBMITTED"

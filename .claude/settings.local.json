@@ -20,7 +20,14 @@
       "Bash(pnpm prisma *)",
       "Bash(pnpm lint *)",
       "Bash(pnpm dlx *)",
-      "Bash(prisma validate *)"
+      "Bash(prisma validate *)",
+      "Bash(dir \"E:\\\\Hello\\\\GenXDigitizing\" /b)",
+      "Bash(findstr -i \"eslint lint\")",
+      "Bash(npx --prefix \"E:/Hello/GenXDigitizing\" next lint --dir .)",
+      "Bash(echo \"EXIT_CODE=$?\")",
+      "Bash(node -e \"console.log\\(process.cwd\\(\\)\\)\")",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(node -e \"console.log\\(JSON.stringify\\(require\\('./package.json'\\).scripts, null, 2\\)\\)\")"
     ]
   }
 }

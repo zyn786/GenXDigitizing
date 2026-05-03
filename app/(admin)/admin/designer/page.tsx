@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { Route } from "next";
 import { redirect } from "next/navigation";
-import { Briefcase, CheckCircle2, Clock, DollarSign } from "lucide-react";
+import { Briefcase, CheckCircle2, Clock, DollarSign, Sparkles } from "lucide-react";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
@@ -158,6 +158,12 @@ export default async function DesignerDashboardPage() {
                       <div className="font-medium">{job.title}</div>
                       <div className="mt-0.5 text-xs text-muted-foreground">
                         {job.orderNumber} · {SERVICE_LABELS[job.serviceType] ?? job.serviceType}
+                        {job.status === "SUBMITTED" && (
+                          <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-blue-400/20 bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-300">
+                            <Sparkles className="h-2.5 w-2.5" />
+                            Ready for review
+                          </span>
+                        )}
                       </div>
                       <div className="mt-0.5 text-xs text-muted-foreground">
                         {job.clientUser.name ?? "—"}

@@ -2,6 +2,7 @@ import type { WorkflowStatus, QuoteStatus, ProofStatus, OrderRevisionStatus, Ord
 
 export function getWorkflowStatusLabel(status: WorkflowStatus): string {
   switch (status) {
+    case "DRAFT": return "Draft";
     case "NEW": return "New";
     case "QUOTED": return "Quoted";
     case "SUBMITTED": return "Submitted";
@@ -19,6 +20,7 @@ export function getWorkflowStatusLabel(status: WorkflowStatus): string {
 
 export function getWorkflowProgress(status: WorkflowStatus): number {
   switch (status) {
+    case "DRAFT": return 0;
     case "NEW": return 5;
     case "QUOTED": return 10;
     case "SUBMITTED": return 15;

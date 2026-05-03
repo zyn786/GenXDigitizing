@@ -35,6 +35,7 @@ export function mapDbStatus(s: string): WorkflowStatus {
 }
 
 function mapStatus(s: string): WorkflowStatus {
+  if (s === "DRAFT") return "DRAFT";
   if (s === "SUBMITTED") return "SUBMITTED";
   if (s === "UNDER_REVIEW") return "UNDER_REVIEW";
   if (s === "ASSIGNED_TO_DESIGNER") return "ASSIGNED_TO_DESIGNER";
@@ -192,10 +193,7 @@ function normalizeDbOrder(o: any): WorkflowOrder {
 
 export async function getClientOrders(userId: string): Promise<WorkflowOrder[]> {
   const rows = await prisma.workflowOrder.findMany({
-    where: {
-      clientUserId: userId,
-      status: { notIn: ["DRAFT"] },
-    },
+    where: { clientUserId: userId },
     include: DB_INCLUDE,
     orderBy: { createdAt: "desc" },
   });

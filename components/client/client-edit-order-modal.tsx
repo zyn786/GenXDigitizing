@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { X, Pencil, FileImage, Trash2, Loader2 } from "lucide-react";
+import { X, Pencil, FileImage, Trash2, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { PLACEMENT_OPTIONS, FABRIC_TYPES } from "@/lib/quote-order/catalog";
 import { ReferenceFileUploader, type RefFile } from "@/components/shared/reference-file-uploader";
 
@@ -28,6 +28,8 @@ type Props = {
   orderId: string;
   initialData: InitialData;
   initialFiles: InitialFile[];
+  /** Current workflow status — used to show intake guidance for DRAFT orders. */
+  status?: string;
 };
 
 function formatBytes(b: number) {
@@ -36,7 +38,7 @@ function formatBytes(b: number) {
   return `${(b / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function ClientEditOrderModal({ orderId, initialData, initialFiles }: Props) {
+export function ClientEditOrderModal({ orderId, initialData, initialFiles, status }: Props) {
   const [open, setOpen] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState("");
@@ -186,6 +188,31 @@ export function ClientEditOrderModal({ orderId, initialData, initialFiles }: Pro
               {/* Body */}
               <div className="flex-1 overflow-y-auto px-6 py-5 [scrollbar-width:thin]">
                 <div className="grid gap-4">
+                  {/* Intake status guidance for DRAFT orders */}
+                  {status === "DRAFT" && (
+                    <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                        <div className="text-xs leading-relaxed text-amber-200/80">
+                          <span className="font-semibold text-amber-300">Order incomplete.</span>
+                          {" "}Fill in the missing details below, then save. Once all required fields are complete,
+                          the order will be automatically submitted for review.
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {status === "SUBMITTED" && (
+                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                        <div className="text-xs leading-relaxed text-emerald-200/80">
+                          <span className="font-semibold text-emerald-300">Order is complete.</span>
+                          {" "}All required fields are filled in. Edit below if needed; changes will be saved
+                          and the order will remain in the queue.
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {/* Design title */}
                   <div>
                     <label className={label}>

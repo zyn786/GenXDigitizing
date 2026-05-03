@@ -3,6 +3,7 @@ import { getWorkflowStatusLabel } from "@/lib/workflow/status";
 import type { WorkflowStatus } from "@/lib/workflow/types";
 
 const toneMap: Record<WorkflowStatus, string> = {
+  DRAFT: "bg-amber-500/10 text-amber-200 border-amber-400/20",
   NEW: "bg-white/10 text-white/75 border-white/10",
   QUOTED: "bg-sky-500/10 text-sky-200 border-sky-400/20",
   SUBMITTED: "bg-blue-500/10 text-blue-200 border-blue-400/20",
