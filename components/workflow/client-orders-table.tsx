@@ -4,41 +4,8 @@ import { ArrowRight } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { OrderProgressBar } from "@/components/workflow/order-progress-bar";
+import { getClientWorkflowStatusLabel, getClientWorkflowStatusTone } from "@/lib/workflow/status";
 import type { WorkflowOrder } from "@/lib/workflow/types";
-
-/* ------------------------------------------------------------------ */
-/* Client-friendly status labels                                       */
-/* ------------------------------------------------------------------ */
-
-function clientStatusLabel(status: string): string {
-  const map: Record<string, string> = {
-    SUBMITTED: "Order Received",
-    UNDER_REVIEW: "Under Review",
-    ASSIGNED_TO_DESIGNER: "In Production",
-    IN_PROGRESS: "In Production",
-    PROOF_READY: "Proof Ready",
-    REVISION_REQUESTED: "Revision In Progress",
-    APPROVED: "Proof Approved",
-    DELIVERED: "Completed",
-    CLOSED: "Completed",
-    CANCELLED: "Cancelled",
-  };
-  return map[status] ?? status.replaceAll("_", " ").toLowerCase();
-}
-
-function statusTone(status: string): string {
-  switch (status) {
-    case "PROOF_READY": return "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20";
-    case "REVISION_REQUESTED": return "bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-500/20";
-    case "APPROVED": return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
-    case "DELIVERED":
-    case "CLOSED": return "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20";
-    case "CANCELLED": return "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20";
-    case "IN_PROGRESS":
-    case "ASSIGNED_TO_DESIGNER": return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
-    default: return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20";
-  }
-}
 
 /* ------------------------------------------------------------------ */
 /* Component                                                           */
@@ -48,8 +15,8 @@ export function ClientOrdersTable({ orders }: { orders: WorkflowOrder[] }) {
   return (
     <div className="grid gap-4">
       {orders.map((order) => {
-        const label = clientStatusLabel(order.status);
-        const tone = statusTone(order.status);
+        const label = getClientWorkflowStatusLabel(order.status);
+        const tone = getClientWorkflowStatusTone(order.status);
 
         return (
           <Card key={order.id}>

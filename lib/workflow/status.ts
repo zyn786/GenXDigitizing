@@ -94,3 +94,41 @@ export function getPaymentStatusLabel(status: OrderPaymentStatus): string {
     case "REFUNDED": return "Refunded";
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Client-friendly label helpers (used by client portal pages)         */
+/* ------------------------------------------------------------------ */
+
+const CLIENT_STATUS_LABELS: Record<string, string> = {
+  SUBMITTED: "Order Received",
+  UNDER_REVIEW: "Under Review",
+  ASSIGNED_TO_DESIGNER: "In Production",
+  IN_PROGRESS: "In Production",
+  PROOF_READY: "Proof Ready",
+  REVISION_REQUESTED: "Revision In Progress",
+  APPROVED: "Proof Approved",
+  DELIVERED: "Completed",
+  CLOSED: "Completed",
+  CANCELLED: "Cancelled",
+};
+
+export function getClientWorkflowStatusLabel(status: string): string {
+  return CLIENT_STATUS_LABELS[status] ?? status.replaceAll("_", " ").toLowerCase();
+}
+
+const CLIENT_STATUS_TONES: Record<string, string> = {
+  SUBMITTED: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  UNDER_REVIEW: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  ASSIGNED_TO_DESIGNER: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  IN_PROGRESS: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  PROOF_READY: "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  REVISION_REQUESTED: "border-fuchsia-500/20 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400",
+  APPROVED: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  DELIVERED: "border-teal-500/20 bg-teal-500/10 text-teal-600 dark:text-teal-400",
+  CLOSED: "border-teal-500/20 bg-teal-500/10 text-teal-600 dark:text-teal-400",
+  CANCELLED: "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400",
+};
+
+export function getClientWorkflowStatusTone(status: string): string {
+  return CLIENT_STATUS_TONES[status] ?? "border-border/60 bg-muted/60 text-muted-foreground";
+}

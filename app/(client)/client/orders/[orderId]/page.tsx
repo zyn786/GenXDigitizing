@@ -17,41 +17,12 @@ import { ClientProofReview } from "@/components/workflow/client-proof-review";
 import { PaymentGatePanel } from "@/components/workflow/payment-gate-panel";
 import { buildTitle } from "@/lib/site";
 import { getClientOrder } from "@/lib/workflow/repository";
+import { getClientWorkflowStatusLabel, getClientWorkflowStatusTone } from "@/lib/workflow/status";
 import { ClientReferenceFilesSection } from "@/components/client/client-reference-files-section";
 
 /* ------------------------------------------------------------------ */
 /* Client-friendly helpers                                             */
 /* ------------------------------------------------------------------ */
-
-function clientStatusLabel(status: string): string {
-  const map: Record<string, string> = {
-    SUBMITTED: "Order Received",
-    UNDER_REVIEW: "Under Review",
-    ASSIGNED_TO_DESIGNER: "In Production",
-    IN_PROGRESS: "In Production",
-    PROOF_READY: "Proof Ready",
-    REVISION_REQUESTED: "Revision In Progress",
-    APPROVED: "Proof Approved",
-    DELIVERED: "Completed",
-    CLOSED: "Completed",
-    CANCELLED: "Cancelled",
-  };
-  return map[status] ?? status.replaceAll("_", " ").toLowerCase();
-}
-
-function statusTone(status: string): string {
-  switch (status) {
-    case "PROOF_READY": return "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400";
-    case "APPROVED": return "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
-    case "DELIVERED":
-    case "CLOSED": return "border-teal-500/20 bg-teal-500/10 text-teal-600 dark:text-teal-400";
-    case "CANCELLED": return "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400";
-    case "IN_PROGRESS":
-    case "ASSIGNED_TO_DESIGNER": return "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400";
-    case "REVISION_REQUESTED": return "border-fuchsia-500/20 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400";
-    default: return "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400";
-  }
-}
 
 function clientNextAction(
   status: string,
@@ -143,7 +114,7 @@ export default async function ClientOrderDetailPage({
 
   if (!order) notFound();
 
-  const statusLabel = clientStatusLabel(order.status);
+  const statusLabel = getClientWorkflowStatusLabel(order.status);
   const proofStatus = rawOrder?.proofStatus ?? "NOT_UPLOADED";
   const paymentStatus = rawOrder?.paymentStatus ?? "NOT_REQUIRED";
   const filesUnlocked = invoice?.filesUnlocked ?? false;
@@ -173,7 +144,7 @@ export default async function ClientOrderDetailPage({
               {order.serviceLabel}{order.companyName ? ` · ${order.companyName}` : ""}
             </p>
           </div>
-          <span className={`inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium ${statusTone(order.status)}`}>
+          <span className={`inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium ${getClientWorkflowStatusTone(order.status)}`}>
             {statusLabel}
           </span>
         </div>

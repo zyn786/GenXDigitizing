@@ -11,30 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getClientInvoices } from "@/lib/billing/repository";
 import { getClientOrders } from "@/lib/workflow/repository";
+import { getClientWorkflowStatusLabel } from "@/lib/workflow/status";
 import { buildTitle } from "@/lib/site";
 
 export const metadata: Metadata = { title: buildTitle("Dashboard") };
 export const dynamic = "force-dynamic";
-
-/* ------------------------------------------------------------------ */
-/* Client-friendly status helpers                                      */
-/* ------------------------------------------------------------------ */
-
-function clientStatusLabel(status: string): string {
-  const map: Record<string, string> = {
-    SUBMITTED: "Order Received",
-    UNDER_REVIEW: "Under Review",
-    ASSIGNED_TO_DESIGNER: "In Production",
-    IN_PROGRESS: "In Production",
-    PROOF_READY: "Proof Ready",
-    REVISION_REQUESTED: "Revision In Progress",
-    APPROVED: "Proof Approved",
-    DELIVERED: "Completed",
-    CLOSED: "Completed",
-    CANCELLED: "Cancelled",
-  };
-  return map[status] ?? status.replaceAll("_", " ").toLowerCase();
-}
 
 function isActiveOrder(status: string): boolean {
   return !["DELIVERED", "CLOSED", "CANCELLED"].includes(status);
@@ -226,7 +207,7 @@ export default async function ClientDashboardPage() {
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <Badge className="text-[10px]">
-                    {clientStatusLabel(order.status)}
+                    {getClientWorkflowStatusLabel(order.status)}
                   </Badge>
                   <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
                 </div>

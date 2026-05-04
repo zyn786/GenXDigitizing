@@ -6,6 +6,8 @@ import {
   Package, Zap, Clock, Check, Layers, MapPin,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+
 import {
   FABRIC_TYPES,
   PLACEMENT_OPTIONS,
@@ -261,12 +263,15 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
   return (
     <>
       {/* Trigger */}
-      <button
+      <Button
         onClick={openModal}
-        className={triggerClassName ?? "inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"}
+        variant="premium"
+        shape="pill"
+        size="sm"
+        className={triggerClassName}
       >
         {triggerLabel ?? (mode === "order" ? "Order Now" : "New Quote")}
-      </button>
+      </Button>
 
       {open && (
         <>
@@ -276,7 +281,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
           {/* Sheet */}
           <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
             <div
-              className="relative flex w-full max-w-xl flex-col overflow-hidden rounded-t-[2.5rem] border border-white/[0.09] bg-[#060c1a] shadow-[0_48px_180px_rgba(0,0,0,0.85)] sm:rounded-[2.5rem]"
+              className="relative flex w-full max-w-xl flex-col overflow-hidden rounded-t-[2.5rem] border border-border/40 bg-background shadow-[0_48px_180px_rgba(0,0,0,0.85)] sm:rounded-[2.5rem]"
               style={{ maxHeight: "92dvh" }}
             >
               {/* Ambient gradient */}
@@ -311,7 +316,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                     </div>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-white">{mode === "order" ? "Order Confirmed!" : "Quote Submitted!"}</p>
+                    <p className="text-2xl font-bold text-foreground">{mode === "order" ? "Order Confirmed!" : "Quote Submitted!"}</p>
                     <div className="mx-auto mt-3 w-fit rounded-xl border border-white/10 bg-white/[0.05] px-4 py-1.5 font-mono text-sm text-white/45">{orderNumber}</div>
                     <p className="mt-4 text-sm leading-6 text-white/45">
                       {mode === "order" ? "Your order is in our queue. We'll begin production shortly." : "We'll review your request and send pricing within 1 business day."}
@@ -616,7 +621,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                 </div>
 
                 {/* Footer nav */}
-                <div className="relative shrink-0 border-t border-white/[0.07] bg-[#060c1a]/95 px-6 py-4 backdrop-blur-xl">
+                <div className="relative shrink-0 border-t border-border/40 bg-background/95 px-6 py-4 backdrop-blur-xl">
                   <div className="flex items-center gap-3">
                     {/* Back */}
                     {step > 1 ? (
