@@ -88,7 +88,8 @@ function canonicalKey(key: string) {
 
 function getS3Url(key: string | null): string | null {
   if (!key) return null;
-  if (!process.env.NEXT_PUBLIC_ASSET_BASE_URL) return null;
+  const base = process.env.NEXT_PUBLIC_ASSET_BASE_URL;
+  if (!base) return null;
   return assetUrl(key);
 }
 

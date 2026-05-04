@@ -70,7 +70,8 @@ const ALL_SERVICES = Object.entries(SERVICE_LABELS).map(([k, v]) => ({ key: k, l
 
 function getS3Url(key: string | null) {
   if (!key) return null;
-  if (!process.env.NEXT_PUBLIC_ASSET_BASE_URL) return null;
+  const base = process.env.NEXT_PUBLIC_ASSET_BASE_URL;
+  if (!base) return null;
   return assetUrl(key);
 }
 
