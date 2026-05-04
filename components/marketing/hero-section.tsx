@@ -28,28 +28,13 @@ export function HeroSection() {
 
   return (
     <section className="relative min-h-screen overflow-hidden -mt-20">
-      {/* Desktop YouTube embed (hidden on mobile) */}
-      <div className="pointer-events-none absolute inset-0 hidden select-none md:block">
-        <iframe
-          src="https://www.youtube.com/embed/dYQ7iQJEJXw?autoplay=1&mute=1&loop=1&controls=0&playlist=dYQ7iQJEJXw&playsinline=1&rel=0&showinfo=0&modestbranding=1"
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{ width: "100vw", height: "56.25vw", minHeight: "100vh", minWidth: "177.77vh", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
-          allow="autoplay; encrypted-media"
-          allowFullScreen={false}
-          title="GenX hero background"
-        />
-      </div>
-      {/* Mobile YouTube Short embed (hidden on desktop) */}
-      <div className="pointer-events-none absolute inset-0 select-none md:hidden">
-        <iframe
-          src="https://www.youtube.com/embed/Y-zhysHWyZI?autoplay=1&mute=1&loop=1&controls=0&playlist=Y-zhysHWyZI&playsinline=1&rel=0&showinfo=0&modestbranding=1"
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{ width: "100vw", height: "177.78vw", minHeight: "100vh", minWidth: "56.25vh", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
-          allow="autoplay; encrypted-media"
-          allowFullScreen={false}
-          title="GenX hero background"
-        />
-      </div>
+      <video
+        autoPlay muted loop playsInline preload="metadata"
+        className="absolute inset-0 h-full w-full object-cover"
+      >
+        <source media="(min-width: 768px)" src="/video/hero-bg-desktop.mp4" type="video/mp4" />
+        <source src="/video/hero-bg-mobile.mp4" type="video/mp4" />
+      </video>
 
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-[#07111f]/78" />
