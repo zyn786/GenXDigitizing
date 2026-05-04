@@ -14,9 +14,9 @@ const STATUS_LABELS: Record<ProofStatus, string> = {
 };
 
 const STATUS_COLORS: Record<ProofStatus, string> = {
-  PENDING: "text-amber-400 bg-amber-500/10",
-  APPROVED: "text-emerald-400 bg-emerald-500/10",
-  REJECTED: "text-red-400 bg-red-500/10",
+  PENDING: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-600 dark:text-amber-400",
+  APPROVED: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-600 dark:text-emerald-400",
+  REJECTED: "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-600 dark:text-red-400",
 };
 
 function formatDate(iso: string) {
@@ -127,7 +127,7 @@ export function PaymentProofsManager({
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
           {error}
         </div>
       )}
@@ -204,7 +204,7 @@ export function PaymentProofsManager({
                       type="button"
                       disabled={actingId === viewingProof.id}
                       onClick={() => reject(viewingProof.id)}
-                      className="inline-flex h-10 items-center justify-center rounded-full bg-red-500/10 px-5 text-sm font-medium text-red-400 hover:bg-red-500/20 disabled:opacity-50"
+                      className="inline-flex h-10 items-center justify-center rounded-full bg-red-500/10 px-5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-500/20 disabled:opacity-50"
                     >
                       {actingId === viewingProof.id ? "Rejecting…" : "Confirm reject"}
                     </button>
@@ -223,14 +223,14 @@ export function PaymentProofsManager({
                     type="button"
                     disabled={actingId === viewingProof.id}
                     onClick={() => approve(viewingProof.id)}
-                    className="inline-flex h-10 items-center justify-center rounded-full bg-emerald-500/10 px-5 text-sm font-medium text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50"
+                    className="inline-flex h-10 items-center justify-center rounded-full bg-emerald-500/10 px-5 text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50"
                   >
                     {actingId === viewingProof.id ? "Approving…" : "Approve payment"}
                   </button>
                   <button
                     type="button"
                     onClick={() => setRejectingId(viewingProof.id)}
-                    className="inline-flex h-10 items-center justify-center rounded-full bg-red-500/10 px-5 text-sm font-medium text-red-400 hover:bg-red-500/20"
+                    className="inline-flex h-10 items-center justify-center rounded-full bg-red-500/10 px-5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-500/20"
                   >
                     Reject
                   </button>
@@ -240,7 +240,7 @@ export function PaymentProofsManager({
           )}
 
           {viewingProof.status === "REJECTED" && viewingProof.rejectionReason && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
               Rejection reason: {viewingProof.rejectionReason}
             </div>
           )}
@@ -292,14 +292,14 @@ export function PaymentProofsManager({
                         type="button"
                         disabled={actingId === proof.id}
                         onClick={() => approve(proof.id)}
-                        className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50"
+                        className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50"
                       >
                         {actingId === proof.id ? "…" : "Approve"}
                       </button>
                       <button
                         type="button"
                         onClick={() => { viewImage(proof); setRejectingId(proof.id); }}
-                        className="rounded-full px-3 py-1 text-xs text-red-400 hover:bg-red-500/10 disabled:opacity-50"
+                        className="rounded-full px-3 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-500/10 disabled:opacity-50"
                       >
                         Reject
                       </button>

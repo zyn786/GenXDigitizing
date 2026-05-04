@@ -59,11 +59,11 @@ const NICHE_OPTIONS: Record<string, Array<{ value: string; label: string }>> = {
 };
 
 const APPROVAL_BADGE: Record<string, string> = {
-  PENDING_APPROVAL: "border-amber-400/30 bg-amber-500/10 text-amber-300",
-  APPROVED:         "border-emerald-400/30 bg-emerald-500/10 text-emerald-300",
-  DECLINED:         "border-red-400/30 bg-red-500/10 text-red-300",
-  DRAFT:            "border-white/10 bg-white/5 text-white/50",
-  ARCHIVED:         "border-white/10 bg-white/5 text-white/40",
+  PENDING_APPROVAL: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-600 dark:text-amber-400",
+  APPROVED:         "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-600 dark:text-emerald-400",
+  DECLINED:         "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-600 dark:text-red-400",
+  DRAFT:            "border-border/60 bg-muted/60 text-muted-foreground",
+  ARCHIVED:         "border-border/60 bg-muted/60 text-muted-foreground",
 };
 const APPROVAL_LABEL: Record<string, string> = {
   PENDING_APPROVAL: "Pending review",
@@ -239,7 +239,7 @@ export function PortfolioManager({
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
           {error}
         </div>
       )}
@@ -272,7 +272,7 @@ export function PortfolioManager({
                   tab === t
                     ? "bg-white/20 text-white"
                     : t === "pending"
-                    ? "bg-amber-500/20 text-amber-400"
+                    ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
                     : "bg-secondary/80 text-muted-foreground"
                 }`}
               >
@@ -323,10 +323,10 @@ export function PortfolioManager({
                         <span>Uploaded by {item.createdBy.name}</span>
                       )}
                       {item.approvedBy?.name && item.approvalStatus === "APPROVED" && (
-                        <span className="text-emerald-400/70">· Approved by {item.approvedBy.name}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400/70">· Approved by {item.approvedBy.name}</span>
                       )}
                       {item.approvalStatus === "DECLINED" && item.declineReason && (
-                        <span className="text-red-400/70">· Declined: {item.declineReason}</span>
+                        <span className="text-red-600 dark:text-red-400/70">· Declined: {item.declineReason}</span>
                       )}
                     </div>
                   </div>
@@ -346,7 +346,7 @@ export function PortfolioManager({
                       active={item.isFeatured}
                       activeLabel="Featured"
                       inactiveLabel="Feature"
-                      activeClass="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                      activeClass="bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20"
                       disabled={togglingId === item.id}
                       onClick={() => toggleField(item.id, "isFeatured", item.isFeatured)}
                     />
@@ -355,7 +355,7 @@ export function PortfolioManager({
                       active={item.isVisible}
                       activeLabel="Visible"
                       inactiveLabel="Hidden"
-                      activeClass="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                      activeClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
                       disabled={togglingId === item.id}
                       onClick={() => toggleField(item.id, "isVisible", item.isVisible)}
                     />
@@ -366,7 +366,7 @@ export function PortfolioManager({
                         type="button"
                         disabled={approvingId === item.id}
                         onClick={() => approveItem(item.id)}
-                        className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50"
+                        className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50"
                       >
                         {approvingId === item.id ? "Approving…" : "Approve"}
                       </button>
@@ -378,7 +378,7 @@ export function PortfolioManager({
                           setDeclineTarget(item.id);
                           setDeclineReason("");
                         }}
-                        className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/20"
+                        className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-500/20"
                       >
                         Decline
                       </button>
@@ -390,7 +390,7 @@ export function PortfolioManager({
                           type="button"
                           disabled={deletingId === item.id}
                           onClick={() => deleteItem(item.id)}
-                          className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/20 disabled:opacity-50"
+                          className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-500/20 disabled:opacity-50"
                         >
                           {deletingId === item.id ? "Deleting…" : "Confirm"}
                         </button>
@@ -406,7 +406,7 @@ export function PortfolioManager({
                       <button
                         type="button"
                         onClick={() => setConfirmDeleteId(item.id)}
-                        className="rounded-full px-3 py-1 text-xs text-muted-foreground hover:bg-red-500/10 hover:text-red-400"
+                        className="rounded-full px-3 py-1 text-xs text-muted-foreground hover:bg-red-500/10 hover:text-red-600 dark:text-red-400"
                       >
                         Delete
                       </button>
@@ -417,7 +417,7 @@ export function PortfolioManager({
                 {/* Inline decline form */}
                 {declineTarget === item.id && (
                   <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
-                    <p className="mb-2 text-xs font-medium text-red-300">Decline reason</p>
+                    <p className="mb-2 text-xs font-medium text-red-600 dark:text-red-600 dark:text-red-400">Decline reason</p>
                     <textarea
                       rows={2}
                       value={declineReason}
@@ -430,7 +430,7 @@ export function PortfolioManager({
                         type="button"
                         disabled={decliningSaving}
                         onClick={() => declineItem(item.id)}
-                        className="rounded-full bg-red-500/10 px-4 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/20 disabled:opacity-50"
+                        className="rounded-full bg-red-500/10 px-4 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-500/20 disabled:opacity-50"
                       >
                         {decliningSaving ? "Saving…" : "Confirm decline"}
                       </button>
@@ -648,7 +648,7 @@ function AddItemForm({
       </label>
 
       {error && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
           {error}
         </div>
       )}
@@ -756,7 +756,7 @@ function ImageUploadField({
         )}
         {state?.status === "done" && (
           <div className="grid gap-1">
-            <p className="text-xs text-emerald-400">Uploaded</p>
+            <p className="text-xs text-emerald-600 dark:text-emerald-400">Uploaded</p>
             <p className="max-w-full truncate text-xs text-muted-foreground">{state.fileName}</p>
             <button
               type="button"
@@ -765,14 +765,14 @@ function ImageUploadField({
                 onStateChange(null);
                 if (inputRef.current) inputRef.current.value = "";
               }}
-              className="text-xs text-muted-foreground hover:text-red-400"
+              className="text-xs text-muted-foreground hover:text-red-600 dark:text-red-400"
             >
               Remove
             </button>
           </div>
         )}
         {state?.status === "error" && (
-          <p className="text-xs text-red-400">{state.message}</p>
+          <p className="text-xs text-red-600 dark:text-red-400">{state.message}</p>
         )}
       </div>
     </div>
@@ -793,7 +793,7 @@ function FormField({
   return (
     <div className="grid gap-2">
       <label className="text-sm font-medium">
-        {label} {required && <span className="text-red-400">*</span>}
+        {label} {required && <span className="text-red-600 dark:text-red-400">*</span>}
       </label>
       {children}
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
