@@ -2,11 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { Route } from "next";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
+import { Chip } from "@/components/ui/chip";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
 import { OrderStatusControls } from "@/components/workflow/order-status-controls";
@@ -74,11 +81,22 @@ export default async function AdminOrderDetailPage({ params }: Props) {
     <div className="grid gap-6">
       {/* Header */}
       <section>
-        <Link href={"/admin/orders" as Route} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition hover:text-foreground">
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Order queue
-        </Link>
-        <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
+        <Breadcrumb className="mb-2">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href={"/admin/dashboard" as Route}>Admin</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href={"/admin/orders" as Route}>Orders</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{order.reference}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{order.reference}</p>
             <h1 className="mt-1 text-2xl font-semibold tracking-tight md:text-3xl">{order.title}</h1>
@@ -362,12 +380,3 @@ function ProductionSpecsCard({ production }: { production: OrderProduction }) {
   );
 }
 
-function Chip({ label, variant = "default" }: { label: string; variant?: "default" | "emerald" | "purple" | "blue" }) {
-  const variants = {
-    default: "border-border/60 bg-muted/60 text-muted-foreground",
-    emerald: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-    purple: "border-purple-500/20 bg-purple-500/10 text-purple-600 dark:text-purple-400",
-    blue: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  };
-  return <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${variants[variant]}`}>{label}</span>;
-}

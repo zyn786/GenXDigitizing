@@ -132,3 +132,26 @@ const CLIENT_STATUS_TONES: Record<string, string> = {
 export function getClientWorkflowStatusTone(status: string): string {
   return CLIENT_STATUS_TONES[status] ?? "border-border/60 bg-muted/60 text-muted-foreground";
 }
+
+/* ------------------------------------------------------------------ */
+/* Admin status tones (dark/light friendly)                            */
+/* ------------------------------------------------------------------ */
+
+const ADMIN_STATUS_TONES: Record<string, string> = {
+  NEW: "border-white/10 bg-white/5 text-foreground/70 dark:text-white/70",
+  QUOTED: "border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400",
+  SUBMITTED: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  UNDER_REVIEW: "border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400",
+  ASSIGNED_TO_DESIGNER: "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  IN_PROGRESS: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  PROOF_READY: "border-purple-500/20 bg-purple-500/10 text-purple-600 dark:text-purple-400",
+  REVISION_REQUESTED: "border-fuchsia-500/20 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400",
+  APPROVED: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  DELIVERED: "border-teal-500/20 bg-teal-500/10 text-teal-600 dark:text-teal-400",
+  CLOSED: "border-teal-500/20 bg-teal-500/10 text-teal-600 dark:text-teal-400",
+  CANCELLED: "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400",
+};
+
+export function getAdminWorkflowStatusTone(status: string): string {
+  return ADMIN_STATUS_TONES[status] ?? "border-border/60 bg-muted/60 text-muted-foreground";
+}

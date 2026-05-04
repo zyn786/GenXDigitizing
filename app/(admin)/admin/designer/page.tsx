@@ -10,6 +10,14 @@ import { buildTitle } from "@/lib/site";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
 import { mapDbStatus } from "@/lib/workflow/repository";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export const metadata: Metadata = { title: buildTitle("My Dashboard") };
 
@@ -45,6 +53,18 @@ export default async function DesignerDashboardPage() {
 
   return (
     <div className="grid gap-6">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href={"/admin/designer" as Route}>Designer Studio</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>My Jobs</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       {/* Header */}
       <section>
         <p className="section-eyebrow">Designer workspace</p>
