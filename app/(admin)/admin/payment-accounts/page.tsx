@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import type { Route } from "next";
 
 import { auth } from "@/auth";
 import { buildTitle } from "@/lib/site";
 import { getPaymentAccounts } from "@/lib/payments/repository";
 import { PaymentAccountsManager } from "@/components/admin/payment-accounts-manager";
+import {
+  Breadcrumb, BreadcrumbItem, BreadcrumbLink,
+  BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export const metadata: Metadata = { title: buildTitle("Payment Methods") };
 
@@ -21,14 +26,19 @@ export default async function AdminPaymentAccountsPage() {
 
   return (
     <div className="grid gap-6">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem><BreadcrumbLink href={"/admin/dashboard" as Route}>Admin</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem><BreadcrumbPage>Payment Methods</BreadcrumbPage></BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       <section>
-        <div className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
-          Billing settings
-        </div>
-        <h1 className="mt-2 text-4xl font-semibold tracking-tight">Payment methods</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-          Configure manual payment accounts shown to clients on invoices. Clients submit
-          payment screenshots which you review before unlocking their completed files.
+        <p className="section-eyebrow">Billing settings</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Payment Methods</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+          Configure manual payment accounts shown to clients on invoices. Clients submit payment screenshots which you review before unlocking files.
         </p>
       </section>
 
