@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/ui/logout-button";
@@ -95,10 +95,10 @@ export function DashboardMobileNav({ items, badges, user, initials }: Props) {
         </div>
 
         {/* Footer: user info + back to site */}
-        <div className="space-y-2 border-t border-border/80 p-4">
+        <div className="space-y-2.5 border-t border-border/60 p-4">
           {user && (
             <div className="flex items-center gap-3 rounded-2xl bg-secondary/50 px-3 py-2.5">
-              <div className="flex h-9 w-9 shrink-0 select-none items-center justify-center rounded-xl bg-primary/10 text-xs font-bold text-primary">
+              <div className="flex h-9 w-9 shrink-0 select-none items-center justify-center rounded-xl bg-primary/10 text-xs font-bold text-primary shadow-sm">
                 {initials}
               </div>
               <div className="min-w-0">
@@ -111,14 +111,18 @@ export function DashboardMobileNav({ items, badges, user, initials }: Props) {
               </div>
             </div>
           )}
-          <Link
-            href="/"
-            onClick={() => setOpen(false)}
-            className="flex items-center justify-center rounded-2xl border border-border/80 py-2 text-xs font-medium text-muted-foreground transition hover:bg-secondary/80 hover:text-foreground"
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="w-full rounded-2xl border-border/60"
           >
-            ← Back to site
-          </Link>
-          <LogoutButton className="w-full rounded-2xl border border-border/80 bg-transparent" />
+            <Link href="/" onClick={() => setOpen(false)}>
+              <ArrowLeft className="h-4 w-4" />
+              Back to site
+            </Link>
+          </Button>
+          <LogoutButton className="w-full rounded-2xl border border-border/60 bg-transparent" />
         </div>
       </div>
     </>

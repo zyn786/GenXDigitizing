@@ -60,6 +60,10 @@ const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
 
 type NavItem = { href: Route; label: string };
 
+/* ------------------------------------------------------------------ */
+/* Desktop sidebar nav                                                 */
+/* ------------------------------------------------------------------ */
+
 export function PortalNav({
   items,
   badges,
@@ -84,7 +88,7 @@ export function PortalNav({
             className={cn(
               "group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all",
               active
-                ? "bg-primary/10 text-primary"
+                ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.12)]"
                 : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
             )}
           >
@@ -98,14 +102,14 @@ export function PortalNav({
             >
               <Icon className="h-4 w-4" />
               {badgeCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
                   {badgeCount > 9 ? "9+" : badgeCount}
                 </span>
               )}
             </div>
             <span className="flex-1">{item.label}</span>
             {active && (
-              <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+              <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.5)]" />
             )}
           </Link>
         );
@@ -113,6 +117,10 @@ export function PortalNav({
     </nav>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Mobile horizontal scroll strip                                      */
+/* ------------------------------------------------------------------ */
 
 export function PortalNavMobile({
   items,
@@ -124,35 +132,43 @@ export function PortalNavMobile({
   const pathname = usePathname();
 
   return (
-    <nav
-      className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      aria-label="Mobile navigation"
-    >
-      {items.map((item) => {
-        const href = item.href as string;
-        const active = pathname === href || pathname.startsWith(href + "/");
-        const badgeCount = badges?.[href] ?? 0;
+    <div className="relative">
+      <nav
+        className="flex gap-2 overflow-x-auto pb-1 pr-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        aria-label="Mobile navigation"
+      >
+        {items.map((item) => {
+          const href = item.href as string;
+          const active = pathname === href || pathname.startsWith(href + "/");
+          const badgeCount = badges?.[href] ?? 0;
 
-        return (
-          <Link
-            key={href}
-            href={item.href}
-            className={cn(
-              "relative shrink-0 rounded-2xl px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors",
-              active
-                ? "bg-primary/10 text-primary"
-                : "border border-border/80 bg-card/70 text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
-            )}
-          >
-            {item.label}
-            {badgeCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                {badgeCount > 9 ? "9+" : badgeCount}
-              </span>
-            )}
-          </Link>
-        );
-      })}
-    </nav>
+          return (
+            <Link
+              key={href}
+              href={item.href}
+              className={cn(
+                "relative shrink-0 rounded-2xl px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors",
+                active
+                  ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.12)]"
+                  : "border border-border/60 bg-card/70 text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+              )}
+            >
+              {item.label}
+              {badgeCount > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
+                  {badgeCount > 9 ? "9+" : badgeCount}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Scroll-edge fade indicator */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background/90 to-transparent"
+      />
+    </div>
   );
 }
