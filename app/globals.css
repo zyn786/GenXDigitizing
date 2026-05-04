@@ -69,6 +69,21 @@
     --ring: 245 83% 61%;
 
     --radius: 1.25rem;
+
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.08);
+    --shadow-xl: 0 20px 60px rgba(15, 23, 42, 0.1);
+    --shadow-primary: 0 16px 50px rgba(99, 102, 241, 0.24);
+
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+
+    --z-sidebar: 30;
+    --z-header: 40;
+    --z-overlay: 50;
+    --z-modal: 60;
   }
 
   .dark {
@@ -99,6 +114,21 @@
     --border: 232 18% 20%;
     --input: 232 18% 20%;
     --ring: 245 88% 68%;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.4);
+    --shadow-primary: 0 16px 50px rgba(99, 102, 241, 0.3);
+
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+
+    --z-sidebar: 30;
+    --z-header: 40;
+    --z-overlay: 50;
+    --z-modal: 60;
   }
 
   * {
@@ -123,6 +153,19 @@
   h3,
   h4 {
     letter-spacing: -0.025em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    html {
+      scroll-behavior: auto;
+    }
   }
 
   @keyframes page-enter {
@@ -197,10 +240,12 @@
     @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
   }
 
+  /* Compatibility aliases for <Button variant="premium" shape="pill" size="lg"> */
   .btn-primary {
-    @apply inline-flex h-12 items-center gap-2 rounded-full bg-primary px-7 text-sm font-semibold text-primary-foreground transition-all hover:opacity-90 hover:shadow-[0_8px_30px_rgba(99,102,241,0.35)] active:scale-[0.98];
+    @apply inline-flex h-12 items-center gap-2 rounded-full bg-primary px-7 text-sm font-semibold text-primary-foreground transition-all hover:opacity-95 hover:shadow-[0_12px_40px_rgba(99,102,241,0.45)] active:scale-[0.98] shadow-[0_8px_30px_rgba(99,102,241,0.35)];
   }
 
+  /* Compatibility alias for <Button variant="outline" shape="pill" size="lg"> */
   .btn-outline {
     @apply inline-flex h-12 items-center gap-2 rounded-full border border-border/80 bg-card/70 px-7 text-sm font-semibold transition-all hover:bg-card hover:shadow-md active:scale-[0.98];
   }

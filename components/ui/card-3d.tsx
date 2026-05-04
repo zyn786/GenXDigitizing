@@ -6,6 +6,7 @@ import {
   useMotionValue,
   useSpring,
   useTransform,
+  useReducedMotion,
 } from "framer-motion";
 
 import { cn } from "@/lib/utils";
@@ -24,17 +25,27 @@ export function Card3D({
   glare = true,
 }: Card3DProps) {
   const ref = React.useRef<HTMLDivElement>(null);
+  const prefersReduced = useReducedMotion();
 
   const xRaw = useMotionValue(0);
   const yRaw = useMotionValue(0);
 
   const springConfig = { stiffness: 260, damping: 28 };
-  const rotateX = useSpring(useTransform(yRaw, [-0.5, 0.5], [intensity, -intensity]), springConfig);
-  const rotateY = useSpring(useTransform(xRaw, [-0.5, 0.5], [-intensity, intensity]), springConfig);
+  const rotateX = useSpring(
+    useTransform(yRaw, [-0.5, 0.5], prefersReduced ? [0, 0] : [intensity, -intensity]),
+    springConfig
+  );
+  const rotateY = useSpring(
+    useTransform(xRaw, [-0.5, 0.5], prefersReduced ? [0, 0] : [-intensity, intensity]),
+    springConfig
+  );
 
   const glareX = useTransform(xRaw, [-0.5, 0.5], ["120%", "-20%"]);
   const glareY = useTransform(yRaw, [-0.5, 0.5], ["120%", "-20%"]);
-  const glareOpacity = useSpring(useTransform(xRaw, [-0.5, 0, 0.5], [0.12, 0, 0.12]), springConfig);
+  const glareOpacity = useSpring(
+    useTransform(xRaw, [-0.5, 0, 0.5], prefersReduced ? [0, 0, 0] : [0.12, 0, 0.12]),
+    springConfig
+  );
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     const el = ref.current;

@@ -14,7 +14,11 @@
       "Bash(npx vitest *)",
       "Bash(python -c \"import sys,json; [print\\(json.loads\\(l\\).get\\('message',{}\\).get\\('role',''\\) + ': ' + str\\(json.loads\\(l\\).get\\('message',{}\\).get\\('content',''\\)\\)[:300] if 'message' in json.loads\\(l\\) else json.loads\\(l\\).get\\('type',''\\)\\) for l in sys.stdin]\")",
       "Bash(Get-ChildItem -Path \"E:\\\\Hello\\\\GenXDigitizing\" -Force)",
-      "Bash(Select-Object Name, FullName)"
+      "Bash(Select-Object Name, FullName)",
+      "Bash(Remove-Item -Recurse -Force \".next\" -ErrorAction SilentlyContinue)",
+      "Bash(pnpm typecheck *)",
+      "Bash(pnpm lint *)",
+      "Bash(pnpm build *)"
     ]
   }
 }

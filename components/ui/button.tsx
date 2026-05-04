@@ -5,18 +5,26 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-medium transition-all outline-none disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-medium transition-all outline-none disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-[0_16px_50px_rgba(37,99,235,0.24)] hover:opacity-95",
+          "bg-primary text-primary-foreground shadow-[0_16px_50px_rgba(99,102,241,0.24)] hover:opacity-95",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         outline:
-          "border border-border/80 bg-card/70 hover:bg-card",
+          "border border-border/80 bg-card/70 hover:bg-card hover:shadow-md",
         ghost:
           "hover:bg-secondary/80",
+        premium:
+          "bg-primary text-primary-foreground shadow-[0_8px_30px_rgba(99,102,241,0.35)] hover:opacity-95 hover:shadow-[0_12px_40px_rgba(99,102,241,0.45)]",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:opacity-90",
+      },
+      shape: {
+        default: "rounded-2xl",
+        pill: "rounded-full",
       },
       size: {
         default: "h-11 px-5 py-2.5",
@@ -27,6 +35,7 @@ const buttonVariants = cva(
     },
     defaultVariants: {
       variant: "default",
+      shape: "default",
       size: "default",
     },
   }
@@ -43,6 +52,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     {
       className,
       variant,
+      shape,
       size,
       asChild = false,
       type = "button",
@@ -55,7 +65,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     if (asChild) {
       return (
         <Comp
-          className={cn(buttonVariants({ variant, size }), className)}
+          className={cn(buttonVariants({ variant, shape, size }), className)}
           ref={ref}
           {...props}
         />
@@ -64,7 +74,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size }), className)}
+        className={cn(buttonVariants({ variant, shape, size }), className)}
         ref={ref}
         type={type}
         {...props}
