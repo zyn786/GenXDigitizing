@@ -10,5 +10,11 @@ export default async function ClientOrderPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?next=/client/order");
 
-  return <QuoteOrderOverlay mode="order" />;
+  return (
+    <QuoteOrderOverlay
+      mode="order"
+      flowContext="client"
+      user={{ name: session.user.name, email: session.user.email }}
+    />
+  );
 }

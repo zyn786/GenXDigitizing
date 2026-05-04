@@ -3,25 +3,76 @@
 import * as React from "react";
 import Link from "next/link";
 import type { Route } from "next";
-import { ArrowRight, CheckCircle2, Info, Package, Save, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowLeft,
+  CheckCircle2,
+  ChevronDown,
+  Info,
+  Save,
+  Zap,
+  Sparkles,
+  User,
+  LogIn,
+  UserPlus,
+} from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   FABRIC_TYPES,
-  FILE_FORMAT_OPTIONS,
   PLACEMENT_OPTIONS,
   getDefaultNiche,
   getNichesForService,
   getPlacementMeta,
-  getServiceByType,
   serviceCatalog,
   type ServiceType,
-  type TurnaroundType,
 } from "@/lib/quote-order/catalog";
-import { computeQuotePricing } from "@/lib/quote-order/pricing";
 import { quoteOrderSchema, type QuoteOrderInput } from "@/schemas/quote-order";
 import { ReferenceFileUploader, type RefFile } from "@/components/shared/reference-file-uploader";
+import { cn } from "@/lib/utils";
+
+/* ------------------------------------------------------------------ */
+/* Types & constants                                                   */
+/* ------------------------------------------------------------------ */
 
 type BuilderMode = "quote" | "order";
+type FlowContext = "guest" | "client";
+type SubmitState = { type: "idle" | "success" | "error"; text: string };
+
+interface BuilderUser {
+  name?: string | null;
+  email?: string | null;
+}
+
+const DESIGN_TYPES = [
+  { value: "LEFT_CHEST", label: "Left Chest", desc: "Standard logo placement — up to 5\"", icon: "👕" },
+  { value: "HAT_FRONT", label: "Cap / Hat", desc: "Cap front, side, or back — up to 5\"", icon: "🧢" },
+  { value: "JACKET_BACK", label: "Jacket Back", desc: "Full back design — up to 12\"", icon: "🧥" },
+  { value: "CUSTOM_PATCHES", label: "Patch", desc: "Custom embroidered or woven patch", icon: "🏷️" },
+  { value: "PUFF_LEFT_CHEST", label: "3D Puff", desc: "Raised 3D foam embroidery — up to 5\"", icon: "✨" },
+  { value: "OTHER", label: "Other / Custom", desc: "Custom placement or specialty item", icon: "📐" },
+] as const;
+
+const DELIVERY_SPEEDS = [
+  { value: "STANDARD" as const, label: "Normal", time: "12 hours", desc: "Standard turnaround — included" },
+  { value: "URGENT" as const, label: "Rush", time: "6 hours", desc: "Priority queue — +$12", price: 12 },
+  { value: "SAME_DAY" as const, label: "Urgent", time: "3 hours", desc: "Highest priority — +$24", price: 24 },
+];
+
+const STEPS = [
+  { num: 1, label: "Design Type" },
+  { num: 2, label: "Size & Placement" },
+  { num: 3, label: "Delivery" },
+  { num: 4, label: "Upload" },
+  { num: 5, label: "Review" },
+];
+
+/* ------------------------------------------------------------------ */
+/* Helpers                                                             */
+/* ------------------------------------------------------------------ */
 
 function getDraftKey(mode: BuilderMode) {
   return `genx-v2-${mode}-draft`;
@@ -75,72 +126,125 @@ function getInitialValues(mode: BuilderMode): QuoteOrderInput {
   }
 }
 
-// ── Utility ──────────────────────────────────────────────────────────────────
-
-function InputClass() {
-  return "h-12 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 text-white outline-none placeholder:text-white/35 focus:border-white/25 focus:bg-white/[0.09] transition";
+function mapDesignTypeToPlacement(dt: string): string {
+  switch (dt) {
+    case "LEFT_CHEST": return "LEFT_CHEST";
+    case "HAT_FRONT": return "HAT_FRONT";
+    case "JACKET_BACK": return "JACKET_BACK";
+    case "PUFF_LEFT_CHEST": return "PUFF_LEFT_CHEST";
+    case "CUSTOM_PATCHES": return "OTHER";
+    case "OTHER": return "OTHER";
+    default: return "";
+  }
 }
 
-function LabelClass() {
-  return "grid gap-2";
+function mapDesignTypeToService(dt: string): ServiceType {
+  return dt === "CUSTOM_PATCHES" ? "CUSTOM_PATCHES" : "EMBROIDERY_DIGITIZING";
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function getMissingFields(values: QuoteOrderInput, flowCtx: FlowContext): string[] {
+  const missing: string[] = [];
+  if (flowCtx === "guest") {
+    if (!values.customerName || values.customerName.length < 2) missing.push("Name");
+    if (!values.email || !values.email.includes("@")) missing.push("Email");
+  }
+  if (!values.designTitle || values.designTitle.length < 2) missing.push("Design title");
+  if (!values.placement) missing.push("Placement");
+  return missing;
+}
+
+/* ------------------------------------------------------------------ */
+/* Sub-components                                                      */
+/* ------------------------------------------------------------------ */
+
+function StepIndicator({ step, onStepClick }: { step: number; onStepClick: (s: number) => void }) {
   return (
-    <div className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-white/50">
-      <span className="h-px flex-1 bg-white/10" />
-      {children}
-      <span className="h-px flex-1 bg-white/10" />
+    <div className="mb-8 flex items-center justify-center gap-2 md:gap-3">
+      {STEPS.map((s, i) => (
+        <React.Fragment key={s.num}>
+          <button
+            type="button"
+            onClick={() => { if (s.num < step) onStepClick(s.num); }}
+            className={cn(
+              "flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-all md:px-4",
+              step === s.num && "bg-primary text-primary-foreground shadow-[0_4px_16px_hsl(var(--primary)/0.3)]",
+              step > s.num && "bg-primary/10 text-primary hover:bg-primary/20",
+              step < s.num && "bg-muted/50 text-muted-foreground cursor-default"
+            )}
+          >
+            <span className={cn("flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold", step > s.num ? "bg-primary text-primary-foreground" : step === s.num ? "bg-primary-foreground/20" : "bg-muted-foreground/20")}>
+              {step > s.num ? "✓" : s.num}
+            </span>
+            <span className="hidden sm:inline">{s.label}</span>
+          </button>
+          {i < STEPS.length - 1 && <div className="hidden h-px w-6 bg-border/60 sm:block" />}
+        </React.Fragment>
+      ))}
     </div>
   );
 }
 
-// ── Component ────────────────────────────────────────────────────────────────
+function SummaryRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-foreground text-right">{value || "—"}</span>
+    </div>
+  );
+}
 
-export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
+/* ------------------------------------------------------------------ */
+/* Component                                                           */
+/* ------------------------------------------------------------------ */
+
+type Props = {
+  mode: BuilderMode;
+  flowContext?: FlowContext;
+  user?: BuilderUser;
+};
+
+export function QuoteOrderBuilder({ mode, flowContext, user }: Props) {
+  const ctx: FlowContext = flowContext ?? "guest";
+  const isOrder = mode === "order";
   const draftKey = React.useMemo(() => getDraftKey(mode), [mode]);
 
-  const [values, setValues] = React.useState<QuoteOrderInput>(() => getInitialValues(mode));
-  const [submitState, setSubmitState] = React.useState<{ type: "idle" | "success" | "error"; text: string }>({ type: "idle", text: "" });
+  const [step, setStep] = React.useState(isOrder ? 1 : 0);
+  const [values, setValues] = React.useState<QuoteOrderInput>(() => {
+    const init = getInitialValues(mode);
+    if (ctx === "client" && user) {
+      init.customerName = user.name ?? "";
+      init.email = user.email ?? "";
+    }
+    return init;
+  });
+  const [submitState, setSubmitState] = React.useState<SubmitState>({ type: "idle", text: "" });
   const [savingState, setSavingState] = React.useState("");
   const [orderResult, setOrderResult] = React.useState<{ orderNumber: string; isFreeDesign: boolean } | null>(null);
   const [showAdvanced, setShowAdvanced] = React.useState(false);
   const [refFiles, setRefFiles] = React.useState<RefFile[]>([]);
+  const [designType, setDesignType] = React.useState("");
 
-  const pricing = React.useMemo(() => computeQuotePricing(values), [values]);
-  const service = getServiceByType(values.serviceType);
   const placementMeta = values.placement ? getPlacementMeta(values.placement) : null;
-  const sizeWarning = placementMeta && values.sizeInches > placementMeta.maxSizeIn
-    ? `${placementMeta.label} typically fits up to ${placementMeta.maxSizeIn}". Current size may require special handling.`
-    : null;
+  const missing = isOrder && step === 5 ? getMissingFields(values, ctx) : [];
 
   function update<K extends keyof QuoteOrderInput>(key: K, val: QuoteOrderInput[K]) {
     setValues((cur) => ({ ...cur, [key]: val }));
   }
 
-  function updateService(nextType: ServiceType) {
-    setValues((cur) => ({
-      ...cur,
-      serviceType: nextType,
-      nicheSlug: getDefaultNiche(nextType),
-      threeDPuff: nextType === "EMBROIDERY_DIGITIZING" ? cur.threeDPuff : false,
-      smallText: nextType === "EMBROIDERY_DIGITIZING" ? cur.smallText : false,
-    }));
-  }
-
-  function toggleFileFormat(fmt: string) {
-    const fmts = values.fileFormats as string[];
-    const next = fmts.includes(fmt) ? fmts.filter((f) => f !== fmt) : [...fmts, fmt];
-    update("fileFormats", next as QuoteOrderInput["fileFormats"]);
-  }
-
-  function handlePlacementChange(val: string) {
-    const meta = getPlacementMeta(val);
-    update("placement", val);
+  function handleDesignType(dt: string) {
+    setDesignType(dt);
+    const placement = mapDesignTypeToPlacement(dt);
+    const svc = mapDesignTypeToService(dt);
+    const meta = getPlacementMeta(placement);
+    update("placement", placement);
+    update("serviceType", svc);
+    update("nicheSlug", getDefaultNiche(svc));
     update("is3dPuffJacketBack", meta.is3DPuffJacketBack);
-    // Auto-clamp size to placement max if current is over
-    if (values.sizeInches > meta.maxSizeIn) {
-      update("sizeInches", meta.maxSizeIn);
+    if (dt === "PUFF_LEFT_CHEST" || dt === "PUFF_HAT" || dt === "PUFF_JACKET_BACK") {
+      update("threeDPuff", true);
+    }
+    if (meta.maxSizeIn && (values.designHeightIn ?? 0) > meta.maxSizeIn) {
+      update("designHeightIn", meta.maxSizeIn);
     }
   }
 
@@ -150,17 +254,53 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
     window.setTimeout(() => setSavingState(""), 1800);
   }
 
-  async function submitForm(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function submitForm() {
     setSubmitState({ type: "idle", text: "" });
     setOrderResult(null);
 
     const parsed = quoteOrderSchema.safeParse(values);
     if (!parsed.success) {
-      setSubmitState({ type: "error", text: "Please complete all required fields." });
+      const issues = parsed.error.issues.map((i) => i.path.join(".")).join(", ");
+      setSubmitState({ type: "error", text: `Missing fields: ${issues || "check required fields"}` });
       return;
     }
 
+    if (ctx === "guest" && isOrder) {
+      // Guest order → use guest API
+      const res = await fetch("/api/guest/order", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          name: values.customerName,
+          email: values.email,
+          phone: values.companyName || undefined,
+          serviceType: values.serviceType,
+          designTitle: values.designTitle,
+          placement: values.placement,
+          fabricType: values.fabricType,
+          designHeightIn: values.designHeightIn,
+          designWidthIn: values.designWidthIn,
+          quantity: values.quantity,
+          colorQuantity: values.colorQuantity,
+          turnaround: values.turnaround,
+          notes: values.notes,
+          specialInstructions: values.specialInstructions,
+          referenceFiles: refFiles,
+        }),
+      });
+
+      const result = (await res.json()) as { ok: boolean; message?: string; orderNumber?: string };
+      if (!res.ok || !result.ok) {
+        setSubmitState({ type: "error", text: result.message ?? "Unable to submit." });
+        return;
+      }
+      window.localStorage.removeItem(draftKey);
+      setSubmitState({ type: "success", text: result.message ?? "Submitted." });
+      if (result.orderNumber) setOrderResult({ orderNumber: result.orderNumber, isFreeDesign: false });
+      return;
+    }
+
+    // Client order or quote → use authenticated API
     const endpoint = mode === "quote" ? "/api/quote" : "/api/order";
     const res = await fetch(endpoint, {
       method: "POST",
@@ -190,464 +330,623 @@ export function QuoteOrderBuilder({ mode }: { mode: BuilderMode }) {
     }
   }
 
+  /* ── Success screen ───────────────────────────────────────────── */
+
   if (orderResult) {
     return (
-      <main className="relative min-h-screen overflow-hidden bg-[#070816] text-white flex items-center justify-center px-4">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(83,173,255,0.22),transparent_20%),radial-gradient(circle_at_bottom_right,rgba(190,90,255,0.20),transparent_24%)]" />
-        <section className="relative z-10 w-full max-w-lg rounded-[2rem] border border-white/10 bg-white/[0.08] p-8 text-center shadow-[0_30px_120px_rgba(0,0,0,0.5)] backdrop-blur-2xl">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-500/10">
-            <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+      <main className="relative flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.12),transparent_40%),radial-gradient(circle_at_bottom_right,hsl(var(--accent)/0.10),transparent_35%)]" />
+        <section className="relative z-10 w-full max-w-lg rounded-[2rem] border border-border/60 bg-card/80 p-8 text-center shadow-2xl backdrop-blur-2xl">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10">
+            <CheckCircle2 className="h-8 w-8 text-emerald-500" />
           </div>
           {orderResult.isFreeDesign && (
-            <div className="mb-4 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-2 text-sm text-amber-200">
-              Your first design is <strong>on us!</strong> Free design applied.
+            <div className="mb-4 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-600 dark:text-amber-300">
+              <Sparkles className="mr-1.5 inline h-3.5 w-3.5" />
+              Your first design is on us! Free design applied.
             </div>
           )}
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-foreground">
             {mode === "quote" ? "Quote request submitted!" : "Order confirmed!"}
           </h2>
-          <p className="mt-2 text-sm text-white/60">{submitState.text}</p>
-          <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.05] p-4">
-            <div className="text-xs uppercase tracking-[0.2em] text-white/45">Reference number</div>
-            <div className="mt-2 font-mono text-xl font-bold text-white">{orderResult.orderNumber}</div>
+          <p className="mt-2 text-sm text-muted-foreground">{submitState.text}</p>
+          <div className="mt-5 rounded-2xl border border-border/60 bg-muted/30 p-4">
+            <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Reference number</div>
+            <div className="mt-2 font-mono text-xl font-bold text-foreground">{orderResult.orderNumber}</div>
           </div>
           <div className="mt-6 flex gap-3">
-            <Link
-              href={"/client/orders" as Route}
-              className="flex-1 rounded-full bg-white py-3 text-sm font-bold text-slate-950 transition hover:bg-white/90"
-            >
-              View My Orders
-            </Link>
-            <button
-              onClick={() => { setOrderResult(null); setValues(buildDefaultValues(mode)); }}
-              className="flex-1 rounded-full border border-white/10 bg-white/[0.05] py-3 text-sm text-white transition hover:bg-white/[0.1]"
+            <Button asChild variant="default" shape="pill" className="flex-1">
+              <Link href={"/client/orders" as Route}>View My Orders</Link>
+            </Button>
+            <Button
+              variant="outline"
+              shape="pill"
+              className="flex-1"
+              onClick={() => { setOrderResult(null); setValues(buildDefaultValues(mode)); setStep(1); }}
             >
               New Order
-            </button>
+            </Button>
           </div>
         </section>
       </main>
     );
   }
 
-  return (
-    <main className="relative min-h-screen overflow-hidden bg-[#070816] text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(83,173,255,0.22),transparent_20%),radial-gradient(circle_at_bottom_right,rgba(190,90,255,0.20),transparent_24%),linear-gradient(180deg,#07101f_0%,#090611_40%,#0a0d1c_100%)]" />
-      <div className="relative z-10 px-4 py-10 md:px-8">
-        <div className="mx-auto max-w-7xl">
+  /* ── Quote mode (existing simplified form) ────────────────────── */
 
-          {/* Header */}
-          <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div className="text-sm uppercase tracking-[0.22em] text-white/45">
-                {mode === "quote" ? "Get a quote" : "Place an order"}
-              </div>
-              <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">
-                {mode === "quote" ? "Request a Quote" : "Start a Direct Order"}
-              </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-white/60 md:text-base">
-                {mode === "quote"
-                  ? "Tell us about your artwork and we'll send a firm price within one business day."
-                  : "Submit your artwork and production requirements — we'll confirm turnaround and start production."}
+  if (!isOrder) {
+    return (
+      <main className="relative min-h-screen bg-background text-foreground">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.08),transparent_35%),radial-gradient(circle_at_bottom_right,hsl(var(--accent)/0.06),transparent_30%)]" />
+        <div className="relative z-10 px-4 py-10 md:px-8">
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-8">
+              <div className="section-eyebrow">Get a quote</div>
+              <h1 className="mt-2 text-4xl font-semibold tracking-tight">Request a Quote</h1>
+              <p className="mt-3 max-w-2xl text-muted-foreground">
+                Tell us about your artwork and we&apos;ll send a firm price within one business day.
               </p>
             </div>
-            <div className="flex gap-3">
-              <Link href={"/quote" as Route} className={`inline-flex h-11 items-center rounded-full border px-5 text-sm font-medium transition ${mode === "quote" ? "border-white/20 bg-white text-slate-950" : "border-white/10 bg-white/5 text-white hover:bg-white/10"}`}>
-                Quote
-              </Link>
-              <Link href={"/order" as Route} className={`inline-flex h-11 items-center rounded-full border px-5 text-sm font-medium transition ${mode === "order" ? "border-white/20 bg-white text-slate-950" : "border-white/10 bg-white/5 text-white hover:bg-white/10"}`}>
-                Order
-              </Link>
-            </div>
+
+            <form onSubmit={(e) => { e.preventDefault(); submitForm(); }} className="space-y-8">
+              <Card className="p-6">
+                <CardContent className="space-y-4">
+                  <h3 className="font-semibold">Service</h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Service type <span className="text-destructive">*</span></label>
+                      <select value={values.serviceType} onChange={(e) => {
+                        const t = e.target.value as ServiceType;
+                        update("serviceType", t);
+                        update("nicheSlug", getDefaultNiche(t));
+                      }} className="h-11 rounded-2xl border border-input bg-card/70 px-4 text-sm">
+                        {serviceCatalog.map((item) => (
+                          <option key={item.type} value={item.type}>{item.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Category <span className="text-destructive">*</span></label>
+                      <select value={values.nicheSlug} onChange={(e) => update("nicheSlug", e.target.value)} className="h-11 rounded-2xl border border-input bg-card/70 px-4 text-sm">
+                        {getNichesForService(values.serviceType).map((item) => (
+                          <option key={item.slug} value={item.slug}>{item.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="p-6">
+                <CardContent className="space-y-4">
+                  <h3 className="font-semibold">Contact</h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Name <span className="text-destructive">*</span></label>
+                      <Input value={values.customerName} onChange={(e) => update("customerName", e.target.value)} placeholder="Alex Chen" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Email <span className="text-destructive">*</span></label>
+                      <Input type="email" value={values.email} onChange={(e) => update("email", e.target.value)} placeholder="studio@example.com" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Design title <span className="text-destructive">*</span></label>
+                      <Input value={values.designTitle} onChange={(e) => update("designTitle", e.target.value)} placeholder="Spring cap front logo" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Company</label>
+                      <Input value={values.companyName ?? ""} onChange={(e) => update("companyName", e.target.value)} placeholder="Your studio or brand" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="p-6">
+                <CardContent className="space-y-4">
+                  <h3 className="font-semibold">Details</h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Placement</label>
+                      <select value={values.placement ?? ""} onChange={(e) => {
+                        const meta = getPlacementMeta(e.target.value);
+                        update("placement", e.target.value);
+                        update("is3dPuffJacketBack", meta.is3DPuffJacketBack);
+                      }} className="h-11 rounded-2xl border border-input bg-card/70 px-4 text-sm">
+                        <option value="">— Select —</option>
+                        {PLACEMENT_OPTIONS.map((p) => (
+                          <option key={p.value} value={p.value}>{p.label} (max {p.maxSizeIn}&Prime;)</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Fabric</label>
+                      <select value={values.fabricType ?? ""} onChange={(e) => update("fabricType", e.target.value)} className="h-11 rounded-2xl border border-input bg-card/70 px-4 text-sm">
+                        <option value="">— Select —</option>
+                        {FABRIC_TYPES.map((f) => (<option key={f} value={f}>{f}</option>))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Height (in)</label>
+                      <Input type="number" min={0.5} max={24} step={0.25} value={values.designHeightIn ?? ""} onChange={(e) => update("designHeightIn", e.target.value ? Number(e.target.value) : undefined)} placeholder="3.5" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Width (in)</label>
+                      <Input type="number" min={0.5} max={24} step={0.25} value={values.designWidthIn ?? ""} onChange={(e) => update("designWidthIn", e.target.value ? Number(e.target.value) : undefined)} placeholder="4.0" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="p-6">
+                <CardContent className="space-y-3">
+                  <h3 className="font-semibold">Reference Files</h3>
+                  <p className="text-xs text-muted-foreground">Upload your artwork or reference images. Optional but helps us get started faster.</p>
+                  <ReferenceFileUploader files={refFiles} onChange={setRefFiles} maxFiles={10} />
+                </CardContent>
+              </Card>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <Button type="button" variant="outline" shape="pill" onClick={saveDraft}>
+                  <Save className="h-4 w-4" />
+                  Save draft
+                </Button>
+                <Button type="submit" variant="premium" shape="pill" size="lg">
+                  Submit Quote Request
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+                {savingState && <span className="text-sm text-emerald-500">{savingState}</span>}
+                {submitState.type === "error" && <span className="text-sm text-destructive">{submitState.text}</span>}
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  /* ── Order mode: 5-step wizard ────────────────────────────────── */
+
+  return (
+    <main className="relative min-h-screen bg-background text-foreground">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.07),transparent_35%),radial-gradient(circle_at_bottom_right,hsl(var(--accent)/0.05),transparent_30%)]" />
+      <div className="relative z-10 px-4 py-8 md:px-8 md:py-10">
+        <div className="mx-auto max-w-3xl">
+
+          {/* Header */}
+          <div className="mb-2 text-center">
+            <p className="section-eyebrow">Place an order</p>
+            <h1 className="mt-1 text-3xl font-semibold tracking-tight md:text-4xl">Start Your Order</h1>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-            <form onSubmit={submitForm} className="rounded-[2rem] border border-white/10 bg-white/[0.08] p-6 shadow-[0_30px_120px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
-              <div className="grid gap-8">
+          <StepIndicator step={step} onStepClick={setStep} />
 
-                {/* ── Service & Niche ─────────────────────────────────── */}
+          {/* ── Guest banner ── */}
+          {ctx === "guest" && (
+            <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <SectionLabel>Service</SectionLabel>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Service type <span className="text-red-400">*</span></span>
-                      <select value={values.serviceType} onChange={(e) => updateService(e.target.value as ServiceType)} className={InputClass()}>
-                        {serviceCatalog.map((item) => (
-                          <option key={item.type} value={item.type} className="text-slate-950">{item.label}</option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Niche / category <span className="text-red-400">*</span></span>
-                      <select value={values.nicheSlug} onChange={(e) => update("nicheSlug", e.target.value)} className={InputClass()}>
-                        {getNichesForService(values.serviceType).map((item) => (
-                          <option key={item.slug} value={item.slug} className="text-slate-950">{item.label}</option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
+                  <h3 className="font-semibold text-foreground">
+                    <Sparkles className="mr-1.5 inline h-4 w-4 text-primary" />
+                    Login & Get Your First Order Free
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    New clients get their first digitizing order free. Log in or create an account before ordering to claim it.
+                  </p>
                 </div>
-
-                {/* ── Contact ─────────────────────────────────────────── */}
-                <div>
-                  <SectionLabel>Contact</SectionLabel>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Your name <span className="text-red-400">*</span></span>
-                      <input value={values.customerName} onChange={(e) => update("customerName", e.target.value)} placeholder="Alex Chen" className={InputClass()} />
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Email <span className="text-red-400">*</span></span>
-                      <input type="email" value={values.email} onChange={(e) => update("email", e.target.value)} placeholder="studio@example.com" className={InputClass()} />
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Company name</span>
-                      <input value={values.companyName ?? ""} onChange={(e) => update("companyName", e.target.value)} placeholder="Your studio or brand" className={InputClass()} />
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Design title <span className="text-red-400">*</span></span>
-                      <input value={values.designTitle} onChange={(e) => update("designTitle", e.target.value)} placeholder="Spring cap front logo" className={InputClass()} />
-                    </label>
-                  </div>
+                <div className="flex shrink-0 gap-2">
+                  <Button asChild variant="outline" shape="pill" size="sm">
+                    <Link href="/login?next=/client/order">
+                      <LogIn className="h-3.5 w-3.5" />
+                      Login
+                    </Link>
+                  </Button>
+                  <Button asChild variant="default" shape="pill" size="sm">
+                    <Link href="/register?next=/client/order">
+                      <UserPlus className="h-3.5 w-3.5" />
+                      Create Account
+                    </Link>
+                  </Button>
                 </div>
+              </div>
+              <p className="mt-3 text-xs text-muted-foreground">
+                You can still continue as a guest and receive updates by email.
+              </p>
+            </div>
+          )}
 
-                {/* ── Design Specifications ───────────────────────────── */}
-                <div>
-                  <SectionLabel>Design Specifications</SectionLabel>
-                  <div className="grid gap-4 md:grid-cols-2">
+          {/* ── Client identity card ── */}
+          {ctx === "client" && user && (
+            <div className="mb-6 flex items-center gap-3 rounded-2xl border border-border/60 bg-card/70 px-4 py-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-bold text-primary">
+                <User className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Ordering as: {user.name || user.email}</p>
+                <p className="text-xs text-muted-foreground">Welcome! Your first digitizing order is free.</p>
+              </div>
+            </div>
+          )}
 
-                    {/* Placement */}
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Placement</span>
-                      <select value={values.placement ?? ""} onChange={(e) => handlePlacementChange(e.target.value)} className={InputClass()}>
-                        <option value="" className="text-slate-950">— Select placement —</option>
-                        {PLACEMENT_OPTIONS.map((p) => (
-                          <option key={p.value} value={p.value} className="text-slate-950">
-                            {p.label} (max {p.maxSizeIn}&Prime;)
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-
-                    {/* Fabric type */}
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Fabric type</span>
-                      <select value={values.fabricType ?? ""} onChange={(e) => update("fabricType", e.target.value)} className={InputClass()}>
-                        <option value="" className="text-slate-950">— Select fabric —</option>
-                        {FABRIC_TYPES.map((f) => (
-                          <option key={f} value={f} className="text-slate-950">{f}</option>
-                        ))}
-                      </select>
-                    </label>
-
-                    {/* Design dimensions */}
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Design height (inches)</span>
-                      <input
-                        type="number" min={0.5} max={24} step={0.25}
-                        value={values.designHeightIn ?? ""}
-                        onChange={(e) => update("designHeightIn", e.target.value ? Number(e.target.value) : undefined)}
-                        placeholder="e.g. 3.5"
-                        className={InputClass()}
-                      />
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Design width (inches)</span>
-                      <input
-                        type="number" min={0.5} max={24} step={0.25}
-                        value={values.designWidthIn ?? ""}
-                        onChange={(e) => update("designWidthIn", e.target.value ? Number(e.target.value) : undefined)}
-                        placeholder="e.g. 4.0"
-                        className={InputClass()}
-                      />
-                    </label>
-                  </div>
-
-                  {/* Size warning */}
-                  {sizeWarning && (
-                    <div className="mt-3 flex items-start gap-2 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
-                      <Info className="mt-0.5 h-4 w-4 shrink-0" />
-                      {sizeWarning}
-                    </div>
-                  )}
-
-                  {/* 3D Puff Jacket Back info */}
-                  {values.is3dPuffJacketBack && (
-                    <div className="mt-3 flex items-start gap-2 rounded-2xl border border-violet-400/20 bg-violet-500/10 px-4 py-3 text-sm text-violet-200">
-                      <Zap className="mt-0.5 h-4 w-4 shrink-0" />
-                      <span><strong>3D Puff Jacket Back</strong> is priced as a premium separate service. Flat rate applied instead of standard per-inch pricing.</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* ── Production Details ──────────────────────────────── */}
-                <div>
-                  <SectionLabel>Production Details</SectionLabel>
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Quantity</span>
-                      <input type="number" min={1} value={values.quantity} onChange={(e) => update("quantity", Number(e.target.value || 1))} className={InputClass()} />
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Size (inches)</span>
-                      <input type="number" min={0.5} step={0.25} value={values.sizeInches} onChange={(e) => update("sizeInches", Number(e.target.value || 1))} className={InputClass()} />
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Thread colors</span>
-                      <input type="number" min={1} max={16} value={values.colorCount} onChange={(e) => update("colorCount", Number(e.target.value || 1))} className={InputClass()} />
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Color quantity</span>
-                      <input type="number" min={0} max={50} value={values.colorQuantity ?? ""} onChange={(e) => update("colorQuantity", e.target.value ? Number(e.target.value) : undefined)} placeholder="Total # colors" className={InputClass()} />
-                    </label>
-                  </div>
-
-                  <div className="mt-4 grid gap-4 md:grid-cols-2">
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Stitch count (if known)</span>
-                      <input type="number" min={0} step={100} value={values.stitchCount ?? ""} onChange={(e) => update("stitchCount", e.target.value ? Number(e.target.value) : undefined)} placeholder="e.g. 8000" className={InputClass()} />
-                      {values.stitchCount ? (
-                        <span className="text-xs text-white/45">Stitch-plan pricing: ${((values.stitchCount / 1000) * 1).toFixed(2)} base (1,000 stitches = $1.00)</span>
-                      ) : null}
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Complexity</span>
-                      <select value={values.complexity} onChange={(e) => update("complexity", e.target.value as QuoteOrderInput["complexity"])} className={InputClass()}>
-                        <option value="LOW" className="text-slate-950">Low — simple shapes, few details</option>
-                        <option value="MEDIUM" className="text-slate-950">Medium — moderate detail</option>
-                        <option value="HIGH" className="text-slate-950">High — fine detail, small text</option>
-                      </select>
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Thread brand / color spec</span>
-                      <input value={values.threadBrand ?? ""} onChange={(e) => update("threadBrand", e.target.value)} placeholder="e.g. Madeira, Robison-Anton" className={InputClass()} />
-                    </label>
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Trims / underlay details</span>
-                      <input value={values.trims ?? ""} onChange={(e) => update("trims", e.target.value)} placeholder="e.g. zig-zag underlay, 2mm trim" className={InputClass()} />
-                    </label>
-                  </div>
-
-                  <div className="mt-4">
-                    <label className={LabelClass()}>
-                      <span className="text-sm text-white/70">Color / thread details</span>
-                      <textarea value={values.colorDetails ?? ""} onChange={(e) => update("colorDetails", e.target.value)} placeholder="Describe thread colors, Pantone references, or color matching notes." className="min-h-[80px] w-full rounded-[1.5rem] border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-white/35 focus:border-white/25" />
-                    </label>
-                  </div>
-                </div>
-
-                {/* ── Add-ons ─────────────────────────────────────────── */}
-                <div>
-                  <SectionLabel>Add-ons & Options</SectionLabel>
-                  <div className="grid gap-3 md:grid-cols-3">
-                    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-white/80 cursor-pointer hover:bg-white/[0.08] transition">
-                      <input type="checkbox" checked={values.sourceCleanup} onChange={(e) => update("sourceCleanup", e.target.checked)} className="accent-indigo-400" />
-                      <span>Source cleanup <span className="text-white/40">(+$8)</span></span>
-                    </label>
-                    {values.serviceType === "EMBROIDERY_DIGITIZING" && (
-                      <>
-                        <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-white/80 cursor-pointer hover:bg-white/[0.08] transition">
-                          <input type="checkbox" checked={values.smallText} onChange={(e) => update("smallText", e.target.checked)} className="accent-indigo-400" />
-                          <span>Small text work <span className="text-white/40">(+$6)</span></span>
-                        </label>
-                        <label className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm cursor-pointer transition ${values.is3dPuffJacketBack ? "opacity-40 pointer-events-none border-white/10 bg-white/[0.05] text-white/50" : "border-white/10 bg-white/[0.05] text-white/80 hover:bg-white/[0.08]"}`}>
-                          <input type="checkbox" checked={values.threeDPuff} onChange={(e) => update("threeDPuff", e.target.checked)} disabled={values.is3dPuffJacketBack} className="accent-indigo-400" />
-                          <span>3D puff <span className="text-white/40">(+$10)</span></span>
-                        </label>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* ── Turnaround ──────────────────────────────────────── */}
-                <div>
-                  <SectionLabel>Turnaround</SectionLabel>
-                  <div className="grid gap-3 md:grid-cols-3">
-                    {(["STANDARD", "URGENT", "SAME_DAY"] as TurnaroundType[]).map((item) => (
-                      <button key={item} type="button" onClick={() => update("turnaround", item)}
-                        className={`rounded-[1.5rem] border p-4 text-left transition ${values.turnaround === item ? "border-white/20 bg-white text-slate-950" : "border-white/10 bg-white/[0.05] text-white hover:bg-white/[0.08]"}`}>
-                        <div className="text-sm font-semibold">{item === "STANDARD" ? "Standard" : item === "URGENT" ? "Urgent" : "Same Day"}</div>
-                        <div className={`mt-1 text-xs ${values.turnaround === item ? "text-slate-600" : "text-white/50"}`}>
-                          {item === "STANDARD" ? "Default SLA (24–48h)" : item === "URGENT" ? "Rush (+$12)" : "Highest priority (+$24)"}
+          {/* ── Step 1: Design Type ── */}
+          {step === 1 && (
+            <Card className="p-6 md:p-8">
+              <CardContent>
+                <h2 className="mb-1 text-xl font-semibold">Choose Your Design Type</h2>
+                <p className="mb-5 text-sm text-muted-foreground">Select the type of embroidery design you need.</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {DESIGN_TYPES.map((dt) => {
+                    const selected = designType === dt.value;
+                    return (
+                      <button
+                        key={dt.value}
+                        type="button"
+                        onClick={() => handleDesignType(dt.value)}
+                        className={cn(
+                          "flex items-start gap-4 rounded-2xl border p-4 text-left transition-all",
+                          selected
+                            ? "border-primary bg-primary/10 shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.2)]"
+                            : "border-border/60 bg-card/70 hover:border-border hover:bg-card"
+                        )}
+                      >
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted text-xl">
+                          {dt.icon}
+                        </span>
+                        <div>
+                          <div className="font-semibold text-foreground">{dt.label}</div>
+                          <div className="mt-0.5 text-xs text-muted-foreground">{dt.desc}</div>
                         </div>
                       </button>
-                    ))}
+                    );
+                  })}
+                </div>
+                <div className="mt-6 flex justify-end">
+                  <Button onClick={() => setStep(2)} disabled={!designType} variant="premium" shape="pill" size="lg">
+                    Continue
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ── Step 2: Size & Placement ── */}
+          {step === 2 && (
+            <Card className="p-6 md:p-8">
+              <CardContent>
+                <h2 className="mb-1 text-xl font-semibold">Size & Placement</h2>
+                <p className="mb-5 text-sm text-muted-foreground">
+                  Not sure about size? Upload your logo and we&apos;ll guide you.
+                </p>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-medium">Placement <span className="text-destructive">*</span></label>
+                    <select
+                      value={values.placement ?? ""}
+                      onChange={(e) => {
+                        const meta = getPlacementMeta(e.target.value);
+                        update("placement", e.target.value);
+                        update("is3dPuffJacketBack", meta.is3DPuffJacketBack);
+                      }}
+                      className="h-11 rounded-2xl border border-input bg-card/70 px-4 text-sm"
+                    >
+                      <option value="">— Select placement —</option>
+                      {PLACEMENT_OPTIONS.map((p) => (
+                        <option key={p.value} value={p.value}>{p.label} (max {p.maxSizeIn}&Prime;)</option>
+                      ))}
+                    </select>
+                    {placementMeta && (
+                      <p className="text-xs text-muted-foreground">Max recommended: {placementMeta.maxSizeIn}&Prime;</p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-medium">Fabric type</label>
+                    <select value={values.fabricType ?? ""} onChange={(e) => update("fabricType", e.target.value)} className="h-11 rounded-2xl border border-input bg-card/70 px-4 text-sm">
+                      <option value="">— Select fabric —</option>
+                      {FABRIC_TYPES.map((f) => (<option key={f} value={f}>{f}</option>))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-medium">Height (inches)</label>
+                    <Input type="number" min={0.5} max={24} step={0.25} value={values.designHeightIn ?? ""} onChange={(e) => update("designHeightIn", e.target.value ? Number(e.target.value) : undefined)} placeholder="e.g. 3.5" />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-medium">Width (inches)</label>
+                    <Input type="number" min={0.5} max={24} step={0.25} value={values.designWidthIn ?? ""} onChange={(e) => update("designWidthIn", e.target.value ? Number(e.target.value) : undefined)} placeholder="e.g. 4.0" />
                   </div>
                 </div>
 
-                {/* ── Output Formats ──────────────────────────────────── */}
-                <div>
-                  <SectionLabel>Output File Formats</SectionLabel>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                    {FILE_FORMAT_OPTIONS.map((fmt) => {
-                      const selected = (values.fileFormats as string[]).includes(fmt.value);
-                      return (
-                        <button key={fmt.value} type="button" onClick={() => toggleFileFormat(fmt.value)}
-                          className={`rounded-2xl border px-3 py-2 text-left text-xs transition ${selected ? "border-indigo-400/40 bg-indigo-500/15 text-indigo-200" : "border-white/10 bg-white/[0.04] text-white/60 hover:bg-white/[0.08]"}`}>
-                          <div className="font-bold">{fmt.value}</div>
-                          <div className="text-[10px] opacity-70">{fmt.label.split("(")[1]?.replace(")", "") ?? ""}</div>
-                        </button>
-                      );
-                    })}
+                {values.is3dPuffJacketBack && (
+                  <div className="mt-4 flex items-start gap-2 rounded-2xl border border-violet-500/20 bg-violet-500/10 px-4 py-3 text-sm text-violet-600 dark:text-violet-300">
+                    <Zap className="mt-0.5 h-4 w-4 shrink-0" />
+                    3D Puff Jacket Back is priced as a premium separate service.
                   </div>
-                  <div className="mt-2 text-xs text-white/40">Select all output formats you need. DST and PES included by default.</div>
-                </div>
+                )}
 
-                {/* ── Advanced / Special Instructions ─────────────────── */}
-                <div>
-                  <button type="button" onClick={() => setShowAdvanced(!showAdvanced)}
-                    className="flex items-center gap-2 text-sm text-white/55 transition hover:text-white">
-                    <span className={`transition-transform ${showAdvanced ? "rotate-90" : ""}`}>▶</span>
-                    {showAdvanced ? "Hide" : "Show"} advanced options
+                {/* ── Advanced Options ── */}
+                <div className="mt-6 border-t border-border/60 pt-5">
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="flex w-full items-center justify-between text-sm font-medium text-muted-foreground transition hover:text-foreground"
+                  >
+                    <div>
+                      <span>Advanced Embroidery Options</span>
+                      <p className="text-xs font-normal text-muted-foreground">Optional details for professional clients or exact production requirements.</p>
+                    </div>
+                    <ChevronDown className={cn("h-4 w-4 transition-transform", showAdvanced && "rotate-180")} />
                   </button>
 
                   {showAdvanced && (
-                    <div className="mt-4 grid gap-4">
-                      <label className={LabelClass()}>
-                        <span className="text-sm text-white/70">Special instructions</span>
-                        <textarea value={values.specialInstructions ?? ""} onChange={(e) => update("specialInstructions", e.target.value)} placeholder="Any specific production details, machine preferences, stitch direction, pull compensation notes, etc." className="min-h-[100px] w-full rounded-[1.5rem] border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-white/35 focus:border-white/25" />
-                      </label>
-                      <label className={LabelClass()}>
-                        <span className="text-sm text-white/70">General notes</span>
-                        <textarea value={values.notes ?? ""} onChange={(e) => update("notes", e.target.value)} placeholder="Placement, garment type, revision instructions, or anything else production should know." className="min-h-[100px] w-full rounded-[1.5rem] border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-white/35 focus:border-white/25" />
-                      </label>
+                    <div className="mt-4 grid gap-4 md:grid-cols-2">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium">Quantity</label>
+                        <Input type="number" min={1} max={5000} value={values.quantity} onChange={(e) => update("quantity", Number(e.target.value || 1))} />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium">Color quantity</label>
+                        <Input type="number" min={0} max={50} value={values.colorQuantity ?? ""} onChange={(e) => update("colorQuantity", e.target.value ? Number(e.target.value) : undefined)} placeholder="Total # colors" />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium">Thread brand</label>
+                        <Input value={values.threadBrand ?? ""} onChange={(e) => update("threadBrand", e.target.value)} placeholder="e.g. Madeira, Robison-Anton" />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium">Trims / underlay</label>
+                        <Input value={values.trims ?? ""} onChange={(e) => update("trims", e.target.value)} placeholder="e.g. zig-zag underlay" />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium">Stitch count (if known)</label>
+                        <Input type="number" min={0} step={100} value={values.stitchCount ?? ""} onChange={(e) => update("stitchCount", e.target.value ? Number(e.target.value) : undefined)} placeholder="e.g. 8000" />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium">Thread colors</label>
+                        <Input type="number" min={1} max={16} value={values.colorCount} onChange={(e) => update("colorCount", Number(e.target.value || 1))} />
+                      </div>
+                      <div className="flex flex-col gap-1.5 md:col-span-2">
+                        <label className="text-sm font-medium">Color / thread details</label>
+                        <textarea
+                          value={values.colorDetails ?? ""}
+                          onChange={(e) => update("colorDetails", e.target.value)}
+                          placeholder="Describe thread colors, Pantone references, or color matching notes."
+                          className="min-h-[72px] w-full rounded-2xl border border-border/80 bg-card/70 px-4 py-2.5 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
 
-                {/* ── Service Policy ───────────────────────────────────── */}
-                <div className="rounded-[1.5rem] border border-indigo-400/20 bg-gradient-to-br from-indigo-500/[0.07] to-white/[0.03] p-5">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-indigo-300/80">
-                    <Package className="h-3.5 w-3.5" />
-                    Our Service Policy
+                {/* Service policy */}
+                <div className="mt-6 rounded-2xl border border-primary/15 bg-primary/5 p-4">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary/80">
+                    <Info className="h-3.5 w-3.5" />
+                    Service Policy
                   </div>
-                  <ul className="mt-4 grid gap-2.5">
-                    <li className="flex items-start gap-3 text-sm text-white/70">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/10 text-[10px] font-bold text-emerald-400">✓</span>
-                      <span><strong className="text-white/90">Unlimited revisions</strong> — we work with you until you are completely satisfied.</span>
+                  <ul className="mt-3 grid gap-2">
+                    <li className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-[10px] font-bold text-emerald-500">✓</span>
+                      LC to LC same-size adjustment and color change is free
                     </li>
-                    <li className="flex items-start gap-3 text-sm text-white/70">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/10 text-[10px] font-bold text-emerald-400">✓</span>
-                      <span><strong className="text-white/90">LC to LC same-size adjustment is free</strong> — no extra charge for minor size tweaks within the same placement.</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-sm text-white/70">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/10 text-[10px] font-bold text-emerald-400">✓</span>
-                      <span><strong className="text-white/90">Color change is free</strong> — thread color updates are included at no cost.</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-sm text-white/70">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-amber-400/30 bg-amber-500/10 text-[10px] font-bold text-amber-400">!</span>
-                      <span><strong className="text-white/90">LC to Jacket Back = new design / new order</strong> — changing placement type requires a fresh order.</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-sm text-white/70">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-amber-400/30 bg-amber-500/10 text-[10px] font-bold text-amber-400">!</span>
-                      <span><strong className="text-white/90">Big size or placement changes may need a new order</strong> — major resizes or placement switches are treated as new designs.</span>
+                    <li className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-[10px] font-bold text-amber-500">!</span>
+                      LC to Jacket Back = new design / new order
                     </li>
                   </ul>
                 </div>
 
-                {/* ── Reference Files ─────────────────────────────────── */}
-                <div>
-                  <SectionLabel>Reference Files</SectionLabel>
-                  <p className="mb-3 text-xs text-white/45">
-                    Upload your artwork, logo files, or any reference images. Optional but helps us get started faster.
-                  </p>
-                  <ReferenceFileUploader
-                    files={refFiles}
-                    onChange={setRefFiles}
-                    maxFiles={10}
+                <div className="mt-6 flex justify-between">
+                  <Button onClick={() => setStep(1)} variant="ghost" shape="pill">
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                  <Button onClick={() => setStep(3)} disabled={!values.placement} variant="premium" shape="pill" size="lg">
+                    Continue
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ── Step 3: Delivery Speed ── */}
+          {step === 3 && (
+            <Card className="p-6 md:p-8">
+              <CardContent>
+                <h2 className="mb-1 text-xl font-semibold">Delivery Speed</h2>
+                <p className="mb-5 text-sm text-muted-foreground">Choose how fast you need your design delivered.</p>
+
+                {/* First-order-free banner */}
+                <div className="mb-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-600 dark:text-amber-300">
+                  <Sparkles className="mr-1 inline h-3.5 w-3.5" />
+                  Your first order is free — choose any delivery speed.
+                </div>
+
+                <div className="grid gap-3">
+                  {DELIVERY_SPEEDS.map((ds) => {
+                    const selected = values.turnaround === ds.value;
+                    return (
+                      <button
+                        key={ds.value}
+                        type="button"
+                        onClick={() => update("turnaround", ds.value)}
+                        className={cn(
+                          "flex items-center justify-between rounded-2xl border p-4 text-left transition-all",
+                          selected
+                            ? "border-primary bg-primary/10 shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.2)]"
+                            : "border-border/60 bg-card/70 hover:border-border hover:bg-card"
+                        )}
+                      >
+                        <div>
+                          <div className="font-semibold">{ds.label}</div>
+                          <div className="text-sm text-muted-foreground">{ds.time} — {ds.desc}</div>
+                        </div>
+                        <Badge className={cn(selected ? "bg-primary/15 text-primary border-primary/20" : "bg-muted text-muted-foreground")}>
+                          Free for your first order
+                        </Badge>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-6 flex justify-between">
+                  <Button onClick={() => setStep(2)} variant="ghost" shape="pill">
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                  <Button onClick={() => setStep(4)} variant="premium" shape="pill" size="lg">
+                    Continue
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ── Step 4: Upload Design ── */}
+          {step === 4 && (
+            <Card className="p-6 md:p-8">
+              <CardContent>
+                <h2 className="mb-1 text-xl font-semibold">Upload Your Design</h2>
+                <p className="mb-5 text-sm text-muted-foreground">
+                  Upload your artwork, logo, or reference image. Supported: JPG, PNG, PDF, AI, EPS, SVG, PSD, ZIP.
+                </p>
+
+                <ReferenceFileUploader
+                  files={refFiles}
+                  onChange={setRefFiles}
+                  guestEmail={ctx === "guest" ? values.email : undefined}
+                  maxFiles={10}
+                />
+
+                {refFiles.length === 0 && (
+                  <div className="mt-4 flex items-start gap-2 rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0" />
+                    No files uploaded yet. You can skip this step and upload later — but uploading now helps us start faster.
+                  </div>
+                )}
+
+                <div className="mt-6 flex justify-between">
+                  <Button onClick={() => setStep(3)} variant="ghost" shape="pill">
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                  <Button onClick={() => setStep(5)} variant="premium" shape="pill" size="lg">
+                    Review Order
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ── Step 5: Review & Confirm ── */}
+          {step === 5 && (
+            <Card className="p-6 md:p-8">
+              <CardContent>
+                <h2 className="mb-1 text-xl font-semibold">Review & Confirm</h2>
+                <p className="mb-5 text-sm text-muted-foreground">Check your order details before submitting.</p>
+
+                {/* Guest contact fields */}
+                {ctx === "guest" && (
+                  <div className="mb-5 grid gap-4 rounded-2xl border border-border/60 bg-card/70 p-4 md:grid-cols-2">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Your name <span className="text-destructive">*</span></label>
+                      <Input value={values.customerName} onChange={(e) => update("customerName", e.target.value)} placeholder="Alex Chen" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Email <span className="text-destructive">*</span></label>
+                      <Input type="email" value={values.email} onChange={(e) => update("email", e.target.value)} placeholder="studio@example.com" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Phone / WhatsApp</label>
+                      <Input value={values.companyName ?? ""} onChange={(e) => update("companyName", e.target.value)} placeholder="+1 (555) 000-0000" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium">Design title <span className="text-destructive">*</span></label>
+                      <Input value={values.designTitle} onChange={(e) => update("designTitle", e.target.value)} placeholder="Spring cap front logo" />
+                    </div>
+                  </div>
+                )}
+
+                {/* Summary card */}
+                <div className="rounded-2xl border border-border/60 bg-card/70 p-5">
+                  <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Order Summary</h3>
+                  <div className="grid gap-2.5 text-sm">
+                    <SummaryRow label="Design type" value={DESIGN_TYPES.find((d) => d.value === designType)?.label ?? "—"} />
+                    <SummaryRow label="Placement" value={placementMeta?.label ?? "—"} />
+                    <SummaryRow label="Height" value={values.designHeightIn ? `${values.designHeightIn}"` : "—"} />
+                    <SummaryRow label="Width" value={values.designWidthIn ? `${values.designWidthIn}"` : "—"} />
+                    <SummaryRow label="Fabric" value={values.fabricType || "—"} />
+                    <SummaryRow label="Delivery" value={DELIVERY_SPEEDS.find((d) => d.value === values.turnaround)?.label ?? "Normal"} />
+                    <SummaryRow label="Files uploaded" value={refFiles.length > 0 ? `${refFiles.length} file(s)` : "None"} />
+                    {ctx === "client" && (
+                      <SummaryRow label="Account" value={user?.email ?? "—"} />
+                    )}
+                    <SummaryRow label="Pricing" value={<span className="font-semibold text-emerald-600 dark:text-emerald-400">Free — first order</span>} />
+                  </div>
+                </div>
+
+                {/* Special instructions */}
+                <div className="mt-4 flex flex-col gap-1.5">
+                  <label className="text-sm font-medium">Special Instructions</label>
+                  <textarea
+                    value={values.specialInstructions ?? ""}
+                    onChange={(e) => update("specialInstructions", e.target.value)}
+                    placeholder="Tell us anything important about colors, placement, size, or style."
+                    className="min-h-[90px] w-full rounded-2xl border border-border/80 bg-card/70 px-4 py-2.5 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
                   />
                 </div>
 
-                {/* ── Submit ──────────────────────────────────────────── */}
-                <section className="flex flex-wrap items-center gap-3">
-                  <button type="button" onClick={saveDraft} className="inline-flex h-12 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-5 text-sm text-white transition hover:bg-white/[0.08]">
-                    <Save className="h-4 w-4" />
-                    Save draft
-                  </button>
-                  <button type="submit" className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-slate-950 transition hover:bg-white/90">
-                    {mode === "quote" ? "Submit Quote Request" : "Submit Direct Order"}
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                  {savingState && <span className="text-sm text-emerald-300">{savingState}</span>}
-                  {submitState.type === "error" && <span className="text-sm text-red-300">{submitState.text}</span>}
-                </section>
-              </div>
-            </form>
-
-            {/* ── Sidebar ───────────────────────────────────────────────── */}
-            <aside className="grid gap-5 self-start">
-              <section className="rounded-[2rem] border border-white/10 bg-white/[0.08] p-5 backdrop-blur-2xl">
-                <div className="text-xs uppercase tracking-[0.22em] text-white/45">Service summary</div>
-                <h2 className="mt-2 text-xl font-semibold">{service.label}</h2>
-                <div className="mt-3 space-y-2">
-                  {service.hints.map((hint) => (
-                    <div key={hint} className="rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-2.5 text-xs text-white/65">{hint}</div>
-                  ))}
-                </div>
-              </section>
-
-              <section className="rounded-[2rem] border border-white/10 bg-white/[0.08] p-5 backdrop-blur-2xl">
-                <div className="text-xs uppercase tracking-[0.22em] text-white/45">Live pricing</div>
-                <div className="mt-4 space-y-2 text-sm text-white/70">
-                  <PriceRow label="Base" value={pricing.breakdown.base} />
-                  <PriceRow label="Quantity adj." value={pricing.breakdown.quantityAdj} />
-                  {pricing.breakdown.stitchAdj > 0
-                    ? <PriceRow label="Stitch plan" value={pricing.breakdown.stitchAdj} />
-                    : <PriceRow label="Size adj." value={pricing.breakdown.sizeAdj} />}
-                  <PriceRow label="Colors" value={pricing.breakdown.colorAdj} />
-                  <PriceRow label="Complexity" value={pricing.breakdown.complexityAdj} />
-                  <PriceRow label="Placement surcharge" value={pricing.breakdown.placementSurcharge} />
-                  <PriceRow label="Extras" value={pricing.breakdown.extras} />
-                  <PriceRow label="Turnaround" value={pricing.breakdown.turnaroundAdj} />
-                  {pricing.breakdown.bulkDiscountAdj < 0 && (
-                    <PriceRow label={`Bulk discount (${pricing.discountPercent}%)`} value={pricing.breakdown.bulkDiscountAdj} />
-                  )}
-                </div>
-                <div className="mt-4 rounded-[1.5rem] border border-emerald-400/15 bg-emerald-500/10 p-4">
-                  <div className="flex items-center gap-2 text-sm text-emerald-200">
-                    <CheckCircle2 className="h-4 w-4" />
-                    Estimated total
-                  </div>
-                  <div className="mt-1 text-4xl font-bold text-white">${pricing.total.toFixed(2)}</div>
-                  <div className="mt-1.5 text-xs text-white/45">Final invoice may vary based on artwork complexity.</div>
-                </div>
-                {values.quantity >= 5 && (
-                  <div className="mt-3 rounded-2xl border border-indigo-400/20 bg-indigo-500/10 px-4 py-2.5 text-xs text-indigo-200">
-                    Bulk discount applied: {pricing.discountPercent > 0 ? `${pricing.discountPercent}% off` : "5% discount threshold not yet reached"}
+                {/* Missing field warnings */}
+                {missing.length > 0 && (
+                  <div className="mt-4 flex items-start gap-2 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div>
+                      <strong>Missing before confirmation:</strong> {missing.join(", ")}
+                    </div>
                   </div>
                 )}
-              </section>
 
-              {placementMeta && (
-                <section className="rounded-[2rem] border border-white/10 bg-white/[0.08] p-5 backdrop-blur-2xl">
-                  <div className="text-xs uppercase tracking-[0.22em] text-white/45">Placement guide</div>
-                  <h3 className="mt-2 font-semibold">{placementMeta.label}</h3>
-                  <div className="mt-2 text-xs text-white/55">
-                    Maximum recommended size: <strong className="text-white/80">{placementMeta.maxSizeIn}&Prime;</strong>
+                {/* Submit error */}
+                {submitState.type === "error" && (
+                  <div className="mt-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                    {submitState.text}
                   </div>
-                  {placementMeta.is3DPuffJacketBack && (
-                    <div className="mt-2 rounded-xl border border-violet-400/20 bg-violet-500/10 px-3 py-2 text-xs text-violet-200">
-                      Premium service — flat rate applies
-                    </div>
-                  )}
-                </section>
-              )}
-            </aside>
-          </div>
+                )}
+
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex gap-2">
+                    <Button onClick={() => setStep(4)} variant="ghost" shape="pill">
+                      <ArrowLeft className="h-4 w-4" />
+                      Back
+                    </Button>
+                    <Button type="button" variant="outline" shape="pill" onClick={saveDraft}>
+                      <Save className="h-4 w-4" />
+                      Save draft
+                    </Button>
+                  </div>
+                  <Button
+                    onClick={submitForm}
+                    disabled={missing.length > 0}
+                    variant="premium"
+                    shape="pill"
+                    size="lg"
+                  >
+                    {missing.length > 0 ? "Complete missing details" : ctx === "guest" ? "Submit Order as Guest" : "Confirm & Submit"}
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+                {savingState && <p className="mt-2 text-sm text-emerald-500">{savingState}</p>}
+              </CardContent>
+            </Card>
+          )}
+
         </div>
       </div>
     </main>
   );
 }
 
-function PriceRow({ label, value }: { label: string; value: number }) {
-  if (value === 0) return null;
-  return (
-    <div className="flex items-center justify-between">
-      <span>{label}</span>
-      <span className={value < 0 ? "text-emerald-300" : undefined}>
-        {value < 0 ? `-$${Math.abs(value).toFixed(2)}` : `$${value.toFixed(2)}`}
-      </span>
-    </div>
-  );
-}
