@@ -252,7 +252,7 @@ All client pages live under `app/(client)/client/`. Requires `CLIENT` role.
 ### Dashboard `/client/dashboard`
 
 - Welcome panel with account summary
-- `DashboardActions` — quick action buttons (New Order, New Quote, View Files)
+- Inline `<Button>` components — quick action buttons (Place Order, Request Quote)
 
 ---
 

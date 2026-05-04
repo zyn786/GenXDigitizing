@@ -270,7 +270,7 @@ export function PortfolioManager({
               <span
                 className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
                   tab === t
-                    ? "bg-white/20 text-white"
+                    ? "bg-primary-foreground/20 text-primary-foreground"
                     : t === "pending"
                     ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
                     : "bg-secondary/80 text-muted-foreground"
