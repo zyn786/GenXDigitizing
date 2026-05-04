@@ -10,9 +10,10 @@ type Props = {
   mode: "order" | "quote";
   flowContext?: FlowContext;
   user?: { name?: string | null; email?: string | null };
+  isFirstOrder?: boolean;
 };
 
-export function QuoteOrderOverlay({ mode, flowContext, user }: Props) {
+export function QuoteOrderOverlay({ mode, flowContext, user, isFirstOrder }: Props) {
   const router = useRouter();
 
   return (
@@ -24,7 +25,7 @@ export function QuoteOrderOverlay({ mode, flowContext, user }: Props) {
       >
         <X className="h-5 w-5" />
       </button>
-      <QuoteOrderBuilder mode={mode} flowContext={flowContext} user={user} />
+      <QuoteOrderBuilder mode={mode} flowContext={flowContext} user={user} isFirstOrder={isFirstOrder} />
     </div>
   );
 }

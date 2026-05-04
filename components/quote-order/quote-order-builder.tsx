@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   FABRIC_TYPES,
+  FILE_FORMAT_OPTIONS,
   PLACEMENT_OPTIONS,
   getDefaultNiche,
   getNichesForService,
@@ -153,6 +154,15 @@ function getMissingFields(values: QuoteOrderInput, flowCtx: FlowContext): string
   return missing;
 }
 
+function getSoftWarnings(values: QuoteOrderInput, fileCount: number): string[] {
+  const warnings: string[] = [];
+  if (fileCount === 0) warnings.push("Upload a reference file to help us start production faster.");
+  if (!values.specialInstructions || values.specialInstructions.trim().length === 0) {
+    warnings.push("Add special instructions about colors, size, or style.");
+  }
+  return warnings;
+}
+
 /* ------------------------------------------------------------------ */
 /* Sub-components                                                      */
 /* ------------------------------------------------------------------ */
@@ -201,11 +211,13 @@ type Props = {
   mode: BuilderMode;
   flowContext?: FlowContext;
   user?: BuilderUser;
+  isFirstOrder?: boolean;
 };
 
-export function QuoteOrderBuilder({ mode, flowContext, user }: Props) {
+export function QuoteOrderBuilder({ mode, flowContext, user, isFirstOrder }: Props) {
   const ctx: FlowContext = flowContext ?? "guest";
   const isOrder = mode === "order";
+  const eligibleForFree = isFirstOrder === true;
   const draftKey = React.useMemo(() => getDraftKey(mode), [mode]);
 
   const [step, setStep] = React.useState(isOrder ? 1 : 0);
@@ -226,6 +238,7 @@ export function QuoteOrderBuilder({ mode, flowContext, user }: Props) {
 
   const placementMeta = values.placement ? getPlacementMeta(values.placement) : null;
   const missing = isOrder && step === 5 ? getMissingFields(values, ctx) : [];
+  const softWarnings = isOrder && step === 5 ? getSoftWarnings(values, refFiles.length) : [];
 
   function update<K extends keyof QuoteOrderInput>(key: K, val: QuoteOrderInput[K]) {
     setValues((cur) => ({ ...cur, [key]: val }));
@@ -246,6 +259,12 @@ export function QuoteOrderBuilder({ mode, flowContext, user }: Props) {
     if (meta.maxSizeIn && (values.designHeightIn ?? 0) > meta.maxSizeIn) {
       update("designHeightIn", meta.maxSizeIn);
     }
+  }
+
+  function toggleFileFormat(fmt: string) {
+    const fmts = values.fileFormats as string[];
+    const next = fmts.includes(fmt) ? fmts.filter((f) => f !== fmt) : [...fmts, fmt];
+    update("fileFormats", next as QuoteOrderInput["fileFormats"]);
   }
 
   function saveDraft() {
@@ -562,7 +581,11 @@ export function QuoteOrderBuilder({ mode, flowContext, user }: Props) {
               </div>
               <div>
                 <p className="text-sm font-medium">Ordering as: {user.name || user.email}</p>
-                <p className="text-xs text-muted-foreground">Welcome! Your first digitizing order is free.</p>
+                <p className="text-xs text-muted-foreground">
+                  {eligibleForFree
+                    ? "Welcome! Your first digitizing order is free."
+                    : "Fill in the details below and we'll get started."}
+                </p>
               </div>
             </div>
           )}
@@ -715,6 +738,30 @@ export function QuoteOrderBuilder({ mode, flowContext, user }: Props) {
                           className="min-h-[72px] w-full rounded-2xl border border-border/80 bg-card/70 px-4 py-2.5 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
                         />
                       </div>
+                      <div className="flex flex-col gap-1.5 md:col-span-2">
+                        <label className="text-sm font-medium">Output file formats</label>
+                        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                          {FILE_FORMAT_OPTIONS.filter((f) => ["DST", "PES", "EMB", "EXP", "JEF", "VP3", "XXX", "HUS", "SEW"].includes(f.value)).map((fmt) => {
+                            const selected = (values.fileFormats as string[]).includes(fmt.value);
+                            return (
+                              <button
+                                key={fmt.value}
+                                type="button"
+                                onClick={() => toggleFileFormat(fmt.value)}
+                                className={cn(
+                                  "rounded-2xl border px-3 py-2 text-center text-xs font-medium transition-all",
+                                  selected
+                                    ? "border-primary/40 bg-primary/10 text-primary"
+                                    : "border-border/60 bg-card/70 text-muted-foreground hover:border-border hover:bg-card"
+                                )}
+                              >
+                                {fmt.value}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Machine formats. DST and PES selected by default.</p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -758,11 +805,13 @@ export function QuoteOrderBuilder({ mode, flowContext, user }: Props) {
                 <h2 className="mb-1 text-xl font-semibold">Delivery Speed</h2>
                 <p className="mb-5 text-sm text-muted-foreground">Choose how fast you need your design delivered.</p>
 
-                {/* First-order-free banner */}
-                <div className="mb-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-600 dark:text-amber-300">
-                  <Sparkles className="mr-1 inline h-3.5 w-3.5" />
-                  Your first order is free — choose any delivery speed.
-                </div>
+                {/* First-order-free banner — only for eligible clients */}
+                {eligibleForFree && (
+                  <div className="mb-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-600 dark:text-amber-300">
+                    <Sparkles className="mr-1 inline h-3.5 w-3.5" />
+                    Your first order is free — choose any delivery speed.
+                  </div>
+                )}
 
                 <div className="grid gap-3">
                   {DELIVERY_SPEEDS.map((ds) => {
@@ -784,7 +833,7 @@ export function QuoteOrderBuilder({ mode, flowContext, user }: Props) {
                           <div className="text-sm text-muted-foreground">{ds.time} — {ds.desc}</div>
                         </div>
                         <Badge className={cn(selected ? "bg-primary/15 text-primary border-primary/20" : "bg-muted text-muted-foreground")}>
-                          Free for your first order
+                          {eligibleForFree ? "Free for your first order" : ds.price ? `+$${ds.price}` : "Included"}
                         </Badge>
                       </button>
                     );
@@ -880,12 +929,23 @@ export function QuoteOrderBuilder({ mode, flowContext, user }: Props) {
                     <SummaryRow label="Height" value={values.designHeightIn ? `${values.designHeightIn}"` : "—"} />
                     <SummaryRow label="Width" value={values.designWidthIn ? `${values.designWidthIn}"` : "—"} />
                     <SummaryRow label="Fabric" value={values.fabricType || "—"} />
+                    <SummaryRow label="3D Puff" value={values.threeDPuff ? "Yes" : "No"} />
+                    <SummaryRow label="Color quantity" value={values.colorQuantity ? String(values.colorQuantity) : "—"} />
+                    <SummaryRow label="Trims" value={values.trims || "—"} />
+                    <SummaryRow label="Output formats" value={(values.fileFormats as string[]).length > 0 ? (values.fileFormats as string[]).join(", ") : "DST, PES"} />
                     <SummaryRow label="Delivery" value={DELIVERY_SPEEDS.find((d) => d.value === values.turnaround)?.label ?? "Normal"} />
                     <SummaryRow label="Files uploaded" value={refFiles.length > 0 ? `${refFiles.length} file(s)` : "None"} />
                     {ctx === "client" && (
                       <SummaryRow label="Account" value={user?.email ?? "—"} />
                     )}
-                    <SummaryRow label="Pricing" value={<span className="font-semibold text-emerald-600 dark:text-emerald-400">Free — first order</span>} />
+                    <SummaryRow
+                      label="Pricing"
+                      value={
+                        eligibleForFree
+                          ? <span className="font-semibold text-emerald-600 dark:text-emerald-400">Free — first order</span>
+                          : <span className="font-medium text-foreground">Standard pricing</span>
+                      }
+                    />
                   </div>
                 </div>
 
@@ -900,7 +960,19 @@ export function QuoteOrderBuilder({ mode, flowContext, user }: Props) {
                   />
                 </div>
 
-                {/* Missing field warnings */}
+                {/* Soft warnings (non-blocking) */}
+                {missing.length === 0 && softWarnings.length > 0 && (
+                  <div className="mt-4 grid gap-2">
+                    {softWarnings.map((w, i) => (
+                      <div key={i} className="flex items-start gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-600 dark:text-amber-300">
+                        <Info className="mt-0.5 h-4 w-4 shrink-0" />
+                        {w}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Missing field warnings (blocking) */}
                 {missing.length > 0 && (
                   <div className="mt-4 flex items-start gap-2 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
                     <Info className="mt-0.5 h-4 w-4 shrink-0" />
