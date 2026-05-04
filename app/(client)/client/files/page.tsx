@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { FolderOpen, Lock } from "lucide-react";
 
 import { auth } from "@/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ClientDownloadButton } from "@/components/client/client-download-button";
 import { buildTitle } from "@/lib/site";
 import { prisma } from "@/lib/db";
@@ -57,22 +60,19 @@ export default async function ClientFilesPage() {
   return (
     <div className="grid gap-6">
       <section>
-        <div className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
-          Client files
-        </div>
-        <h1 className="mt-2 text-4xl font-semibold tracking-tight">
-          Your delivered files
-        </h1>
-        <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
-          Completed files from your orders appear here. Files are locked until your invoice
-          payment is approved by our team.
+        <p className="section-eyebrow">Client files</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Your Files</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+          Completed files from your orders appear here. Files are locked until your invoice payment is approved.
         </p>
       </section>
 
       {ordersWithFiles.length === 0 ? (
-        <div className="rounded-[2rem] border border-border/80 bg-card/70 px-5 py-16 text-center text-sm text-muted-foreground">
-          No files delivered yet. Files will appear here once your designer uploads completed work.
-        </div>
+        <EmptyState
+          icon={<FolderOpen className="h-8 w-8" />}
+          title="No files yet"
+          description="Files will appear here once your designer uploads completed work and payment is approved."
+        />
       ) : (
         <div className="grid gap-4">
           {ordersWithFiles.map((order) => {
@@ -87,34 +87,33 @@ export default async function ClientFilesPage() {
                       <CardTitle className="text-base">{order.title}</CardTitle>
                       <CardDescription>Order #{order.orderNumber}</CardDescription>
                     </div>
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                      filesUnlocked
-                        ? "bg-emerald-500/10 text-emerald-400"
-                        : "bg-amber-500/10 text-amber-400"
-                    }`}>
+                    <Badge className={filesUnlocked ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400"}>
                       {filesUnlocked ? "Unlocked" : "Locked"}
-                    </span>
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="grid gap-3">
                   {!filesUnlocked && (
-                    <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-400">
-                      {hasPendingProof
-                        ? "Your payment proof is under review. Files will unlock once approved."
-                        : order.invoice
-                          ? (
-                            <>
-                              Files are locked.{" "}
-                              <Link
-                                href={`/client/invoices/${order.invoice.id}`}
-                                className="underline underline-offset-2 hover:text-amber-300"
-                              >
-                                Submit payment proof
-                              </Link>{" "}
-                              to unlock your files.
-                            </>
-                          )
-                          : "Files are locked pending invoice creation."}
+                    <div className="flex items-start gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-muted-foreground">
+                      <Lock className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                      <span>
+                        {hasPendingProof
+                          ? "Your payment proof is under review. Files will unlock once approved."
+                          : order.invoice
+                            ? (
+                              <>
+                                Files are locked.{" "}
+                                <Link
+                                  href={`/client/invoices/${order.invoice.id}`}
+                                  className="underline underline-offset-2 hover:text-foreground"
+                                >
+                                  Submit payment proof
+                                </Link>{" "}
+                                to unlock your files.
+                              </>
+                            )
+                            : "Files are locked pending invoice creation."}
+                      </span>
                     </div>
                   )}
 
@@ -122,20 +121,18 @@ export default async function ClientFilesPage() {
                     {order.orderFiles.map((file) => (
                       <div
                         key={file.id}
-                        className="flex items-center justify-between rounded-xl border border-border/60 bg-secondary/40 px-4 py-3"
+                        className="flex items-center justify-between rounded-2xl border border-border/60 bg-muted/30 px-4 py-3"
                       >
                         <div>
-                          <div className="text-sm font-medium">{file.fileName}</div>
-                          <div className="mt-0.5 text-xs text-muted-foreground">
+                          <p className="text-sm font-medium">{file.fileName}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
                             {formatBytes(file.sizeBytes)} · {file.mimeType}
-                          </div>
+                          </p>
                         </div>
                         {filesUnlocked ? (
                           <ClientDownloadButton fileId={file.id} fileName={file.fileName} />
                         ) : (
-                          <span className="rounded-full border border-border/60 px-3 py-1 text-xs text-muted-foreground">
-                            Locked
-                          </span>
+                          <Badge>Locked</Badge>
                         )}
                       </div>
                     ))}

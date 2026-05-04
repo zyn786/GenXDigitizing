@@ -2,20 +2,57 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, FileText, MessageCircle, Package, RefreshCw, FileQuestion } from "lucide-react";
+import { ArrowRight, FileText, MessageCircle, Package, RefreshCw, Sparkles, Upload } from "lucide-react";
 
 import { auth } from "@/auth";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { getClientInvoices } from "@/lib/billing/repository";
 import { getClientOrders } from "@/lib/workflow/repository";
 import { buildTitle } from "@/lib/site";
-import { DashboardActions } from "@/components/client/dashboard-actions";
 
-export const metadata: Metadata = {
-  title: buildTitle("Dashboard"),
-};
-
+export const metadata: Metadata = { title: buildTitle("Dashboard") };
 export const dynamic = "force-dynamic";
+
+/* ------------------------------------------------------------------ */
+/* Client-friendly status helpers                                      */
+/* ------------------------------------------------------------------ */
+
+function clientStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    SUBMITTED: "Order Received",
+    UNDER_REVIEW: "Under Review",
+    ASSIGNED_TO_DESIGNER: "In Production",
+    IN_PROGRESS: "In Production",
+    PROOF_READY: "Proof Ready",
+    REVISION_REQUESTED: "Revision In Progress",
+    APPROVED: "Proof Approved",
+    DELIVERED: "Completed",
+    CLOSED: "Completed",
+    CANCELLED: "Cancelled",
+  };
+  return map[status] ?? status.replaceAll("_", " ").toLowerCase();
+}
+
+function isActiveOrder(status: string): boolean {
+  return !["DELIVERED", "CLOSED", "CANCELLED"].includes(status);
+}
+
+function clientNextAction(status: string, proofStatus?: string, paymentStatus?: string): string | null {
+  if (status === "SUBMITTED" || status === "UNDER_REVIEW") return "We'll review your order and assign a designer soon.";
+  if (status === "PROOF_READY") return "Review your proof and approve or request changes.";
+  if (status === "REVISION_REQUESTED") return "Your revision is being worked on by our team.";
+  if (status === "APPROVED" && paymentStatus === "PAYMENT_PENDING") return "Submit payment proof to unlock your files.";
+  if (status === "APPROVED" && paymentStatus === "PAYMENT_SUBMITTED") return "Payment is under review. Files will unlock soon.";
+  if (status === "DELIVERED" || status === "CLOSED") return "Your files are ready to download.";
+  return null;
+}
+
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
 
 export default async function ClientDashboardPage() {
   const session = await auth();
@@ -27,210 +64,267 @@ export default async function ClientDashboardPage() {
   ]);
 
   const firstName = session.user.name?.split(" ")[0] ?? "there";
-
-  const pendingOrders = orders.filter(
-    (o) => !["DELIVERED", "CLOSED", "CANCELLED"].includes(String((o as Record<string, unknown>).status ?? ""))
-  );
-  const unpaidInvoices = invoices.filter(
-    (inv) => inv.status !== "PAID" && inv.status !== "CANCELLED"
-  );
+  const activeOrders = orders.filter((o) => isActiveOrder(o.status));
+  const unpaidInvoices = invoices.filter((inv) => inv.status !== "PAID" && inv.status !== "CANCELLED");
   const totalBalance = unpaidInvoices.reduce((sum, inv) => sum + inv.balanceDue, 0);
-
-  const quickLinks: Array<{ href: Route; icon: typeof Package; label: string; description: string; count: number | null; countLabel: string | null; color: string }> = [
-    {
-      href: "/client/orders" as Route,
-      icon: Package,
-      label: "My Orders",
-      description: "Track progress, view proofs, download files",
-      count: orders.length,
-      countLabel: "total",
-      color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
-    },
-    {
-      href: "/client/quotes" as Route,
-      icon: FileQuestion,
-      label: "Quote Requests",
-      description: "Pricing requests pending review by our team",
-      count: null,
-      countLabel: null,
-      color: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
-    },
-    {
-      href: "/client/invoices" as Route,
-      icon: FileText,
-      label: "Invoices",
-      description: "View balances, payment history, and receipts",
-      count: unpaidInvoices.length,
-      countLabel: "open",
-      color: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    },
-    {
-      href: "/client/support" as Route,
-      icon: MessageCircle,
-      label: "Chat & Support",
-      description: "Chat with our team about orders or artwork",
-      count: null,
-      countLabel: null,
-      color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-    },
-    {
-      href: "/client/revisions" as Route,
-      icon: RefreshCw,
-      label: "Revisions",
-      description: "Open revision requests waiting on action",
-      count: null,
-      countLabel: null,
-      color: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
-    },
-  ];
+  const proofsWaiting = orders.filter((o) => o.status === "PROOF_READY").length;
+  const filesReady = orders.filter((o) => o.status === "DELIVERED" || o.status === "CLOSED").length;
+  const isFirstTime = orders.length === 0;
 
   return (
     <div className="grid gap-6">
       {/* Welcome */}
       <section>
-        <div className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
-          Client workspace
-        </div>
-        <h1 className="mt-2 text-4xl font-semibold tracking-tight">
+        <p className="section-eyebrow">Client workspace</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
           Welcome back, {firstName}
         </h1>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Here&apos;s everything happening with your account right now.
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+          Track your orders, review proofs, download files, and manage your account — all in one place.
         </p>
       </section>
 
+      {/* First-order-free card */}
+      {isFirstTime && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="font-semibold">
+                <Sparkles className="mr-1.5 inline h-4 w-4 text-primary" />
+                Your First Digitizing Order Is Free
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                New clients get their first embroidery digitizing order at no cost. Ready to get started?
+              </p>
+            </div>
+            <Button asChild variant="premium" shape="pill" size="lg" className="shrink-0">
+              <Link href="/client/order">
+                Place Free Order
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats row */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="rounded-[1.5rem] border-border/80">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
           <CardContent className="p-5">
-            <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-              Active orders
-            </div>
-            <div className="mt-2 text-3xl font-semibold">{pendingOrders.length}</div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              {orders.length} total
-            </div>
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Active orders</p>
+            <p className="mt-2 text-3xl font-semibold">{activeOrders.length}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{orders.length} total</p>
           </CardContent>
         </Card>
 
-        <Card className="rounded-[1.5rem] border-border/80">
+        <Card>
           <CardContent className="p-5">
-            <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-              Outstanding balance
-            </div>
-            <div className="mt-2 text-3xl font-semibold">
-              ${totalBalance.toFixed(2)}
-            </div>
-            <div className="mt-1 text-xs text-muted-foreground">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Proofs waiting</p>
+            <p className="mt-2 text-3xl font-semibold">{proofsWaiting}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {proofsWaiting > 0 ? "Action needed" : "None pending"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Files ready</p>
+            <p className="mt-2 text-3xl font-semibold">{filesReady}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {filesReady > 0 ? "Ready to download" : "None yet"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Balance</p>
+            <p className="mt-2 text-3xl font-semibold">${totalBalance.toFixed(2)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
               {unpaidInvoices.length} open invoice{unpaidInvoices.length !== 1 ? "s" : ""}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-[1.5rem] border-border/80">
-          <CardContent className="p-5">
-            <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-              Start something new
-            </div>
-            <div className="mt-3">
-              <DashboardActions />
-            </div>
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick links */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {quickLinks.map((link) => {
-          const Icon = link.icon;
-          return (
-            <Link key={link.href} href={link.href} className="group block">
-              <Card className="h-full rounded-[1.5rem] border-border/80 transition hover:-translate-y-0.5 hover:shadow-lg">
-                <CardContent className="p-5">
-                  <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl ${link.color}`}>
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="text-sm font-semibold">{link.label}</div>
-                    {link.count !== null && link.count > 0 && (
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                        {link.count} {link.countLabel}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                    {link.description}
-                  </p>
-                  <div className="mt-3 flex items-center gap-1 text-xs font-medium text-primary transition group-hover:gap-2">
-                    Open
-                    <ArrowRight className="h-3 w-3" />
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+      {/* Next Action + New Order */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Next action card */}
+        {activeOrders.length > 0 && (() => {
+          const firstActionable = activeOrders.find((o) =>
+            o.status === "PROOF_READY" || o.status === "APPROVED" || o.status === "REVISION_REQUESTED"
           );
-        })}
+          if (!firstActionable) return null;
+          const action = clientNextAction(
+            firstActionable.status,
+            firstActionable.proofStatus ?? undefined,
+            firstActionable.paymentStatus ?? undefined
+          );
+          return (
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Next action</p>
+                <h3 className="mt-2 font-semibold">{firstActionable.title}</h3>
+                {action && <p className="mt-1 text-sm text-muted-foreground">{action}</p>}
+                <div className="mt-4 flex gap-2">
+                  <Button asChild variant="default" shape="pill" size="sm">
+                    <Link href={`/client/orders/${firstActionable.id}` as Route}>
+                      View order
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
+
+        {/* Start new card */}
+        <Card>
+          <CardContent className="p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Start something new</p>
+            <div className="mt-3 flex flex-wrap gap-3">
+              <Button asChild variant="premium" shape="pill" size="sm">
+                <Link href="/client/order">
+                  <Package className="h-3.5 w-3.5" />
+                  Place Order
+                </Link>
+              </Button>
+              <Button asChild variant="outline" shape="pill" size="sm">
+                <Link href="/client/quote">
+                  <FileText className="h-3.5 w-3.5" />
+                  Request Quote
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Recent orders */}
       {orders.length > 0 ? (
-        <Card className="rounded-[1.5rem] border-border/80">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Recent orders</CardTitle>
-              <Link
-                href="/client/orders"
-                className="text-xs text-primary transition hover:opacity-80"
-              >
-                View all
-              </Link>
-            </div>
+        <Card>
+          <CardHeader className="flex-row items-center justify-between pb-2">
+            <CardTitle className="text-base">Recent orders</CardTitle>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/client/orders">View all</Link>
+            </Button>
           </CardHeader>
           <CardContent className="grid gap-2">
-            {orders.slice(0, 4).map((order) => {
-              const o = order as Record<string, unknown>;
-              return (
-                <Link
-                  key={String(o.id)}
-                  href={`/client/orders/${String(o.id)}` as unknown as Route}
-                  className="flex items-center justify-between rounded-2xl border border-border/80 bg-secondary/40 px-4 py-3 text-sm transition hover:bg-secondary/70"
-                >
-                  <div>
-                    <div className="font-medium">{String(o.title ?? "Order")}</div>
-                    <div className="mt-0.5 text-xs text-muted-foreground">
-                      {String(o.reference ?? o.id)} · {String(o.serviceLabel ?? "")}
-                    </div>
+            {orders.slice(0, 4).map((order) => (
+              <Link
+                key={order.id}
+                href={`/client/orders/${order.id}` as Route}
+                className="flex items-center justify-between rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm transition hover:bg-muted/60"
+              >
+                <div className="min-w-0">
+                  <div className="truncate font-medium">{order.title}</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">
+                    {order.reference} · {order.serviceLabel}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="rounded-full border border-border/80 bg-background px-3 py-1 text-xs capitalize">
-                      {String(o.status ?? "").replaceAll("_", " ").toLowerCase()}
-                    </span>
-                    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
-                  </div>
-                </Link>
-              );
-            })}
+                </div>
+                <div className="flex shrink-0 items-center gap-3">
+                  <Badge className="text-[10px]">
+                    {clientStatusLabel(order.status)}
+                  </Badge>
+                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                </div>
+              </Link>
+            ))}
           </CardContent>
         </Card>
       ) : (
-        <Card className="rounded-[1.5rem] border-border/80">
-          <CardContent className="py-12 text-center">
-            <Package className="mx-auto h-8 w-8 text-muted-foreground/40" />
-            <div className="mt-3 text-sm font-medium">No orders yet</div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Ready to start? Request a quote or place a direct order.
-            </p>
-            <div className="mt-5 flex justify-center gap-3">
-              <Link href="/client/quote" className="btn-primary text-xs">
-                Get a quote
-              </Link>
-              <Link href="/client/order" className="btn-outline text-xs">
-                Direct order
-              </Link>
+        <EmptyState
+          icon={<Package className="h-8 w-8" />}
+          title="No orders yet"
+          description="Ready to start? Request a quote or place a direct order."
+          action={
+            <div className="flex gap-3">
+              <Button asChild variant="premium" shape="pill" size="sm">
+                <Link href="/client/order">Place Order</Link>
+              </Button>
+              <Button asChild variant="outline" shape="pill" size="sm">
+                <Link href="/client/quote">Get a Quote</Link>
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+          }
+        />
       )}
+
+      {/* Quick links */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <QuickLink
+          href="/client/files"
+          icon={<Upload className="h-4 w-4" />}
+          label="My Files"
+          desc="Download completed delivery files"
+          count={filesReady}
+          countLabel="ready"
+        />
+        <QuickLink
+          href="/client/invoices"
+          icon={<FileText className="h-4 w-4" />}
+          label="Invoices"
+          desc="View balances, payments, and receipts"
+          count={unpaidInvoices.length}
+          countLabel="open"
+        />
+        <QuickLink
+          href="/client/support"
+          icon={<MessageCircle className="h-4 w-4" />}
+          label="Chat & Support"
+          desc="Chat with our team about orders or artwork"
+        />
+        <QuickLink
+          href="/client/revisions"
+          icon={<RefreshCw className="h-4 w-4" />}
+          label="Revisions"
+          desc="Open revision requests waiting on action"
+        />
+      </div>
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* QuickLink helper                                                    */
+/* ------------------------------------------------------------------ */
+
+function QuickLink({
+  href,
+  icon,
+  label,
+  desc,
+  count,
+  countLabel,
+}: {
+  href: Route;
+  icon: React.ReactNode;
+  label: string;
+  desc: string;
+  count?: number;
+  countLabel?: string;
+}) {
+  return (
+    <Link href={href} className="group block">
+      <Card className="h-full transition hover:-translate-y-0.5 hover:shadow-lg">
+        <CardContent className="flex items-center gap-4 p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            {icon}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">{label}</span>
+              {count !== undefined && count > 0 && (
+                <Badge className="text-[10px]">{count} {countLabel}</Badge>
+              )}
+            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>
+          </div>
+          <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5" />
+        </CardContent>
+      </Card>
+    </Link>
   );
 }

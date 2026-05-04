@@ -2,29 +2,84 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { Route } from "next";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Clock, RefreshCw, Lock } from "lucide-react";
+import { ArrowLeft, Download, Lock } from "lucide-react";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConversationLauncherButton } from "@/components/support/conversation-launcher-button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
 import { CancelOrderButton } from "@/components/client/cancel-order-button";
 import { ClientEditOrderModal } from "@/components/client/client-edit-order-modal";
 import { ClientDownloadButton } from "@/components/client/client-download-button";
 import { ClientProofReview } from "@/components/workflow/client-proof-review";
 import { PaymentGatePanel } from "@/components/workflow/payment-gate-panel";
-import { WorkflowTimeline } from "@/components/workflow/workflow-timeline";
 import { buildTitle } from "@/lib/site";
 import { getClientOrder } from "@/lib/workflow/repository";
-import type { OrderProduction } from "@/lib/workflow/types";
 import { ClientReferenceFilesSection } from "@/components/client/client-reference-files-section";
+
+/* ------------------------------------------------------------------ */
+/* Client-friendly helpers                                             */
+/* ------------------------------------------------------------------ */
+
+function clientStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    SUBMITTED: "Order Received",
+    UNDER_REVIEW: "Under Review",
+    ASSIGNED_TO_DESIGNER: "In Production",
+    IN_PROGRESS: "In Production",
+    PROOF_READY: "Proof Ready",
+    REVISION_REQUESTED: "Revision In Progress",
+    APPROVED: "Proof Approved",
+    DELIVERED: "Completed",
+    CLOSED: "Completed",
+    CANCELLED: "Cancelled",
+  };
+  return map[status] ?? status.replaceAll("_", " ").toLowerCase();
+}
+
+function statusTone(status: string): string {
+  switch (status) {
+    case "PROOF_READY": return "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400";
+    case "APPROVED": return "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+    case "DELIVERED":
+    case "CLOSED": return "border-teal-500/20 bg-teal-500/10 text-teal-600 dark:text-teal-400";
+    case "CANCELLED": return "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400";
+    case "IN_PROGRESS":
+    case "ASSIGNED_TO_DESIGNER": return "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400";
+    case "REVISION_REQUESTED": return "border-fuchsia-500/20 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400";
+    default: return "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400";
+  }
+}
+
+function clientNextAction(
+  status: string,
+  proofStatus: string,
+  paymentStatus: string,
+  filesUnlocked: boolean,
+): string | null {
+  if (status === "CANCELLED") return null;
+  if (status === "DELIVERED" || status === "CLOSED" || filesUnlocked) return "Your files are ready to download.";
+  if (status === "PROOF_READY") return "Review your proof and approve or request changes.";
+  if (status === "REVISION_REQUESTED") return "Your revision is being worked on by our team.";
+  if (status === "APPROVED" && paymentStatus === "PAYMENT_PENDING") return "Submit payment proof to unlock your files.";
+  if (status === "APPROVED" && paymentStatus === "PAYMENT_SUBMITTED") return "Payment is under review. Files will unlock once approved.";
+  if (proofStatus === "PENDING_ADMIN_PROOF_REVIEW" || proofStatus === "INTERNAL_REVIEW") return "Your proof is being reviewed by our team.";
+  if (status === "SUBMITTED" || status === "UNDER_REVIEW") return "Your order is being reviewed. We'll assign a designer soon.";
+  if (status === "IN_PROGRESS" || status === "ASSIGNED_TO_DESIGNER") return "Your design is in production.";
+  return null;
+}
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
 
 type ClientOrderDetailPageProps = {
   params: Promise<{ orderId: string }>;
@@ -68,6 +123,15 @@ export default async function ClientOrderDetailPage({
         designWidthIn: true,
         colorQuantity: true,
         specialInstructions: true,
+        fileFormats: true,
+        trims: true,
+        is3dPuffJacketBack: true,
+        quantity: true,
+        isFreeDesign: true,
+        estimatedPrice: true,
+        stitchCount: true,
+        threadBrand: true,
+        colorDetails: true,
       },
     }),
     prisma.clientReferenceFile.findMany({
@@ -79,18 +143,17 @@ export default async function ClientOrderDetailPage({
 
   if (!order) notFound();
 
-  const statusLabel = order.status.replaceAll("_", " ").toLowerCase();
-  const hasInvoice = Boolean(invoice);
-  const isCancelled = rawOrder?.status === "CANCELLED";
-  const canCancel = rawOrder?.status === "SUBMITTED";
-  const filesUnlocked = invoice?.filesUnlocked ?? false;
-
+  const statusLabel = clientStatusLabel(order.status);
   const proofStatus = rawOrder?.proofStatus ?? "NOT_UPLOADED";
   const paymentStatus = rawOrder?.paymentStatus ?? "NOT_REQUIRED";
+  const filesUnlocked = invoice?.filesUnlocked ?? false;
+  const isCancelled = rawOrder?.status === "CANCELLED";
+  const canCancel = rawOrder?.status === "SUBMITTED";
+  const nextAction = clientNextAction(order.status, proofStatus, paymentStatus, filesUnlocked);
 
   return (
     <div className="grid gap-6">
-      {/* Header */}
+      {/* Breadcrumb + Header */}
       <section>
         <Link
           href={"/client/orders" as Route}
@@ -99,27 +162,54 @@ export default async function ClientOrderDetailPage({
           <ArrowLeft className="h-3.5 w-3.5" />
           My orders
         </Link>
+
         <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
               {order.reference}
-            </div>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight">{order.title}</h1>
-            <div className="mt-2 text-sm text-muted-foreground">
-              {order.serviceLabel}
-              {order.companyName ? ` · ${order.companyName}` : ""}
-            </div>
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight md:text-3xl">{order.title}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {order.serviceLabel}{order.companyName ? ` · ${order.companyName}` : ""}
+            </p>
           </div>
-          <OrderStatusBadge status={order.status} />
+          <span className={`inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium ${statusTone(order.status)}`}>
+            {statusLabel}
+          </span>
         </div>
       </section>
 
-      {/* Progress */}
-      <Card className="rounded-[1.5rem] border-border/80">
+      {/* Next action banner */}
+      {nextAction && !isCancelled && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Next action</p>
+              <p className="mt-1 text-sm">{nextAction}</p>
+            </div>
+            {order.status === "PROOF_READY" && (
+              <Button asChild variant="default" shape="pill" size="sm">
+                <Link href="#proof-section">Review Proof</Link>
+              </Button>
+            )}
+            {filesUnlocked && (
+              <Button asChild variant="default" shape="pill" size="sm">
+                <Link href="#files-section">
+                  <Download className="h-3.5 w-3.5" />
+                  Download Files
+                </Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Progress bar */}
+      <Card>
         <CardContent className="p-5">
           <div className="mb-2 flex items-center justify-between">
-            <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Progress</div>
-            <div className="text-sm font-medium">{order.progressPercent}%</div>
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Progress</p>
+            <p className="text-sm font-medium">{order.progressPercent}%</p>
           </div>
           <div className="h-2 rounded-full bg-secondary">
             <div
@@ -128,27 +218,29 @@ export default async function ClientOrderDetailPage({
             />
           </div>
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <MetaStat icon={<Clock className="h-3.5 w-3.5" />} label="Due" value={order.dueLabel} />
-            <MetaStat icon={<RefreshCw className="h-3.5 w-3.5" />} label="Revisions" value={`${order.revisionCount}`} />
-            <MetaStat label="Priority" value={order.priority} />
-            <MetaStat label="Status" value={statusLabel} capitalize />
+            <Stat label="Due" value={order.dueLabel} />
+            <Stat label="Revisions" value={String(order.revisionCount)} />
+            <Stat label="Priority" value={order.priority} />
+            <Stat label="Status" value={statusLabel} />
           </div>
         </CardContent>
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr] lg:items-start">
-        {/* Main */}
+        {/* Main column */}
         <div className="grid gap-4">
-          {/* Proof review — shown when proof is in review or client action needed */}
-          {(rawOrder?.status === "PROOF_READY" ||
+          {/* Proof section */}
+          {(order.status === "PROOF_READY" ||
             proofStatus === "CLIENT_APPROVED" ||
             proofStatus === "REVISION_REQUESTED" ||
             proofStatus === "PENDING_ADMIN_PROOF_REVIEW") && (
-            <Card className="rounded-[1.5rem] border-border/80">
+            <Card id="proof-section">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Proof review</CardTitle>
+                <CardTitle className="text-base">Proof Review</CardTitle>
                 <CardDescription>
-                  Review your proof files below and approve or request changes.
+                  {proofStatus === "PENDING_ADMIN_PROOF_REVIEW"
+                    ? "Your proof is being reviewed by our team before it's sent to you."
+                    : "Review your proof files and approve or request changes."}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -161,10 +253,10 @@ export default async function ClientOrderDetailPage({
             </Card>
           )}
 
-          {/* Delivery files */}
-          <Card className="rounded-[1.5rem] border-border/80">
+          {/* Files section */}
+          <Card id="files-section">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Delivery files</CardTitle>
+              <CardTitle className="text-base">Delivery Files</CardTitle>
               <CardDescription>
                 {filesUnlocked
                   ? "Your files are ready to download."
@@ -173,22 +265,22 @@ export default async function ClientOrderDetailPage({
             </CardHeader>
             <CardContent>
               {order.orderFiles.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
+                <p className="py-4 text-center text-sm text-muted-foreground">
                   No files yet. They will appear here once production is complete.
                 </p>
               ) : !filesUnlocked ? (
                 <div className="flex items-center gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
-                  <Lock className="h-4 w-4 shrink-0 text-amber-400" />
-                  <p className="text-sm text-amber-300">
+                  <Lock className="h-4 w-4 shrink-0 text-amber-500" />
+                  <p className="text-sm text-muted-foreground">
                     Files are locked. {proofStatus !== "CLIENT_APPROVED"
                       ? "Approve your proof to unlock payment and then download."
-                      : "Submit payment to unlock your files."}
-                    {hasInvoice && proofStatus === "CLIENT_APPROVED" && (
+                      : "Submit payment proof to unlock your files."}
+                    {invoice && proofStatus === "CLIENT_APPROVED" && (
                       <>
                         {" "}
                         <Link
-                          href={`/client/invoices/${invoice!.id}` as Route}
-                          className="underline underline-offset-2"
+                          href={`/client/invoices/${invoice.id}` as Route}
+                          className="underline underline-offset-2 hover:text-foreground"
                         >
                           View invoice
                         </Link>
@@ -201,14 +293,14 @@ export default async function ClientOrderDetailPage({
                   {order.orderFiles.map((file) => (
                     <div
                       key={file.id}
-                      className="flex items-center justify-between rounded-2xl border border-border/80 bg-secondary/60 px-4 py-3 text-sm"
+                      className="flex items-center justify-between rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm"
                     >
                       <div>
-                        <div className="font-medium">{file.fileName}</div>
-                        <div className="mt-0.5 text-xs text-muted-foreground">
+                        <p className="font-medium">{file.fileName}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
                           {formatBytes(file.sizeBytes)}
                           {file.uploadedByName ? ` · By ${file.uploadedByName}` : ""}
-                        </div>
+                        </p>
                       </div>
                       <ClientDownloadButton fileId={file.id} fileName={file.fileName} />
                     </div>
@@ -218,7 +310,7 @@ export default async function ClientOrderDetailPage({
             </CardContent>
           </Card>
 
-          {/* Reference files — client can view their uploads and add more */}
+          {/* Reference files */}
           <ClientReferenceFilesSection
             orderId={orderId}
             initialFiles={referenceFiles.map((f) => ({
@@ -228,32 +320,30 @@ export default async function ClientOrderDetailPage({
           />
 
           {/* Order specs */}
-          <ClientSpecsCard production={order.production} />
+          <ClientSpecsCard rawOrder={rawOrder} />
 
           {/* Revision history */}
           {order.orderRevisions.length > 0 && (
-            <Card className="rounded-[1.5rem] border-border/80">
+            <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Revision history</CardTitle>
+                <CardTitle className="text-base">Revision History</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-2">
                 {order.orderRevisions.map((rev) => (
                   <div
                     key={rev.id}
-                    className="rounded-2xl border border-border/80 bg-secondary/60 px-4 py-3 text-sm"
+                    className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <div className="font-medium">{rev.versionLabel ?? "Revision"}</div>
-                      <span className="shrink-0 rounded-full border border-border/80 bg-background px-2.5 py-0.5 text-[10px] font-medium capitalize">
-                        {rev.status.toLowerCase().replace(/_/g, " ")}
-                      </span>
+                      <p className="font-medium">{rev.versionLabel ?? "Revision"}</p>
+                      <Badge className="text-[10px]">{rev.status.toLowerCase().replace(/_/g, " ")}</Badge>
                     </div>
                     {rev.clientNotes && (
-                      <div className="mt-1 text-xs text-muted-foreground">{rev.clientNotes}</div>
+                      <p className="mt-1 text-xs text-muted-foreground">{rev.clientNotes}</p>
                     )}
-                    <div className="mt-1 text-[10px] text-muted-foreground/60">
+                    <p className="mt-1 text-[10px] text-muted-foreground/60">
                       {new Date(rev.createdAt).toLocaleDateString()}
-                    </div>
+                    </p>
                   </div>
                 ))}
               </CardContent>
@@ -262,23 +352,21 @@ export default async function ClientOrderDetailPage({
 
           {/* Order timeline */}
           {order.events.length > 0 && (
-            <Card className="rounded-[1.5rem] border-border/80">
+            <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Order timeline</CardTitle>
+                <CardTitle className="text-base">Order Timeline</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-2">
                 {order.events.map((ev) => (
                   <div
                     key={ev.id}
-                    className="rounded-2xl border border-border/80 bg-secondary/60 px-4 py-3 text-sm"
+                    className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm"
                   >
-                    <div className="font-medium">{ev.title}</div>
-                    {ev.body && (
-                      <div className="mt-0.5 text-xs text-muted-foreground">{ev.body}</div>
-                    )}
-                    <div className="mt-1 text-[10px] text-muted-foreground/60">
+                    <p className="font-medium">{ev.title}</p>
+                    {ev.body && <p className="mt-0.5 text-xs text-muted-foreground">{ev.body}</p>}
+                    <p className="mt-1 text-[10px] text-muted-foreground/60">
                       {new Date(ev.at).toLocaleString()}
-                    </div>
+                    </p>
                   </div>
                 ))}
               </CardContent>
@@ -290,51 +378,35 @@ export default async function ClientOrderDetailPage({
         <div className="grid gap-4 self-start">
           {/* Cancellation */}
           {isCancelled && rawOrder?.cancelledAt && (
-            <Card className="rounded-[1.5rem] border-red-500/20 bg-red-500/5">
+            <Card className="border-red-500/20 bg-red-500/5">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base text-red-400">Order Cancelled</CardTitle>
+                <CardTitle className="text-base text-red-500">Order Cancelled</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-2 text-sm">
                 <div>
-                  <div className="text-xs text-muted-foreground">Cancelled on</div>
-                  <div className="mt-0.5 font-medium">
+                  <p className="text-xs text-muted-foreground">Cancelled on</p>
+                  <p className="mt-0.5 font-medium">
                     {new Date(rawOrder.cancelledAt).toLocaleString()}
-                  </div>
+                  </p>
                 </div>
                 {rawOrder.cancelledBy?.name && (
                   <div>
-                    <div className="text-xs text-muted-foreground">Cancelled by</div>
-                    <div className="mt-0.5 font-medium">{rawOrder.cancelledBy.name}</div>
+                    <p className="text-xs text-muted-foreground">Cancelled by</p>
+                    <p className="mt-0.5 font-medium">{rawOrder.cancelledBy.name}</p>
                   </div>
                 )}
                 {rawOrder.cancelReason && (
                   <div>
-                    <div className="text-xs text-muted-foreground">Reason</div>
-                    <div className="mt-0.5 text-muted-foreground">{rawOrder.cancelReason}</div>
+                    <p className="text-xs text-muted-foreground">Reason</p>
+                    <p className="mt-0.5 text-muted-foreground">{rawOrder.cancelReason}</p>
                   </div>
                 )}
               </CardContent>
             </Card>
           )}
 
-          {/* Workflow timeline */}
-          <Card className="rounded-[1.5rem] border-border/80">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Order status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <WorkflowTimeline
-                orderStatus={rawOrder?.status ?? order.status}
-                quoteStatus={rawOrder?.quoteStatus ?? order.quoteStatus}
-                proofStatus={proofStatus as "NOT_UPLOADED" | "UPLOADED" | "INTERNAL_REVIEW" | "SENT_TO_CLIENT" | "CLIENT_REVIEWING" | "CLIENT_APPROVED" | "REVISION_REQUESTED"}
-                paymentStatus={paymentStatus as "NOT_REQUIRED" | "PAYMENT_PENDING" | "PAYMENT_SUBMITTED" | "PAYMENT_UNDER_REVIEW" | "PAID" | "PARTIALLY_PAID" | "REJECTED" | "REFUNDED"}
-                filesUnlocked={filesUnlocked}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Payment gate */}
-          <Card className="rounded-[1.5rem] border-border/80">
+          {/* Payment */}
+          <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Payment</CardTitle>
             </CardHeader>
@@ -350,24 +422,30 @@ export default async function ClientOrderDetailPage({
             </CardContent>
           </Card>
 
-          {/* Actions */}
-          <Card className="rounded-[1.5rem] border-border/80">
+          {/* Support */}
+          <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Actions</CardTitle>
+              <CardTitle className="text-base">Need Help?</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2">
-              <Link
-                href={"/client/orders" as Route}
-                className="inline-flex h-9 items-center justify-center rounded-full border border-border/80 bg-card/70 px-4 text-xs font-medium transition hover:bg-card"
-              >
-                Back to orders
-              </Link>
               <ConversationLauncherButton
                 mode="client"
                 type="ORDER"
                 orderId={order.id}
-                label="Open conversation"
+                label="Chat about this order"
               />
+            </CardContent>
+          </Card>
+
+          {/* Actions */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2">
+              <Button asChild variant="outline" shape="pill" size="sm" className="w-full">
+                <Link href={"/client/orders" as Route}>Back to orders</Link>
+              </Button>
               {rawOrder?.status === "SUBMITTED" && (
                 <>
                   <div className="my-1 h-px bg-border/60" />
@@ -390,20 +468,19 @@ export default async function ClientOrderDetailPage({
                   />
                 </>
               )}
-              {!isCancelled && (
-                canCancel ? (
-                  <>
-                    <div className="my-1 h-px bg-border/60" />
-                    <CancelOrderButton orderId={order.id} />
-                  </>
-                ) : (
-                  <>
-                    <div className="my-1 h-px bg-border/60" />
-                    <p className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-xs leading-snug text-amber-300">
-                      Cancellation is no longer available — this order is already in production.
-                    </p>
-                  </>
-                )
+              {!isCancelled && canCancel && (
+                <>
+                  <div className="my-1 h-px bg-border/60" />
+                  <CancelOrderButton orderId={order.id} />
+                </>
+              )}
+              {!isCancelled && !canCancel && rawOrder?.status !== "SUBMITTED" && (
+                <>
+                  <div className="my-1 h-px bg-border/60" />
+                  <p className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-xs leading-snug text-muted-foreground">
+                    Cancellation is no longer available — this order is already in production.
+                  </p>
+                </>
               )}
             </CardContent>
           </Card>
@@ -413,106 +490,87 @@ export default async function ClientOrderDetailPage({
   );
 }
 
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
+/* ------------------------------------------------------------------ */
+/* Sub-components                                                      */
+/* ------------------------------------------------------------------ */
 
-function MetaStat({
-  icon,
-  label,
-  value,
-  capitalize,
-}: {
-  icon?: React.ReactNode;
-  label: string;
-  value: string;
-  capitalize?: boolean;
-}) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="flex items-center gap-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-        {icon}
-        {label}
-      </div>
-      <div className={`mt-1 text-sm font-medium ${capitalize ? "capitalize" : ""}`}>{value}</div>
+      <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+      <p className="mt-1 text-sm font-medium">{value}</p>
     </div>
   );
 }
 
 function SpecRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-2 py-2 text-sm">
+    <div className="flex items-baseline justify-between gap-2 py-2 text-sm">
       <span className="shrink-0 text-xs text-muted-foreground">{label}</span>
-      <span className="font-medium text-right">{value}</span>
+      <span className="text-right font-medium">{value}</span>
     </div>
   );
 }
 
-function ClientSpecsCard({ production }: { production: OrderProduction }) {
-  const hasAnySpec =
-    production.placement ||
-    production.stitchCount ||
-    production.fabricType ||
-    production.fileFormats.length > 0 ||
-    production.colorQuantity ||
-    production.threadBrand ||
-    production.is3dPuffJacketBack ||
-    production.designHeightIn ||
-    production.designWidthIn;
+function ClientSpecsCard({ rawOrder }: { rawOrder: Record<string, unknown> | null }) {
+  if (!rawOrder) return null;
 
-  if (!hasAnySpec && !production.specialInstructions) return null;
+  const placement = rawOrder.placement as string | null;
+  const stitchCount = rawOrder.stitchCount as number | null;
+  const fabricType = rawOrder.fabricType as string | null;
+  const fileFormats = (rawOrder.fileFormats as string[]) ?? [];
+  const colorQuantity = rawOrder.colorQuantity as number | null;
+  const threadBrand = rawOrder.threadBrand as string | null;
+  const colorDetails = rawOrder.colorDetails as string | null;
+  const trims = rawOrder.trims as string | null;
+  const is3dPuffJacketBack = rawOrder.is3dPuffJacketBack as boolean;
+  const designHeightIn = rawOrder.designHeightIn as number | null;
+  const designWidthIn = rawOrder.designWidthIn as number | null;
+  const quantity = rawOrder.quantity as number ?? 1;
+  const isFreeDesign = rawOrder.isFreeDesign as boolean;
+  const estimatedPrice = rawOrder.estimatedPrice != null ? Number(rawOrder.estimatedPrice) : null;
+  const specialInstructions = rawOrder.specialInstructions as string | null;
+  const hasAnySpec = placement || stitchCount || fabricType || fileFormats.length > 0 ||
+    colorQuantity || threadBrand || is3dPuffJacketBack || designHeightIn || designWidthIn;
+
+  if (!hasAnySpec && !specialInstructions) return null;
 
   return (
-    <Card className="rounded-[1.5rem] border-border/80">
+    <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">Your order specs</CardTitle>
+        <CardTitle className="text-base">Order Specs</CardTitle>
         <CardDescription>What you submitted with this order.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-3 flex flex-wrap gap-2">
-          <Chip label={`Qty: ${production.quantity}`} />
-          {production.isFreeDesign && <Chip label="Free first design" color="emerald" />}
-          {production.is3dPuffJacketBack && <Chip label="3D Puff Jacket Back" color="purple" />}
-          {production.estimatedPrice != null && (
-            <Chip label={`Est. $${production.estimatedPrice.toFixed(2)}`} color="blue" />
-          )}
+          <Chip label={`Qty: ${quantity}`} />
+          {isFreeDesign && <Chip label="Free first design" variant="emerald" />}
+          {is3dPuffJacketBack && <Chip label="3D Puff Jacket Back" variant="purple" />}
+          {estimatedPrice != null && <Chip label={`Est. $${estimatedPrice.toFixed(2)}`} variant="blue" />}
         </div>
 
         {hasAnySpec && (
           <div className="divide-y divide-border/60">
-            {production.placement && <SpecRow label="Placement" value={production.placement} />}
-            {(production.designHeightIn || production.designWidthIn) && (
-              <SpecRow
-                label="Dimensions"
-                value={`${production.designHeightIn ?? "?"}″ H × ${production.designWidthIn ?? "?"}″ W`}
-              />
+            {placement && <SpecRow label="Placement" value={placement} />}
+            {(designHeightIn || designWidthIn) && (
+              <SpecRow label="Dimensions" value={`${designHeightIn ?? "?"}″ H × ${designWidthIn ?? "?"}″ W`} />
             )}
-            {production.stitchCount && (
-              <SpecRow label="Stitch count" value={production.stitchCount.toLocaleString()} />
-            )}
-            {production.fabricType && <SpecRow label="Fabric" value={production.fabricType} />}
-            {production.fileFormats.length > 0 && (
-              <SpecRow label="File formats" value={production.fileFormats.join(", ")} />
-            )}
-            {production.colorQuantity && (
-              <SpecRow label="Thread colors" value={`${production.colorQuantity}`} />
-            )}
-            {production.threadBrand && <SpecRow label="Thread brand" value={production.threadBrand} />}
-            {production.colorDetails && <SpecRow label="Color details" value={production.colorDetails} />}
-            {production.trims && <SpecRow label="Trims" value={production.trims} />}
+            {stitchCount && <SpecRow label="Stitch count" value={stitchCount.toLocaleString()} />}
+            {fabricType && <SpecRow label="Fabric" value={fabricType} />}
+            {fileFormats.length > 0 && <SpecRow label="File formats" value={fileFormats.join(", ")} />}
+            {colorQuantity && <SpecRow label="Thread colors" value={String(colorQuantity)} />}
+            {threadBrand && <SpecRow label="Thread brand" value={threadBrand} />}
+            {colorDetails && <SpecRow label="Color details" value={colorDetails} />}
+            {trims && <SpecRow label="Trims" value={trims} />}
           </div>
         )}
 
-        {production.specialInstructions && (
+        {specialInstructions && (
           <div className="mt-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-3">
-            <div className="mb-1 text-xs font-medium uppercase tracking-wide text-amber-400">
-              Special instructions
-            </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {production.specialInstructions}
+            <p className="mb-1 text-xs font-medium uppercase tracking-wide text-amber-600 dark:text-amber-400">
+              Special Instructions
             </p>
+            <p className="text-sm leading-relaxed text-muted-foreground">{specialInstructions}</p>
           </div>
         )}
       </CardContent>
@@ -520,21 +578,15 @@ function ClientSpecsCard({ production }: { production: OrderProduction }) {
   );
 }
 
-function Chip({
-  label,
-  color = "default",
-}: {
-  label: string;
-  color?: "default" | "emerald" | "purple" | "blue";
-}) {
-  const colors = {
-    default: "border-border/80 bg-secondary/80 text-muted-foreground",
-    emerald: "border-emerald-400/30 bg-emerald-500/10 text-emerald-400",
-    purple: "border-purple-400/30 bg-purple-500/10 text-purple-400",
-    blue: "border-blue-400/30 bg-blue-500/10 text-blue-400",
+function Chip({ label, variant = "default" }: { label: string; variant?: "default" | "emerald" | "purple" | "blue" }) {
+  const variants = {
+    default: "border-border/60 bg-muted/60 text-muted-foreground",
+    emerald: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    purple: "border-purple-500/20 bg-purple-500/10 text-purple-600 dark:text-purple-400",
+    blue: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
   };
   return (
-    <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${colors[color]}`}>
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${variants[variant]}`}>
       {label}
     </span>
   );
