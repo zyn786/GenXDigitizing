@@ -143,7 +143,7 @@ function mapDesignTypeToService(dt: string): ServiceType {
   return dt === "CUSTOM_PATCHES" ? "CUSTOM_PATCHES" : "EMBROIDERY_DIGITIZING";
 }
 
-function getMissingFields(values: QuoteOrderInput, flowCtx: FlowContext): string[] {
+function getMissingFields(values: QuoteOrderInput, flowCtx: FlowContext, fileCount: number): string[] {
   const missing: string[] = [];
   if (flowCtx === "guest") {
     if (!values.customerName || values.customerName.length < 2) missing.push("Name");
@@ -151,12 +151,12 @@ function getMissingFields(values: QuoteOrderInput, flowCtx: FlowContext): string
   }
   if (!values.designTitle || values.designTitle.length < 2) missing.push("Design title");
   if (!values.placement) missing.push("Placement");
+  if (fileCount === 0) missing.push("Upload at least one artwork or reference file");
   return missing;
 }
 
-function getSoftWarnings(values: QuoteOrderInput, fileCount: number): string[] {
+function getSoftWarnings(values: QuoteOrderInput): string[] {
   const warnings: string[] = [];
-  if (fileCount === 0) warnings.push("Upload a reference file to help us start production faster.");
   if (!values.specialInstructions || values.specialInstructions.trim().length === 0) {
     warnings.push("Add special instructions about colors, size, or style.");
   }
@@ -237,8 +237,8 @@ export function QuoteOrderBuilder({ mode, flowContext, user, isFirstOrder }: Pro
   const [designType, setDesignType] = React.useState("");
 
   const placementMeta = values.placement ? getPlacementMeta(values.placement) : null;
-  const missing = isOrder && step === 5 ? getMissingFields(values, ctx) : [];
-  const softWarnings = isOrder && step === 5 ? getSoftWarnings(values, refFiles.length) : [];
+  const missing = isOrder && step === 5 ? getMissingFields(values, ctx, refFiles.length) : [];
+  const softWarnings = isOrder && step === 5 ? getSoftWarnings(values) : [];
 
   function update<K extends keyof QuoteOrderInput>(key: K, val: QuoteOrderInput[K]) {
     setValues((cur) => ({ ...cur, [key]: val }));
@@ -860,7 +860,7 @@ export function QuoteOrderBuilder({ mode, flowContext, user, isFirstOrder }: Pro
               <CardContent>
                 <h2 className="mb-1 text-xl font-semibold">Upload Your Design</h2>
                 <p className="mb-5 text-sm text-muted-foreground">
-                  Upload your artwork, logo, or reference image. Supported: JPG, PNG, PDF, AI, EPS, SVG, PSD, ZIP.
+                  Upload at least one artwork or reference file to submit your order. Supported: JPG, PNG, PDF, AI, EPS, SVG, PSD, ZIP.
                 </p>
 
                 <ReferenceFileUploader
@@ -873,7 +873,7 @@ export function QuoteOrderBuilder({ mode, flowContext, user, isFirstOrder }: Pro
                 {refFiles.length === 0 && (
                   <div className="mt-4 flex items-start gap-2 rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
                     <Info className="mt-0.5 h-4 w-4 shrink-0" />
-                    No files uploaded yet. You can skip this step and upload later — but uploading now helps us start faster.
+                    No files uploaded yet. At least one artwork or reference file is required to submit your order.
                   </div>
                 )}
 
