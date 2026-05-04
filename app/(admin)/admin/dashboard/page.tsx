@@ -7,7 +7,6 @@ import { prisma } from "@/lib/db";
 import { buildTitle } from "@/lib/site";
 import { auth } from "@/auth";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
 import { mapDbStatus } from "@/lib/workflow/repository";

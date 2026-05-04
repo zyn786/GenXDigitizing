@@ -5,7 +5,6 @@ import Link from "next/link";
 import type { Route } from "next";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
 import type { WorkflowOrder } from "@/lib/workflow/types";
 
