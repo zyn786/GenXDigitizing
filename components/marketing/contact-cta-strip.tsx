@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 export function ContactCtaStrip() {
@@ -23,13 +24,15 @@ export function ContactCtaStrip() {
               </div>
 
               <div className="flex shrink-0 flex-wrap gap-3">
-                <Link href="/services" className="btn-primary">
-                  Explore services
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link href="/login" className="btn-outline">
-                  Open portal
-                </Link>
+                <Button asChild variant="premium" shape="pill" size="lg">
+                  <Link href="/services">
+                    Explore services
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" shape="pill" size="lg">
+                  <Link href="/login">Open portal</Link>
+                </Button>
               </div>
             </div>
           </CardContent>

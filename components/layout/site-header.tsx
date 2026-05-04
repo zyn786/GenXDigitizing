@@ -121,7 +121,7 @@ export function SiteHeader() {
                     </Link>
                   </Button>
                 )}
-                <Button asChild className="rounded-full bg-primary px-5 text-primary-foreground hover:opacity-95">
+                <Button asChild variant="premium" shape="pill" size="lg">
                   <Link href="/contact">Get a quote</Link>
                 </Button>
               </div>
@@ -205,23 +205,23 @@ export function SiteHeader() {
         <div className="space-y-3 border-t border-border/80 px-4 pb-8 pt-4">
           {isAuthenticated ? (
             <>
-              <Button asChild variant="outline" className="w-full rounded-2xl border-border/80">
+              <Button asChild variant="outline" shape="pill" size="lg" className="w-full">
                 <Link href="/client/dashboard" onClick={() => setMobileOpen(false)}>
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
                 </Link>
               </Button>
-              <LogoutButton className="w-full rounded-2xl border border-border/80 bg-transparent" />
+              <LogoutButton className="w-full rounded-full border border-border/80 bg-transparent" />
             </>
           ) : (
-            <Button asChild variant="outline" className="w-full rounded-2xl border-border/80">
+            <Button asChild variant="outline" shape="pill" size="lg" className="w-full">
               <Link href="/login" onClick={() => setMobileOpen(false)}>
                 <LogIn className="mr-2 h-4 w-4" />
                 Login
               </Link>
             </Button>
           )}
-          <Button asChild className="w-full rounded-2xl bg-primary text-primary-foreground hover:opacity-95">
+          <Button asChild variant="premium" shape="pill" size="lg" className="w-full">
             <Link href="/contact" onClick={() => setMobileOpen(false)}>
               Get a free quote
             </Link>

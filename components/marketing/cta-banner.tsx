@@ -4,6 +4,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+
 export function FinalCtaBanner() {
   return (
     <section className="px-4 pb-20 pt-16 md:px-8 md:pb-28 md:pt-20">
@@ -67,15 +69,17 @@ export function FinalCtaBanner() {
 
                 <div className="flex shrink-0 flex-wrap gap-3">
                   <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Link href="/contact" className="btn-primary">
-                      Get a free quote
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
+                    <Button asChild variant="premium" shape="pill" size="lg">
+                      <Link href="/contact">
+                        Get a free quote
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Link href="/login" className="btn-outline">
-                      Client portal
-                    </Link>
+                    <Button asChild variant="outline" shape="pill" size="lg">
+                      <Link href="/login">Client portal</Link>
+                    </Button>
                   </motion.div>
                 </div>
               </div>

@@ -31,17 +31,17 @@ export function PublicShellBackground() {
 
       {/* ── Animated floating orbs ── */}
       <motion.div
-        className="absolute left-[-10rem] top-[-8rem] h-[28rem] w-[28rem] rounded-full bg-indigo-500/10 blur-[80px]"
+        className="absolute left-[-10rem] top-[-8rem] h-[28rem] w-[28rem] rounded-full bg-primary/10 blur-[80px]"
         animate={{ y: [0, 22, 0], x: [0, 14, 0] }}
         transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute right-[-10rem] top-[6rem] h-[26rem] w-[26rem] rounded-full bg-violet-500/10 blur-[80px]"
+        className="absolute right-[-10rem] top-[6rem] h-[26rem] w-[26rem] rounded-full bg-accent/10 blur-[80px]"
         animate={{ y: [0, -18, 0], x: [0, -22, 0] }}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 1 }}
       />
       <motion.div
-        className="absolute bottom-[-10rem] left-[20%] h-[22rem] w-[22rem] rounded-full bg-blue-500/08 blur-[60px]"
+        className="absolute bottom-[-10rem] left-[20%] h-[22rem] w-[22rem] rounded-full bg-primary/8 blur-[60px]"
         animate={{ y: [0, 14, 0], x: [0, -12, 0] }}
         transition={{ duration: 17, repeat: Infinity, ease: "easeInOut", delay: 2 }}
       />

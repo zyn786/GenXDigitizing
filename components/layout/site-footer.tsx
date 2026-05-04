@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Route } from "next";
 
 import { SiteLogo } from "@/components/branding/site-logo";
+import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site";
 
 const serviceLinks: Array<{ href: Route; label: string }> = [
@@ -36,18 +37,12 @@ export function SiteFooter() {
                 production-ready within 24 hours.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
-                <Link
-                  href="/contact"
-                  className="inline-flex h-9 items-center rounded-full bg-primary px-5 text-xs font-semibold text-primary-foreground transition hover:opacity-90"
-                >
-                  Get a quote
-                </Link>
-                <Link
-                  href="/portfolio"
-                  className="inline-flex h-9 items-center rounded-full border border-border/80 bg-card/70 px-5 text-xs font-semibold transition hover:bg-card"
-                >
-                  View work
-                </Link>
+                <Button asChild variant="premium" shape="pill" size="sm">
+                  <Link href="/contact">Get a quote</Link>
+                </Button>
+                <Button asChild variant="outline" shape="pill" size="sm">
+                  <Link href="/portfolio">View work</Link>
+                </Button>
               </div>
             </div>
 

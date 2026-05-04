@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { usePreloader } from "@/components/layout/site-preloader";
 import { DirectOrderModal } from "@/components/marketing/direct-order-modal";
+import { Button } from "@/components/ui/button";
 
 const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
@@ -51,9 +52,9 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isRevealing ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.55, ease }}
-          className="mb-7 inline-flex items-center gap-2 rounded-full border border-indigo-400/25 bg-indigo-500/[0.13] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.25em] text-indigo-300 backdrop-blur-xl"
+          className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/15 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.25em] text-indigo-300 backdrop-blur-xl"
         >
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.9)]" />
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.9)]" />
           <Sparkles className="h-3 w-3 opacity-70" />
           Premium Embroidery Digitizing
         </motion.div>
@@ -90,20 +91,24 @@ export function HeroSection() {
           className="mt-8 flex flex-col items-center gap-3"
         >
           <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              href="/contact"
-              className="inline-flex h-12 items-center gap-2 rounded-full bg-indigo-500 px-7 text-sm font-semibold text-white shadow-[0_4px_24px_rgba(99,102,241,0.35)] transition-all hover:bg-indigo-400 hover:shadow-[0_8px_32px_rgba(99,102,241,0.50)] active:scale-[0.98]"
-            >
-              Get a free quote
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            <Button asChild variant="premium" shape="pill" size="lg">
+              <Link href="/contact">
+                Get a free quote
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
             <DirectOrderModal mode="order" />
-            <Link
-              href="/portfolio"
-              className="inline-flex h-12 items-center gap-2 rounded-full border border-white/[0.16] bg-white/[0.07] px-7 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:border-white/[0.28] hover:bg-white/[0.12] active:scale-[0.98]"
+            <Button
+              asChild
+              variant="ghost"
+              shape="pill"
+              size="lg"
+              className="border border-white/20 text-white hover:border-white/30 hover:bg-white/10"
             >
-              View our work
-            </Link>
+              <Link href="/portfolio">
+                View our work
+              </Link>
+            </Button>
           </div>
           <p className="text-[11px] tracking-wide text-white/30">
             Free first file · No credit card required · 24-hr turnaround

@@ -1,10 +1,13 @@
+import type { ReactNode } from "react";
+
 type PublicPageHeroProps = {
   eyebrow: string;
   title: string;
   description: string;
+  children?: ReactNode;
 };
 
-export function PublicPageHero({ eyebrow, title, description }: PublicPageHeroProps) {
+export function PublicPageHero({ eyebrow, title, description, children }: PublicPageHeroProps) {
   return (
     <section className="px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-10">
       <div className="page-shell">
@@ -15,6 +18,7 @@ export function PublicPageHero({ eyebrow, title, description }: PublicPageHeroPr
             <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
               {description}
             </p>
+            {children && <div className="mt-6 flex flex-wrap gap-3">{children}</div>}
           </div>
         </div>
       </div>
