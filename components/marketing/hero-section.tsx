@@ -29,7 +29,7 @@ export function HeroSection() {
   return (
     <section className="relative min-h-screen overflow-hidden -mt-20">
       {/* Desktop YouTube embed (hidden on mobile) */}
-      <div className="absolute inset-0 hidden md:block">
+      <div className="pointer-events-none absolute inset-0 hidden select-none md:block">
         <iframe
           src="https://www.youtube.com/embed/dYQ7iQJEJXw?autoplay=1&mute=1&loop=1&controls=0&playlist=dYQ7iQJEJXw&playsinline=1&rel=0&showinfo=0&modestbranding=1"
           className="absolute inset-0 h-full w-full object-cover"
@@ -40,7 +40,7 @@ export function HeroSection() {
         />
       </div>
       {/* Mobile YouTube Short embed (hidden on desktop) */}
-      <div className="absolute inset-0 md:hidden">
+      <div className="pointer-events-none absolute inset-0 select-none md:hidden">
         <iframe
           src="https://www.youtube.com/embed/Y-zhysHWyZI?autoplay=1&mute=1&loop=1&controls=0&playlist=Y-zhysHWyZI&playsinline=1&rel=0&showinfo=0&modestbranding=1"
           className="absolute inset-0 h-full w-full object-cover"
