@@ -7,10 +7,10 @@ import type { ProofStatus } from "@/lib/workflow/types";
 import { getProofStatusLabel } from "@/lib/workflow/status";
 
 const PROOF_TONE: Record<string, string> = {
-  PENDING_ADMIN_PROOF_REVIEW: "border-amber-400/30 bg-amber-500/10 text-amber-300",
-  PROOF_APPROVED_BY_ADMIN: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300",
-  PROOF_REJECTED_BY_ADMIN: "border-red-400/30 bg-red-500/10 text-red-300",
-  SENT_TO_CLIENT: "border-violet-400/30 bg-violet-500/10 text-violet-300",
+  PENDING_ADMIN_PROOF_REVIEW: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  PROOF_APPROVED_BY_ADMIN: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  PROOF_REJECTED_BY_ADMIN: "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-600 dark:text-red-400",
+  SENT_TO_CLIENT: "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400",
 };
 
 export function AdminProofReviewPanel({
@@ -90,7 +90,7 @@ export function AdminProofReviewPanel({
 
       {proofStatus === "PROOF_REJECTED_BY_ADMIN" && proofReviewNote && (
         <div className="rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm">
-          <div className="mb-1 flex items-center gap-1.5 font-medium text-red-400">
+          <div className="mb-1 flex items-center gap-1.5 font-medium text-red-600 dark:text-red-400">
             <XCircle className="h-3.5 w-3.5" />
             Rejected with feedback
           </div>
@@ -99,7 +99,7 @@ export function AdminProofReviewPanel({
       )}
 
       {proofStatus === "PROOF_APPROVED_BY_ADMIN" && (
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-300">
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-400">
           Proof approved and sent to client.
         </div>
       )}
@@ -107,7 +107,7 @@ export function AdminProofReviewPanel({
       {proofStatus === "PENDING_ADMIN_PROOF_REVIEW" && (
         <>
           <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm">
-            <div className="flex items-center gap-1.5 font-medium text-amber-300">
+            <div className="flex items-center gap-1.5 font-medium text-amber-600 dark:text-amber-400">
               <AlertTriangle className="h-3.5 w-3.5" />
               Proof awaiting your review
             </div>
@@ -116,7 +116,7 @@ export function AdminProofReviewPanel({
             </p>
           </div>
 
-          {error && <p className="text-xs text-red-400">{error}</p>}
+          {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
 
           {!showRejectForm ? (
             <div className="flex gap-2">
@@ -133,7 +133,7 @@ export function AdminProofReviewPanel({
                 type="button"
                 disabled={approving || rejecting}
                 onClick={() => setShowRejectForm(true)}
-                className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full border border-red-400/30 bg-red-500/10 px-4 text-xs font-medium text-red-300 transition hover:bg-red-500/20 disabled:opacity-50"
+                className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full border border-red-400/30 bg-red-500/10 px-4 text-xs font-medium text-red-600 dark:text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
               >
                 <XCircle className="h-3.5 w-3.5" />
                 Reject with feedback

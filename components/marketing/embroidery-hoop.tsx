@@ -18,8 +18,8 @@ export function EmbroideryHoop({
   digitalLabel = "Digitized File",
 }: Props) {
   const cdn = process.env.NEXT_PUBLIC_ASSET_BASE_URL ?? "";
-  const effectiveRealSrc    = realSrc    ?? `${cdn}/Digitizing/Before-1.png`;
-  const effectiveDigitalSrc = digitalSrc ?? `${cdn}/Digitizing/After-1.png`;
+  const effectiveRealSrc    = realSrc    ?? `${cdn}/digitizing/Before-1.png`;
+  const effectiveDigitalSrc = digitalSrc ?? `${cdn}/digitizing/After-1.png`;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [pct, setPct]       = useState(50);

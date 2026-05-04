@@ -6,14 +6,14 @@ import { getRevisionStatusLabel } from "@/lib/workflow/status";
 import type { OrderRevision } from "@/lib/workflow/types";
 
 const STATUS_TONE: Record<string, string> = {
-  REQUESTED_BY_CLIENT: "border-amber-400/30 bg-amber-500/10 text-amber-300",
-  CREATED_BY_ADMIN: "border-blue-400/30 bg-blue-500/10 text-blue-300",
-  UNDER_ADMIN_REVIEW: "border-amber-400/30 bg-amber-500/10 text-amber-300",
-  ASSIGNED_TO_DESIGNER: "border-violet-400/30 bg-violet-500/10 text-violet-300",
-  IN_PROGRESS: "border-violet-400/30 bg-violet-500/10 text-violet-300",
-  REVISED_PROOF_UPLOADED: "border-blue-400/30 bg-blue-500/10 text-blue-300",
-  COMPLETED: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300",
-  CANCELLED: "border-white/10 bg-white/5 text-white/50",
+  REQUESTED_BY_CLIENT: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  CREATED_BY_ADMIN: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  UNDER_ADMIN_REVIEW: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  ASSIGNED_TO_DESIGNER: "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  IN_PROGRESS: "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  REVISED_PROOF_UPLOADED: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  COMPLETED: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  CANCELLED: "border-border/60 bg-muted/60 text-muted-foreground",
 };
 
 type Designer = { id: string; name: string | null };
@@ -108,7 +108,7 @@ export function RevisionManager({
 
   return (
     <div className="grid gap-4">
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
 
       {/* Existing revisions */}
       {revisions.length > 0 && (
@@ -136,7 +136,7 @@ export function RevisionManager({
                     <button
                       type="button"
                       onClick={() => handleUpdateStatus(rev.id, "CANCELLED")}
-                      className="rounded-full border border-red-400/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/20"
+                      className="rounded-full border border-red-400/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-500/20"
                     >
                       Cancel
                     </button>

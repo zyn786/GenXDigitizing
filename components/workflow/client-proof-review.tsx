@@ -41,7 +41,7 @@ export function ClientProofReview({
     return (
       <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-4">
         <div className="flex items-center gap-2">
-          <CheckCircle className="h-4 w-4 text-emerald-400" />
+          <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           <span className="text-sm font-medium text-emerald-300">Proof approved</span>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -127,7 +127,7 @@ export function ClientProofReview({
         Your proof is ready. Please review the files above and approve or request changes.
       </div>
 
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
 
       {!showRevisionForm ? (
         <div className="flex gap-2">

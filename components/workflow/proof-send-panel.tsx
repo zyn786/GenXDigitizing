@@ -6,16 +6,16 @@ import { getProofStatusLabel } from "@/lib/workflow/status";
 import type { ProofStatus } from "@/lib/workflow/types";
 
 const PROOF_TONE: Record<ProofStatus, string> = {
-  NOT_UPLOADED: "border-white/10 bg-white/5 text-white/60",
-  UPLOADED: "border-blue-400/30 bg-blue-500/10 text-blue-300",
-  INTERNAL_REVIEW: "border-amber-400/30 bg-amber-500/10 text-amber-300",
-  PENDING_ADMIN_PROOF_REVIEW: "border-amber-400/30 bg-amber-500/10 text-amber-300",
-  PROOF_APPROVED_BY_ADMIN: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300",
-  PROOF_REJECTED_BY_ADMIN: "border-red-400/30 bg-red-500/10 text-red-300",
-  SENT_TO_CLIENT: "border-violet-400/30 bg-violet-500/10 text-violet-300",
-  CLIENT_REVIEWING: "border-violet-400/30 bg-violet-500/10 text-violet-300",
-  CLIENT_APPROVED: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300",
-  REVISION_REQUESTED: "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-300",
+  NOT_UPLOADED: "border-border/60 bg-muted/60 text-muted-foreground",
+  UPLOADED: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  INTERNAL_REVIEW: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  PENDING_ADMIN_PROOF_REVIEW: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  PROOF_APPROVED_BY_ADMIN: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  PROOF_REJECTED_BY_ADMIN: "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-600 dark:text-red-400",
+  SENT_TO_CLIENT: "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  CLIENT_REVIEWING: "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  CLIENT_APPROVED: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  REVISION_REQUESTED: "border-fuchsia-500/20 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400",
 };
 
 export function ProofSendPanel({
@@ -74,25 +74,25 @@ export function ProofSendPanel({
       </div>
 
       {proofStatus === "PENDING_ADMIN_PROOF_REVIEW" && (
-        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-300">
+        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-600 dark:text-amber-400">
           Proof is waiting for admin review before being sent to the client.
         </div>
       )}
 
       {proofStatus === "PROOF_REJECTED_BY_ADMIN" && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-600 dark:text-red-600 dark:text-red-400">
           Admin rejected this proof. Upload updated files and resubmit.
         </div>
       )}
 
       {proofStatus === "CLIENT_APPROVED" && (
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-300">
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-400">
           Client has approved this proof. Payment is now pending.
         </div>
       )}
 
       {proofStatus === "REVISION_REQUESTED" && (
-        <div className="rounded-2xl border border-fuchsia-500/20 bg-fuchsia-500/5 px-4 py-3 text-sm text-fuchsia-300">
+        <div className="rounded-2xl border border-fuchsia-500/20 bg-fuchsia-500/5 px-4 py-3 text-sm text-fuchsia-600 dark:text-fuchsia-400">
           Client requested a revision. Upload updated files and resubmit.
         </div>
       )}
@@ -103,7 +103,7 @@ export function ProofSendPanel({
 
       {canSend && proofStatus !== "CLIENT_APPROVED" && (
         <>
-          {error && <p className="text-xs text-red-400">{error}</p>}
+          {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
           <button
             type="button"
             disabled={sending}

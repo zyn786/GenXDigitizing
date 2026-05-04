@@ -60,7 +60,7 @@ function getFromEmail() {
 function getLogoUrl() {
   return (
     process.env.EMAIL_LOGO_URL ??
-    `${getBaseUrl()}/logo.png`
+    `${getBaseUrl()}/brand/genx-logo-black.png`
   );
 }
 

@@ -4,17 +4,10 @@ export function OrderTimeline({ events }: { events: OrderEvent[] }) {
   return (
     <div className="space-y-3">
       {events.map((event) => (
-        <div
-          key={event.id}
-          className="rounded-[1.5rem] border border-white/10 bg-white/[0.05] p-4"
-        >
-          <div className="text-xs uppercase tracking-[0.18em] text-white/40">
-            {new Date(event.at).toLocaleString()}
-          </div>
-          <div className="mt-2 text-sm font-semibold text-white">
-            {event.title}
-          </div>
-          <div className="mt-1 text-sm leading-7 text-white/65">{event.body}</div>
+        <div key={event.id} className="rounded-2xl border border-border/60 bg-muted/30 p-4">
+          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{new Date(event.at).toLocaleString()}</p>
+          <p className="mt-2 text-sm font-semibold">{event.title}</p>
+          <p className="mt-1 text-sm leading-7 text-muted-foreground">{event.body}</p>
         </div>
       ))}
     </div>

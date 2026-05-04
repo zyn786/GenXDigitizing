@@ -120,10 +120,10 @@ export function WorkflowTimeline({
         <div key={step.key} className="flex items-start gap-3">
           <div className="relative flex flex-col items-center">
             <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full
-              ${step.state === "done" ? "bg-emerald-500/20 text-emerald-400" :
-                step.state === "active" ? "bg-amber-500/20 text-amber-400" :
-                step.state === "skipped" ? "bg-red-500/20 text-red-400" :
-                "bg-white/5 text-white/30"}`
+              ${step.state === "done" ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" :
+                step.state === "active" ? "bg-amber-500/20 text-amber-600 dark:text-amber-400" :
+                step.state === "skipped" ? "bg-red-500/20 text-red-600 dark:text-red-400" :
+                "bg-muted/30 text-muted-foreground"}`
             }>
               {step.state === "done" && <CheckCircle className="h-3.5 w-3.5" />}
               {step.state === "active" && <Clock className="h-3.5 w-3.5" />}
@@ -131,14 +131,14 @@ export function WorkflowTimeline({
               {step.state === "pending" && <Circle className="h-3.5 w-3.5" />}
             </div>
             {i < steps.length - 1 && (
-              <div className={`mt-1 h-4 w-px ${step.state === "done" ? "bg-emerald-500/30" : "bg-white/10"}`} />
+              <div className={`mt-1 h-4 w-px ${step.state === "done" ? "bg-emerald-500/30" : "bg-border/40"}`} />
             )}
           </div>
           <div className="pt-0.5">
             <span className={`text-xs font-medium
               ${step.state === "done" ? "text-foreground" :
                 step.state === "active" ? "text-amber-300" :
-                step.state === "skipped" ? "text-red-400/70" :
+                step.state === "skipped" ? "text-red-600 dark:text-red-400/70" :
                 "text-muted-foreground/60"}`
             }>
               {step.label}

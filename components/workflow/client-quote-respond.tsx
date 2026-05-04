@@ -49,7 +49,7 @@ export function ClientQuoteRespond({
     return (
       <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-4">
         <div className="flex items-center gap-2">
-          <CheckCircle className="h-4 w-4 text-emerald-400" />
+          <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           <span className="text-sm font-medium text-emerald-300">Quote accepted</span>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -63,7 +63,7 @@ export function ClientQuoteRespond({
     return (
       <div className="rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-4">
         <div className="flex items-center gap-2">
-          <XCircle className="h-4 w-4 text-red-400" />
+          <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
           <span className="text-sm font-medium text-red-300">Quote declined</span>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -91,7 +91,7 @@ export function ClientQuoteRespond({
         </p>
       </div>
 
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
 
       {!showRejectForm ? (
         <div className="flex gap-2">
@@ -108,7 +108,7 @@ export function ClientQuoteRespond({
             type="button"
             disabled={accepting || rejecting}
             onClick={() => setShowRejectForm(true)}
-            className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full border border-red-400/30 bg-red-500/10 px-4 text-xs font-medium text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
+            className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full border border-red-400/30 bg-red-500/10 px-4 text-xs font-medium text-red-600 dark:text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
           >
             <XCircle className="h-3.5 w-3.5" />
             Decline
@@ -128,7 +128,7 @@ export function ClientQuoteRespond({
               type="button"
               disabled={rejecting}
               onClick={() => handleAction("reject")}
-              className="inline-flex h-9 flex-1 items-center justify-center rounded-full border border-red-400/30 bg-red-500/10 px-4 text-xs font-medium text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
+              className="inline-flex h-9 flex-1 items-center justify-center rounded-full border border-red-400/30 bg-red-500/10 px-4 text-xs font-medium text-red-600 dark:text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
             >
               {rejecting ? "Declining…" : "Confirm decline"}
             </button>

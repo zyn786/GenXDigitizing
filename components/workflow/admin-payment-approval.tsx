@@ -6,14 +6,14 @@ import { getPaymentStatusLabel } from "@/lib/workflow/status";
 import type { OrderPaymentStatus } from "@/lib/workflow/types";
 
 const TONE: Record<OrderPaymentStatus, string> = {
-  NOT_REQUIRED: "border-white/10 bg-white/5 text-white/60",
-  PAYMENT_PENDING: "border-amber-400/30 bg-amber-500/10 text-amber-300",
-  PAYMENT_SUBMITTED: "border-blue-400/30 bg-blue-500/10 text-blue-300",
-  PAYMENT_UNDER_REVIEW: "border-violet-400/30 bg-violet-500/10 text-violet-300",
-  PAID: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300",
-  PARTIALLY_PAID: "border-amber-400/30 bg-amber-500/10 text-amber-300",
-  REJECTED: "border-red-400/30 bg-red-500/10 text-red-300",
-  REFUNDED: "border-blue-400/30 bg-blue-500/10 text-blue-300",
+  NOT_REQUIRED: "border-border/60 bg-muted/60 text-muted-foreground",
+  PAYMENT_PENDING: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  PAYMENT_SUBMITTED: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  PAYMENT_UNDER_REVIEW: "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  PAID: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  PARTIALLY_PAID: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  REJECTED: "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-600 dark:text-red-400",
+  REFUNDED: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
 };
 
 type PendingProof = {
@@ -95,7 +95,7 @@ export function AdminPaymentApproval({
       </div>
 
       {filesUnlocked && (
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-300">
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-600 dark:text-emerald-400">
           Files are unlocked and available to the client.
         </div>
       )}
@@ -116,7 +116,7 @@ export function AdminPaymentApproval({
                 Submitted: {new Date(proof.submittedAt).toLocaleString()}
               </div>
 
-              {error && <p className="text-xs text-red-400">{error}</p>}
+              {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
 
               <div className="grid gap-2">
                 <div className="flex gap-2">
@@ -132,7 +132,7 @@ export function AdminPaymentApproval({
                     type="button"
                     disabled={approving || rejecting}
                     onClick={() => handlePaymentAction("reject", proof.id)}
-                    className="inline-flex h-9 flex-1 items-center justify-center rounded-full border border-red-400/30 bg-red-500/10 px-3 text-xs font-medium text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
+                    className="inline-flex h-9 flex-1 items-center justify-center rounded-full border border-red-400/30 bg-red-500/10 px-3 text-xs font-medium text-red-600 dark:text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
                   >
                     {rejecting ? "Rejecting…" : "Reject"}
                   </button>
@@ -153,7 +153,7 @@ export function AdminPaymentApproval({
       {!filesUnlocked && (
         <div className="border-t border-border/60 pt-3">
           <div className="text-xs text-muted-foreground mb-2">Manual override</div>
-          {error && !pendingProofs.length && <p className="text-xs text-red-400 mb-2">{error}</p>}
+          {error && !pendingProofs.length && <p className="text-xs text-red-600 dark:text-red-400 mb-2">{error}</p>}
           <button
             type="button"
             disabled={unlocking}
