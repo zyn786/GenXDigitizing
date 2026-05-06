@@ -18,7 +18,7 @@ export default async function ClientInvoicesPage() {
     <div className="grid gap-6">
       <section>
         <p className="section-eyebrow">Billing</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Invoices & Billing</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Invoices & Billing</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           View your invoice history, payment status, balances, and receipts.
         </p>

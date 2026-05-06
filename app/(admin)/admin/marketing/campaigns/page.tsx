@@ -38,7 +38,7 @@ export default async function AdminCampaignsPage() {
         <div className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
           Marketing
         </div>
-        <h1 className="mt-2 text-4xl font-semibold tracking-tight">Campaigns</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Campaigns</h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
           {isAdmin
             ? "Review, approve, and manage all marketing campaigns."

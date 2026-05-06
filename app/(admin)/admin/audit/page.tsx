@@ -18,7 +18,7 @@ export default function AdminAuditPage() {
 
       <section>
         <p className="section-eyebrow">Billing audit</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Audit Records</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Audit Records</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Every billing mutation creates an immutable audit entry. Records require a SUPER_ADMIN authenticator-code unlock and expire after 5 minutes.
         </p>

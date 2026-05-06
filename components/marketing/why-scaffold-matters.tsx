@@ -52,7 +52,7 @@ export function WhyScaffoldMatters() {
           className="mb-10 max-w-2xl"
         >
           <div className="section-eyebrow">Why GenX</div>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
             Built for decorators who need files that run right the first time.
           </h2>
         </motion.div>

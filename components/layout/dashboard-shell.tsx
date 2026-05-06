@@ -72,6 +72,8 @@ export function DashboardShell({
     <div className="min-h-screen bg-background [animation:shell-fade_0.35s_ease_both]">
       {/* ── Top header ── */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-xl">
+        {/* Subtle top accent line */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
         <div className="page-shell flex h-14 items-center justify-between gap-3 md:h-16">
           <div className="flex items-center gap-2 md:gap-3">
             <DashboardMobileNav

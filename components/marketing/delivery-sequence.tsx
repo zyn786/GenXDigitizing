@@ -44,11 +44,11 @@ export function DeliverySequence() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
-          className="mb-10 flex flex-col gap-2 md:flex-row md:items-end md:justify-between"
+          className="mb-8 flex flex-col gap-3 md:mb-10 md:flex-row md:items-end md:justify-between"
         >
           <div className="max-w-xl">
             <div className="section-eyebrow">How it works</div>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
               From artwork to production-ready file in four steps.
             </h2>
           </div>

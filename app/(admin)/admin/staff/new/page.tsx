@@ -29,7 +29,7 @@ export default async function NewStaffPage() {
           <ArrowLeft className="h-3.5 w-3.5" />
           Staff
         </Link>
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight">Add staff member</h1>
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Add staff member</h1>
         <p className="mt-3 max-w-xl text-sm leading-7 text-muted-foreground">
           All staff accounts use a company email address in the format{" "}
           <code className="rounded bg-secondary/80 px-1 py-0.5 text-xs">name@genxdigitizing.com</code>.

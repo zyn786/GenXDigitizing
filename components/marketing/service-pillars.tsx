@@ -95,7 +95,7 @@ function ServiceCard({ service }: { service: ServiceDef }) {
   return (
     <motion.article
       variants={cardVariant}
-      className="group relative min-h-[430px] overflow-hidden rounded-[1.8rem] border border-white/[0.08] bg-[#0d1425] shadow-[0_10px_36px_rgba(0,0,0,0.42)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_26px_70px_rgba(0,0,0,0.62)]"
+      className="group relative min-h-[320px] overflow-hidden rounded-[1.8rem] border border-white/[0.08] bg-[#0d1425] shadow-[0_10px_36px_rgba(0,0,0,0.42)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_26px_70px_rgba(0,0,0,0.62)] sm:min-h-[380px] lg:min-h-[430px]"
     >
       <div
         className={[
@@ -136,7 +136,7 @@ function ServiceCard({ service }: { service: ServiceDef }) {
       {/* Subtle top glow */}
       <div className="absolute inset-x-0 top-0 z-[2] h-32 bg-gradient-to-b from-white/[0.08] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-      <div className="relative z-10 flex min-h-[430px] flex-col p-7 md:p-8">
+      <div className="relative z-10 flex min-h-[320px] flex-col p-5 sm:min-h-[380px] sm:p-7 lg:min-h-[430px] md:p-8">
         <div className="flex items-start justify-between gap-4">
           <div className={`h-0.5 w-12 rounded-full ${service.accentColor}`} />
 
@@ -188,7 +188,7 @@ function ServiceCard({ service }: { service: ServiceDef }) {
 
 export function ServicePillars() {
   return (
-    <section className="px-4 py-16 md:px-8 md:py-24">
+    <section className="px-4 py-10 md:px-8 md:py-20 lg:py-24">
       <style>{`
         @keyframes shimmer-sweep {
           0% { transform: translateX(-120%); }
@@ -206,11 +206,11 @@ export function ServicePillars() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.55, ease }}
-          className="mb-12 max-w-2xl"
+          className="mb-8 max-w-2xl md:mb-12"
         >
           <div className="section-eyebrow">Services</div>
 
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
             Built for production-ready artwork, not just attractive mockups.
           </h2>
 
@@ -226,7 +226,7 @@ export function ServicePillars() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-60px" }}
-          className="grid gap-5 lg:grid-cols-3"
+          className="grid gap-4 sm:gap-5 lg:grid-cols-3"
         >
           {services.map((service) => (
             <ServiceCard key={service.title} service={service} />

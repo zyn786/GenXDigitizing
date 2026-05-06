@@ -18,7 +18,9 @@
       "Bash(Remove-Item -Recurse -Force \".next\" -ErrorAction SilentlyContinue)",
       "Bash(pnpm typecheck *)",
       "Bash(pnpm lint *)",
-      "Bash(pnpm build *)"
+      "Bash(pnpm build *)",
+      "Bash(dir E:\\\\Hello\\\\GenXDigitizing *)",
+      "Bash(npx eslint *)"
     ]
   }
 }

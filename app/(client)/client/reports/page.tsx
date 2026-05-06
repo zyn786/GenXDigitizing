@@ -35,7 +35,7 @@ export default async function ClientReportsPage() {
     <div className="grid gap-6">
       <section>
         <p className="section-eyebrow">Overview</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">My Reports</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">My Reports</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">A summary of your orders and activity with GenX Digitizing.</p>
       </section>
 

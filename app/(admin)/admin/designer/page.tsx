@@ -68,7 +68,7 @@ export default async function DesignerDashboardPage() {
       {/* Header */}
       <section>
         <p className="section-eyebrow">Designer workspace</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
           {staffProfile?.displayName ? `Welcome, ${staffProfile.displayName.split(" ")[0]}` : "Dashboard"}
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Your active jobs, production queue, and earnings at a glance.</p>

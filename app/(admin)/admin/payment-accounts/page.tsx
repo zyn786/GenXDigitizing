@@ -36,7 +36,7 @@ export default async function AdminPaymentAccountsPage() {
 
       <section>
         <p className="section-eyebrow">Billing settings</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Payment Methods</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Payment Methods</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Configure manual payment accounts shown to clients on invoices. Clients submit payment screenshots which you review before unlocking files.
         </p>

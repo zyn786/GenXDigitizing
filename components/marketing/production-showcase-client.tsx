@@ -119,7 +119,7 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
   }, [pool]);
 
   return (
-    <section className="relative py-16 md:py-20">
+    <section className="relative py-10 md:py-16 lg:py-20">
       {/* Background atmosphere */}
       <div className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_60%_55%_at_15%_50%,rgba(99,102,241,0.12),transparent_58%),radial-gradient(ellipse_44%_38%_at_85%_22%,rgba(139,92,246,0.09),transparent_55%),radial-gradient(ellipse_36%_52%_at_55%_92%,rgba(59,130,246,0.06),transparent_55%)]" />
       <div className="pointer-events-none absolute inset-0 [background-image:radial-gradient(rgba(255,255,255,0.055)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_78%_78%_at_50%_50%,black_25%,transparent_72%)]" />
@@ -129,7 +129,7 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="section-eyebrow">Our Work</div>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
               Production You Can See
             </h2>
           </div>

@@ -41,7 +41,7 @@ export default async function AdminPaymentProofsPage() {
 
       <section>
         <p className="section-eyebrow">Billing</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
           Payment Proofs
           {pendingCount > 0 && (
             <span className="ml-3 inline-flex h-7 items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-3 text-lg font-semibold text-amber-600 dark:text-amber-400">

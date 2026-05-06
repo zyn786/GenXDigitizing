@@ -58,7 +58,7 @@ export default async function AdminDashboardPage() {
       {/* Header */}
       <section>
         <p className="section-eyebrow">Operations</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
           {firstName ? `Welcome back, ${firstName}` : "Dashboard"}
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
@@ -67,7 +67,7 @@ export default async function AdminDashboardPage() {
       </section>
 
       {/* Stat cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-3">
         <StatCard href="/admin/orders" icon={<ClipboardList className="h-5 w-5" />} label="Active Orders" value={String(data.activeOrders)} sub={`${data.totalOrders} total`} />
         <StatCard href="/admin/orders" icon={<CheckCircle2 className="h-5 w-5" />} label="Delivered" value={String(data.deliveredOrders)} sub="Completed orders" />
         <StatCard href="/admin/quotes" icon={<FileQuestion className="h-5 w-5" />} label="Quotes Pending" value={String(data.pendingQuotes)} sub="Awaiting conversion" />
@@ -163,14 +163,18 @@ export default async function AdminDashboardPage() {
 function StatCard({ href, icon, label, value, sub }: { href: string; icon: React.ReactNode; label: string; value: string; sub: string }) {
   return (
     <Link href={href as Route} className="group block">
-      <Card className="h-full transition hover:-translate-y-0.5 hover:shadow-lg">
-        <CardContent className="flex items-start justify-between gap-3 p-5">
+      <Card className="relative h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5">
+        {/* Subtle top gradient line */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        <CardContent className="flex items-start justify-between gap-2 p-3 md:gap-3 md:p-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight">{value}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
+            <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground md:text-xs md:tracking-[0.18em]">{label}</p>
+            <p className="mt-1.5 text-2xl font-bold tracking-tight gradient-text md:mt-2 md:text-3xl">{value}</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">{sub}</p>
           </div>
-          <div className="rounded-2xl bg-primary/10 p-3 text-primary">{icon}</div>
+          <div className="shrink-0 rounded-xl bg-primary/10 p-2 text-primary ring-1 ring-primary/10 transition-all duration-300 group-hover:bg-primary/15 group-hover:ring-primary/20 md:rounded-2xl md:p-3">
+            {icon}
+          </div>
         </CardContent>
       </Card>
     </Link>

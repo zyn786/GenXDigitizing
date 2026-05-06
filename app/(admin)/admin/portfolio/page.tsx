@@ -40,7 +40,7 @@ export default async function AdminPortfolioPage() {
 
       <section>
         <p className="section-eyebrow">Content management</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Portfolio</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Portfolio</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Add, edit, feature, hide, or delete portfolio items.
           {session.user.role !== "SUPER_ADMIN" && " Uploaded items are sent for Super Admin review before appearing publicly."}

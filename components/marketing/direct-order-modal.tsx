@@ -179,7 +179,7 @@ export function DirectOrderModal({ mode = "order", prefillName, prefillEmail, is
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-12 items-center gap-2 rounded-full border border-white/[0.16] bg-white px-7 text-sm font-semibold text-slate-950 shadow-[0_4px_24px_rgba(255,255,255,0.15)] transition-all hover:bg-white/90 hover:shadow-[0_8px_32px_rgba(255,255,255,0.20)] active:scale-[0.98]"
+        className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-white/[0.16] bg-white px-7 text-sm font-semibold text-slate-950 shadow-[0_4px_24px_rgba(255,255,255,0.15)] transition-all hover:bg-white/90 hover:shadow-[0_8px_32px_rgba(255,255,255,0.20)] active:scale-[0.98] sm:w-auto sm:justify-start"
       >
         {mode === "order" ? "Place Direct Order" : "Get a Free Quote"}
         <Upload className="h-4 w-4" />

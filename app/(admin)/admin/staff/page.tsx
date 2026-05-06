@@ -55,7 +55,7 @@ export default async function AdminStaffPage() {
       <section className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="section-eyebrow">Team management</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Staff</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Staff</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             All staff accounts with their roles and active job counts.
           </p>

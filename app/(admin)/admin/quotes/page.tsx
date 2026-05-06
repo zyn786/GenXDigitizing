@@ -48,7 +48,7 @@ export default async function AdminQuotesPage() {
 
       <section>
         <p className="section-eyebrow">Sales pipeline</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Quote Requests</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Quote Requests</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Review and price incoming quote requests. Only Super Admin and Manager can set prices and send quotes.
         </p>

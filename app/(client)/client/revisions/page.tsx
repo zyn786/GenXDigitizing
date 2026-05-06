@@ -13,7 +13,7 @@ export default function ClientRevisionsPage() {
     <div className="grid gap-6">
       <section>
         <p className="section-eyebrow">Revisions</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Revision Requests</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Revision Requests</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Track open revision requests across your orders. Request changes to a delivered proof directly from the order detail page.
         </p>

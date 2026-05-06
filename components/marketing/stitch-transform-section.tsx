@@ -208,7 +208,7 @@ export function StitchTransformSection() {
   return (
     <section
       ref={ref}
-      className="relative isolate overflow-hidden px-4 py-28 md:px-8 md:py-36 lg:py-44"
+      className="relative isolate overflow-hidden px-4 py-12 md:px-8 md:py-24 lg:py-36"
     >
       <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_15%_15%,rgba(196,149,42,0.08),transparent_30%),radial-gradient(circle_at_85%_20%,rgba(30,58,123,0.1),transparent_34%),radial-gradient(circle_at_50%_90%,rgba(47,143,112,0.08),transparent_34%)]" />
 
@@ -251,7 +251,7 @@ export function StitchTransformSection() {
               ))}
             </div>
 
-            <div className="min-h-[300px] sm:min-h-[420px] lg:min-h-[600px] lg:flex-1">
+            <div className="min-h-[260px] sm:min-h-[360px] lg:min-h-[500px] lg:flex-1">
               <motion.div
                 key={activeIndex}
                 initial={{ opacity: 0, scale: 0.96 }}

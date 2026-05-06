@@ -44,7 +44,7 @@ export default async function AdminActivityPage() {
 
       <section>
         <p className="section-eyebrow">System logs</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Activity Log</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Activity Log</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Every important action across the platform — orders, status changes, assignments, pricing updates, and more.
         </p>

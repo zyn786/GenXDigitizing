@@ -60,7 +60,7 @@ export default async function ClientQuoteDetailPage({ params }: Props) {
             <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
               {quote.orderNumber}
             </div>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight">{quote.title}</h1>
+            <h1 className="mt-1 text-xl font-semibold tracking-tight md:text-2xl lg:text-3xl">{quote.title}</h1>
             <div className="mt-2 text-sm text-muted-foreground">{serviceLabel}</div>
           </div>
           <QuoteStatusBadge status={quote.quoteStatus ?? "NEW"} />

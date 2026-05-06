@@ -17,10 +17,10 @@ export default async function ClientOrdersPage() {
 
   return (
     <div className="grid gap-6">
-      <section className="flex flex-wrap items-start justify-between gap-4">
+      <section className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div>
           <p className="section-eyebrow">My orders</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Your Orders</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Your Orders</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             Track progress, review proofs, download delivery files, and communicate with our team.
           </p>

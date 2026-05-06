@@ -36,7 +36,7 @@ export default async function AdminNotificationsPage() {
 
       <section>
         <p className="section-eyebrow">Notification log</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Notifications</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Notifications</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Delivery log for all outbound events — email, in-app, and browser notifications.
         </p>

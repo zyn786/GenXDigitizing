@@ -11,11 +11,11 @@ export function PublicPageHero({ eyebrow, title, description, children }: Public
   return (
     <section className="px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-10">
       <div className="page-shell">
-        <div className="glass-panel premium-shadow rounded-[2rem] border-border/80 p-6 md:p-10">
+        <div className="glass-panel premium-shadow rounded-[2rem] border-border/80 p-5 md:p-10">
           <div className="max-w-3xl">
             <p className="section-eyebrow">{eyebrow}</p>
-            <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">{title}</h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl lg:text-5xl">{title}</h1>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base lg:text-lg">
               {description}
             </p>
             {children && <div className="mt-6 flex flex-wrap gap-3">{children}</div>}

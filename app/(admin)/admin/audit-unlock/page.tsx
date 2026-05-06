@@ -5,7 +5,7 @@ export default function AuditUnlockPage() {
         <div className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
           Super admin only
         </div>
-        <h1 className="mt-2 text-4xl font-semibold tracking-tight">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
           Unlock billing audit visibility.
         </h1>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">

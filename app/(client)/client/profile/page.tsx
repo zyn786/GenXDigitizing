@@ -49,7 +49,7 @@ export default async function ProfilePage() {
         <div className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
           Account settings
         </div>
-        <h1 className="mt-2 text-4xl font-semibold tracking-tight">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
           My Profile
         </h1>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">

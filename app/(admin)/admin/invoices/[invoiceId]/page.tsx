@@ -72,7 +72,7 @@ export default async function AdminInvoiceDetailPage({ params }: AdminInvoiceDet
         <Card>
           <CardHeader>
             <CardDescription>{invoice.invoiceNumber}</CardDescription>
-            <CardTitle className="text-4xl tracking-tight">Billing detail</CardTitle>
+            <CardTitle className="text-2xl tracking-tight md:text-3xl lg:text-4xl">Billing detail</CardTitle>
             <div className="text-sm text-muted-foreground">
               {invoice.clientName} · {invoice.status.replaceAll("_", " ").toLowerCase()}
               {filesUnlocked && (

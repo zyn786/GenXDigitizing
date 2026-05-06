@@ -57,7 +57,7 @@ export default async function ClientDashboardPage() {
       {/* Welcome */}
       <section>
         <p className="section-eyebrow">Client workspace</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
           Welcome back, {firstName}
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
@@ -89,40 +89,44 @@ export default async function ClientDashboardPage() {
       )}
 
       {/* Stats row */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Active orders</p>
-            <p className="mt-2 text-3xl font-semibold">{activeOrders.length}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{orders.length} total</p>
+      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+        <Card className="relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
+          <CardContent className="p-3 md:p-5">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground md:text-xs md:tracking-[0.18em]">Active orders</p>
+            <p className="mt-1.5 text-2xl font-bold tracking-tight text-blue-500 dark:text-blue-400 md:mt-2 md:text-3xl">{activeOrders.length}</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">{orders.length} total</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Proofs waiting</p>
-            <p className="mt-2 text-3xl font-semibold">{proofsWaiting}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+        <Card className={`relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${proofsWaiting > 0 ? "border-violet-500/30 bg-violet-500/[0.03]" : ""}`}>
+          <div className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent ${proofsWaiting > 0 ? "via-violet-500/60" : "via-violet-500/30"} to-transparent`} />
+          <CardContent className="p-3 md:p-5">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground md:text-xs md:tracking-[0.18em]">Proofs waiting</p>
+            <p className={`mt-1.5 text-2xl font-bold tracking-tight md:mt-2 md:text-3xl ${proofsWaiting > 0 ? "text-violet-500 dark:text-violet-400" : ""}`}>{proofsWaiting}</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">
               {proofsWaiting > 0 ? "Action needed" : "None pending"}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Files ready</p>
-            <p className="mt-2 text-3xl font-semibold">{filesReady}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+        <Card className="relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
+          <CardContent className="p-3 md:p-5">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground md:text-xs md:tracking-[0.18em]">Files ready</p>
+            <p className="mt-1.5 text-2xl font-bold tracking-tight text-emerald-500 dark:text-emerald-400 md:mt-2 md:text-3xl">{filesReady}</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">
               {filesReady > 0 ? "Ready to download" : "None yet"}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Balance</p>
-            <p className="mt-2 text-3xl font-semibold">${totalBalance.toFixed(2)}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+        <Card className="relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
+          <CardContent className="p-3 md:p-5">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground md:text-xs md:tracking-[0.18em]">Balance</p>
+            <p className="mt-1.5 text-xl font-bold tracking-tight text-amber-500 dark:text-amber-400 md:mt-2 md:text-3xl">${totalBalance.toFixed(2)}</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">
               {unpaidInvoices.length} open invoice{unpaidInvoices.length !== 1 ? "s" : ""}
             </p>
           </CardContent>

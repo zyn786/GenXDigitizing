@@ -61,7 +61,7 @@ export default async function ClientFilesPage() {
     <div className="grid gap-6">
       <section>
         <p className="section-eyebrow">Client files</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Your Files</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Your Files</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Completed files from your orders appear here. Files are locked until your invoice payment is approved.
         </p>

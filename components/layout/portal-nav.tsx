@@ -86,17 +86,21 @@ export function PortalNav({
             key={href}
             href={item.href}
             className={cn(
-              "group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all",
+              "group relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
               active
-                ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.12)]"
+                ? "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.14)]"
                 : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
             )}
           >
+            {/* Active left accent bar */}
+            {active && (
+              <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.5)]" />
+            )}
             <div
               className={cn(
-                "relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors",
+                "relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all duration-200",
                 active
-                  ? "bg-primary/15 text-primary"
+                  ? "bg-primary/20 text-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.2)]"
                   : "bg-secondary/60 text-muted-foreground group-hover:bg-secondary group-hover:text-foreground"
               )}
             >
@@ -109,7 +113,7 @@ export function PortalNav({
             </div>
             <span className="flex-1">{item.label}</span>
             {active && (
-              <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.5)]" />
+              <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.6)]" />
             )}
           </Link>
         );

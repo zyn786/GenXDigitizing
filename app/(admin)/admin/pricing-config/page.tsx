@@ -30,7 +30,7 @@ export default async function PricingConfigPage() {
 
       <section>
         <p className="section-eyebrow">Pricing governance</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Pricing Configuration</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Pricing Configuration</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Control stitch-plan pricing rates, bulk discounts, free-first-design rules, and special service pricing.
         </p>

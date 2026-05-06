@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 export function FinalCtaBanner() {
   return (
-    <section className="px-4 pb-20 pt-16 md:px-8 md:pb-28 md:pt-20">
+    <section className="px-4 pb-12 pt-10 md:px-8 md:pb-24 md:pt-16 lg:pb-28 lg:pt-20">
       <div className="page-shell">
         <motion.div
           initial={{ opacity: 0, y: 32 }}
@@ -17,7 +17,7 @@ export function FinalCtaBanner() {
           transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
         >
           <div className="relative overflow-hidden rounded-[2.5rem] border border-primary/20 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent p-px shadow-[0_30px_80px_rgba(99,102,241,0.15)] premium-shadow">
-            <div className="relative rounded-[2.4rem] bg-card/90 px-8 py-12 backdrop-blur-xl md:px-12">
+            <div className="relative rounded-[2.4rem] bg-card/90 px-5 py-8 backdrop-blur-xl md:px-10 md:py-12 lg:px-12">
 
               {/* Animated glow orbs */}
               <motion.div
@@ -58,7 +58,7 @@ export function FinalCtaBanner() {
                     <Sparkles className="h-3 w-3" />
                     Get started today
                   </div>
-                  <h2 className="max-w-2xl text-3xl font-semibold tracking-tight md:text-4xl">
+                  <h2 className="max-w-2xl text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
                     Ready for embroidery files that run without rework?
                   </h2>
                   <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
@@ -67,7 +67,7 @@ export function FinalCtaBanner() {
                   </p>
                 </div>
 
-                <div className="flex shrink-0 flex-wrap gap-3">
+                <div className="flex w-full shrink-0 flex-col gap-3 sm:w-auto sm:flex-row lg:flex-col xl:flex-row">
                   <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                     <Button asChild variant="premium" shape="pill" size="lg">
                       <Link href="/contact">

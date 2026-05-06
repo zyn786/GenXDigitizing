@@ -30,7 +30,7 @@ export default async function LeadsPage() {
 
       <section>
         <p className="section-eyebrow">Marketing analytics</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Lead Source Tracking</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Lead Source Tracking</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           See where your clients come from — website, social media, referrals, campaigns, and more.
         </p>

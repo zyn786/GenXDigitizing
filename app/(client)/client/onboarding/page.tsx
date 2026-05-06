@@ -38,7 +38,7 @@ export default async function OnboardingPage() {
       <div className="w-full max-w-xl">
         <div className="mb-8 text-center">
           <div className="flex justify-center"><SiteLogo size="sm" /></div>
-          <h1 className="mt-6 text-4xl font-semibold tracking-tight">
+          <h1 className="mt-6 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">
             Welcome, {firstName}
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">

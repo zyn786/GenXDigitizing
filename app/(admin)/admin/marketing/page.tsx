@@ -32,22 +32,22 @@ export default async function AdminMarketingPage() {
 
       <section>
         <p className="section-eyebrow">Marketing</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Marketing Hub</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl lg:text-4xl">Marketing Hub</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Quote pipeline, client follow-up, and conversion tracking for the sales team.
         </p>
       </section>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4">
         {[
           { label: "Total Clients", value: totalClients, sub: "registered accounts" },
           { label: "Open Quotes", value: quotes.length, sub: "awaiting conversion" },
           { label: "Conversion Rate", value: `${conversionRate}%`, sub: "quote → order" },
         ].map((s) => (
-          <div key={s.label} className="rounded-[1.75rem] border border-border/60 bg-card/70 p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{s.label}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight">{s.value}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{s.sub}</p>
+          <div key={s.label} className="rounded-[1.75rem] border border-border/60 bg-card/70 p-3 md:p-5">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground md:text-xs md:tracking-[0.18em]">{s.label}</p>
+            <p className="mt-1.5 text-xl font-semibold tracking-tight md:mt-2 md:text-3xl">{s.value}</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">{s.sub}</p>
           </div>
         ))}
       </div>

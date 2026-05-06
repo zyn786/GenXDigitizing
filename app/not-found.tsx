@@ -1,40 +1,67 @@
 import Link from "next/link";
 import type { Route } from "next";
-import { ArrowRight, FileQuestion, Home } from "lucide-react";
+import { ArrowRight, Home, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.06),transparent_50%)]" />
-      <Card className="relative w-full max-w-md text-center">
-        <CardContent className="flex flex-col items-center gap-4 p-8">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/60 bg-muted/60">
-            <FileQuestion className="h-7 w-7 text-muted-foreground" />
+    <main className="relative flex min-h-screen items-center justify-center bg-background px-4 overflow-hidden">
+      {/* Background ambient glows */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/[0.06] blur-3xl" />
+        <div className="absolute right-[-6rem] top-[-4rem] h-72 w-72 rounded-full bg-violet-500/[0.06] blur-3xl" />
+        <div className="absolute bottom-[-4rem] left-[-4rem] h-60 w-60 rounded-full bg-indigo-500/[0.05] blur-3xl" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-lg text-center">
+        {/* 404 large numeral */}
+        <div
+          className="mb-4 select-none text-[9rem] font-black leading-none tracking-tight"
+          style={{
+            background: "linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.10) 100%)",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+            textShadow: "none",
+          }}
+          aria-hidden
+        >
+          404
+        </div>
+
+        {/* Glass card */}
+        <div className="glass-panel premium-shadow rounded-[2rem] border-border/80 p-8">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-border/60 bg-muted/40">
+            <Undo2 className="h-6 w-6 text-muted-foreground" />
           </div>
-          <div>
-            <h1 className="text-xl font-semibold">Page not found</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              The page you are looking for may have moved or does not exist.
-            </p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Button asChild variant="default" shape="pill" size="sm">
+
+          <h1 className="text-2xl font-bold tracking-tight">Page not found</h1>
+          <p className="mx-auto mt-3 max-w-sm text-sm leading-7 text-muted-foreground">
+            The page you&rsquo;re looking for may have moved or doesn&rsquo;t exist.
+            Head back home or place an order.
+          </p>
+
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Button asChild variant="premium" shape="pill" size="sm">
               <Link href={"/" as Route}>
-                <Home className="h-4 w-4" />
+                <Home className="h-3.5 w-3.5" />
                 Go home
               </Link>
             </Button>
             <Button asChild variant="outline" shape="pill" size="sm">
-              <Link href={"/order" as Route}>
-                Place order
-                <ArrowRight className="h-4 w-4" />
+              <Link href={"/contact" as Route}>
+                Get a quote
+                <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Bottom trust line */}
+        <p className="mt-6 text-xs text-muted-foreground/50">
+          GenX Digitizing · Premium Embroidery Studio
+        </p>
+      </div>
     </main>
   );
 }
