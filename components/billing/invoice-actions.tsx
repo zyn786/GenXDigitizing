@@ -79,7 +79,7 @@ export function InvoiceActions({ invoiceId, userRole }: Props) {
         )}
       </button>
       <p className="text-xs text-muted-foreground">
-        Invoice line editing, discount lines, and manual payment recording are available on the billing audit page.
+        Edit line items and record payments in the sections below.
       </p>
     </div>
   );

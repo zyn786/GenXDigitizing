@@ -290,7 +290,12 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   )}
                 </div>
               ) : (
-                <CreateInvoiceButton orderId={order.id} canCreate={canManagePayment} />
+                <CreateInvoiceButton
+                  orderId={order.id}
+                  canCreate={canManagePayment}
+                  estimatedPrice={order.production.estimatedPrice}
+                  orderTitle={order.title}
+                />
               )}
             </CardContent>
           </Card>

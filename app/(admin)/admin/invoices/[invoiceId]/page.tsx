@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/card";
 import { AdminFileDownloadButton } from "@/components/admin/admin-file-download-button";
 import { InvoiceActions } from "@/components/billing/invoice-actions";
+import { InvoiceLineEditor } from "@/components/billing/invoice-line-editor";
+import { RecordManualPaymentForm } from "@/components/billing/record-manual-payment-form";
 import { getCurrencySymbol } from "@/lib/billing/currencies";
 import { getAdminInvoiceById } from "@/lib/billing/repository";
 import { getOrderFiles } from "@/lib/payments/repository";
@@ -143,17 +145,32 @@ export default async function AdminInvoiceDetailPage({ params }: AdminInvoiceDet
       <Card>
         <CardHeader>
           <CardTitle>Line items</CardTitle>
+          <CardDescription>
+            {invoice.status === "DRAFT" || invoice.status === "SENT"
+              ? "Edit line items and save changes. Subtotal updates automatically."
+              : `Invoice is ${invoice.status.toLowerCase()} — line items are read-only.`}
+          </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-3">
-          {invoice.lineItems.map((item) => (
-            <div key={item.id} className="rounded-2xl border border-border/80 bg-secondary/80 p-4">
-              <div className="font-medium">{item.label}</div>
-              <div className="mt-1 text-sm text-muted-foreground">{item.description ?? "No description"}</div>
-              <div className="mt-2 text-sm text-muted-foreground">
-                Qty {item.quantity} · {currency}{item.unitPrice.toFixed(2)} · Total {currency}{item.lineTotal.toFixed(2)}
-              </div>
-            </div>
-          ))}
+        <CardContent>
+          <InvoiceLineEditor
+            invoice={{
+              id: invoice.id,
+              status: invoice.status,
+              currency: invoice.currency,
+              subtotalAmount: invoice.subtotal,
+              totalAmount: invoice.total,
+              balanceDue: invoice.balanceDue,
+              lineItems: invoice.lineItems.map((li) => ({
+                id: li.id,
+                label: li.label,
+                description: li.description ?? null,
+                quantity: li.quantity,
+                unitPrice: li.unitPrice,
+                lineTotal: li.lineTotal,
+              })),
+            }}
+            canEdit={userRole === "SUPER_ADMIN" || userRole === "MANAGER"}
+          />
         </CardContent>
       </Card>
 
@@ -181,24 +198,26 @@ export default async function AdminInvoiceDetailPage({ params }: AdminInvoiceDet
 
         <Card>
           <CardHeader>
-            <CardTitle>Payment history</CardTitle>
+            <CardTitle>Record payment</CardTitle>
+            <CardDescription>Record a manual payment against this invoice.</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3">
-            {invoice.payments.length ? (
-              invoice.payments.map((payment) => (
-                <div key={payment.id} className="rounded-2xl border border-border/80 bg-secondary/80 p-4 text-sm text-muted-foreground">
-                  <div className="font-medium text-foreground">{payment.receiptNumber}</div>
-                  <div className="mt-1">{currency}{payment.amount.toFixed(2)} · {payment.method}</div>
-                  <div className="mt-1">Reference: {payment.reference ?? "N/A"}</div>
-                  <div className="mt-1">Received: {payment.receivedAt}</div>
-                  <div className="mt-1">Receipt sent: {payment.receiptSentAt ?? "Pending"}</div>
-                </div>
-              ))
-            ) : (
-              <div className="rounded-2xl border border-border/80 bg-secondary/80 p-4 text-sm text-muted-foreground">
-                No payments recorded yet.
-              </div>
-            )}
+          <CardContent>
+            <RecordManualPaymentForm
+              invoiceId={invoice.id}
+              currency={invoice.currency}
+              balanceDue={invoice.balanceDue}
+              payments={invoice.payments.map((p) => ({
+                id: p.id,
+                receiptNumber: p.receiptNumber,
+                amount: p.amount,
+                currency: p.currency,
+                method: p.method,
+                reference: p.reference ?? null,
+                receivedAt: p.receivedAt,
+                note: p.note ?? null,
+              }))}
+              canRecord={userRole === "SUPER_ADMIN" || userRole === "MANAGER"}
+            />
           </CardContent>
         </Card>
       </div>
