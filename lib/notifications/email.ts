@@ -1045,3 +1045,48 @@ export async function sendClientProofRejectedEmail(opts: {
     status: "SENT",
   });
 }
+
+// ─── Client proof approved → assigned designer ──────────────────────────────
+
+export async function sendClientProofApprovedDesignerEmail(opts: {
+  to: string;
+  designerName: string;
+  orderNumber: string;
+  orderId: string;
+  clientName: string;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/admin/designer/${opts.orderId}`;
+  const firstName = opts.designerName.split(" ")[0] || "Designer";
+  const subject = `Client approved proof — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `${opts.clientName} approved the proof for order ${opts.orderNumber}.`,
+    "Final files will be available once payment is confirmed.",
+    "",
+    `View order: ${portalUrl}`,
+  ].join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Proof approved by client</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      <strong>${esc(opts.clientName)}</strong> approved the proof for order
+      <strong>${esc(opts.orderNumber)}</strong>.
+      Final files will be available once payment is confirmed by the billing team.
+    </p>
+    ${btn(portalUrl, "View order")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "PROOF_APPROVED",
+    audience: "ASSIGNED_USER",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}

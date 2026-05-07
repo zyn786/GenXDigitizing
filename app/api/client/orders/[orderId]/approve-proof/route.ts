@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
 import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
-import { sendProofApprovedPaymentRequiredEmail, sendNewOrderOpsEmail, writeNotificationLog } from "@/lib/notifications/email";
+import { sendProofApprovedPaymentRequiredEmail, sendNewOrderOpsEmail, sendClientProofApprovedDesignerEmail, writeNotificationLog } from "@/lib/notifications/email";
 
 type Props = { params: Promise<{ orderId: string }> };
 
@@ -79,6 +79,22 @@ export async function POST(_request: Request, { params }: Props) {
         clientName: order.clientUser?.name ?? session.user.name ?? "Client",
         clientEmail: order.clientUser?.email ?? session.user.email ?? "",
         serviceType: "Proof approved by client",
+      });
+    } catch {
+      // non-fatal
+    }
+  }
+
+  // Notify assigned designer about client proof approval (non-fatal)
+  if (order.assignedTo?.email) {
+    try {
+      await sendClientProofApprovedDesignerEmail({
+        to: order.assignedTo.email,
+        designerName: order.assignedTo.name ?? "Designer",
+        orderNumber: order.orderNumber,
+        orderId: order.id,
+        clientName: order.clientUser?.name ?? session.user.name ?? "Client",
+        recipientUserId: order.assignedTo.id,
       });
     } catch {
       // non-fatal
