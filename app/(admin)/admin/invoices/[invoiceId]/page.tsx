@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { Route } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { ConversationLauncherButton } from "@/components/support/conversation-launcher-button";
@@ -41,9 +41,15 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+const ALLOWED_ROLES = new Set(["SUPER_ADMIN", "MANAGER"]);
+
 export default async function AdminInvoiceDetailPage({ params }: AdminInvoiceDetailPageProps) {
   const session = await auth();
   const userRole = String(session?.user?.role ?? "");
+
+  if (!ALLOWED_ROLES.has(userRole)) {
+    redirect("/admin/dashboard");
+  }
 
   const { invoiceId } = await params;
   const invoice = await getAdminInvoiceById(invoiceId);

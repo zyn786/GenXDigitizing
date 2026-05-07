@@ -1,7 +1,17 @@
+import { redirect } from "next/navigation";
+
+import { auth } from "@/auth";
 import { AdminInvoiceList } from "@/components/billing/admin-invoice-list";
 import { getAdminInvoices } from "@/lib/billing/repository";
 
+const ALLOWED_ROLES = new Set(["SUPER_ADMIN", "MANAGER"]);
+
 export default async function AdminInvoicesPage() {
+  const session = await auth();
+  if (!ALLOWED_ROLES.has(String(session?.user?.role ?? ""))) {
+    redirect("/admin/dashboard");
+  }
+
   const invoices = await getAdminInvoices();
 
   return (
