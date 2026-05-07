@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
 import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
-import { sendRevisionPendingEmail, writeNotificationLog } from "@/lib/notifications/email";
+import { sendRevisionPendingEmail, sendClientRevisionRequestedEmail, writeNotificationLog } from "@/lib/notifications/email";
 
 type Props = { params: Promise<{ orderId: string }> };
 
@@ -29,6 +29,7 @@ export async function POST(request: Request, { params }: Props) {
     where: { id: orderId, clientUserId: session.user.id },
     include: {
       clientUser: { select: { id: true, name: true, email: true } },
+      assignedTo: { select: { id: true, name: true, email: true } },
     },
   });
   if (!order) return NextResponse.json({ ok: false, message: "Not found." }, { status: 404 });
@@ -105,6 +106,46 @@ export async function POST(request: Request, { params }: Props) {
         status: "FAILED",
         errorMessage: err instanceof Error ? err.message : "Unknown error",
       });
+    }
+  }
+
+  // Notify ops + assigned designer about revision request (non-fatal)
+  const opsEmail = process.env.OPS_EMAIL ?? process.env.EMAIL_FROM_ADDRESS ?? process.env.EMAIL_FROM;
+  const opsEmailAddress = opsEmail?.includes("<")
+    ? opsEmail.match(/<(.+)>/)?.[1] ?? opsEmail
+    : opsEmail;
+  const newRevisionCount = (order.revisionCount ?? 0) + 1;
+  if (opsEmailAddress) {
+    try {
+      await sendClientRevisionRequestedEmail({
+        to: opsEmailAddress,
+        recipientName: "Admin",
+        orderNumber: order.orderNumber,
+        orderId: order.id,
+        clientName: clientName,
+        clientNotes: parsed.data.clientNotes,
+        revisionCount: newRevisionCount,
+        role: "ops",
+      });
+    } catch {
+      // non-fatal
+    }
+  }
+  if (order.assignedTo?.email) {
+    try {
+      await sendClientRevisionRequestedEmail({
+        to: order.assignedTo.email,
+        recipientName: order.assignedTo.name ?? "Designer",
+        orderNumber: order.orderNumber,
+        orderId: order.id,
+        clientName: clientName,
+        clientNotes: parsed.data.clientNotes,
+        revisionCount: newRevisionCount,
+        role: "designer",
+        recipientUserId: order.assignedTo.id,
+      });
+    } catch {
+      // non-fatal
     }
   }
 

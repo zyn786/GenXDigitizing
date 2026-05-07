@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
 import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
+import { sendClientProofRejectedEmail } from "@/lib/notifications/email";
 
 type Props = { params: Promise<{ orderId: string }> };
 
@@ -30,7 +31,14 @@ export async function POST(request: Request, { params }: Props) {
 
   const order = await prisma.workflowOrder.findFirst({
     where: { id: orderId, clientUserId: session.user.id },
-    select: { id: true, orderNumber: true, status: true, proofStatus: true },
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      proofStatus: true,
+      clientUser: { select: { id: true, name: true } },
+      assignedTo: { select: { id: true, name: true, email: true } },
+    },
   });
   if (!order) return NextResponse.json({ ok: false, message: "Not found." }, { status: 404 });
 
@@ -77,6 +85,44 @@ export async function POST(request: Request, { params }: Props) {
     entityId: orderId,
     metadata: { orderNumber: order.orderNumber, reason: parsed.data.reason },
   });
+
+  // Notify ops + assigned designer about client proof rejection (non-fatal)
+  const clientName = order.clientUser?.name ?? session.user.name ?? "Client";
+  const opsEmail = process.env.OPS_EMAIL ?? process.env.EMAIL_FROM_ADDRESS ?? process.env.EMAIL_FROM;
+  const opsEmailAddress = opsEmail?.includes("<")
+    ? opsEmail.match(/<(.+)>/)?.[1] ?? opsEmail
+    : opsEmail;
+  if (opsEmailAddress) {
+    try {
+      await sendClientProofRejectedEmail({
+        to: opsEmailAddress,
+        recipientName: "Admin",
+        orderNumber: order.orderNumber,
+        orderId: order.id,
+        clientName,
+        rejectionReason: parsed.data.reason,
+        role: "ops",
+      });
+    } catch {
+      // non-fatal
+    }
+  }
+  if (order.assignedTo?.email) {
+    try {
+      await sendClientProofRejectedEmail({
+        to: order.assignedTo.email,
+        recipientName: order.assignedTo.name ?? "Designer",
+        orderNumber: order.orderNumber,
+        orderId: order.id,
+        clientName,
+        rejectionReason: parsed.data.reason,
+        role: "designer",
+        recipientUserId: order.assignedTo.id,
+      });
+    } catch {
+      // non-fatal
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }

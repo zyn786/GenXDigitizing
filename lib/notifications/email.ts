@@ -943,3 +943,105 @@ export async function sendProofRejectedByAdminEmail(opts: {
     status: "SENT",
   });
 }
+
+// ─── Client revision request → ops/designer ──────────────────────────────────
+
+export async function sendClientRevisionRequestedEmail(opts: {
+  to: string;
+  recipientName: string;
+  orderNumber: string;
+  orderId: string;
+  clientName: string;
+  clientNotes?: string | null;
+  revisionCount?: number | null;
+  role: "ops" | "designer";
+  recipientUserId?: string | null;
+}) {
+  const portalUrl =
+    opts.role === "designer"
+      ? `${appUrl()}/admin/designer/${opts.orderId}`
+      : `${appUrl()}/admin/orders/${opts.orderId}`;
+  const firstName = opts.recipientName.split(" ")[0] || "there";
+  const revLabel = opts.revisionCount ? ` (revision #${opts.revisionCount})` : "";
+  const subject = `Client requested revision${revLabel} — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `${opts.clientName} requested a revision for order ${opts.orderNumber}${revLabel}.`,
+    opts.clientNotes ? `Client notes: ${opts.clientNotes}` : "",
+    "",
+    `View order: ${portalUrl}`,
+  ].filter(Boolean).join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Revision requested by client</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      <strong>${esc(opts.clientName)}</strong> requested a revision for order
+      <strong>${esc(opts.orderNumber)}</strong>${esc(revLabel)}.
+    </p>
+    ${opts.clientNotes ? `<p style="margin:10px 0 0;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:13px;">${esc(opts.clientNotes)}</p>` : ""}
+    ${btn(portalUrl, "View order")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "REVISION_REQUESTED",
+    audience: opts.role === "designer" ? "ASSIGNED_USER" : "OPS_QUEUE",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
+// ─── Client proof rejection → ops/designer ───────────────────────────────────
+
+export async function sendClientProofRejectedEmail(opts: {
+  to: string;
+  recipientName: string;
+  orderNumber: string;
+  orderId: string;
+  clientName: string;
+  rejectionReason?: string | null;
+  role: "ops" | "designer";
+  recipientUserId?: string | null;
+}) {
+  const portalUrl =
+    opts.role === "designer"
+      ? `${appUrl()}/admin/designer/${opts.orderId}`
+      : `${appUrl()}/admin/orders/${opts.orderId}`;
+  const firstName = opts.recipientName.split(" ")[0] || "there";
+  const subject = `Client rejected proof — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `${opts.clientName} rejected the proof for order ${opts.orderNumber}.`,
+    opts.rejectionReason ? `Reason: ${opts.rejectionReason}` : "",
+    "",
+    `View order: ${portalUrl}`,
+  ].filter(Boolean).join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Proof rejected by client</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      <strong>${esc(opts.clientName)}</strong> rejected the proof for order
+      <strong>${esc(opts.orderNumber)}</strong>.
+    </p>
+    ${opts.rejectionReason ? `<p style="margin:10px 0 0;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:13px;">${esc(opts.rejectionReason)}</p>` : ""}
+    ${btn(portalUrl, "View order")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "PROOF_ADMIN_REJECTED",
+    audience: opts.role === "designer" ? "ASSIGNED_USER" : "OPS_QUEUE",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
