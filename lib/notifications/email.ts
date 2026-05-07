@@ -855,6 +855,50 @@ export async function sendProofApprovedByAdminEmail(opts: {
   });
 }
 
+export async function sendPaymentRejectedEmail(opts: {
+  to: string;
+  clientName: string;
+  orderNumber: string;
+  orderId: string;
+  invoiceNumber: string;
+  rejectionReason?: string | null;
+  recipientUserId?: string | null;
+}) {
+  const portalUrl = `${appUrl()}/client/invoices/${opts.orderId}`;
+  const firstName = opts.clientName.split(" ")[0] || "there";
+  const subject = `Payment proof needs attention — ${opts.orderNumber}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    `Your payment proof for invoice ${opts.invoiceNumber} (order ${opts.orderNumber}) requires attention.`,
+    opts.rejectionReason ? `Reason: ${opts.rejectionReason}` : "",
+    "",
+    `Please review and resubmit: ${portalUrl}`,
+  ].filter(Boolean).join("\n");
+
+  const html = wrap(`
+    <h1 style="margin:12px 0 0;font-size:26px;">Payment proof needs attention</h1>
+    <p style="margin:16px 0 0;">Hi ${esc(firstName)},</p>
+    <p style="margin:10px 0 0;">
+      Your payment proof for invoice <strong>${esc(opts.invoiceNumber)}</strong>
+      (order <strong>${esc(opts.orderNumber)}</strong>) has been reviewed and requires attention.
+    </p>
+    ${opts.rejectionReason ? `<p style="margin:10px 0 0;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:13px;"><strong>Reviewer note:</strong><br/>${esc(opts.rejectionReason)}</p>` : ""}
+    ${btn(portalUrl, "Resubmit payment proof")}
+  `);
+
+  await send(opts.to, subject, html, text);
+  await writeNotificationLog({
+    eventType: "PAYMENT_PENDING",
+    audience: "CLIENT",
+    channel: "EMAIL",
+    recipientUserId: opts.recipientUserId ?? null,
+    recipientAddress: opts.to,
+    orderId: opts.orderId,
+    status: "SENT",
+  });
+}
+
 export async function sendProofRejectedByAdminEmail(opts: {
   to: string;
   designerName: string;

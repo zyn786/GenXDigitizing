@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
 import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
-import { sendProofApprovedPaymentRequiredEmail, writeNotificationLog } from "@/lib/notifications/email";
+import { sendProofApprovedPaymentRequiredEmail, sendNewOrderOpsEmail, writeNotificationLog } from "@/lib/notifications/email";
 
 type Props = { params: Promise<{ orderId: string }> };
 
@@ -19,6 +19,7 @@ export async function POST(_request: Request, { params }: Props) {
     where: { id: orderId, clientUserId: session.user.id },
     include: {
       clientUser: { select: { id: true, name: true, email: true } },
+      assignedTo: { select: { id: true, name: true, email: true } },
       invoice: { select: { id: true, invoiceNumber: true, totalAmount: true, currency: true } },
     },
   });
@@ -63,6 +64,26 @@ export async function POST(_request: Request, { params }: Props) {
     entityId: orderId,
     metadata: { orderNumber: order.orderNumber },
   });
+
+  // Notify ops about client proof approval (non-fatal)
+  const opsEmail = process.env.OPS_EMAIL ?? process.env.EMAIL_FROM_ADDRESS ?? process.env.EMAIL_FROM;
+  const opsEmailAddress = opsEmail?.includes("<")
+    ? opsEmail.match(/<(.+)>/)?.[1] ?? opsEmail
+    : opsEmail;
+  if (opsEmailAddress) {
+    try {
+      await sendNewOrderOpsEmail({
+        to: opsEmailAddress,
+        orderNumber: order.orderNumber,
+        orderId: order.id,
+        clientName: order.clientUser?.name ?? session.user.name ?? "Client",
+        clientEmail: order.clientUser?.email ?? session.user.email ?? "",
+        serviceType: "Proof approved by client",
+      });
+    } catch {
+      // non-fatal
+    }
+  }
 
   const clientEmail = order.clientUser?.email;
   const clientName = order.clientUser?.name ?? "Valued Customer";

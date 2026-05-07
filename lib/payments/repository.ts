@@ -2,6 +2,7 @@ import { Prisma, Role } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { calculateBalanceDue, deriveInvoiceStatus } from "@/lib/billing/status";
+import { sendPaymentSubmittedEmail, sendPaymentRejectedEmail } from "@/lib/notifications/email";
 import type {
   ManualPaymentAccountRecord,
   OrderFileRecord,
@@ -263,8 +264,12 @@ export async function submitPaymentProof(input: {
     where: { id: input.invoiceId },
     select: {
       id: true,
+      clientName: true,
+      invoiceNumber: true,
       order: {
         select: {
+          id: true,
+          orderNumber: true,
           clientUserId: true,
           proofStatus: true,
           paymentStatus: true,
@@ -317,6 +322,27 @@ export async function submitPaymentProof(input: {
       },
     },
   }).catch(() => {});
+
+  // Notify admin/manager about new payment proof (non-fatal)
+  const opsEmail = process.env.OPS_EMAIL ?? process.env.EMAIL_FROM_ADDRESS ?? process.env.EMAIL_FROM;
+  const opsEmailAddress = opsEmail?.includes("<")
+    ? opsEmail.match(/<(.+)>/)?.[1] ?? opsEmail
+    : opsEmail;
+  if (opsEmailAddress) {
+    try {
+      await sendPaymentSubmittedEmail({
+        to: opsEmailAddress,
+        adminName: "Admin",
+        orderNumber: invoice.order.orderNumber,
+        orderId: invoice.order.id,
+        clientName: invoice.clientName,
+        amount: input.amountClaimed,
+        currency: "USD",
+      });
+    } catch {
+      // non-fatal
+    }
+  }
 
   return mapProof(row);
 }
@@ -445,6 +471,40 @@ export async function reviewPaymentProof(
 
     return updatedProof;
   });
+
+  // Send client notification after transaction commits (non-fatal)
+  if (action === "reject") {
+    try {
+      const proof = await prisma.paymentProofSubmission.findUnique({
+        where: { id: proofId },
+        select: {
+          invoice: {
+            select: {
+              invoiceNumber: true,
+              clientName: true,
+              clientEmail: true,
+              orderId: true,
+              order: { select: { orderNumber: true, clientUserId: true } },
+            },
+          },
+        },
+      });
+      if (proof?.invoice.clientEmail) {
+        const i = proof!.invoice;
+        await sendPaymentRejectedEmail({
+          to: i.clientEmail,
+          clientName: i.clientName,
+          orderNumber: i.order.orderNumber,
+          orderId: i.orderId,
+          invoiceNumber: i.invoiceNumber,
+          rejectionReason: rejectionReason ?? null,
+          recipientUserId: i.order.clientUserId,
+        });
+      }
+    } catch {
+      // non-fatal
+    }
+  }
 }
 
 // ─── Order Files ──────────────────────────────────────────────────────────────
