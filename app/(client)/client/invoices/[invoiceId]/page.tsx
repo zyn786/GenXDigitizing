@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { Route } from "next";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download, FileText } from "lucide-react";
 
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
@@ -132,6 +132,20 @@ export default async function ClientInvoiceDetailPage({ params }: ClientInvoiceD
             <Button asChild variant="default" shape="pill" size="sm">
               <Link href={`/client/orders/${invoice.orderId}` as Route}>View order</Link>
             </Button>
+            <Button asChild variant="outline" shape="pill" size="sm">
+              <a href={`/api/client/invoices/${invoice.id}/pdf`} download>
+                <Download className="h-3.5 w-3.5" />
+                Download PDF
+              </a>
+            </Button>
+            {isPaid && (
+              <Button asChild variant="outline" shape="pill" size="sm">
+                <a href={`/api/client/invoices/${invoice.id}/receipt`} download>
+                  <FileText className="h-3.5 w-3.5" />
+                  Download receipt
+                </a>
+              </Button>
+            )}
             <ConversationLauncherButton
               mode="client"
               type="INVOICE"

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { Route } from "next";
 import { notFound, redirect } from "next/navigation";
+import { Download, FileText } from "lucide-react";
 
 import { auth } from "@/auth";
 import { ConversationLauncherButton } from "@/components/support/conversation-launcher-button";
@@ -132,6 +133,27 @@ export default async function AdminInvoiceDetailPage({ params }: AdminInvoiceDet
           </CardHeader>
           <CardContent className="grid gap-3">
             <InvoiceActions invoiceId={invoice.id} userRole={userRole} />
+
+            <a
+              href={`/api/admin/invoices/${invoice.id}/pdf`}
+              download
+              className="flex items-center gap-2 rounded-2xl border border-border/80 bg-secondary/80 p-4 text-sm text-muted-foreground transition hover:bg-secondary"
+            >
+              <Download className="h-4 w-4" />
+              Download invoice PDF
+            </a>
+
+            {(invoice.status === "PAID" || invoice.balanceDue <= 0) && (
+              <a
+                href={`/api/admin/invoices/${invoice.id}/receipt`}
+                download
+                className="flex items-center gap-2 rounded-2xl border border-border/80 bg-secondary/80 p-4 text-sm text-muted-foreground transition hover:bg-secondary"
+              >
+                <FileText className="h-4 w-4" />
+                Download receipt PDF
+              </a>
+            )}
+
             <Link
               href={paymentProofsHref}
               className="rounded-2xl border border-border/80 bg-secondary/80 p-4 text-sm text-muted-foreground transition hover:bg-secondary"
