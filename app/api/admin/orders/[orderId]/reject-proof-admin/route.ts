@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
+import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
 import { sendProofRejectedByAdminEmail } from "@/lib/notifications/email";
 
 type Props = { params: Promise<{ orderId: string }> };
@@ -47,6 +48,15 @@ export async function POST(request: Request, { params }: Props) {
       { ok: false, message: "Proof is not pending admin review." },
       { status: 422 }
     );
+  }
+
+  try {
+    assertCanTransition({ from: order.status, to: "IN_PROGRESS", actorRole: session.user.role });
+  } catch (e) {
+    if (e instanceof TransitionError) {
+      return NextResponse.json({ ok: false, message: e.message }, { status: 400 });
+    }
+    throw e;
   }
 
   await prisma.workflowOrder.update({

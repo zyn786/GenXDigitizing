@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { isAppAdminRole } from "@/lib/auth/session";
 import { logActivity } from "@/lib/activity/logger";
+import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
 import { sendWorkStartedEmail, writeNotificationLog } from "@/lib/notifications/email";
 
 type Props = { params: Promise<{ orderId: string }> };
@@ -43,12 +44,21 @@ export async function PATCH(request: Request, { params }: Props) {
     }
   }
 
-  const existing = await prisma.workflowOrder.findUnique({ where: { id: orderId }, select: { id: true } });
+  const existing = await prisma.workflowOrder.findUnique({ where: { id: orderId }, select: { id: true, status: true } });
   if (!existing) {
     return NextResponse.json({ ok: false, message: "Order not found." }, { status: 404 });
   }
 
   if (designerId !== null) {
+    try {
+      assertCanTransition({ from: existing.status, to: "ASSIGNED_TO_DESIGNER", actorRole: session.user.role }, { allowAdminOverride: true });
+    } catch (e) {
+      if (e instanceof TransitionError) {
+        return NextResponse.json({ ok: false, message: e.message }, { status: 400 });
+      }
+      throw e;
+    }
+
     const updatedOrder = await prisma.workflowOrder.update({
       where: { id: orderId },
       data: {
@@ -87,6 +97,15 @@ export async function PATCH(request: Request, { params }: Props) {
       }
     }
   } else {
+    try {
+      assertCanTransition({ from: existing.status, to: "UNDER_REVIEW", actorRole: session.user.role }, { allowAdminOverride: true });
+    } catch (e) {
+      if (e instanceof TransitionError) {
+        return NextResponse.json({ ok: false, message: e.message }, { status: 400 });
+      }
+      throw e;
+    }
+
     await prisma.workflowOrder.update({
       where: { id: orderId },
       data: {

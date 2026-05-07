@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
+import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
 import { sendProofApprovedPaymentRequiredEmail, writeNotificationLog } from "@/lib/notifications/email";
 
 type Props = { params: Promise<{ orderId: string }> };
@@ -33,6 +34,15 @@ export async function POST(_request: Request, { params }: Props) {
       { ok: false, message: "Proof is not available for review." },
       { status: 400 }
     );
+  }
+
+  try {
+    assertCanTransition({ from: order.status, to: "APPROVED", actorRole: session.user.role });
+  } catch (e) {
+    if (e instanceof TransitionError) {
+      return NextResponse.json({ ok: false, message: e.message }, { status: 400 });
+    }
+    throw e;
   }
 
   await prisma.workflowOrder.update({

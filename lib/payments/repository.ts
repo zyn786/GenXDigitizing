@@ -261,11 +261,32 @@ export async function submitPaymentProof(input: {
 }) {
   const invoice = await prisma.invoice.findUnique({
     where: { id: input.invoiceId },
-    select: { id: true, order: { select: { clientUserId: true } } },
+    select: {
+      id: true,
+      order: {
+        select: {
+          clientUserId: true,
+          proofStatus: true,
+          paymentStatus: true,
+        },
+      },
+    },
   });
 
   if (!invoice) throw new Error("Invoice not found.");
   if (invoice.order.clientUserId !== input.clientUserId) throw new Error("Forbidden.");
+
+  // Guard: payment proof can be submitted only after client proof approval.
+  // Allow NOT_UPLOADED for no-proof jobs where proof workflow is not used.
+  const allowedProofStatuses = ["CLIENT_APPROVED", "NOT_UPLOADED"];
+  if (!allowedProofStatuses.includes(invoice.order.proofStatus)) {
+    throw new Error("Payment proof can be submitted after proof approval.");
+  }
+
+  const allowedPaymentStatuses = ["PAYMENT_PENDING", "REJECTED", "PARTIALLY_PAID"];
+  if (!allowedPaymentStatuses.includes(invoice.order.paymentStatus)) {
+    throw new Error("Payment is not currently pending for this order.");
+  }
 
   const row = await prisma.paymentProofSubmission.create({
     data: {

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
+import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
 import { sendRevisionPendingEmail, writeNotificationLog } from "@/lib/notifications/email";
 
 type Props = { params: Promise<{ orderId: string }> };
@@ -42,6 +43,15 @@ export async function POST(request: Request, { params }: Props) {
       { ok: false, message: "Proof is not available for review." },
       { status: 400 }
     );
+  }
+
+  try {
+    assertCanTransition({ from: order.status, to: "REVISION_REQUESTED", actorRole: session.user.role });
+  } catch (e) {
+    if (e instanceof TransitionError) {
+      return NextResponse.json({ ok: false, message: e.message }, { status: 400 });
+    }
+    throw e;
   }
 
   await prisma.$transaction([

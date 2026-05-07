@@ -20,7 +20,9 @@
       "Bash(pnpm lint *)",
       "Bash(pnpm build *)",
       "Bash(dir E:\\\\Hello\\\\GenXDigitizing *)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(echo \"BUILD_EXIT=$?\")"
     ]
   }
 }

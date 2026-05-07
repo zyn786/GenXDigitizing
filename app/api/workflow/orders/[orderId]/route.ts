@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { isAppAdminRole } from "@/lib/auth/session";
 import { getAdminOrder } from "@/lib/workflow/repository";
 import { logActivity } from "@/lib/activity/logger";
+import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
 import {
   sendProofReadyEmail,
   sendRevisionPendingEmail,
@@ -91,6 +92,15 @@ export async function PATCH(request: Request, { params }: Props) {
   });
   if (!existing) {
     return NextResponse.json({ ok: false, message: "Order not found." }, { status: 404 });
+  }
+
+  try {
+    assertCanTransition({ from: existing.status, to: status, actorRole: session.user.role }, { allowAdminOverride: true });
+  } catch (e) {
+    if (e instanceof TransitionError) {
+      return NextResponse.json({ ok: false, message: e.message }, { status: 400 });
+    }
+    throw e;
   }
 
   await prisma.workflowOrder.update({

@@ -42,7 +42,11 @@ export async function POST(req: Request, { params }: RouteProps) {
     return NextResponse.json({ ok: true, proof }, { status: 201 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unexpected error.";
-    const status = message === "Invoice not found." ? 404 : message === "Forbidden." ? 403 : 500;
+    let status = 500;
+    if (message === "Invoice not found.") status = 404;
+    else if (message === "Forbidden.") status = 403;
+    else if (message.startsWith("Payment proof can be submitted")) status = 400;
+    else if (message.startsWith("Payment is not currently pending")) status = 400;
     return NextResponse.json({ ok: false, message }, { status });
   }
 }

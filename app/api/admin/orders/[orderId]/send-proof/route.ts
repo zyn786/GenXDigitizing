@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { isAppAdminRole } from "@/lib/auth/session";
 import { logActivity } from "@/lib/activity/logger";
 import { getOrderFiles } from "@/lib/payments/repository";
+import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
 import {
   sendProofSentEmail,
   sendProofPendingAdminReviewEmail,
@@ -12,7 +13,9 @@ import {
 
 type Props = { params: Promise<{ orderId: string }> };
 
-const SENDABLE_STATUSES = ["ASSIGNED_TO_DESIGNER", "IN_PROGRESS", "REVISION_REQUESTED", "PROOF_REJECTED_BY_ADMIN"];
+// PROOF_REJECTED_BY_ADMIN is a ProofStatus value, not a WorkflowOrderStatus.
+// It was dead code in this WorkflowOrderStatus check and has been removed.
+const SENDABLE_STATUSES = ["ASSIGNED_TO_DESIGNER", "IN_PROGRESS", "REVISION_REQUESTED"];
 
 async function isAdminReviewEnabled(): Promise<boolean> {
   const config = await prisma.pricingConfig.findUnique({
@@ -55,6 +58,15 @@ export async function POST(_request: Request, { params }: Props) {
   }
 
   const adminReview = await isAdminReviewEnabled();
+
+  try {
+    assertCanTransition({ from: order.status, to: "PROOF_READY", actorRole: session.user.role });
+  } catch (e) {
+    if (e instanceof TransitionError) {
+      return NextResponse.json({ ok: false, message: e.message }, { status: 400 });
+    }
+    throw e;
+  }
 
   if (adminReview && session.user.role === "DESIGNER") {
     // Route to admin review queue instead of sending directly to client

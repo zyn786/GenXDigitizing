@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
+import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
 
 type Props = { params: Promise<{ orderId: string }> };
 
@@ -63,6 +64,15 @@ export async function PATCH(request: Request, { params }: Props) {
         },
         { status: 422 }
       );
+    }
+
+    try {
+      assertCanTransition({ from: order.status, to: "CANCELLED", actorRole: session.user.role });
+    } catch (e) {
+      if (e instanceof TransitionError) {
+        return NextResponse.json({ ok: false, message: e.message }, { status: 400 });
+      }
+      throw e;
     }
 
     await prisma.workflowOrder.update({

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
+import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
 import { sendFilesUnlockedEmail, writeNotificationLog } from "@/lib/notifications/email";
 
 const PAYMENT_APPROVAL_ROLES = ["SUPER_ADMIN", "MANAGER"] as const;
@@ -61,6 +62,25 @@ export async function POST(request: Request, { params }: Props) {
   }
 
   if (action === "approve") {
+    // Business rule: payment approval requires proof-approved state.
+    // The transition guard also enforces APPROVED → DELIVERED,
+    // this check provides a clearer error message and defense-in-depth.
+    if (order.status !== "APPROVED") {
+      return NextResponse.json(
+        { ok: false, message: "Order must be in Approved state before payment can be approved." },
+        { status: 422 }
+      );
+    }
+
+    try {
+      assertCanTransition({ from: order.status, to: "DELIVERED", actorRole: session.user.role });
+    } catch (e) {
+      if (e instanceof TransitionError) {
+        return NextResponse.json({ ok: false, message: e.message }, { status: 400 });
+      }
+      throw e;
+    }
+
     const submissionId = proofSubmissionId ?? invoice.proofSubmissions[0]?.id;
 
     await prisma.$transaction(async (tx) => {

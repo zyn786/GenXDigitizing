@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { isAppAdminRole } from "@/lib/auth/session";
 import { logActivity } from "@/lib/activity/logger";
+import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
 import { sendRevisionAssignedEmail, writeNotificationLog } from "@/lib/notifications/email";
 
 type Props = { params: Promise<{ orderId: string }> };
@@ -77,6 +78,15 @@ export async function POST(request: Request, { params }: Props) {
     });
 
     if (!["REVISION_REQUESTED", "IN_PROGRESS"].includes(order.status)) {
+      try {
+        assertCanTransition({ from: order.status, to: "REVISION_REQUESTED", actorRole: session.user.role }, { allowAdminOverride: true });
+      } catch (e) {
+        if (e instanceof TransitionError) {
+          return NextResponse.json({ ok: false, message: e.message }, { status: 400 });
+        }
+        throw e;
+      }
+
       await prisma.workflowOrder.update({
         where: { id: orderId },
         data: { status: "REVISION_REQUESTED", proofStatus: "REVISION_REQUESTED", revisionCount: { increment: 1 } },
@@ -119,6 +129,15 @@ export async function POST(request: Request, { params }: Props) {
     });
 
     if (order.status === "REVISION_REQUESTED") {
+      try {
+        assertCanTransition({ from: order.status, to: "IN_PROGRESS", actorRole: session.user.role }, { allowAdminOverride: true });
+      } catch (e) {
+        if (e instanceof TransitionError) {
+          return NextResponse.json({ ok: false, message: e.message }, { status: 400 });
+        }
+        throw e;
+      }
+
       await prisma.workflowOrder.update({
         where: { id: orderId },
         data: { status: "IN_PROGRESS", proofStatus: "INTERNAL_REVIEW", assignedToUserId: parsed.data.assignedToUserId },
