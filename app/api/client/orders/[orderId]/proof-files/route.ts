@@ -47,24 +47,38 @@ function isAllowedProofFile(fileName: string, mimeType: string): boolean {
 export async function GET(_req: Request, { params }: RouteProps) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
   if (session.user.role !== "CLIENT") {
-    return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ ok: false, error: "Proof previews are only available to the order owner." }, { status: 403 });
   }
 
   const { orderId } = await params;
 
   const order = await prisma.workflowOrder.findFirst({
     where: { id: orderId, clientUserId: session.user.id },
-    select: { id: true, proofStatus: true },
+    select: { id: true, status: true, proofStatus: true },
   });
 
   if (!order) {
     return NextResponse.json({ ok: false, error: "Order not found." }, { status: 404 });
   }
 
-  if (!REVIEWABLE_PROOF_STATUSES.has(order.proofStatus)) {
+  // Allow proof access when proofStatus is reviewable OR order is in PROOF_READY.
+  // PROOF_READY status means proof has been sent — covers paths where proofStatus
+  // may not have been explicitly set (e.g. admin workflow PATCH).
+  const canView =
+    REVIEWABLE_PROOF_STATUSES.has(order.proofStatus) ||
+    order.status === "PROOF_READY";
+
+  if (!canView) {
+    if (process.env.NODE_ENV === "development") {
+      console.log("[proof-files] proof not viewable", {
+        orderId,
+        proofStatus: order.proofStatus,
+        orderStatus: order.status,
+      });
+    }
     return NextResponse.json({ ok: true, files: [] });
   }
 

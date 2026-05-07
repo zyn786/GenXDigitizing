@@ -22,7 +22,8 @@
       "Bash(dir E:\\\\Hello\\\\GenXDigitizing *)",
       "Bash(npx eslint *)",
       "Bash(echo \"EXIT=$?\")",
-      "Bash(echo \"BUILD_EXIT=$?\")"
+      "Bash(echo \"BUILD_EXIT=$?\")",
+      "Bash(echo \"LINT_EXIT=$?\")"
     ]
   }
 }

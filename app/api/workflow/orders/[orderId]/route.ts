@@ -39,7 +39,10 @@ export async function GET(_request: Request, { params }: Props) {
 }
 
 const PROGRESS: Record<string, number> = {
+  DRAFT: 5,
   SUBMITTED: 15,
+  UNDER_REVIEW: 20,
+  ASSIGNED_TO_DESIGNER: 35,
   IN_PROGRESS: 50,
   PROOF_READY: 70,
   REVISION_REQUESTED: 75,
@@ -51,7 +54,10 @@ const PROGRESS: Record<string, number> = {
 
 const patchSchema = z.object({
   status: z.enum([
+    "DRAFT",
     "SUBMITTED",
+    "UNDER_REVIEW",
+    "ASSIGNED_TO_DESIGNER",
     "IN_PROGRESS",
     "PROOF_READY",
     "REVISION_REQUESTED",

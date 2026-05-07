@@ -203,6 +203,8 @@ export default async function ClientOrderDetailPage({
         <div className="grid gap-4">
           {/* Proof section */}
           {(order.status === "PROOF_READY" ||
+            proofStatus === "SENT_TO_CLIENT" ||
+            proofStatus === "CLIENT_REVIEWING" ||
             proofStatus === "CLIENT_APPROVED" ||
             proofStatus === "REVISION_REQUESTED" ||
             proofStatus === "PENDING_ADMIN_PROOF_REVIEW") && (

@@ -50,12 +50,19 @@ export function AdminProofPreview({ orderId }: AdminProofPreviewProps) {
   useEffect(() => {
     let cancelled = false;
 
-    fetch(`/api/admin/orders/${orderId}/proof-files`, { cache: "no-store" })
+    fetch(`/api/admin/orders/${orderId}/proof-files`, {
+      credentials: "include",
+      cache: "no-store",
+    })
       .then(async (res) => {
         const json = (await res.json()) as ProofFilesResponse;
         if (cancelled) return;
         if (!res.ok || !json.ok || !Array.isArray(json.files)) {
-          setError(json.error ?? "Failed to load proof previews.");
+          if (res.status === 403) {
+            setError("You do not have permission to view these proof previews.");
+          } else {
+            setError(json.error ?? "Failed to load proof previews.");
+          }
           setFiles(null);
         } else {
           setFiles(json.files);

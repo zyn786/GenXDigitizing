@@ -36,7 +36,7 @@ export function ProofSendPanel({
   const [error, setError] = useState<string | null>(null);
 
   const canSend =
-    ["IN_PROGRESS", "REVISION_REQUESTED", "PROOF_REJECTED_BY_ADMIN"].includes(orderStatus) &&
+    ["ASSIGNED_TO_DESIGNER", "IN_PROGRESS", "REVISION_REQUESTED"].includes(orderStatus) &&
     fileCount > 0 &&
     proofStatus !== "PENDING_ADMIN_PROOF_REVIEW" &&
     proofStatus !== "SENT_TO_CLIENT" &&

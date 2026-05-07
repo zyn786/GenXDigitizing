@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Eye, Lock } from "lucide-react";
+import { Eye, Lock, Trash2 } from "lucide-react";
 
 type UploadedFile = {
   id: string;
@@ -133,6 +133,18 @@ export function OrderFileUploader({
       setUploading(false);
       setProgress(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  async function handleDelete(fileId: string) {
+    try {
+      const res = await fetch(`/api/admin/order-files/${fileId}`, { method: "DELETE" });
+      const json = await res.json() as { ok: boolean };
+      if (json.ok) {
+        setFiles((prev) => prev.filter((f) => f.id !== fileId));
+      }
+    } catch {
+      // silently fail
     }
   }
 
@@ -288,13 +300,23 @@ export function OrderFileUploader({
                   {formatBytes(file.sizeBytes)} · {new Date(file.createdAt).toLocaleDateString()}
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => handleDownload(file.id, file.fileName)}
-                className="rounded-full bg-secondary/60 px-3 py-1 text-xs text-muted-foreground hover:bg-secondary"
-              >
-                Download
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => handleDownload(file.id, file.fileName)}
+                  className="rounded-full bg-secondary/60 px-3 py-1 text-xs text-muted-foreground hover:bg-secondary"
+                >
+                  Download
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(file.id)}
+                  className="rounded-full px-2 py-1 text-xs text-red-400 hover:bg-red-500/10"
+                  title="Delete file"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

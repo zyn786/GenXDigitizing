@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, RefreshCw } from "lucide-react";
+import { CheckCircle, RefreshCw, XCircle } from "lucide-react";
 import type { ProofStatus } from "@/lib/workflow/types";
+
+type ActionMode = "idle" | "revision" | "reject";
 
 export function ClientProofReview({
   orderId,
@@ -15,13 +17,15 @@ export function ClientProofReview({
   orderStatus: string;
 }) {
   const router = useRouter();
-  const [showRevisionForm, setShowRevisionForm] = useState(false);
-  const [revisionNotes, setRevisionNotes] = useState("");
+  const [mode, setMode] = useState<ActionMode>("idle");
+  const [notes, setNotes] = useState("");
   const [approving, setApproving] = useState(false);
-  const [requesting, setRequesting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canAct = orderStatus === "PROOF_READY" && proofStatus === "SENT_TO_CLIENT";
+  const canAct =
+    orderStatus === "PROOF_READY" &&
+    (proofStatus === "SENT_TO_CLIENT" || proofStatus === "CLIENT_REVIEWING");
 
   if (proofStatus === "PENDING_ADMIN_PROOF_REVIEW") {
     return (
@@ -95,83 +99,126 @@ export function ClientProofReview({
     }
   }
 
-  async function handleRequestRevision() {
-    if (!revisionNotes.trim() || revisionNotes.trim().length < 5) {
-      setError("Please describe what needs to be changed (min 5 characters).");
+  async function handleSubmit(action: "revision" | "reject") {
+    const minLen = action === "reject" ? 1 : 5;
+    const emptyMsg =
+      action === "reject"
+        ? "Please provide a reason for rejecting the proof."
+        : "Please describe what needs to be changed (min 5 characters).";
+
+    if (!notes.trim() || notes.trim().length < minLen) {
+      setError(emptyMsg);
       return;
     }
-    setRequesting(true);
+    setSubmitting(true);
     setError(null);
+
+    const endpoint =
+      action === "reject"
+        ? `/api/client/orders/${orderId}/reject-proof`
+        : `/api/client/orders/${orderId}/request-revision`;
+
+    const bodyKey = action === "reject" ? "reason" : "clientNotes";
+
     try {
-      const res = await fetch(`/api/client/orders/${orderId}/request-revision`, {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientNotes: revisionNotes }),
+        body: JSON.stringify({ [bodyKey]: notes }),
       });
       const json = await res.json() as { ok: boolean; message?: string };
       if (!json.ok) {
-        setError(json.message ?? "Failed to submit revision request.");
+        setError(json.message ?? "Failed to submit.");
       } else {
         router.refresh();
       }
     } catch {
       setError("Network error.");
     } finally {
-      setRequesting(false);
+      setSubmitting(false);
     }
+  }
+
+  function cancelAction() {
+    setMode("idle");
+    setNotes("");
+    setError(null);
   }
 
   return (
     <div className="grid gap-3">
       <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 px-4 py-3 text-sm text-violet-300">
-        Your proof is ready. Please review the files above and approve or request changes.
+        Your proof is ready. Please review the files above and approve, reject, or request changes.
       </div>
 
       {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
 
-      {!showRevisionForm ? (
-        <div className="flex gap-2">
+      {mode === "idle" && (
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            disabled={approving || requesting}
+            disabled={approving}
             onClick={handleApprove}
             className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full bg-emerald-600 px-4 text-xs font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
           >
             <CheckCircle className="h-3.5 w-3.5" />
-            {approving ? "Approving…" : "Approve proof"}
+            {approving ? "Approving…" : "Approve"}
           </button>
           <button
             type="button"
-            disabled={approving || requesting}
-            onClick={() => setShowRevisionForm(true)}
+            disabled={approving}
+            onClick={() => setMode("reject")}
+            className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full border border-red-400/30 bg-red-500/10 px-4 text-xs font-medium text-red-300 transition hover:bg-red-500/20 disabled:opacity-50"
+          >
+            <XCircle className="h-3.5 w-3.5" />
+            Reject
+          </button>
+          <button
+            type="button"
+            disabled={approving}
+            onClick={() => setMode("revision")}
             className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full border border-fuchsia-400/30 bg-fuchsia-500/10 px-4 text-xs font-medium text-fuchsia-300 transition hover:bg-fuchsia-500/20 disabled:opacity-50"
           >
             <RefreshCw className="h-3.5 w-3.5" />
-            Request revision
+            Revision
           </button>
         </div>
-      ) : (
+      )}
+
+      {(mode === "revision" || mode === "reject") && (
         <div className="grid gap-2">
           <textarea
-            value={revisionNotes}
-            onChange={(e) => setRevisionNotes(e.target.value)}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            placeholder="Describe what needs to be changed…"
+            placeholder={
+              mode === "reject"
+                ? "Why are you rejecting this proof? What needs to change?"
+                : "Describe what needs to be changed…"
+            }
             className="w-full resize-none rounded-xl border border-border/80 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           />
           <div className="flex gap-2">
             <button
               type="button"
-              disabled={requesting}
-              onClick={handleRequestRevision}
-              className="inline-flex h-9 flex-1 items-center justify-center rounded-full bg-primary px-4 text-xs font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+              disabled={submitting}
+              onClick={() => handleSubmit(mode)}
+              className={`inline-flex h-9 flex-1 items-center justify-center rounded-full px-4 text-xs font-medium transition hover:opacity-90 disabled:opacity-50 ${
+                mode === "reject"
+                  ? "bg-red-600 text-white hover:bg-red-700"
+                  : "bg-primary text-primary-foreground"
+              }`}
             >
-              {requesting ? "Submitting…" : "Submit revision"}
+              {submitting
+                ? "Submitting…"
+                : mode === "reject"
+                ? "Submit rejection"
+                : "Submit revision"}
             </button>
             <button
               type="button"
-              disabled={requesting}
-              onClick={() => { setShowRevisionForm(false); setError(null); }}
+              disabled={submitting}
+              onClick={cancelAction}
               className="inline-flex h-9 flex-1 items-center justify-center rounded-full border border-border/80 bg-card/70 px-4 text-xs font-medium transition hover:bg-card"
             >
               Cancel

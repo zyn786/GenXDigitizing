@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
-import { OrderStatusControls } from "@/components/workflow/order-status-controls";
+import { OrderStatusDropdown } from "@/components/workflow/order-status-dropdown";
 import { ConversationLauncherButton } from "@/components/support/conversation-launcher-button";
 import { OrderFileUploader } from "@/components/admin/order-file-uploader";
 import { ProofSendPanel } from "@/components/workflow/proof-send-panel";
@@ -191,7 +191,7 @@ export default async function DesignerJobDetailPage({ params }: Props) {
               <CardDescription>Reference images and files uploaded by the client.</CardDescription>
             </CardHeader>
             <CardContent>
-              <ReferenceFilesViewer files={referenceFiles.map((f) => ({ ...f, createdAt: f.createdAt.toISOString() }))} downloadRoute="designer" />
+              <ReferenceFilesViewer files={referenceFiles.map((f) => ({ ...f, createdAt: f.createdAt.toISOString() }))} downloadRoute="designer" showDelete />
             </CardContent>
           </Card>
 
@@ -226,7 +226,15 @@ export default async function DesignerJobDetailPage({ params }: Props) {
               <CardTitle className="text-base">Update Status</CardTitle>
               <CardDescription>Move this job to its next stage.</CardDescription>
             </CardHeader>
-            <CardContent><OrderStatusControls orderId={job.id} status={status} /></CardContent>
+            <CardContent>
+                <OrderStatusDropdown
+                  orderId={job.id}
+                  currentStatus={status}
+                  userRole={String(session.user.role ?? "DESIGNER")}
+                  title="Update Job Progress"
+                  description="Update only the production status for your assigned job."
+                />
+              </CardContent>
           </Card>
 
           <Card>

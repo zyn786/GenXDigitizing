@@ -387,6 +387,26 @@ export async function reviewPaymentProof(
         },
       });
 
+      // Update the WorkflowOrder to reflect payment approval.
+      // Only advance to DELIVERED if currently in APPROVED state.
+      const order = invoice.order;
+      if (order.status === "APPROVED") {
+        await tx.workflowOrder.update({
+          where: { id: order.id },
+          data: {
+            paymentStatus: "PAID",
+            status: "DELIVERED",
+            progressPercent: 100,
+          },
+        });
+      } else {
+        // Order may have been manually advanced — still mark as paid.
+        await tx.workflowOrder.update({
+          where: { id: order.id },
+          data: { paymentStatus: "PAID" },
+        });
+      }
+
       await tx.billingAuditLog.create({
         data: {
           invoiceId: invoice.id,
@@ -402,6 +422,12 @@ export async function reviewPaymentProof(
         },
       });
     } else {
+      // Mark order payment as rejected so client can resubmit.
+      await tx.workflowOrder.update({
+        where: { id: proof.invoice.orderId },
+        data: { paymentStatus: "REJECTED" },
+      });
+
       await tx.billingAuditLog.create({
         data: {
           invoiceId: proof.invoiceId,

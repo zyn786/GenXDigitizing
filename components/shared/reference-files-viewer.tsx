@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { FileImage, Download, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { FileImage, Download, Trash2, Loader2 } from "lucide-react";
 
 type ReferenceFile = {
   id: string;
@@ -15,6 +16,10 @@ type ReferenceFile = {
 type Props = {
   files: ReferenceFile[];
   downloadRoute: "admin" | "designer";
+  /** When true, shows a delete button on each file row. */
+  showDelete?: boolean;
+  /** Called after a file is successfully deleted (before router refresh). */
+  onDeleted?: (fileId: string) => void;
 };
 
 function formatBytes(b: number) {
@@ -59,7 +64,43 @@ function DownloadButton({ fileId, fileName, route }: { fileId: string; fileName:
   );
 }
 
-export function ReferenceFilesViewer({ files, downloadRoute }: Props) {
+function DeleteButton({ fileId, route, onDeleted }: { fileId: string; route: "admin" | "designer"; onDeleted?: (fileId: string) => void }) {
+  const [deleting, setDeleting] = React.useState(false);
+  const router = useRouter();
+
+  async function handleDelete() {
+    if (!confirm("Delete this reference file?")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/${route}/reference-files/${fileId}`, { method: "DELETE" });
+      const json = await res.json() as { ok: boolean };
+      if (json.ok) {
+        onDeleted?.(fileId);
+        router.refresh();
+      }
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleDelete}
+      disabled={deleting}
+      className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-red-400/20 bg-red-500/5 text-red-400 transition hover:bg-red-500/10 disabled:opacity-50"
+      title="Delete file"
+    >
+      {deleting ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : (
+        <Trash2 className="h-3.5 w-3.5" />
+      )}
+    </button>
+  );
+}
+
+export function ReferenceFilesViewer({ files, downloadRoute, showDelete, onDeleted }: Props) {
   if (files.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">No reference files uploaded.</p>
@@ -82,7 +123,16 @@ export function ReferenceFilesViewer({ files, downloadRoute }: Props) {
               {" · "}{new Date(file.createdAt).toLocaleDateString()}
             </div>
           </div>
-          <DownloadButton fileId={file.id} fileName={file.fileName} route={downloadRoute} />
+          <div className="flex items-center gap-1">
+            <DownloadButton fileId={file.id} fileName={file.fileName} route={downloadRoute} />
+            {showDelete && (
+              <DeleteButton
+                fileId={file.id}
+                route={downloadRoute}
+                onDeleted={onDeleted}
+              />
+            )}
+          </div>
         </div>
       ))}
     </div>

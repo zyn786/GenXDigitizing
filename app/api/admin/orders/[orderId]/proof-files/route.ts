@@ -47,7 +47,7 @@ function isAllowedProofFile(fileName: string, mimeType: string): boolean {
 export async function GET(_req: Request, { params }: RouteProps) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const role = String(session.user.role ?? "");

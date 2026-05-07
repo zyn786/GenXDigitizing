@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
-import { OrderStatusControls } from "@/components/workflow/order-status-controls";
+import { OrderStatusDropdown } from "@/components/workflow/order-status-dropdown";
 import { DesignerAssignControl } from "@/components/workflow/designer-assign-control";
 import { ConvertQuoteButton } from "@/components/workflow/convert-quote-button";
 import { OrderFileUploader } from "@/components/admin/order-file-uploader";
@@ -141,7 +141,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               <CardDescription>Files uploaded by the client with their order.</CardDescription>
             </CardHeader>
             <CardContent>
-              <ReferenceFilesViewer files={referenceFiles.map((f) => ({ ...f, createdAt: f.createdAt.toISOString() }))} downloadRoute="admin" />
+              <ReferenceFilesViewer files={referenceFiles.map((f) => ({ ...f, createdAt: f.createdAt.toISOString() }))} downloadRoute="admin" showDelete />
             </CardContent>
           </Card>
 
@@ -304,7 +304,13 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               {rawOrder?.status === "DRAFT" ? (
                 <ConvertQuoteButton orderId={order.id} />
               ) : (
-                <OrderStatusControls orderId={order.id} status={order.status} />
+                <OrderStatusDropdown
+                  orderId={order.id}
+                  currentStatus={order.status}
+                  userRole={String(userRole ?? "")}
+                  title="Update Order Status"
+                  description="Move this order through the production workflow."
+                />
               )}
               <div className="my-1 h-px bg-border/60" />
               <Button asChild variant="outline" shape="pill" size="sm" className="w-full">
