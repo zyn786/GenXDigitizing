@@ -15,7 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface ClientProofPreviewProps {
+interface AdminProofPreviewProps {
   orderId: string;
 }
 
@@ -25,6 +25,7 @@ interface ProofFile {
   mimeType: string;
   sizeBytes: number;
   createdAt: string;
+  uploadedByUserId: string | null;
   previewUrl: string;
 }
 
@@ -40,7 +41,7 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function ClientProofPreview({ orderId }: ClientProofPreviewProps) {
+export function AdminProofPreview({ orderId }: AdminProofPreviewProps) {
   const [files, setFiles] = useState<ProofFile[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +50,7 @@ export function ClientProofPreview({ orderId }: ClientProofPreviewProps) {
   useEffect(() => {
     let cancelled = false;
 
-    fetch(`/api/client/orders/${orderId}/proof-files`, { cache: "no-store" })
+    fetch(`/api/admin/orders/${orderId}/proof-files`, { cache: "no-store" })
       .then(async (res) => {
         const json = (await res.json()) as ProofFilesResponse;
         if (cancelled) return;
@@ -128,8 +129,8 @@ export function ClientProofPreview({ orderId }: ClientProofPreviewProps) {
     return (
       <EmptyState
         icon={<ImageIcon className="h-7 w-7" />}
-        title="No Proof Files Yet"
-        description="Your proof preview will appear here once our team uploads it."
+        title="No Proof Previews Yet"
+        description="Proof preview images will appear here once uploaded."
       />
     );
   }
@@ -181,6 +182,11 @@ export function ClientProofPreview({ orderId }: ClientProofPreviewProps) {
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {formatBytes(file.sizeBytes)}
                   </p>
+                  {file.uploadedByUserId && (
+                    <p className="mt-0.5 text-[11px] text-muted-foreground/80">
+                      Uploaded by user {file.uploadedByUserId.slice(0, 8)}…
+                    </p>
+                  )}
                 </div>
                 <Badge variant="success" className="shrink-0">
                   Proof Preview

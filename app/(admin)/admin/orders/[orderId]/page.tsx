@@ -22,6 +22,7 @@ import { ConvertQuoteButton } from "@/components/workflow/convert-quote-button";
 import { OrderFileUploader } from "@/components/admin/order-file-uploader";
 import { ProofSendPanel } from "@/components/workflow/proof-send-panel";
 import { AdminProofReviewPanel } from "@/components/workflow/admin-proof-review-panel";
+import { AdminProofPreview } from "@/components/workflow/admin-proof-preview";
 import { RevisionManager } from "@/components/workflow/revision-manager";
 import { AdminPaymentApproval } from "@/components/workflow/admin-payment-approval";
 import { WorkflowTimeline } from "@/components/workflow/workflow-timeline";
@@ -152,6 +153,11 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             </CardHeader>
             <CardContent className="grid gap-4">
               <OrderFileUploader orderId={order.id} initialFiles={order.orderFiles} />
+
+              <div className="border-t border-border/60 pt-4">
+                <p className="mb-2 text-xs font-medium text-muted-foreground">Proof previews</p>
+                <AdminProofPreview orderId={order.id} />
+              </div>
 
               <div className="border-t border-border/60 pt-4">
                 <p className="mb-2 text-xs font-medium text-muted-foreground">Proof delivery</p>

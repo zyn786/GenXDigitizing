@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Eye, Lock } from "lucide-react";
 
 type UploadedFile = {
   id: string;
@@ -11,6 +12,11 @@ type UploadedFile = {
   createdAt: string;
 };
 
+type FileType = "PROOF_PREVIEW" | "FINAL_FILE";
+
+const PROOF_ACCEPT = ".jpg,.jpeg,.png,.pdf";
+const FINAL_ACCEPT = ".dst,.pes,.emb,.exp,.jef,.vp3,.xxx,.hus,.sew,.dxt,.zip,.pdf";
+
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -20,19 +26,26 @@ function formatBytes(bytes: number) {
 export function OrderFileUploader({
   orderId,
   initialFiles,
+  defaultFileType,
 }: {
   orderId: string;
   initialFiles: UploadedFile[];
+  defaultFileType?: FileType;
 }) {
   const [files, setFiles] = useState(initialFiles);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFileType, setSelectedFileType] = useState<FileType>(
+    defaultFileType ?? "FINAL_FILE"
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const fileTypeAtUpload: FileType = selectedFileType;
 
     setUploading(true);
     setError(null);
@@ -49,9 +62,11 @@ export function OrderFileUploader({
           fileName: file.name,
           mimeType: file.type || "application/octet-stream",
           sizeBytes: file.size,
+          fileType: fileTypeAtUpload,
+          orderId,
         }),
       });
-      const intentJson = await intentRes.json() as {
+      const intentJson = (await intentRes.json()) as {
         uploadUrl?: string;
         objectKey?: string;
         bucket?: string;
@@ -99,9 +114,14 @@ export function OrderFileUploader({
           bucket,
           mimeType: file.type || "application/octet-stream",
           sizeBytes: file.size,
+          fileType: fileTypeAtUpload,
         }),
       });
-      const json = await res.json() as { ok: boolean; file?: UploadedFile; message?: string };
+      const json = (await res.json()) as {
+        ok: boolean;
+        file?: UploadedFile;
+        message?: string;
+      };
       if (!json.ok || !json.file) {
         setError(json.message ?? "Failed to save file record.");
         return;
@@ -119,7 +139,12 @@ export function OrderFileUploader({
   async function handleDownload(fileId: string, fileName: string) {
     try {
       const res = await fetch(`/api/admin/order-files/${fileId}/download`);
-      const json = await res.json() as { ok?: boolean; downloadUrl?: string; fileName?: string; error?: string };
+      const json = (await res.json()) as {
+        ok?: boolean;
+        downloadUrl?: string;
+        fileName?: string;
+        error?: string;
+      };
       if (!json.downloadUrl) return;
       const a = document.createElement("a");
       a.href = json.downloadUrl;
@@ -132,8 +157,88 @@ export function OrderFileUploader({
     }
   }
 
+  const acceptAttr =
+    selectedFileType === "PROOF_PREVIEW" ? PROOF_ACCEPT : FINAL_ACCEPT;
+
+  const isProofSelected = selectedFileType === "PROOF_PREVIEW";
+  const isFinalSelected = selectedFileType === "FINAL_FILE";
+
   return (
     <div className="grid gap-4">
+      {/* File type selector */}
+      <div className="grid gap-3">
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          File type
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            disabled={uploading}
+            onClick={() => setSelectedFileType("PROOF_PREVIEW")}
+            aria-pressed={isProofSelected}
+            className={`flex items-start gap-3 rounded-2xl border bg-card/60 p-4 text-left transition disabled:opacity-50 ${
+              isProofSelected
+                ? "border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_0_1px_rgba(16,185,129,0.4)]"
+                : "border-border/60 hover:border-border hover:bg-card"
+            }`}
+          >
+            <div
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                isProofSelected
+                  ? "bg-emerald-500/20 text-emerald-500"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              <Eye className="h-4 w-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">Proof Preview</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                JPG/PNG files the client will see before approval.
+              </p>
+              {isProofSelected && (
+                <p className="mt-2 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                  Proof previews are visible to the client after proof is sent.
+                </p>
+              )}
+            </div>
+          </button>
+
+          <button
+            type="button"
+            disabled={uploading}
+            onClick={() => setSelectedFileType("FINAL_FILE")}
+            aria-pressed={isFinalSelected}
+            className={`flex items-start gap-3 rounded-2xl border bg-card/60 p-4 text-left transition disabled:opacity-50 ${
+              isFinalSelected
+                ? "border-violet-500/50 bg-violet-500/10 shadow-[0_0_0_1px_rgba(139,92,246,0.4)]"
+                : "border-border/60 hover:border-border hover:bg-card"
+            }`}
+          >
+            <div
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                isFinalSelected
+                  ? "bg-violet-500/20 text-violet-500"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              <Lock className="h-4 w-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">Final Production File</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                DST/PES/EMB/ZIP files locked until payment or free-order release.
+              </p>
+              {isFinalSelected && (
+                <p className="mt-2 text-[11px] font-medium text-violet-600 dark:text-violet-400">
+                  Machine files stay locked from the client until payment or admin release.
+                </p>
+              )}
+            </div>
+          </button>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           {files.length} file{files.length !== 1 ? "s" : ""} uploaded
@@ -144,11 +249,16 @@ export function OrderFileUploader({
           onClick={() => fileInputRef.current?.click()}
           className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-xs font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
         >
-          {uploading ? progress ?? "Uploading…" : "+ Upload file"}
+          {uploading
+            ? progress ?? "Uploading…"
+            : isProofSelected
+              ? "+ Upload proof preview"
+              : "+ Upload final file"}
         </button>
         <input
           ref={fileInputRef}
           type="file"
+          accept={acceptAttr}
           onChange={handleFileSelect}
           className="hidden"
         />
