@@ -34,6 +34,15 @@ export async function POST(request: Request, { params }: Props) {
   if (order.status !== "PROOF_READY") {
     return NextResponse.json({ ok: false, message: "Revision can only be requested when a proof is ready." }, { status: 422 });
   }
+  if (
+    order.proofStatus !== "SENT_TO_CLIENT" &&
+    order.proofStatus !== "CLIENT_REVIEWING"
+  ) {
+    return NextResponse.json(
+      { ok: false, message: "Proof is not available for review." },
+      { status: 400 }
+    );
+  }
 
   await prisma.$transaction([
     prisma.workflowOrder.update({

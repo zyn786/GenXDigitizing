@@ -31,6 +31,7 @@ export async function GET(_req: Request, { params }: RouteProps) {
     });
   }
 
-  const files = await getOrderFiles(orderId);
+  // Clients only ever see FINAL_FILE downloads — never proof previews.
+  const files = await getOrderFiles(orderId, "FINAL_FILE");
   return NextResponse.json({ ok: true, files, locked: false });
 }

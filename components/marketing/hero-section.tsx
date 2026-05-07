@@ -4,7 +4,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { usePreloader } from "@/components/layout/site-preloader";
-import { DirectOrderModal } from "@/components/marketing/direct-order-modal";
 import { Button } from "@/components/ui/button";
 
 const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
@@ -97,7 +96,11 @@ export function HeroSection() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <DirectOrderModal mode="order" />
+            <Button asChild variant="outline" shape="pill" size="lg" className="min-h-[44px] w-full border border-white/20 text-white hover:border-white/30 hover:bg-white/10 sm:w-auto">
+              <Link href="/orders">
+                Place Direct Order
+              </Link>
+            </Button>
             <Button
               asChild
               variant="ghost"

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { isAppAdminRole } from "@/lib/auth/session";
 import { logActivity } from "@/lib/activity/logger";
 import { getOrderFiles } from "@/lib/payments/repository";
 import {
@@ -12,13 +11,15 @@ import {
 
 type Props = { params: Promise<{ orderId: string }> };
 
+const PROOF_REVIEW_ROLES = ["SUPER_ADMIN", "MANAGER"] as const;
+
 export async function POST(_request: Request, { params }: Props) {
   const session = await auth();
-  if (!session?.user || !isAppAdminRole(session.user.role)) {
-    return NextResponse.json({ ok: false, message: "Forbidden." }, { status: 403 });
+  if (!session?.user) {
+    return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }
-  if (session.user.role === "DESIGNER") {
-    return NextResponse.json({ ok: false, message: "Designers cannot approve proofs." }, { status: 403 });
+  if (!PROOF_REVIEW_ROLES.includes(session.user.role as typeof PROOF_REVIEW_ROLES[number])) {
+    return NextResponse.json({ ok: false, message: "Forbidden." }, { status: 403 });
   }
 
   const { orderId } = await params;

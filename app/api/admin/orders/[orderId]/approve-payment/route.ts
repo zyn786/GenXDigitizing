@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { isAppAdminRole } from "@/lib/auth/session";
 import { logActivity } from "@/lib/activity/logger";
 import { sendFilesUnlockedEmail, writeNotificationLog } from "@/lib/notifications/email";
+
+const PAYMENT_APPROVAL_ROLES = ["SUPER_ADMIN", "MANAGER"] as const;
 
 type Props = { params: Promise<{ orderId: string }> };
 
@@ -16,7 +17,10 @@ const schema = z.object({
 
 export async function POST(request: Request, { params }: Props) {
   const session = await auth();
-  if (!session?.user || !isAppAdminRole(session.user.role)) {
+  if (!session?.user) {
+    return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
+  }
+  if (!PAYMENT_APPROVAL_ROLES.includes(session.user.role as typeof PAYMENT_APPROVAL_ROLES[number])) {
     return NextResponse.json({ ok: false, message: "Forbidden." }, { status: 403 });
   }
 

@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
 import { createPutSignedUrl, getDefaultBucket, sanitizeFileName } from "@/lib/s3";
 import { orderFileUploadIntentSchema } from "@/lib/payments/schemas";
 
@@ -34,6 +35,21 @@ export async function POST(req: Request) {
       { error: "Proof preview images must be JPG or PNG only." },
       { status: 400 }
     );
+  }
+
+  // Designer assignment guard — designers may only upload for orders they own.
+  if (session.user.role === "DESIGNER") {
+    const orderId = typeof body?.orderId === "string" ? body.orderId : null;
+    if (!orderId) {
+      return NextResponse.json({ error: "Not authorized for this order" }, { status: 403 });
+    }
+    const order = await prisma.workflowOrder.findUnique({
+      where: { id: orderId },
+      select: { assignedToUserId: true },
+    });
+    if (!order || order.assignedToUserId !== session.user.id) {
+      return NextResponse.json({ error: "Not authorized for this order" }, { status: 403 });
+    }
   }
 
   const bucket = getDefaultBucket();

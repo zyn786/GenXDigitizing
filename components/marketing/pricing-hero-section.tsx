@@ -83,7 +83,7 @@ export function PricingHeroSection() {
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
                 <Link
-                  href="/order"
+                  href="/orders"
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-border/70 bg-card/60 px-5 py-2.5 text-sm font-medium transition hover:bg-card hover:shadow-md"
                 >
                   <Zap className="h-3.5 w-3.5" />

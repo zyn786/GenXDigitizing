@@ -79,7 +79,7 @@ export default async function ClientDashboardPage() {
               </p>
             </div>
             <Button asChild variant="premium" shape="pill" size="lg" className="shrink-0">
-              <Link href="/client/order">
+              <Link href="/orders">
                 Place Free Order
                 <ArrowRight className="h-4 w-4" />
               </Link>
@@ -171,7 +171,7 @@ export default async function ClientDashboardPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Start something new</p>
             <div className="mt-3 flex flex-wrap gap-3">
               <Button asChild variant="premium" shape="pill" size="sm">
-                <Link href="/client/order">
+                <Link href="/orders">
                   <Package className="h-3.5 w-3.5" />
                   Place Order
                 </Link>
@@ -227,7 +227,7 @@ export default async function ClientDashboardPage() {
           action={
             <div className="flex gap-3">
               <Button asChild variant="premium" shape="pill" size="sm">
-                <Link href="/client/order">Place Order</Link>
+                <Link href="/orders">Place Order</Link>
               </Button>
               <Button asChild variant="outline" shape="pill" size="sm">
                 <Link href="/client/quote">Get a Quote</Link>

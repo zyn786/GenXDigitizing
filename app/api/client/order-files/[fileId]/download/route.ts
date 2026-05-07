@@ -16,6 +16,15 @@ export async function GET(_req: Request, { params }: RouteProps) {
   const file = await getOrderFileById(fileId);
   if (!file) return NextResponse.json({ error: "File not found." }, { status: 404 });
 
+  // Look up fileType separately — getOrderFileById doesn't expose it.
+  const fileMeta = await prisma.orderFile.findUnique({
+    where: { id: fileId },
+    select: { fileType: true },
+  });
+  if (!fileMeta || fileMeta.fileType !== "FINAL_FILE") {
+    return NextResponse.json({ error: "File not available" }, { status: 403 });
+  }
+
   const order = await prisma.workflowOrder.findFirst({
     where: { id: file.orderId, clientUserId: session.user.id },
     select: { invoice: { select: { filesUnlocked: true } } },

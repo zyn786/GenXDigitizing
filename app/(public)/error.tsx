@@ -43,7 +43,7 @@ export default function PublicError({ error, reset }: ErrorProps) {
               </Link>
             </Button>
             <Button asChild variant="premium" shape="pill" size="sm">
-              <Link href={"/order" as Route}>
+              <Link href={"/orders" as Route}>
                 Place direct order
                 <ArrowRight className="h-4 w-4" />
               </Link>

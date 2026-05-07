@@ -18,6 +18,17 @@ export async function GET(req: Request, { params }: RouteProps) {
 
   const { orderId } = await params;
 
+  // Designers may only see files for orders assigned to them.
+  if (session.user.role === "DESIGNER") {
+    const assignment = await prisma.workflowOrder.findUnique({
+      where: { id: orderId },
+      select: { assignedToUserId: true },
+    });
+    if (!assignment || assignment.assignedToUserId !== session.user.id) {
+      return NextResponse.json({ error: "Not authorized for this order" }, { status: 403 });
+    }
+  }
+
   const url = new URL(req.url);
   const rawFileType = url.searchParams.get("fileType");
   const fileType =
@@ -38,8 +49,16 @@ export async function POST(req: Request, { params }: RouteProps) {
 
   const { orderId } = await params;
 
-  const order = await prisma.workflowOrder.findUnique({ where: { id: orderId }, select: { id: true } });
+  const order = await prisma.workflowOrder.findUnique({
+    where: { id: orderId },
+    select: { id: true, assignedToUserId: true },
+  });
   if (!order) return NextResponse.json({ ok: false, message: "Order not found." }, { status: 404 });
+
+  // Designers may only upload for orders assigned to them.
+  if (session.user.role === "DESIGNER" && order.assignedToUserId !== session.user.id) {
+    return NextResponse.json({ error: "Not authorized for this order" }, { status: 403 });
+  }
 
   const body = await req.json().catch(() => null) as {
     fileName?: string;

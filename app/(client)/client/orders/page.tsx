@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ClientOrdersTable } from "@/components/workflow/client-orders-table";
 import { getClientOrders } from "@/lib/workflow/repository";
-import { QuickOrderModal } from "@/components/client/quick-order-modal";
 
 export default async function ClientOrdersPage() {
   const session = await auth();
@@ -32,12 +31,12 @@ export default async function ClientOrdersPage() {
               Dashboard
             </Link>
           </Button>
-          <QuickOrderModal
-            mode="order"
-            userName={session.user.name ?? ""}
-            userEmail={session.user.email ?? ""}
-            triggerLabel="New Order"
-          />
+          <Button asChild variant="premium" shape="pill" size="sm">
+            <Link href="/orders">
+              <Package className="h-4 w-4" />
+              New Order
+            </Link>
+          </Button>
         </div>
       </section>
 
@@ -51,7 +50,7 @@ export default async function ClientOrdersPage() {
           action={
             <div className="flex gap-3">
               <Button asChild variant="premium" shape="pill" size="sm">
-                <Link href="/client/order">
+                <Link href="/orders">
                   Place Your First Order
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
