@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { notFound } from "next/navigation";
 
+import { auth } from "@/auth";
 import { ConversationLauncherButton } from "@/components/support/conversation-launcher-button";
 import {
   Card,
@@ -12,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { AdminFileDownloadButton } from "@/components/admin/admin-file-download-button";
+import { InvoiceActions } from "@/components/billing/invoice-actions";
 import { getCurrencySymbol } from "@/lib/billing/currencies";
 import { getAdminInvoiceById } from "@/lib/billing/repository";
 import { getOrderFiles } from "@/lib/payments/repository";
@@ -40,6 +42,9 @@ function formatBytes(bytes: number) {
 }
 
 export default async function AdminInvoiceDetailPage({ params }: AdminInvoiceDetailPageProps) {
+  const session = await auth();
+  const userRole = String(session?.user?.role ?? "");
+
   const { invoiceId } = await params;
   const invoice = await getAdminInvoiceById(invoiceId);
 
@@ -118,19 +123,7 @@ export default async function AdminInvoiceDetailPage({ params }: AdminInvoiceDet
             <CardDescription>Billing edits, payments, and invoice send actions.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            {[
-              "Edit invoice lines",
-              "Add percentage discount line",
-              "Record partial payment",
-              "Send invoice email",
-            ].map((item) => (
-              <div
-                key={item}
-                className="rounded-2xl border border-border/80 bg-secondary/80 p-4 text-sm text-muted-foreground"
-              >
-                {item}
-              </div>
-            ))}
+            <InvoiceActions invoiceId={invoice.id} userRole={userRole} />
             <Link
               href={paymentProofsHref}
               className="rounded-2xl border border-border/80 bg-secondary/80 p-4 text-sm text-muted-foreground transition hover:bg-secondary"

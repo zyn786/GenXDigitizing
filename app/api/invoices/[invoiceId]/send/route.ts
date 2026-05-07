@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
-import { isAppAdminRole } from "@/lib/auth/session";
 import { invoiceSendPayloadSchema } from "@/lib/billing/schemas";
 import { markInvoiceSent } from "@/lib/billing/repository";
 import { prisma } from "@/lib/db";
@@ -11,6 +10,8 @@ type RouteProps = {
   params: Promise<{ invoiceId: string }>;
 };
 
+const APPROVER_ROLES = new Set(["SUPER_ADMIN", "MANAGER"]);
+
 export async function POST(request: Request, { params }: RouteProps) {
   const session = await auth();
 
@@ -18,7 +19,7 @@ export async function POST(request: Request, { params }: RouteProps) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }
 
-  if (!isAppAdminRole(session.user.role)) {
+  if (!APPROVER_ROLES.has(String(session.user.role ?? ""))) {
     return NextResponse.json({ ok: false, message: "Forbidden." }, { status: 403 });
   }
 

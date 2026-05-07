@@ -256,15 +256,44 @@ export async function addPayment(
       payments,
     });
 
+    const filesUnlocked = nextStatus === "PAID" ? true : invoice.filesUnlocked;
+
     const updatedInvoice = await tx.invoice.update({
       where: { id: invoiceId },
       data: {
         paidAmount,
         balanceDue,
         status: nextStatus,
+        filesUnlocked,
         closedAt: nextStatus === "PAID" ? new Date() : invoice.closedAt,
       },
     });
+
+    // Sync WorkflowOrder paymentStatus when invoice is fully or partially paid.
+    const order = await tx.workflowOrder.findUnique({
+      where: { id: invoice.orderId },
+      select: { id: true, status: true },
+    });
+    if (order) {
+      if (nextStatus === "PAID") {
+        const newOrderData: Record<string, unknown> = {
+          paymentStatus: "PAID",
+          progressPercent: 100,
+        };
+        if (order.status === "APPROVED") {
+          newOrderData.status = "DELIVERED";
+        }
+        await tx.workflowOrder.update({
+          where: { id: order.id },
+          data: newOrderData,
+        });
+      } else if (balanceDue > 0 && paidAmount > 0) {
+        await tx.workflowOrder.update({
+          where: { id: order.id },
+          data: { paymentStatus: "PARTIALLY_PAID" },
+        });
+      }
+    }
 
     await tx.billingAuditLog.create({
       data: {
@@ -283,6 +312,7 @@ export async function addPayment(
           amount: payment.amount.toString(),
           currency: payment.currency,
           invoiceStatus: updatedInvoice.status,
+          filesUnlocked,
         },
         keyUnlockUsed: actor?.keyUnlockUsed ?? false,
       },

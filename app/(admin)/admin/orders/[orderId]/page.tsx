@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { OrderStatusBadge } from "@/components/workflow/order-status-badge";
+import { CreateInvoiceButton } from "@/components/billing/create-invoice-button";
 import { OrderStatusDropdown } from "@/components/workflow/order-status-dropdown";
 import { DesignerAssignControl } from "@/components/workflow/designer-assign-control";
 import { ConvertQuoteButton } from "@/components/workflow/convert-quote-button";
@@ -289,7 +290,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No invoice yet.</p>
+                <CreateInvoiceButton orderId={order.id} canCreate={canManagePayment} />
               )}
             </CardContent>
           </Card>
