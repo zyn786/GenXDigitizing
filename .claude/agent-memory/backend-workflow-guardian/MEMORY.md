@@ -1,1 +1,2 @@
 - [Phase 11A.0 hardening](phase_11a0_hardening.md) — Asset auth, designer assignment guards, payment+proof role narrowing, FINAL_FILE filtering applied May 2026
+- [Phase 11A.1 proof viewer](phase_11a1_proof_viewer.md) — Client proof-files endpoint + UI with signed URLs, MIME allowlist, proofStatus gate added May 2026

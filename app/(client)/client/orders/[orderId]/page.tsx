@@ -14,6 +14,7 @@ import { CancelOrderButton } from "@/components/client/cancel-order-button";
 import { ClientEditOrderModal } from "@/components/client/client-edit-order-modal";
 import { ClientDownloadButton } from "@/components/client/client-download-button";
 import { ClientProofReview } from "@/components/workflow/client-proof-review";
+import { ClientProofPreview } from "@/components/workflow/client-proof-preview";
 import { PaymentGatePanel } from "@/components/workflow/payment-gate-panel";
 import { buildTitle } from "@/lib/site";
 import { getClientOrder } from "@/lib/workflow/repository";
@@ -211,15 +212,21 @@ export default async function ClientOrderDetailPage({
                 <CardDescription>
                   {proofStatus === "PENDING_ADMIN_PROOF_REVIEW"
                     ? "Your proof is being reviewed by our team before it's sent to you."
-                    : "Review your proof files and approve or request changes."}
+                    : "Review the proof previews below. Production machine files remain locked until proof approval and payment confirmation."}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="grid gap-4">
+                <ClientProofPreview orderId={order.id} />
                 <ClientProofReview
                   orderId={order.id}
                   proofStatus={proofStatus as "NOT_UPLOADED" | "UPLOADED" | "INTERNAL_REVIEW" | "SENT_TO_CLIENT" | "CLIENT_REVIEWING" | "CLIENT_APPROVED" | "REVISION_REQUESTED"}
                   orderStatus={rawOrder?.status ?? order.status}
                 />
+                {!filesUnlocked && (
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    Final machine files (DST, PES, and others) will be available after proof approval and payment confirmation.
+                  </p>
+                )}
               </CardContent>
             </Card>
           )}
