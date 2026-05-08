@@ -117,17 +117,17 @@ export function DashboardShell({
       )}
 
       {/* ── Mobile nav strip — hidden on desktop ── */}
-      <div className="sticky top-14 md:top-16 z-30 border-b border-border/60 bg-background/90 px-3 py-2 backdrop-blur-xl lg:hidden">
+      <div className="sticky top-14 md:top-16 z-30 border-b border-border/60 bg-background/90 px-3 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] backdrop-blur-xl lg:hidden">
         <PortalNavMobile items={nav} badges={badges} />
       </div>
 
       {/* ── Body ── */}
       <div className="page-shell grid gap-6 py-6 md:gap-8 md:py-8 lg:grid-cols-[264px_1fr] lg:min-h-[calc(100vh-4rem)]">
         {/* Sidebar — desktop only */}
-        <aside className="hidden lg:block [animation:shell-fade_0.45s_ease_0.05s_both]">
+        <aside className="hidden lg:block [animation:shell-fade_0.3s_ease_both]">
           <div className="sticky top-24 flex max-h-[calc(100vh-7rem)] flex-col gap-3">
             {/* Nav panel */}
-            <div className="flex min-h-0 flex-col rounded-[1.75rem] border border-border/60 bg-card/70 p-3 backdrop-blur-sm">
+            <div className="flex min-h-0 flex-col rounded-2xl border border-border/60 bg-card p-3">
               <div className="mb-1.5 shrink-0 border-b border-border/50 px-3 pb-3">
                 <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                   {sidebarLabel}
@@ -140,7 +140,7 @@ export function DashboardShell({
 
             {/* User card */}
             {user && (
-              <div className="shrink-0 rounded-[1.75rem] border border-border/60 bg-card/70 px-4 py-3 space-y-3">
+              <div className="shrink-0 rounded-2xl border border-border/60 bg-card/70 px-4 py-3 space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 shrink-0 select-none items-center justify-center rounded-2xl bg-primary/10 text-xs font-bold text-primary shadow-sm">
                     {userInitials}

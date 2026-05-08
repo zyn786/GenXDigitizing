@@ -27,7 +27,7 @@ export function SiteFooter() {
   return (
     <footer className="relative z-10 px-4 pb-8 pt-8 md:px-8">
       <div className="page-shell">
-        <div className="glass-panel premium-shadow rounded-[2rem] p-5 md:p-8 lg:p-10">
+        <div className="glass-panel premium-shadow rounded-2xl p-5 md:p-8 lg:p-10">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr] lg:gap-10">
             {/* Brand column */}
             <div>

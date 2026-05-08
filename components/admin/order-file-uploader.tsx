@@ -190,7 +190,7 @@ export function OrderFileUploader({
             aria-pressed={isProofSelected}
             className={`flex items-start gap-3 rounded-2xl border bg-card/60 p-4 text-left transition disabled:opacity-50 ${
               isProofSelected
-                ? "border-emerald-500/50 bg-emerald-500/10 shadow-[0_0_0_1px_rgba(16,185,129,0.4)]"
+                ? "border-emerald-500/50 bg-emerald-500/10"
                 : "border-border/60 hover:border-border hover:bg-card"
             }`}
           >
@@ -223,7 +223,7 @@ export function OrderFileUploader({
             aria-pressed={isFinalSelected}
             className={`flex items-start gap-3 rounded-2xl border bg-card/60 p-4 text-left transition disabled:opacity-50 ${
               isFinalSelected
-                ? "border-violet-500/50 bg-violet-500/10 shadow-[0_0_0_1px_rgba(139,92,246,0.4)]"
+                ? "border-violet-500/50 bg-violet-500/10"
                 : "border-border/60 hover:border-border hover:bg-card"
             }`}
           >
@@ -294,8 +294,8 @@ export function OrderFileUploader({
               key={file.id}
               className="flex items-center justify-between rounded-xl border border-border/60 bg-secondary/40 px-4 py-3"
             >
-              <div>
-                <div className="text-sm font-medium">{file.fileName}</div>
+              <div className="min-w-0">
+                <div className="truncate text-sm font-medium">{file.fileName}</div>
                 <div className="mt-0.5 text-xs text-muted-foreground">
                   {formatBytes(file.sizeBytes)} · {new Date(file.createdAt).toLocaleDateString()}
                 </div>

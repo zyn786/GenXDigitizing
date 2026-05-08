@@ -6,11 +6,9 @@ import { Button } from "@/components/ui/button";
 export default function NotFound() {
   return (
     <main className="relative flex min-h-screen items-center justify-center bg-background px-4 overflow-hidden">
-      {/* Background ambient glows */}
+      {/* Subtle top glow */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/[0.06] blur-3xl" />
-        <div className="absolute right-[-6rem] top-[-4rem] h-72 w-72 rounded-full bg-violet-500/[0.06] blur-3xl" />
-        <div className="absolute bottom-[-4rem] left-[-4rem] h-60 w-60 rounded-full bg-indigo-500/[0.05] blur-3xl" />
+        <div className="absolute left-1/2 top-0 h-80 w-[40rem] -translate-x-1/2 rounded-full bg-primary/[0.04] blur-3xl" />
       </div>
 
       <div className="relative z-10 w-full max-w-lg text-center">
@@ -30,7 +28,7 @@ export default function NotFound() {
         </div>
 
         {/* Glass card */}
-        <div className="glass-panel premium-shadow rounded-[2rem] border-border/80 p-8">
+        <div className="glass-panel premium-shadow rounded-2xl border-border/80 p-8">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-border/60 bg-muted/40">
             <Undo2 className="h-6 w-6 text-muted-foreground" />
           </div>

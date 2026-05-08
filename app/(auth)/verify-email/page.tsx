@@ -53,7 +53,7 @@ export default async function VerifyEmailPage({
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(139,92,246,0.16),transparent_24%),linear-gradient(180deg,#07111f_0%,#0b1423_40%,#0f1728_100%)]" />
 
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10">
-        <section className="w-full max-w-[520px] rounded-[2rem] border border-white/10 bg-white/[0.06] p-6 shadow-[0_30px_120px_rgba(0,0,0,0.5)] backdrop-blur-2xl md:p-8">
+        <section className="w-full max-w-[520px] rounded-2xl border border-border/60 bg-card p-6 shadow-lg md:p-8">
 
           {/* Header */}
           <div className="text-center">

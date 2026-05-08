@@ -16,11 +16,9 @@ const highlights = [
 export function PricingHeroSection() {
   return (
     <section className="relative overflow-hidden px-4 pb-10 pt-16 md:px-8 md:pt-20">
-      {/* Ambient glows */}
+      {/* Subtle top glow */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute right-[-4rem] top-[-2rem] h-64 w-64 rounded-full bg-amber-500/[0.07] blur-3xl" />
-        <div className="absolute left-[-3rem] top-[30%] h-56 w-56 rounded-full bg-primary/[0.08] blur-3xl" />
-        <div className="absolute bottom-0 right-1/3 h-40 w-80 rounded-full bg-violet-500/[0.06] blur-3xl" />
+        <div className="absolute left-1/2 top-0 h-80 w-[40rem] -translate-x-1/2 rounded-full bg-amber-500/[0.04] blur-3xl" />
       </div>
 
       <div className="page-shell relative z-10 max-w-4xl">

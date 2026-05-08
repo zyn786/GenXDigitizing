@@ -23,6 +23,7 @@ type Props = {
   balanceDue: number;
   payments: PaymentRecord[];
   canRecord: boolean;
+  clientEmail: string;
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -47,6 +48,7 @@ export function RecordManualPaymentForm({
   balanceDue,
   payments,
   canRecord,
+  clientEmail,
 }: Props) {
   const router = useRouter();
 
@@ -87,7 +89,7 @@ export function RecordManualPaymentForm({
           method,
           reference: reference.trim() || null,
           note: note.trim() || null,
-          clientEmail: "client@example.com",
+          clientEmail,
         }),
       });
       const json = await res.json() as { ok: boolean; message?: string };

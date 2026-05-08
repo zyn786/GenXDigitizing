@@ -94,7 +94,7 @@ export function PageTransition() {
         }}
         className="relative z-10 flex flex-col items-center gap-5"
       >
-        <div className="relative h-12 w-12 drop-shadow-[0_0_18px_rgba(99,102,241,0.6)]">
+        <div className="relative h-12 w-12">
           <Image
             src="/brand/genx-logo-white.png"
             alt="GenX"

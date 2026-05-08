@@ -103,13 +103,13 @@ function buildSteps(
 const STATE_CONFIG = {
   done: {
     icon: CheckCircle2,
-    dot: "bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 border border-emerald-500/30 shadow-[0_0_8px_rgba(34,197,94,0.15)]",
+    dot: "bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 border border-emerald-500/30",
     connector: "bg-emerald-500/30",
     label: "text-foreground font-medium",
   },
   active: {
     icon: Clock,
-    dot: "bg-amber-500/20 text-amber-500 dark:text-amber-400 border border-amber-500/30 shadow-[0_0_8px_rgba(245,158,11,0.2)] animate-pulse",
+    dot: "bg-amber-500/20 text-amber-500 dark:text-amber-400 border border-amber-500/30",
     connector: "bg-border/40",
     label: "text-amber-400 font-semibold",
   },
@@ -152,7 +152,7 @@ export function WorkflowTimeline({
           {doneCount} of {steps.length} steps complete
         </span>
         <div className="flex items-center gap-2">
-          <div className="h-1.5 w-24 overflow-hidden rounded-full bg-muted/50">
+          <div className="h-1.5 min-w-[6rem] max-w-[8rem] flex-1 overflow-hidden rounded-full bg-muted/50">
             <div
               className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700"
               style={{ width: `${progress}%` }}

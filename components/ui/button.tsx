@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-[0_16px_50px_rgba(99,102,241,0.24)] hover:opacity-95",
+          "bg-primary text-primary-foreground shadow-sm hover:opacity-95",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         outline:
@@ -18,7 +18,7 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-secondary/80",
         premium:
-          "bg-primary text-primary-foreground shadow-[0_8px_30px_rgba(99,102,241,0.35)] hover:opacity-95 hover:shadow-[0_12px_40px_rgba(99,102,241,0.45)]",
+          "bg-primary text-primary-foreground shadow-sm hover:opacity-95",
         destructive:
           "bg-destructive text-destructive-foreground hover:opacity-90",
       },
@@ -27,10 +27,10 @@ const buttonVariants = cva(
         pill: "rounded-full",
       },
       size: {
-        default: "h-11 px-5 py-2.5",
+        default: "h-12 px-5 py-2.5",
         lg: "h-12 px-6 text-sm",
         sm: "h-9 px-3 text-xs",
-        icon: "h-11 w-11 p-0",
+        icon: "h-12 w-12 p-0",
       },
     },
     defaultVariants: {

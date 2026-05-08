@@ -120,7 +120,7 @@ export function EmbroideryHoop({
         {/* drag handle */}
         <div
           className="absolute top-1/2 left-0 pointer-events-auto z-30
-                     flex h-10 w-10 items-center justify-center rounded-full
+                     flex h-11 w-11 items-center justify-center rounded-full
                      bg-white shadow-[0_2px_12px_rgba(0,0,0,0.45)] ring-2 ring-white/40
                      transition-transform duration-150"
           style={{ transform: `translate(-50%, -50%) scale(${dragging ? 1.15 : 1})` }}

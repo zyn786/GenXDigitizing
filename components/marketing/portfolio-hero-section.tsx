@@ -22,11 +22,9 @@ const serviceChips = [
 export function PortfolioHeroSection() {
   return (
     <section className="relative overflow-hidden px-4 pb-10 pt-16 md:px-8 md:pt-20">
-      {/* Ambient background glow */}
+      {/* Subtle top glow */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-[-5rem] top-0 h-72 w-72 rounded-full bg-indigo-500/[0.08] blur-3xl" />
-        <div className="absolute right-[-3rem] top-[20%] h-56 w-56 rounded-full bg-violet-500/[0.07] blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 h-48 w-96 -translate-x-1/2 rounded-full bg-primary/[0.05] blur-3xl" />
+        <div className="absolute left-1/2 top-0 h-80 w-[40rem] -translate-x-1/2 rounded-full bg-primary/[0.04] blur-3xl" />
       </div>
 
       <div className="page-shell relative z-10">
@@ -113,7 +111,7 @@ export function PortfolioHeroSection() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.15 + i * 0.08, ease }}
-                  className="rounded-[1.5rem] border border-border/60 bg-card/60 px-4 py-3 backdrop-blur-sm sm:flex-1 sm:min-w-[120px] lg:min-w-0"
+                  className="rounded-xl border border-border/60 bg-card px-4 py-3 sm:flex-1 sm:min-w-[120px] lg:min-w-0"
                 >
                   <div className="text-xl font-bold tracking-tight gradient-text md:text-2xl">{value}</div>
                   <div className="mt-0.5 text-xs text-muted-foreground">{label}</div>

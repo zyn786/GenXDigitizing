@@ -23,7 +23,9 @@
       "Bash(npx eslint *)",
       "Bash(echo \"EXIT=$?\")",
       "Bash(echo \"BUILD_EXIT=$?\")",
-      "Bash(echo \"LINT_EXIT=$?\")"
+      "Bash(echo \"LINT_EXIT=$?\")",
+      "Bash(pnpm prisma *)",
+      "Bash(powershell *)"
     ]
   }
 }

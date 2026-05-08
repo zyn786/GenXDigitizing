@@ -38,7 +38,7 @@ export default async function ResetPasswordPage({
     <main className="relative min-h-screen overflow-hidden bg-[#07111f] text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(139,92,246,0.16),transparent_24%),linear-gradient(180deg,#07111f_0%,#0b1423_40%,#0f1728_100%)]" />
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10">
-        <section className="w-full max-w-[560px] rounded-[2rem] border border-white/10 bg-white/[0.08] p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-2xl md:p-8">
+        <section className="w-full max-w-[560px] rounded-2xl border border-border/60 bg-card p-6 shadow-lg md:p-8">
           <div className="text-center">
             <div className="text-xs uppercase tracking-[0.24em] text-white/45">
               Password reset

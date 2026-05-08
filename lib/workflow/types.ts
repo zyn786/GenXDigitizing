@@ -106,6 +106,7 @@ export type OrderFile = {
   fileName: string;
   mimeType: string;
   sizeBytes: number;
+  fileType: string | null;
   uploadedByName: string | null;
   createdAt: string;
 };

@@ -40,9 +40,9 @@ export function ClientOrdersTable({ orders }: { orders: WorkflowOrder[] }) {
         return (
           <Card
             key={order.id}
-            className={`group relative transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${
+            className={`group relative transition-all duration-200 hover:shadow-md ${
               order.status === "PROOF_READY"
-                ? "border-violet-500/30 bg-violet-500/[0.03] shadow-[0_0_0_1px_rgba(139,92,246,0.1)]"
+                ? "border-violet-500/30 bg-violet-500/[0.03]"
                 : ""
             }`}
           >

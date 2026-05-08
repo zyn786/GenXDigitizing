@@ -51,7 +51,7 @@ export function ScrollSectionNav({ sections }: { sections: SectionEntry[] }) {
             {/* Label — slides in to the left of the dot on hover */}
             <span
               className={cn(
-                "pointer-events-none whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold backdrop-blur-sm transition-all duration-200",
+                "pointer-events-none whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all duration-200",
                 isActive
                   ? "translate-x-0 border-primary/30 bg-primary/10 text-primary opacity-100"
                   : "translate-x-2 border-border/50 bg-card/70 text-muted-foreground opacity-0 group-hover:translate-x-0 group-hover:opacity-100",

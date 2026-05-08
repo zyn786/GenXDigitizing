@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
+import { ensureDraftInvoiceForOrder } from "@/lib/billing/auto-invoice";
+import { markInvoiceSent } from "@/lib/billing/repository";
 import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
 import { sendProofApprovedPaymentRequiredEmail, sendNewOrderOpsEmail, sendClientProofApprovedDesignerEmail, writeNotificationLog } from "@/lib/notifications/email";
 
@@ -64,6 +66,29 @@ export async function POST(_request: Request, { params }: Props) {
     entityId: orderId,
     metadata: { orderNumber: order.orderNumber },
   });
+
+  // Fallback: auto-create DRAFT invoice if none exists yet (non-fatal)
+  if (!order.invoice) {
+    void ensureDraftInvoiceForOrder(orderId, {
+      createdByUserId: session.user.id,
+    }).catch(() => null);
+  }
+
+  // Auto-send invoice if enabled (non-fatal)
+  const autoSendEnabled = process.env.AUTO_SEND_INVOICE_AFTER_PROOF_APPROVAL === "true";
+  if (autoSendEnabled && order.invoice && order.invoice.totalAmount.gt(0)) {
+    try {
+      await markInvoiceSent(order.invoice.id, {
+        userId: order.clientUser?.id ?? session.user.id,
+        email: order.clientUser?.email ?? session.user.email ?? null,
+        role: "CLIENT",
+        reason: "Auto-sent after proof approval.",
+        keyUnlockUsed: false,
+      });
+    } catch {
+      // non-fatal — invoice stays DRAFT, admin can send manually
+    }
+  }
 
   // Notify ops about client proof approval (non-fatal)
   const opsEmail = process.env.OPS_EMAIL ?? process.env.EMAIL_FROM_ADDRESS ?? process.env.EMAIL_FROM;

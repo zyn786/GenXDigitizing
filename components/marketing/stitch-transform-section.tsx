@@ -210,7 +210,7 @@ export function StitchTransformSection() {
       ref={ref}
       className="relative isolate overflow-hidden px-4 py-12 md:px-8 md:py-24 lg:py-36"
     >
-      <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_15%_15%,rgba(196,149,42,0.08),transparent_30%),radial-gradient(circle_at_85%_20%,rgba(30,58,123,0.1),transparent_34%),radial-gradient(circle_at_50%_90%,rgba(47,143,112,0.08),transparent_34%)]" />
+      <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.04),transparent_40%)]" />
 
       <MultiColorThreadLines position="top" inView={inView} />
       <MultiColorThreadLines position="bottom" inView={inView} />
@@ -296,7 +296,7 @@ export function StitchTransformSection() {
               {callouts.map(({ label, desc }, index) => (
                 <motion.div
                   key={label}
-                  className="flex items-start gap-3 rounded-xl border border-border/60 bg-card/60 px-4 py-3 backdrop-blur-sm"
+                  className="flex items-start gap-3 rounded-xl border border-border/60 bg-card px-4 py-3"
                   initial={{ opacity: 0, x: 16 }}
                   animate={inView ? { opacity: 1, x: 0 } : {}}
                   transition={{

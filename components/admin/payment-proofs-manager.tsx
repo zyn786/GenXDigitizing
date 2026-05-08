@@ -174,7 +174,7 @@ export function PaymentProofsManager({
               <div className="text-sm text-muted-foreground">Loading image…</div>
             )}
             {proofImageUrl ? (
-              <div className="relative h-96 w-full">
+              <div className="relative h-64 max-h-[50vh] w-full sm:h-96">
                 <Image
                   src={proofImageUrl}
                   alt="Payment proof"

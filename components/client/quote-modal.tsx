@@ -480,7 +480,7 @@ export function QuoteModal({ open, onClose, catalog }: Props) {
               </div>
 
               {/* Footer */}
-              <div className="relative shrink-0 border-t border-white/8 bg-[#07111f]/95 px-6 py-4 backdrop-blur-xl">
+              <div className="relative shrink-0 border-t border-white/8 bg-[#07111f]/95 px-6 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] backdrop-blur-xl">
                 {error && (
                   <div className="mb-3 flex items-center gap-2 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs text-red-300">
                     <AlertCircle className="h-3.5 w-3.5 shrink-0" />

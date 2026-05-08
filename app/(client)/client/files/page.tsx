@@ -7,7 +7,7 @@ import { auth } from "@/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { ClientDownloadButton } from "@/components/client/client-download-button";
+import { FileShareActions } from "@/components/client/file-share-actions";
 import { buildTitle } from "@/lib/site";
 import { prisma } from "@/lib/db";
 
@@ -42,6 +42,7 @@ export default async function ClientFilesPage() {
         },
       },
       orderFiles: {
+        where: { fileType: "FINAL_FILE" },
         select: {
           id: true,
           fileName: true,
@@ -112,7 +113,7 @@ export default async function ClientFilesPage() {
                                 to unlock your files.
                               </>
                             )
-                            : "Files are locked pending invoice creation."}
+                            : "Your invoice is being prepared. We'll notify you once it's ready for payment."}
                       </span>
                     </div>
                   )}
@@ -123,14 +124,14 @@ export default async function ClientFilesPage() {
                         key={file.id}
                         className="flex items-center justify-between rounded-2xl border border-border/60 bg-muted/30 px-4 py-3"
                       >
-                        <div>
-                          <p className="text-sm font-medium">{file.fileName}</p>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{file.fileName}</p>
                           <p className="mt-0.5 text-xs text-muted-foreground">
                             {formatBytes(file.sizeBytes)} · {file.mimeType}
                           </p>
                         </div>
                         {filesUnlocked ? (
-                          <ClientDownloadButton fileId={file.id} fileName={file.fileName} />
+                          <FileShareActions fileId={file.id} fileName={file.fileName} mimeType={file.mimeType} />
                         ) : (
                           <Badge>Locked</Badge>
                         )}

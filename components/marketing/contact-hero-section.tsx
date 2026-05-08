@@ -15,10 +15,9 @@ const promises = [
 export function ContactHeroSection() {
   return (
     <section className="relative overflow-hidden px-4 pb-10 pt-16 md:px-8 md:pt-20">
-      {/* Ambient glows */}
+      {/* Subtle top glow */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-[-4rem] top-[-2rem] h-64 w-64 rounded-full bg-indigo-500/[0.08] blur-3xl" />
-        <div className="absolute right-[-3rem] top-[40%] h-48 w-48 rounded-full bg-violet-500/[0.07] blur-3xl" />
+        <div className="absolute left-1/2 top-0 h-80 w-[40rem] -translate-x-1/2 rounded-full bg-primary/[0.04] blur-3xl" />
       </div>
 
       <div className="page-shell relative z-10 max-w-4xl">
@@ -68,7 +67,7 @@ export function ContactHeroSection() {
                   initial={{ opacity: 0, x: 12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: 0.15 + i * 0.07, ease }}
-                  className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/60 px-4 py-3 text-sm backdrop-blur-sm"
+                  className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-3 text-sm"
                 >
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                     <Icon className="h-4 w-4 text-primary" />

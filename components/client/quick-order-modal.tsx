@@ -609,7 +609,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                         ].map((p, i) => (
                           <div key={i} className={`flex items-start gap-2 rounded-xl border px-3 py-2.5 text-[11px] ${i < 3 ? "border-emerald-400/15 bg-emerald-500/[0.05] text-emerald-300/60" : "border-amber-400/15 bg-amber-500/[0.05] text-amber-300/60"}`}>
                             <span className="mt-0.5 shrink-0">{i < 3 ? "✓" : "!"}</span>
-                            {p}
+                            <span className="break-words">{p}</span>
                           </div>
                         ))}
                       </div>
@@ -621,7 +621,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                 </div>
 
                 {/* Footer nav */}
-                <div className="relative shrink-0 border-t border-border/40 bg-background/95 px-6 py-4 backdrop-blur-xl">
+                <div className="relative shrink-0 border-t border-border/40 bg-background/95 px-6 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] backdrop-blur-xl">
                   <div className="flex items-center gap-3">
                     {/* Back */}
                     {step > 1 ? (

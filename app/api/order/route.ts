@@ -6,6 +6,7 @@ import { quoteOrderSchema } from "@/schemas/quote-order";
 import { computeQuotePricing } from "@/lib/quote-order/pricing";
 import { getAllPricingConfig, getActiveBulkDiscountRules } from "@/lib/pricing/config";
 import { logActivity } from "@/lib/activity/logger";
+import { ensureDraftInvoiceForOrder } from "@/lib/billing/auto-invoice";
 import { sendOrderCreatedEmail, sendNewOrderOpsEmail, writeNotificationLog } from "@/lib/notifications/email";
 
 const refFileSchema = z.object({
@@ -124,6 +125,13 @@ export async function POST(request: Request) {
       freeDesignUsed: pricing.isFreeDesign ? true : (clientProfile?.freeDesignUsed ?? false),
     },
   }).catch(() => null);
+
+  // Auto-create DRAFT invoice (non-fatal)
+  if (!pricing.isFreeDesign && pricing.total > 0) {
+    void ensureDraftInvoiceForOrder(order.id, {
+      createdByUserId: userId,
+    }).catch(() => null);
+  }
 
   // Save reference files if any
   if (data.referenceFiles.length > 0) {

@@ -52,13 +52,13 @@ export function AdminOrderQueue({ orders }: { orders: WorkflowOrder[] }) {
             placeholder="Search by order #, title, or client…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-11 w-full rounded-2xl border border-border/70 bg-card/70 pl-4 pr-4 text-sm outline-none backdrop-blur-sm transition focus:border-primary/40 focus:bg-card focus-visible:ring-2 focus-visible:ring-primary/20"
+            className="h-11 w-full rounded-2xl border border-border/70 bg-card pl-4 pr-4 text-sm outline-none transition focus:border-primary/40 focus:bg-card focus-visible:ring-2 focus-visible:ring-primary/20"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-11 rounded-2xl border border-border/70 bg-card/70 px-4 text-sm outline-none transition focus:border-primary/40 backdrop-blur-sm"
+          className="h-11 rounded-2xl border border-border/70 bg-card px-4 text-sm outline-none transition focus:border-primary/40"
         >
           {STATUS_OPTIONS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
@@ -73,7 +73,7 @@ export function AdminOrderQueue({ orders }: { orders: WorkflowOrder[] }) {
       )}
 
       {/* Table — card-stack on mobile, grid on sm+ */}
-      <div className="overflow-hidden rounded-[1.75rem] border border-border/60 bg-card/70 backdrop-blur-sm">
+      <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
         {/* Desktop header row */}
         <div className="hidden grid-cols-[1.2fr_1fr_0.8fr_0.8fr_auto] gap-3 border-b border-border/60 bg-muted/20 px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground sm:grid">
           <div>Order</div>

@@ -136,7 +136,15 @@ export async function registerAction(formData: FormData): Promise<void> {
       code: rawOtp,
     });
   } catch (error) {
-    console.error("Failed to send OTP email after registration", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Failed to send OTP email after registration:", errorMessage);
+
+    // Redirect to verify-email with error so user knows email failed
+    redirectWithParams(VERIFY_EMAIL_ROUTE, {
+      pending: "1",
+      email,
+      error: "send-failed",
+    });
   }
 
   try {

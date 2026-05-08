@@ -121,7 +121,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
             {/* Right — auth card */}
             <section className="flex justify-center lg:justify-end">
-              <div className="glass-panel premium-shadow w-full max-w-[570px] rounded-[2rem] border-border/80 p-4 md:p-6">
+              <div className="glass-panel premium-shadow w-full max-w-[570px] rounded-2xl border-border/80 p-4 md:p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <Link
                     href="/"

@@ -19,7 +19,7 @@ export default function TermsPage() {
       />
 
       <section className="px-4 pb-16 md:px-8">
-        <div className="mx-auto max-w-4xl space-y-8 rounded-[2rem] border border-border/80 bg-card/70 p-6 backdrop-blur-xl md:p-10">
+        <div className="mx-auto max-w-4xl space-y-8 rounded-2xl border border-border/80 bg-card p-6 md:p-10">
           <LegalSection title="Acceptance of terms">
             <p>
               By using GenX Digitizing services — including our website, client portal, and any

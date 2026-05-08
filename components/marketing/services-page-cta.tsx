@@ -8,8 +8,7 @@ export function ServicesPageCta() {
   return (
     <section className="px-4 pb-20 pt-8 md:px-8 md:pb-28">
       <div className="page-shell">
-        <Card className="glass-panel premium-shadow relative overflow-hidden rounded-[2.5rem] border-border/80">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+        <Card className="glass-panel premium-shadow relative overflow-hidden rounded-2xl border-border/80">
           <CardContent className="relative p-8 md:p-12">
             <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
               <div>

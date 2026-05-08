@@ -92,7 +92,7 @@ export default async function ClientDashboardPage() {
       <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         <Card className="relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
-          <CardContent className="p-3 md:p-5">
+          <CardContent className="p-2.5 md:p-5">
             <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground md:text-xs md:tracking-[0.18em]">Active orders</p>
             <p className="mt-1.5 text-2xl font-bold tracking-tight text-blue-500 dark:text-blue-400 md:mt-2 md:text-3xl">{activeOrders.length}</p>
             <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">{orders.length} total</p>
@@ -101,7 +101,7 @@ export default async function ClientDashboardPage() {
 
         <Card className={`relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${proofsWaiting > 0 ? "border-violet-500/30 bg-violet-500/[0.03]" : ""}`}>
           <div className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent ${proofsWaiting > 0 ? "via-violet-500/60" : "via-violet-500/30"} to-transparent`} />
-          <CardContent className="p-3 md:p-5">
+          <CardContent className="p-2.5 md:p-5">
             <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground md:text-xs md:tracking-[0.18em]">Proofs waiting</p>
             <p className={`mt-1.5 text-2xl font-bold tracking-tight md:mt-2 md:text-3xl ${proofsWaiting > 0 ? "text-violet-500 dark:text-violet-400" : ""}`}>{proofsWaiting}</p>
             <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">
@@ -112,7 +112,7 @@ export default async function ClientDashboardPage() {
 
         <Card className="relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
-          <CardContent className="p-3 md:p-5">
+          <CardContent className="p-2.5 md:p-5">
             <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground md:text-xs md:tracking-[0.18em]">Files ready</p>
             <p className="mt-1.5 text-2xl font-bold tracking-tight text-emerald-500 dark:text-emerald-400 md:mt-2 md:text-3xl">{filesReady}</p>
             <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">
@@ -123,7 +123,7 @@ export default async function ClientDashboardPage() {
 
         <Card className="relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
-          <CardContent className="p-3 md:p-5">
+          <CardContent className="p-2.5 md:p-5">
             <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground md:text-xs md:tracking-[0.18em]">Balance</p>
             <p className="mt-1.5 text-xl font-bold tracking-tight text-amber-500 dark:text-amber-400 md:mt-2 md:text-3xl">${totalBalance.toFixed(2)}</p>
             <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">

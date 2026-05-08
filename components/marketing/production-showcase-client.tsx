@@ -174,7 +174,7 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
           {MACHINE_FEATURES.map(f => (
             <div
               key={f.title}
-              className="flex items-center gap-2 rounded-full border border-white/[0.07] bg-white/[0.03] px-4 py-2 backdrop-blur-sm"
+              className="flex items-center gap-2 rounded-full border border-white/[0.07] bg-white/[0.03] px-4 py-2"
             >
               <span className="text-sm">{f.icon}</span>
               <span className="text-[11px] font-semibold text-white/60">{f.title}</span>
@@ -199,10 +199,10 @@ function ShowcaseCard({ item }: { item: ShowcaseItem }) {
   return (
     <div className="group relative">
       {item.isFeatured && (
-        <div className="absolute inset-0 scale-105 rounded-[2.25rem] bg-gradient-to-br from-indigo-500/30 to-violet-500/20 blur-3xl opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
+        <div className="absolute inset-0 scale-105 rounded-2xl bg-gradient-to-br from-indigo-500/15 to-violet-500/10 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       )}
 
-      <div className="relative h-[320px] overflow-hidden rounded-[2rem] border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm transition-all duration-500 group-hover:-translate-y-1 group-hover:border-white/[0.18] group-hover:shadow-[0_24px_72px_rgba(0,0,0,0.65)]">
+      <div className="relative h-[320px] overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] transition-all duration-300 group-hover:-translate-y-1 group-hover:border-white/[0.18] group-hover:shadow-lg">
         {afterUrl ? (
           <>
             <Image
@@ -230,8 +230,8 @@ function ShowcaseCard({ item }: { item: ShowcaseItem }) {
             )}
             {hasBoth && (
               <>
-                <span className="absolute left-4 top-[45%] z-[3] -translate-y-1/2 rounded-full bg-black/60 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">Before</span>
-                <span className="absolute right-4 top-[45%] z-[3] -translate-y-1/2 rounded-full bg-black/60 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">After</span>
+                <span className="absolute left-4 top-[45%] z-[3] -translate-y-1/2 rounded-full bg-black/60 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">Before</span>
+                <span className="absolute right-4 top-[45%] z-[3] -translate-y-1/2 rounded-full bg-black/60 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">After</span>
               </>
             )}
           </>
@@ -248,10 +248,10 @@ function ShowcaseCard({ item }: { item: ShowcaseItem }) {
 
         <div className="absolute left-4 right-4 top-4 z-[3] flex items-start justify-between gap-2">
           {item.isFeatured
-            ? <span className="rounded-full border border-amber-400/30 bg-amber-400/[0.15] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-amber-300 backdrop-blur-sm">Featured</span>
+            ? <span className="rounded-full border border-amber-400/30 bg-amber-400/[0.15] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-amber-300">Featured</span>
             : <span />
           }
-          <span className={cn("rounded-full border px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide backdrop-blur-sm", accent.badge)}>{label}</span>
+          <span className={cn("rounded-full border px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide", accent.badge)}>{label}</span>
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 z-[3] translate-y-1 p-5 transition-transform duration-300 ease-out group-hover:translate-y-0">
@@ -262,7 +262,7 @@ function ShowcaseCard({ item }: { item: ShowcaseItem }) {
           {item.tags.length > 0 && (
             <div className="mt-2.5 flex flex-wrap gap-1.5 opacity-0 transition-opacity duration-300 delay-100 group-hover:opacity-100">
               {item.tags.slice(0, 3).map(tag => (
-                <span key={tag} className="rounded-full bg-white/[0.1] px-2 py-0.5 text-[10px] text-white/55 backdrop-blur-sm">{tag}</span>
+                <span key={tag} className="rounded-full bg-white/[0.1] px-2 py-0.5 text-[10px] text-white/55">{tag}</span>
               ))}
             </div>
           )}

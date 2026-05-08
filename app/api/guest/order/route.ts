@@ -4,11 +4,14 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
+import { ensureDraftInvoiceForOrder } from "@/lib/billing/auto-invoice";
 import {
   sendOrderCreatedEmail,
   sendNewOrderOpsEmail,
   writeNotificationLog,
 } from "@/lib/notifications/email";
+import { computeQuotePricing } from "@/lib/quote-order/pricing";
+import { getAllPricingConfig, getActiveBulkDiscountRules } from "@/lib/pricing/config";
 
 function generateOrderNumber() {
   const ts = Date.now().toString(36).toUpperCase();
@@ -99,6 +102,66 @@ export async function POST(request: Request) {
     }
   }
 
+  // Compute estimated price server-side — guest orders are never free
+  let estimatedPrice: number | undefined;
+  let isFreeDesign = false;
+  try {
+    const [config, bulkRules] = await Promise.all([
+      getAllPricingConfig(),
+      getActiveBulkDiscountRules(),
+    ]);
+    const pricing = computeQuotePricing(
+      {
+        mode: "order",
+        serviceType: data.serviceType,
+        placement: (data.placement ?? "") as string,
+        designHeightIn: data.designHeightIn ?? 0,
+        designWidthIn: data.designWidthIn ?? 0,
+        quantity: data.quantity,
+        turnaround: data.turnaround,
+        colorCount: data.colorQuantity ?? 1,
+        complexity: "MEDIUM",
+        threeDPuff: false,
+        is3dPuffJacketBack: false,
+        sizeInches: Math.max(data.designHeightIn ?? 0, data.designWidthIn ?? 0),
+        fabricType: data.fabricType ?? "",
+        designTitle: data.designTitle,
+        fileFormats: [],
+        stitchCount: undefined,
+        sourceCleanup: false,
+        smallText: false,
+        customerName: data.name,
+        email: data.email,
+        notes: data.notes ?? "",
+        specialInstructions: data.specialInstructions ?? "",
+        companyName: "",
+        nicheSlug: "",
+        trims: "",
+        threadBrand: "",
+        colorDetails: "",
+      },
+      {
+        stitchRatePer1000: parseFloat(config["stitch_rate_per_1000"] ?? "1.00"),
+        stitchPricingEnabled: config["stitch_pricing_enabled"] === "true",
+        bulkRules: bulkRules.map((r) => ({
+          minQty: r.minQty,
+          discountPercent:
+            typeof r.discountPercent === "number"
+              ? r.discountPercent
+              : (r.discountPercent as { toNumber(): number }).toNumber(),
+        })),
+        freeFirstDesign: false, // guests never get free first design
+        isFirstOrder: false,
+        puffJacketBackBasePrice: parseFloat(config["puff_jacket_back_base_price"] ?? "35.00"),
+      },
+    );
+    estimatedPrice = pricing.total;
+    isFreeDesign = pricing.isFreeDesign;
+  } catch {
+    // Non-fatal — order still created without estimate
+    estimatedPrice = undefined;
+  }
+
   const order = await prisma.workflowOrder.create({
     data: {
       orderNumber: generateOrderNumber(),
@@ -115,8 +178,17 @@ export async function POST(request: Request) {
       fabricType: data.fabricType || null,
       colorQuantity: data.colorQuantity ?? null,
       specialInstructions: data.specialInstructions || null,
+      estimatedPrice,
+      isFreeDesign,
     },
   });
+
+  // Auto-create DRAFT invoice (non-fatal)
+  if (!isFreeDesign && (estimatedPrice ?? 0) > 0) {
+    void ensureDraftInvoiceForOrder(order.id, {
+      currency: "USD",
+    }).catch(() => null);
+  }
 
   // Save reference files
   if (data.referenceFiles.length > 0) {

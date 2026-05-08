@@ -30,7 +30,30 @@ export async function GET(request: Request) {
 
     const threads = await listThreadsForActor(actor, parsed.data);
 
-    return Response.json({ threads });
+    // Find latest modification time for conditional fetch
+    let latestMod = 0;
+    for (const t of threads) {
+      const ts = t.lastMessageAt ? new Date(t.lastMessageAt).getTime() : new Date(t.updatedAt).getTime();
+      if (ts > latestMod) latestMod = ts;
+    }
+    const lastModified = latestMod > 0 ? new Date(latestMod).toUTCString() : null;
+
+    // Check If-Modified-Since
+    const ifModSince = request.headers.get("If-Modified-Since");
+    if (ifModSince && lastModified) {
+      const clientTime = new Date(ifModSince).getTime();
+      if (clientTime >= latestMod) {
+        return new Response(null, {
+          status: 304,
+          headers: lastModified ? { "Last-Modified": lastModified } : {},
+        });
+      }
+    }
+
+    return Response.json(
+      { threads },
+      lastModified ? { headers: { "Last-Modified": lastModified } } : {},
+    );
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return Response.json({ error: "Unauthorized" }, { status: 401 });

@@ -238,6 +238,7 @@ export default async function AdminInvoiceDetailPage({ params }: AdminInvoiceDet
                 receivedAt: p.receivedAt,
                 note: p.note ?? null,
               }))}
+              clientEmail={invoice.clientEmail ?? invoice.clientName ?? ""}
               canRecord={userRole === "SUPER_ADMIN" || userRole === "MANAGER"}
             />
           </CardContent>

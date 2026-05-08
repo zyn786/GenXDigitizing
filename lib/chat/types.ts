@@ -12,7 +12,6 @@ export const ALLOWED_CHAT_FILE_EXTENSIONS = [
   "psd",
   "ai",
   "eps",
-  "svg",
   "dst",
   "emb",
   "exp",

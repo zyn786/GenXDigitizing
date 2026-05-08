@@ -1,6 +1,41 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
+/* ── Role-based route protection ────────────────────────────── */
+
+const CHAT_SUPPORT_ALLOWED = new Set([
+  "/admin/support",
+  "/admin/notifications",
+]);
+
+const MARKETING_ALLOWED = new Set([
+  "/admin/marketing",
+  "/admin/marketing/campaigns",
+  "/admin/portfolio",
+  "/admin/notifications",
+]);
+
+function isDesignerAllowed(pathname: string): boolean {
+  if (pathname.startsWith("/admin/designer")) return true;
+  if (pathname.startsWith("/admin/notifications")) return true;
+  if (pathname.startsWith("/admin/support")) return true;
+  return false;
+}
+
+function isChatSupportAllowed(pathname: string): boolean {
+  for (const allowed of CHAT_SUPPORT_ALLOWED) {
+    if (pathname.startsWith(allowed)) return true;
+  }
+  return false;
+}
+
+function isMarketingAllowed(pathname: string): boolean {
+  for (const allowed of MARKETING_ALLOWED) {
+    if (pathname.startsWith(allowed)) return true;
+  }
+  return false;
+}
+
 export default auth((req) => {
   const { nextUrl, auth: session } = req;
   const pathname = nextUrl.pathname;
@@ -9,20 +44,37 @@ export default auth((req) => {
   const isClientRoute = pathname.startsWith("/client");
   const isAdminRoute = pathname.startsWith("/admin");
 
-  if (isClientRoute && !session) {
+  // Unauthenticated — redirect to login
+  if ((isClientRoute || isAdminRoute) && !session) {
     const url = new URL("/login", req.url);
     url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }
 
-  if (isAdminRoute && !session) {
-    const url = new URL("/login", req.url);
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
-  }
-
+  // Client trying to access admin
   if (isAdminRoute && role === "CLIENT") {
     return NextResponse.redirect(new URL("/client/dashboard", req.url));
+  }
+
+  // DESIGNER restrictions
+  if (role === "DESIGNER" && isAdminRoute) {
+    if (!isDesignerAllowed(pathname)) {
+      return NextResponse.redirect(new URL("/admin/designer", req.url));
+    }
+  }
+
+  // CHAT_SUPPORT restrictions
+  if (role === "CHAT_SUPPORT" && isAdminRoute) {
+    if (!isChatSupportAllowed(pathname)) {
+      return NextResponse.redirect(new URL("/admin/support", req.url));
+    }
+  }
+
+  // MARKETING restrictions
+  if (role === "MARKETING" && isAdminRoute) {
+    if (!isMarketingAllowed(pathname)) {
+      return NextResponse.redirect(new URL("/admin/marketing", req.url));
+    }
   }
 
   // Inject pathname as request header so server components can read it
@@ -32,5 +84,13 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/client/:path*", "/admin/:path*"],
+  matcher: [
+    "/client/:path*",
+    "/admin/:path*",
+    "/portal/:path*",
+    "/designer/:path*",
+    "/manager/:path*",
+    "/marketing/:path*",
+    "/chat-support/:path*",
+  ],
 };

@@ -70,7 +70,7 @@ export function PricingPlansGrid() {
             transition={{ duration: 0.5, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
           >
             <Card3D
-              className="relative h-full rounded-[2rem]"
+              className="relative h-full"
               intensity={plan.popular ? 10 : 7}
             >
               {plan.popular && (
@@ -80,7 +80,7 @@ export function PricingPlansGrid() {
                     whileInView={{ scale: 1, opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
-                    className="rounded-full bg-primary px-4 py-1 text-xs font-semibold text-primary-foreground shadow-lg shadow-primary/30"
+                    className="rounded-full bg-primary px-4 py-1 text-xs font-semibold text-primary-foreground shadow-md"
                   >
                     Most popular
                   </motion.span>
@@ -88,15 +88,15 @@ export function PricingPlansGrid() {
               )}
 
               <Card
-                className={`relative h-full rounded-[2rem] border ${
+                className={`relative h-full rounded-2xl border ${
                   plan.popular
-                    ? "border-primary/30 bg-primary/5 shadow-[0_0_0_1px_hsl(var(--primary)/0.2),0_20px_60px_rgba(99,102,241,0.18)]"
+                    ? "border-primary/30 bg-primary/5 shadow-md"
                     : "glass-panel premium-shadow border-border/80"
                 }`}
               >
                 {/* Top accent line */}
                 {plan.popular && (
-                  <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-[2rem] bg-gradient-to-r from-transparent via-primary to-transparent" />
+                  <div className="absolute inset-x-0 top-0 h-0.5 rounded-t-2xl bg-gradient-to-r from-transparent via-primary to-transparent" />
                 )}
 
                 <CardHeader className="pb-2 pt-8">
@@ -122,8 +122,8 @@ export function PricingPlansGrid() {
                       href={plan.href}
                       className={`inline-flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold transition-all ${
                         plan.popular
-                          ? "bg-primary text-primary-foreground hover:opacity-90 shadow-[0_8px_24px_rgba(99,102,241,0.3)]"
-                          : "border border-border/80 bg-card/70 hover:bg-card"
+                          ? "bg-primary text-primary-foreground hover:opacity-90 shadow-sm"
+                          : "border border-border/80 bg-card hover:bg-secondary/60"
                       }`}
                     >
                       {plan.cta}

@@ -122,8 +122,14 @@ export async function PATCH(request: Request, { params }: RouteProps) {
       );
       const balanceDue = Math.max(0, totalAmount - paidAmount);
 
-      // 3. Derive status.
-      const nextStatus = balanceDue <= 0 ? "PAID" : invoice.status;
+      // 3. Derive status using full status logic (handles PAID, PARTIALLY_PAID, OVERDUE, DRAFT, SENT)
+      const { deriveInvoiceStatus } = await import("@/lib/billing/status");
+      const nextStatus = deriveInvoiceStatus({
+        status: invoice.status,
+        dueDate: (dueDate ? new Date(dueDate) : invoice.dueDate).toISOString(),
+        total: totalAmount,
+        payments: invoice.payments.map((p) => ({ amount: Number(p.amount) })),
+      });
 
       // 4. Update invoice.
       const data: Record<string, unknown> = {

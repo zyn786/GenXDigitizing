@@ -163,13 +163,13 @@ export default async function AdminDashboardPage() {
 function StatCard({ href, icon, label, value, sub }: { href: string; icon: React.ReactNode; label: string; value: string; sub: string }) {
   return (
     <Link href={href as Route} className="group block">
-      <Card className="relative h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5">
+      <Card className="relative h-full overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
         {/* Subtle top gradient line */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         <CardContent className="flex items-start justify-between gap-2 p-3 md:gap-3 md:p-5">
           <div>
             <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground md:text-xs md:tracking-[0.18em]">{label}</p>
-            <p className="mt-1.5 text-2xl font-bold tracking-tight gradient-text md:mt-2 md:text-3xl">{value}</p>
+            <p className="mt-1.5 truncate text-xl font-bold tracking-tight gradient-text md:mt-2 md:text-3xl">{value}</p>
             <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">{sub}</p>
           </div>
           <div className="shrink-0 rounded-xl bg-primary/10 p-2 text-primary ring-1 ring-primary/10 transition-all duration-300 group-hover:bg-primary/15 group-hover:ring-primary/20 md:rounded-2xl md:p-3">

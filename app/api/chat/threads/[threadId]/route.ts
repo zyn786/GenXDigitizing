@@ -17,7 +17,34 @@ export async function GET(
       return Response.json({ error: "Thread not found." }, { status: 404 });
     }
 
-    return Response.json({ thread });
+    // Compute latest modification time across thread + all messages
+    let latestMod = new Date(thread.thread.updatedAt).getTime();
+    if (thread.thread.lastMessageAt) {
+      const lm = new Date(thread.thread.lastMessageAt).getTime();
+      if (lm > latestMod) latestMod = lm;
+    }
+    for (const m of thread.messages) {
+      const mt = new Date(m.updatedAt).getTime();
+      if (mt > latestMod) latestMod = mt;
+    }
+    const lastModified = new Date(latestMod).toUTCString();
+
+    // Check If-Modified-Since
+    const ifModSince = _request.headers.get("If-Modified-Since");
+    if (ifModSince) {
+      const clientTime = new Date(ifModSince).getTime();
+      if (clientTime >= latestMod) {
+        return new Response(null, {
+          status: 304,
+          headers: { "Last-Modified": lastModified },
+        });
+      }
+    }
+
+    return Response.json(
+      { thread },
+      { headers: { "Last-Modified": lastModified } },
+    );
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return Response.json({ error: "Unauthorized" }, { status: 401 });

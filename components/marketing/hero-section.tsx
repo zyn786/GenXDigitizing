@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { usePreloader } from "@/components/layout/site-preloader";
 import { Button } from "@/components/ui/button";
 
 const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
@@ -23,13 +22,12 @@ const tickerItems = [
 ];
 
 export function HeroSection() {
-  const { isRevealing } = usePreloader();
+  const prefersReduced = useReducedMotion();
 
   return (
     <section className="relative min-h-screen overflow-hidden -mt-20">
       <video
         autoPlay muted loop playsInline preload="metadata"
-        poster="/brand/hero-poster.jpg"
         className="absolute inset-0 h-full w-full object-cover"
       >
         <source media="(min-width: 768px)" src="/video/hero-bg-desktop.mp4" type="video/mp4" />
@@ -38,20 +36,20 @@ export function HeroSection() {
 
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-[#07111f]/78" />
-      {/* Radial color glows */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(99,102,241,0.24),transparent_42%),radial-gradient(circle_at_78%_18%,rgba(139,92,246,0.20),transparent_38%),radial-gradient(circle_at_50%_88%,rgba(59,130,246,0.13),transparent_40%)]" />
+      {/* Subtle top glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.10),transparent_50%)]" />
       {/* Soft vignette */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(7,17,31,0.55)_100%)]" />
 
       {/* ── Centered content ─────────────────────────────────── */}
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 pb-24 pt-28 text-center md:px-8 md:pb-28 md:pt-40">
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 pb-20 pt-24 text-center md:px-8 md:pb-28 md:pt-40">
 
         {/* Eyebrow pill */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={isRevealing ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease }}
-          className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/15 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.25em] text-indigo-300 backdrop-blur-xl md:mb-7 md:px-4 md:py-2 md:text-[10px]"
+          className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/15 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.25em] text-indigo-300 md:mb-7 md:px-4 md:py-2 md:text-[10px]"
         >
           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.9)]" />
           <Sparkles className="h-3 w-3 opacity-70" />
@@ -61,9 +59,9 @@ export function HeroSection() {
         {/* Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 24 }}
-          animate={isRevealing ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+          animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.1, ease }}
-          className="max-w-4xl text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.75rem] lg:leading-[1.08]"
+          className="max-w-sm sm:max-w-2xl md:max-w-4xl text-2xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[3.75rem] lg:leading-[1.08]"
         >
           Embroidery Digitizing, Vector Art &amp; Custom Patches —{" "}
           <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-purple-300 bg-clip-text text-transparent">
@@ -74,7 +72,7 @@ export function HeroSection() {
         {/* Subtitle */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
-          animate={isRevealing ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.2, ease }}
           className="mt-4 max-w-[38rem] text-sm leading-7 text-white/55 md:mt-6 md:text-base"
         >
@@ -85,7 +83,7 @@ export function HeroSection() {
         {/* CTA buttons + trust line */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={isRevealing ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.3, ease }}
           className="mt-6 flex flex-col items-center gap-3 md:mt-8"
         >
@@ -121,12 +119,12 @@ export function HeroSection() {
         {/* Stats — glass card */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
-          animate={isRevealing ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+          animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.42, ease }}
-          className="mt-8 flex overflow-hidden rounded-2xl border border-white/[0.1] bg-white/[0.05] backdrop-blur-sm divide-x divide-white/[0.08]"
+          className="mt-6 flex overflow-hidden rounded-2xl border border-white/[0.12] bg-white/[0.06] divide-x divide-white/[0.08]"
         >
           {stats.map(({ value, label }) => (
-            <div key={label} className="px-4 py-3 text-center sm:px-7 sm:py-4">
+            <div key={label} className="px-3 py-2.5 text-center sm:px-7 sm:py-4">
               <div className="text-base font-bold tracking-tight sm:text-xl bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
                 {value}
               </div>

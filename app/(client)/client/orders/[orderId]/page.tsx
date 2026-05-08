@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ConversationLauncherButton } from "@/components/support/conversation-launcher-button";
 import { CancelOrderButton } from "@/components/client/cancel-order-button";
 import { ClientEditOrderModal } from "@/components/client/client-edit-order-modal";
-import { ClientDownloadButton } from "@/components/client/client-download-button";
+import { FileShareActions } from "@/components/client/file-share-actions";
 import { ClientProofReview } from "@/components/workflow/client-proof-review";
 import { ClientProofPreview } from "@/components/workflow/client-proof-preview";
 import { PaymentGatePanel } from "@/components/workflow/payment-gate-panel";
@@ -244,49 +244,65 @@ export default async function ClientOrderDetailPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {order.orderFiles.length === 0 ? (
-                <p className="py-4 text-center text-sm text-muted-foreground">
-                  No files yet. They will appear here once production is complete.
-                </p>
-              ) : !filesUnlocked ? (
-                <div className="flex items-center gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
-                  <Lock className="h-4 w-4 shrink-0 text-amber-500" />
-                  <p className="text-sm text-muted-foreground">
-                    Files are locked. {proofStatus !== "CLIENT_APPROVED"
-                      ? "Approve your proof to unlock payment and then download."
-                      : "Submit payment proof to unlock your files."}
-                    {invoice && proofStatus === "CLIENT_APPROVED" && (
-                      <>
-                        {" "}
-                        <Link
-                          href={`/client/invoices/${invoice.id}` as Route}
-                          className="underline underline-offset-2 hover:text-foreground"
-                        >
-                          View invoice
-                        </Link>
-                      </>
-                    )}
-                  </p>
-                </div>
-              ) : (
-                <div className="grid gap-2">
-                  {order.orderFiles.map((file) => (
-                    <div
-                      key={file.id}
-                      className="flex items-center justify-between rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 text-sm"
-                    >
-                      <div>
-                        <p className="font-medium">{file.fileName}</p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          {formatBytes(file.sizeBytes)}
-                          {file.uploadedByName ? ` · By ${file.uploadedByName}` : ""}
-                        </p>
-                      </div>
-                      <ClientDownloadButton fileId={file.id} fileName={file.fileName} />
+              {(() => {
+                const finalFiles = order.orderFiles.filter(
+                  (f) => f.fileType === "FINAL_FILE"
+                );
+                if (finalFiles.length === 0) {
+                  return (
+                    <p className="py-4 text-center text-sm text-muted-foreground">
+                      Final production files will appear here after proof approval and payment confirmation.
+                    </p>
+                  );
+                }
+                if (!filesUnlocked) {
+                  return (
+                    <div className="flex items-center gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
+                      <Lock className="h-4 w-4 shrink-0 text-amber-500" />
+                      <p className="text-sm text-muted-foreground">
+                        Final DST, PES, and machine files will be available after proof approval and payment confirmation.
+                        {proofStatus !== "CLIENT_APPROVED"
+                          ? " Approve your proof to unlock payment and then download."
+                          : " Submit payment proof to unlock your files."}
+                        {invoice && proofStatus === "CLIENT_APPROVED" && (
+                          <>
+                            {" "}
+                            <Link
+                              href={`/client/invoices/${invoice.id}` as Route}
+                              className="underline underline-offset-2 hover:text-foreground"
+                            >
+                              View invoice
+                            </Link>
+                          </>
+                        )}
+                      </p>
                     </div>
-                  ))}
-                </div>
-              )}
+                  );
+                }
+                return (
+                  <div className="grid gap-2">
+                    {finalFiles.map((file) => (
+                      <div
+                        key={file.id}
+                        className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-muted/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div>
+                          <p className="font-medium">{file.fileName}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            {formatBytes(file.sizeBytes)}
+                            {file.uploadedByName ? ` · By ${file.uploadedByName}` : ""}
+                          </p>
+                        </div>
+                        <FileShareActions
+                          fileId={file.id}
+                          fileName={file.fileName}
+                          mimeType={file.mimeType}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </CardContent>
           </Card>
 

@@ -79,14 +79,14 @@ const MACHINE_FEATURES = [
 export function MediaShowcaseSection() {
   return (
     <section className="relative overflow-hidden py-16 md:py-24">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.08),transparent_50%),radial-gradient(ellipse_at_bottom,rgba(139,92,246,0.06),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.06),transparent_50%),radial-gradient(ellipse_at_bottom,rgba(139,92,246,0.04),transparent_50%)]" />
 
       <div className="relative px-4 md:px-8">
         <div className="mx-auto max-w-7xl">
 
           {/* Header */}
           <div className="mb-12 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/60 backdrop-blur">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
               <Play className="h-3 w-3" />
               Real work, real machines
             </div>
@@ -103,10 +103,10 @@ export function MediaShowcaseSection() {
             {SHOWCASE_ITEMS.map((item, i) => (
               <div
                 key={item.id}
-                className={`group relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br ${item.accent} backdrop-blur transition hover:border-white/20 hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)] ${i === 0 ? "sm:col-span-2 lg:col-span-1" : ""}`}
+                className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${item.accent} transition hover:border-white/20 hover:shadow-lg ${i === 0 ? "sm:col-span-2 lg:col-span-1" : ""}`}
               >
                 {/* Image */}
-                <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem]">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
                   <Image
                     src={item.src}
                     alt={item.label}
@@ -133,7 +133,7 @@ export function MediaShowcaseSection() {
             {MACHINE_FEATURES.map((f) => (
               <div
                 key={f.title}
-                className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5 backdrop-blur-xl transition hover:bg-white/[0.07]"
+                className="rounded-xl border border-white/10 bg-white/[0.04] p-5 transition hover:bg-white/[0.07]"
               >
                 <div className="mb-3 text-3xl">{f.icon}</div>
                 <div className="font-semibold text-white">{f.title}</div>
@@ -146,7 +146,7 @@ export function MediaShowcaseSection() {
           <div className="mt-12 text-center">
             <Link
               href="/portfolio"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-7 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/[0.12] hover:border-white/25"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-white/[0.12] hover:border-white/25"
             >
               View Full Portfolio
               <ArrowRight className="h-4 w-4" />

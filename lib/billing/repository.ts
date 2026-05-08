@@ -162,6 +162,7 @@ export async function getClientInvoices(clientUserId: string) {
       order: {
         clientUserId,
       },
+      status: { not: "DRAFT" }, // hide draft invoices from client until sent
     },
     include: invoiceListInclude,
     orderBy: { createdAt: "desc" },

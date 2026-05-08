@@ -33,6 +33,7 @@ import {
 } from "@/lib/quote-order/catalog";
 import { quoteOrderSchema, type QuoteOrderInput } from "@/schemas/quote-order";
 import { ReferenceFileUploader, type RefFile } from "@/components/shared/reference-file-uploader";
+import { OrderPriceEstimate } from "@/components/quote-order/order-price-estimate";
 import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
@@ -355,7 +356,7 @@ export function QuoteOrderBuilder({ mode, flowContext, user, isFirstOrder }: Pro
     return (
       <main className="relative flex min-h-screen items-center justify-center bg-background px-4">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.12),transparent_40%),radial-gradient(circle_at_bottom_right,hsl(var(--accent)/0.10),transparent_35%)]" />
-        <section className="relative z-10 w-full max-w-lg rounded-[2rem] border border-border/60 bg-card/80 p-8 text-center shadow-2xl backdrop-blur-2xl">
+        <section className="relative z-10 w-full max-w-lg rounded-2xl border border-border/60 bg-card p-8 text-center shadow-lg">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10">
             <CheckCircle2 className="h-8 w-8 text-emerald-500" />
           </div>
@@ -689,6 +690,18 @@ export function QuoteOrderBuilder({ mode, flowContext, user, isFirstOrder }: Pro
                   </div>
                 )}
 
+                {/* Pricing estimate */}
+                {values.serviceType && (
+                  <div className="mt-5">
+                    <OrderPriceEstimate
+                      values={values}
+                      eligibleForFree={eligibleForFree}
+                      isAuthenticated={ctx === "client"}
+                      compact
+                    />
+                  </div>
+                )}
+
                 {/* ── Advanced Options ── */}
                 <div className="mt-6 border-t border-border/60 pt-5">
                   <button
@@ -805,11 +818,15 @@ export function QuoteOrderBuilder({ mode, flowContext, user, isFirstOrder }: Pro
                 <h2 className="mb-1 text-xl font-semibold">Delivery Speed</h2>
                 <p className="mb-5 text-sm text-muted-foreground">Choose how fast you need your design delivered.</p>
 
-                {/* First-order-free banner — only for eligible clients */}
-                {eligibleForFree && (
-                  <div className="mb-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-600 dark:text-amber-300">
-                    <Sparkles className="mr-1 inline h-3.5 w-3.5" />
-                    Your first order is free — choose any delivery speed.
+                {/* Pricing estimate */}
+                {values.serviceType && (
+                  <div className="mb-4">
+                    <OrderPriceEstimate
+                      values={values}
+                      eligibleForFree={eligibleForFree}
+                      isAuthenticated={ctx === "client"}
+                      compact
+                    />
                   </div>
                 )}
 
@@ -938,16 +955,20 @@ export function QuoteOrderBuilder({ mode, flowContext, user, isFirstOrder }: Pro
                     {ctx === "client" && (
                       <SummaryRow label="Account" value={user?.email ?? "—"} />
                     )}
-                    <SummaryRow
-                      label="Pricing"
-                      value={
-                        eligibleForFree
-                          ? <span className="font-semibold text-emerald-600 dark:text-emerald-400">Free — first order</span>
-                          : <span className="font-medium text-foreground">Standard pricing</span>
-                      }
-                    />
+                    <SummaryRow label="Pricing" value="See estimate below" />
                   </div>
                 </div>
+
+                {/* Full pricing estimate */}
+                {values.serviceType && (
+                  <div className="mt-4">
+                    <OrderPriceEstimate
+                      values={values}
+                      eligibleForFree={eligibleForFree}
+                      isAuthenticated={ctx === "client"}
+                    />
+                  </div>
+                )}
 
                 {/* Special instructions */}
                 <div className="mt-4 flex flex-col gap-1.5">

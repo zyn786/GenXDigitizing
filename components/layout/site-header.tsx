@@ -57,10 +57,10 @@ export function SiteHeader() {
         <div className="page-shell">
           <div
             className={cn(
-              "rounded-[2rem] px-4 py-3 md:px-6 transition-all duration-300",
+              "rounded-2xl px-4 py-3 md:px-6 transition-all duration-300",
               transparent
-                ? "border border-white/10 bg-[#07111f]/30 backdrop-blur"
-                : "glass-panel premium-shadow"
+                ? "border border-white/10 bg-[#07111f]/30"
+                : "glass-panel"
             )}
           >
             <div className="flex items-center justify-between gap-4">

@@ -147,35 +147,28 @@ function SitePreloaderInner({ onReveal }: { onReveal: () => void }) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_65%,rgba(139,92,246,0.14),transparent_45%)]" />
       </div>
 
-      {/* Breathing ambient blob */}
-      <motion.div
-        className="pointer-events-none absolute h-80 w-80 rounded-full bg-indigo-500/[0.06] blur-3xl"
-        animate={{ scale: [1, 1.15, 1] }}
-        transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
-      />
-
       {/* ── Content ─────────────────────────────────────────────────────── */}
       <div className="relative z-10 flex flex-col items-center gap-7">
 
-        {/* 3-D logo zone */}
-        <div className="relative" style={{ perspective: "900px" }}>
+        {/* 2D logo zone */}
+        <div className="relative">
 
           {/* Glow halo behind logo */}
           <motion.div
-            className="absolute inset-0 -m-12 rounded-full bg-gradient-to-br from-indigo-500/25 to-violet-500/20 blur-2xl"
+            className="absolute inset-0 -m-12 rounded-full bg-gradient-to-br from-indigo-500/15 to-violet-500/10 blur-2xl"
             initial={{ opacity: 0, scale: 0.3 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.1, delay: 0.1, ease: EASE }}
           />
 
-          {/* Logo — 3-D entrance */}
+          {/* Logo — simple scale+fade entrance */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.6, rotateY: -28, rotateX: 10 }}
-            animate={{ opacity: 1, scale: 1, rotateY: 0, rotateX: 0 }}
-            transition={{ duration: 1.0, ease: EASE }}
-            style={{ transformStyle: "preserve-3d", width: 88, height: 88 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, ease: EASE }}
+            style={{ width: 88, height: 88 }}
           >
-            <div className="relative h-[88px] w-[88px] overflow-hidden">
+            <div className="relative h-[88px] w-[88px]">
               <Image
                 src="/brand/genx-logo-white.png"
                 alt="GenX Digitizing"
@@ -184,19 +177,6 @@ function SitePreloaderInner({ onReveal }: { onReveal: () => void }) {
                 priority
                 sizes="88px"
               />
-
-              {/* Shine sweep */}
-              <div
-                className="pointer-events-none absolute inset-0 overflow-hidden"
-                aria-hidden
-              >
-                <motion.div
-                  className="absolute inset-y-0 w-2/5 -skew-x-12 bg-gradient-to-r from-transparent via-white/55 to-transparent"
-                  initial={{ x: "-150%" }}
-                  animate={{ x: "220%" }}
-                  transition={{ duration: 0.55, delay: 1.15, ease: "easeInOut" }}
-                />
-              </div>
             </div>
           </motion.div>
 

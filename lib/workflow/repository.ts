@@ -86,7 +86,15 @@ const DB_INCLUDE = {
     select: { id: true, name: true },
   },
   orderFiles: {
-    include: { uploadedBy: { select: { name: true } } },
+    select: {
+      id: true,
+      fileName: true,
+      mimeType: true,
+      sizeBytes: true,
+      fileType: true,
+      createdAt: true,
+      uploadedBy: { select: { name: true } },
+    },
     orderBy: { createdAt: "asc" as const },
   },
   invoice: {
@@ -176,6 +184,7 @@ function normalizeDbOrder(o: any): WorkflowOrder {
       fileName: string;
       mimeType: string;
       sizeBytes: number;
+      fileType: string | null;
       uploadedBy: { name: string | null } | null;
       createdAt: Date;
     }>).map((f) => ({
@@ -183,6 +192,7 @@ function normalizeDbOrder(o: any): WorkflowOrder {
       fileName: f.fileName,
       mimeType: f.mimeType,
       sizeBytes: f.sizeBytes,
+      fileType: f.fileType ?? null,
       uploadedByName: f.uploadedBy?.name ?? null,
       createdAt: f.createdAt.toISOString(),
     })),

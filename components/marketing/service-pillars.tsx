@@ -95,7 +95,7 @@ function ServiceCard({ service }: { service: ServiceDef }) {
   return (
     <motion.article
       variants={cardVariant}
-      className="group relative min-h-[320px] overflow-hidden rounded-[1.8rem] border border-white/[0.08] bg-[#0d1425] shadow-[0_10px_36px_rgba(0,0,0,0.42)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_26px_70px_rgba(0,0,0,0.62)] sm:min-h-[380px] lg:min-h-[430px]"
+      className="group relative min-h-[320px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0d1425] shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:min-h-[380px] lg:min-h-[430px]"
     >
       <div
         className={[
@@ -106,9 +106,7 @@ function ServiceCard({ service }: { service: ServiceDef }) {
         ].join(" ")}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-slate-800/90 to-slate-950/90" />
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="shimmer-sweep absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
-        </div>
+        <div className="absolute inset-0 overflow-hidden" />
       </div>
 
       <div
@@ -141,7 +139,7 @@ function ServiceCard({ service }: { service: ServiceDef }) {
           <div className={`h-0.5 w-12 rounded-full ${service.accentColor}`} />
 
           <div
-            className={`flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] ${service.iconBg} backdrop-blur`}
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] ${service.iconBg}`}
           >
             <Icon className={`h-6 w-6 ${service.iconColor}`} />
           </div>
@@ -162,17 +160,17 @@ function ServiceCard({ service }: { service: ServiceDef }) {
             {service.tags.map((tag) => (
               <span
                 key={tag}
-                className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] backdrop-blur transition-colors duration-300 ${service.tagStyle}`}
+                className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors duration-300 ${service.tagStyle}`}
               >
                 {tag}
               </span>
             ))}
           </div>
 
-          <div className="mt-6 translate-y-4 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-3 group-hover:opacity-100">
+          <div className="mt-6 sm:translate-y-4 sm:opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:group-hover:translate-y-3 sm:group-hover:opacity-100">
             <Link
               href={service.href}
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/45 px-4 py-2.5 text-sm font-semibold text-white shadow-lg backdrop-blur-md transition-all duration-300 hover:gap-3 hover:bg-black/65"
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/45 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:gap-3 hover:bg-black/65"
             >
               View service details
               <ArrowRight className="h-4 w-4" />
@@ -181,7 +179,7 @@ function ServiceCard({ service }: { service: ServiceDef }) {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-0 z-20 rounded-[1.8rem] border border-white/0 transition-colors duration-500 group-hover:border-white/[0.16]" />
+      <div className="pointer-events-none absolute inset-0 z-20 rounded-2xl border border-white/0 transition-colors duration-500 group-hover:border-white/[0.16]" />
     </motion.article>
   );
 }
@@ -189,17 +187,6 @@ function ServiceCard({ service }: { service: ServiceDef }) {
 export function ServicePillars() {
   return (
     <section className="px-4 py-10 md:px-8 md:py-20 lg:py-24">
-      <style>{`
-        @keyframes shimmer-sweep {
-          0% { transform: translateX(-120%); }
-          100% { transform: translateX(220%); }
-        }
-
-        .shimmer-sweep {
-          animation: shimmer-sweep 1.6s ease-in-out infinite;
-        }
-      `}</style>
-
       <div className="page-shell">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

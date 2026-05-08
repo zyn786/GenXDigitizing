@@ -6,6 +6,7 @@ import "@/app/globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { siteConfig } from "@/lib/site";
+import { getSiteUrl } from "@/lib/site-url";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -13,8 +14,10 @@ const inter = Inter({
   display: "swap",
 });
 
+const baseUrl = (() => { try { return getSiteUrl(); } catch { return "http://localhost:3000"; } })();
+
 export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
+  metadataBase: new URL(baseUrl),
   title: {
     default: siteConfig.name,
     template: `%s · ${siteConfig.name}`,
@@ -28,9 +31,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: siteConfig.name,
     description: siteConfig.description,
-    url: siteConfig.url,
+    url: baseUrl,
     siteName: siteConfig.name,
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.name,
+    description: siteConfig.description,
   },
 };
 

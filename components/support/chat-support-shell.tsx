@@ -44,61 +44,160 @@ export function ChatSupportShell({
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingDraft, setEditingDraft] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
+  const [pageVisible, setPageVisible] = useState(true);
 
   // Keep draftRef current so interval callbacks always read latest draft value
   // eslint-disable-next-line react-hooks/refs
   draftRef.current = draft;
+
+  // Dedup refs — prevent overlapping requests
+  const fetchingThreadsRef = useRef(false);
+  const fetchingDetailRef = useRef(false);
+  const fetchingPresenceRef = useRef(false);
+
+  // Backoff ref — exponential backoff on consecutive failures
+  const failCountRef = useRef(0);
+  const pollIntervalRef = useRef(3000);
+
+  function resetBackoff() {
+    failCountRef.current = 0;
+    pollIntervalRef.current = 3000;
+  }
+
+  function bumpBackoff() {
+    failCountRef.current += 1;
+    const delays = [3000, 5000, 10000, 20000, 30000];
+    pollIntervalRef.current = delays[Math.min(failCountRef.current, delays.length - 1)];
+  }
+
+  // Conditional fetch refs — store last known timestamps for 304
+  const lastThreadsModifiedRef = useRef<string | null>(null);
+  const lastDetailModifiedRef = useRef<string | null>(null);
 
   const selectedThreadId = useMemo(
     () => selectedThread?.thread.id ?? null,
     [selectedThread]
   );
 
+  // On mobile, show thread view when a thread is selected; otherwise show list
+  const hasSelectedThread = selectedThread !== null;
+
+  // Pause polling when tab is hidden
+  useEffect(() => {
+    const onVisibilityChange = () => setPageVisible(!document.hidden);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, []);
+
+  const handleBackToList = useCallback(() => {
+    setSelectedThread(null);
+    setPresences([]);
+    setTypingNames([]);
+    setDraft("");
+    setPendingAttachments([]);
+    setEditingMessageId(null);
+    lastDetailModifiedRef.current = null;
+  }, []);
+
+  /* ── Fetch helpers with dedup + 304 ── */
+
   const fetchThreads = useCallback(async () => {
-    const response = await fetch("/api/chat/threads", {
-      method: "GET",
-      cache: "no-store",
-    });
+    if (fetchingThreadsRef.current) return;
+    fetchingThreadsRef.current = true;
 
-    if (!response.ok) return;
+    try {
+      const headers: Record<string, string> = {};
+      if (lastThreadsModifiedRef.current) {
+        headers["If-Modified-Since"] = lastThreadsModifiedRef.current;
+      }
 
-    const data = (await response.json()) as {
-      threads: ChatThreadListItem[];
-    };
+      const response = await fetch("/api/chat/threads", {
+        method: "GET",
+        cache: "no-store",
+        headers,
+      });
 
-    setThreads(data.threads);
+      if (response.status === 304) { resetBackoff(); return; }
+      if (!response.ok) { bumpBackoff(); return; }
+
+      resetBackoff();
+
+      // Store last-modified for next conditional request
+      const lm = response.headers.get("Last-Modified");
+      if (lm) lastThreadsModifiedRef.current = lm;
+
+      const data = (await response.json()) as {
+        threads: ChatThreadListItem[];
+      };
+
+      setThreads(data.threads);
+    } catch {
+      bumpBackoff();
+    } finally {
+      fetchingThreadsRef.current = false;
+    }
   }, []);
 
   const fetchThreadDetail = useCallback(async (threadId: string) => {
-    const response = await fetch(`/api/chat/threads/${threadId}`, {
-      method: "GET",
-      cache: "no-store",
-    });
+    if (fetchingDetailRef.current) return;
+    fetchingDetailRef.current = true;
 
-    if (!response.ok) return;
+    try {
+      const headers: Record<string, string> = {};
+      if (lastDetailModifiedRef.current) {
+        headers["If-Modified-Since"] = lastDetailModifiedRef.current;
+      }
 
-    const data = (await response.json()) as {
-      thread: ChatThreadDetail;
-    };
+      const response = await fetch(`/api/chat/threads/${threadId}`, {
+        method: "GET",
+        cache: "no-store",
+        headers,
+      });
 
-    setSelectedThread(data.thread);
+      if (response.status === 304) { resetBackoff(); return; }
+      if (!response.ok) { bumpBackoff(); return; }
+
+      resetBackoff();
+
+      const lm = response.headers.get("Last-Modified");
+      if (lm) lastDetailModifiedRef.current = lm;
+
+      const data = (await response.json()) as {
+        thread: ChatThreadDetail;
+      };
+
+      setSelectedThread(data.thread);
+    } catch {
+      bumpBackoff();
+    } finally {
+      fetchingDetailRef.current = false;
+    }
   }, []);
 
   const fetchPresence = useCallback(async (threadId: string) => {
-    const response = await fetch(`/api/chat/threads/${threadId}/presence`, {
-      method: "GET",
-      cache: "no-store",
-    });
+    if (fetchingPresenceRef.current) return;
+    fetchingPresenceRef.current = true;
 
-    if (!response.ok) return;
+    try {
+      const response = await fetch(`/api/chat/threads/${threadId}/presence`, {
+        method: "GET",
+        cache: "no-store",
+      });
 
-    const data = (await response.json()) as {
-      presences: ChatPresenceRecord[];
-      typingNames: string[];
-    };
+      if (!response.ok) { bumpBackoff(); return; }
 
-    setPresences(data.presences);
-    setTypingNames(data.typingNames);
+      resetBackoff();
+
+      const data = (await response.json()) as {
+        presences: ChatPresenceRecord[];
+        typingNames: string[];
+      };
+
+      setPresences(data.presences);
+      setTypingNames(data.typingNames);
+    } finally {
+      fetchingPresenceRef.current = false;
+    }
   }, []);
 
   const markRead = useCallback(async (threadId: string) => {
@@ -124,34 +223,43 @@ export function ChatSupportShell({
     []
   );
 
+  /* ── Polling intervals ── */
+
   useEffect(() => {
     void updatePresence({ status: "ONLINE", isTyping: false, threadId: null });
   }, [updatePresence]);
 
+  // Thread list poll — only when no thread is selected (detail poll covers it otherwise)
   useEffect(() => {
+    if (selectedThreadId) return;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchThreads();
+
     const timer = window.setInterval(() => {
       void fetchThreads();
-    }, 10000);
+    }, pageVisible ? 5000 : 30000);
 
     return () => window.clearInterval(timer);
-  }, [fetchThreads]);
+  }, [fetchThreads, selectedThreadId, pageVisible]);
 
+  // Active thread poll — detail + presence + threads combined
   useEffect(() => {
     if (!selectedThreadId) return;
 
-    // Data-fetching on thread selection — standard React pattern.
-    // Functions below internally call setState via async request handlers.
     /* eslint-disable react-hooks/set-state-in-effect */
     void markRead(selectedThreadId);
     void fetchThreadDetail(selectedThreadId);
     void fetchPresence(selectedThreadId);
+    void fetchThreads();
     /* eslint-enable react-hooks/set-state-in-effect */
 
+    const pollMs = pageVisible ? 5000 : 30000;
     const timer = window.setInterval(() => {
       void fetchThreadDetail(selectedThreadId);
-      void fetchThreads();
       void fetchPresence(selectedThreadId);
-    }, 8000);
+      void fetchThreads();
+    }, pollMs);
 
     const heartbeat = window.setInterval(() => {
       const currentDraft = draftRef.current;
@@ -160,7 +268,7 @@ export function ChatSupportShell({
         isTyping: Boolean(currentDraft.trim()),
         threadId: currentDraft.trim() ? selectedThreadId : null,
       });
-    }, 15000);
+    }, 10000);
 
     return () => {
       window.clearInterval(timer);
@@ -176,6 +284,7 @@ export function ChatSupportShell({
     fetchThreadDetail,
     fetchThreads,
     markRead,
+    pageVisible,
     selectedThreadId,
     updatePresence,
   ]);
@@ -467,36 +576,44 @@ export function ChatSupportShell({
         }}
       />
 
-      <div className="mx-auto grid h-[calc(100vh-8rem)] max-w-7xl overflow-hidden rounded-[2rem] border border-border/80 bg-card/70 lg:grid-cols-[340px_1fr]">
-        <ChatThreadListPanel
-          mode={mode}
-          threads={threads}
-          selectedThreadId={selectedThreadId}
-        />
+      <div className="mx-auto grid h-[calc(100dvh-7rem)] max-w-7xl overflow-hidden rounded-2xl border border-border/60 bg-card lg:grid-cols-[340px_1fr]">
+        {/* Thread list — always visible on desktop, conditionally on mobile */}
+        <div className={hasSelectedThread ? "hidden lg:flex lg:flex-col" : "flex flex-col"}>
+          <ChatThreadListPanel
+            mode={mode}
+            threads={threads}
+            selectedThreadId={selectedThreadId}
+            onThreadSelect={(thread) => setSelectedThread(thread)}
+          />
+        </div>
 
-        <ChatThreadViewPanel
-          mode={mode}
-          actorId={actorId}
-          thread={selectedThread}
-          presences={presences}
-          typingNames={typingNames}
-          draft={draft}
-          sending={sending}
-          error={error}
-          internalOnly={internalOnly}
-          pendingAttachments={pendingAttachments}
-          editingMessageId={editingMessageId}
-          editingDraft={editingDraft}
-          savingEdit={savingEdit}
-          setDraft={setDraft}
-          setInternalOnly={setInternalOnly}
-          setEditingDraft={setEditingDraft}
-          onSend={handleSend}
-          onAttachClick={handleAttachClick}
-          onStartEdit={handleStartEdit}
-          onCancelEdit={handleCancelEdit}
-          onSaveEdit={handleSaveEdit}
-        />
+        {/* Thread view — always visible on desktop, conditionally on mobile */}
+        <div className={hasSelectedThread ? "flex flex-col" : "hidden lg:flex lg:flex-col"}>
+          <ChatThreadViewPanel
+            mode={mode}
+            actorId={actorId}
+            thread={selectedThread}
+            presences={presences}
+            typingNames={typingNames}
+            draft={draft}
+            sending={sending}
+            error={error}
+            internalOnly={internalOnly}
+            pendingAttachments={pendingAttachments}
+            editingMessageId={editingMessageId}
+            editingDraft={editingDraft}
+            savingEdit={savingEdit}
+            setDraft={setDraft}
+            setInternalOnly={setInternalOnly}
+            setEditingDraft={setEditingDraft}
+            onSend={handleSend}
+            onAttachClick={handleAttachClick}
+            onStartEdit={handleStartEdit}
+            onCancelEdit={handleCancelEdit}
+            onSaveEdit={handleSaveEdit}
+            onBack={handleBackToList}
+          />
+        </div>
       </div>
     </>
   );
