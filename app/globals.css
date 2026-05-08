@@ -319,9 +319,101 @@
   animation: marquee 35s linear infinite;
 }
 
+
 /* ── Section gradient separators ── */
 .section-divider-top {
   background: linear-gradient(to right, transparent, rgba(124, 58, 237, 0.25), transparent);
   height: 1px;
   width: 100%;
+}
+
+/* ── Thread path draw animations (lightweight CSS, no framer-motion) ── */
+@keyframes thread-draw {
+  from { stroke-dashoffset: 400; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.thread-draw {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: thread-draw 1.2s ease-out forwards;
+}
+
+.thread-draw-delayed {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: thread-draw 1.2s ease-out 0.2s forwards;
+}
+
+@keyframes line-draw {
+  from { stroke-dashoffset: 16; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.thread-line-draw {
+  stroke-dasharray: 16;
+  stroke-dashoffset: 16;
+  animation: line-draw 0.35s ease-out forwards;
+}
+
+/* Disable thread animations on mobile */
+@media (max-width: 767px) {
+  .thread-draw,
+  .thread-draw-delayed {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 0.5;
+  }
+}
+
+/* ── Lightweight transition utilities ── */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes section-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-page-in {
+  animation: page-in 0.2s ease-out both;
+}
+
+.animate-section-in {
+  animation: section-in 0.25s ease-out both;
+}
+
+.animate-card-in {
+  animation: card-in 0.22s ease-out both;
+}
+
+.transition-soft {
+  transition: all 0.15s ease;
+}
+
+.hover-lift {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+/* Reduce animation distance on mobile */
+@media (max-width: 767px) {
+  @keyframes page-in-mobile {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-page-in {
+    animation: page-in-mobile 0.18s ease-out both;
+  }
 }

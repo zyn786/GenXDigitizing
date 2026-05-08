@@ -232,7 +232,7 @@ export function PortfolioClient({ items }: Props) {
               return (
                 <Card
                   key={item.id}
-                  className="glass-panel card-hover premium-shadow rounded-[2rem] border-border/80 cursor-pointer"
+                  className="glass-panel premium-shadow rounded-[2rem] border-border/80 cursor-pointer group transition-all duration-250 hover:scale-[1.03] hover:z-10 hover:shadow-[0_12px_40px_rgba(15,23,42,0.12)]"
                   onClick={() => {
                     if (hasImages) setBeforeAfterItem(item);
                   }}
@@ -267,7 +267,7 @@ export function PortfolioClient({ items }: Props) {
                           src={afterUrl}
                           alt={item.title}
                           fill
-                          className="object-cover transition duration-300 hover:scale-105"
+                          className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                         {beforeUrl && (
