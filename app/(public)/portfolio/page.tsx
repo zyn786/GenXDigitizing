@@ -13,8 +13,15 @@ export const metadata: Metadata = {
 
 export default async function PortfolioPage() {
   const dbItems = await prisma.portfolioItem.findMany({
-    where: { isVisible: true, approvalStatus: "APPROVED" },
-    orderBy: [{ isFeatured: "desc" }, { sortOrder: "asc" }, { createdAt: "desc" }],
+    where: {
+      isVisible: true,
+      approvalStatus: "APPROVED",
+    },
+    orderBy: [
+      { isFeatured: "desc" },
+      { sortOrder: "asc" },
+      { createdAt: "desc" },
+    ],
     take: 60,
     select: {
       id: true,
@@ -30,10 +37,12 @@ export default async function PortfolioPage() {
   });
 
   return (
-    <>
+    <main className="min-h-screen bg-[#f7f7fb] text-slate-950 dark:bg-[#050814] dark:text-white">
       <PortfolioHeroSection />
+
       <PortfolioClient items={dbItems} />
+
       <PortfolioCtaStrip />
-    </>
+    </main>
   );
 }

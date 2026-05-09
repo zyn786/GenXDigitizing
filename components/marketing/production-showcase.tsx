@@ -3,8 +3,15 @@ import { ProductionShowcaseClient } from "./production-showcase-client";
 
 export async function ProductionShowcaseSection() {
   const items = await prisma.portfolioItem.findMany({
-    where: { isVisible: true },
-    orderBy: { createdAt: "desc" },
+    where: {
+      isVisible: true,
+      approvalStatus: "APPROVED",
+    },
+    orderBy: [
+      { isFeatured: "desc" },
+      { sortOrder: "asc" },
+      { createdAt: "desc" },
+    ],
     take: 12,
     select: {
       id: true,

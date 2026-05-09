@@ -1,16 +1,16 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Images, Layers, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, Images, Layers, Sparkles } from "lucide-react";
 
 const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
 const stats = [
   { value: "1,200+", label: "Completed jobs" },
-  { value: "3",      label: "Service types" },
-  { value: "24hr",   label: "Turnaround" },
-  { value: "∞",      label: "Revisions" },
+  { value: "3", label: "Service types" },
+  { value: "24hr", label: "Turnaround" },
+  { value: "∞", label: "Revisions" },
 ];
 
 const serviceChips = [
@@ -20,107 +20,127 @@ const serviceChips = [
 ];
 
 export function PortfolioHeroSection() {
+  const prefersReduced = useReducedMotion();
+
   return (
-    <section className="relative overflow-hidden px-4 pb-10 pt-16 md:px-8 md:pt-20">
-      {/* Subtle top glow */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-0 h-80 w-[40rem] -translate-x-1/2 rounded-full bg-primary/[0.04] blur-3xl" />
-      </div>
+    <section className="relative isolate overflow-hidden bg-[#f7f7fb] px-4 pb-10 pt-24 text-slate-950 dark:bg-[#050814] dark:text-white sm:pt-28 md:px-8 md:pb-14 md:pt-32 lg:pt-36">
+      <PortfolioHeroBackground />
 
       <div className="page-shell relative z-10">
-        <div className="glass-panel premium-shadow rounded-[2rem] border-border/80 p-5 md:p-10">
-          {/* Top bar */}
-          <div className="mb-4 flex flex-wrap items-center gap-3 md:mb-6">
+        <div className="relative overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white/90 p-5 shadow-sm shadow-slate-950/5 backdrop-blur-xl dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/30 sm:rounded-[1.75rem] sm:p-6 md:rounded-[2rem] md:p-10">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/8 via-transparent to-cyan-500/8 dark:from-indigo-400/8 dark:to-cyan-400/6" />
+          <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-bl-full bg-gradient-to-br from-slate-100 to-transparent opacity-80 dark:from-indigo-400/10" />
+
+          <div className="relative z-10">
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease }}
-              className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-primary"
+              initial={prefersReduced ? false : { opacity: 0, y: 14 }}
+              animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, ease }}
+              className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-indigo-700 shadow-sm backdrop-blur dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300 sm:px-4 sm:tracking-[0.24em]"
             >
-              <div className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.8)]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 shadow-[0_0_8px_rgba(99,102,241,0.8)] dark:bg-indigo-300" />
               Production Portfolio
             </motion.div>
-          </div>
 
-          {/* Main content grid */}
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-            {/* Left: text */}
-            <div>
+            <div className="grid gap-7 lg:grid-cols-[1.12fr_0.88fr] lg:items-start lg:gap-10">
               <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: 0.05, ease }}
+                initial={prefersReduced ? false : { opacity: 0, y: 14 }}
+                animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.04, ease }}
               >
-                <div className="section-eyebrow">Portfolio</div>
-                <h1 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-5xl">
+                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                  Portfolio
+                </div>
+
+                <h1 className="mt-3 max-w-3xl text-3xl font-black tracking-[-0.05em] text-slate-950 dark:text-slate-100 sm:text-4xl md:text-5xl lg:text-6xl">
                   Production-quality work across{" "}
-                  <span className="gradient-text">every service</span> we offer.
+                  <span className="bg-gradient-to-r from-indigo-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent dark:from-indigo-300 dark:via-cyan-300 dark:to-blue-300">
+                    every service
+                  </span>{" "}
+                  we offer.
                 </h1>
-                <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
-                  Real examples of embroidery digitizing, vector art conversion, and custom patch
-                  work — from concept to production-ready output. Every file ships with a
-                  proof-first workflow and revision path included.
+
+                <p className="mt-4 max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-400 sm:text-base sm:leading-7">
+                  Real examples of embroidery digitizing, vector art
+                  conversion, and custom patch work — from concept to
+                  production-ready output. Every file ships with a proof-first
+                  workflow and revision path included.
                 </p>
+
+                <div className="mt-5 flex flex-wrap gap-1.5 sm:gap-2">
+                  {serviceChips.map(({ icon: Icon, label }) => (
+                    <div
+                      key={label}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 px-2.5 py-1.5 text-[10px] font-bold text-slate-600 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-[#111C31] dark:text-slate-300 sm:px-3 sm:text-xs"
+                    >
+                      <Icon className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-300" />
+                      {label}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6">
+                  <Link
+                    href="/contact"
+                    className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-full bg-slate-950 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-slate-950/20 transition hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-indigo-500 dark:shadow-indigo-500/20 dark:hover:bg-indigo-400"
+                  >
+                    Get your first order free
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
               </motion.div>
 
-              {/* Service chips */}
               <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.15, ease }}
-                className="mt-6 flex flex-wrap gap-2"
+                initial={prefersReduced ? false : { opacity: 0, x: 16 }}
+                animate={prefersReduced ? undefined : { opacity: 1, x: 0 }}
+                transition={{ duration: 0.35, delay: 0.08, ease }}
+                className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-1"
               >
-                {serviceChips.map(({ icon: Icon, label }) => (
-                  <div
+                {stats.map(({ value, label }, index) => (
+                  <motion.div
                     key={label}
-                    className="flex items-center gap-2 rounded-full border border-border/60 bg-secondary/50 px-3 py-1.5 text-xs font-medium text-muted-foreground"
+                    initial={prefersReduced ? false : { opacity: 0, y: 12 }}
+                    animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.3,
+                      delay: prefersReduced ? 0 : 0.12 + index * 0.04,
+                      ease,
+                    }}
+                    className="group relative overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-[#0F172A] dark:hover:border-slate-600 dark:hover:bg-[#111C31] sm:rounded-[1.5rem]"
                   >
-                    <Icon className="h-3.5 w-3.5 text-primary" />
-                    {label}
-                  </div>
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/8 via-transparent to-cyan-500/8 dark:from-indigo-400/8 dark:to-cyan-400/5" />
+
+                    <div className="relative z-10">
+                      <div className="bg-gradient-to-r from-indigo-600 via-cyan-600 to-blue-600 bg-clip-text text-2xl font-black tracking-[-0.04em] text-transparent dark:from-indigo-300 dark:via-cyan-300 dark:to-blue-300 md:text-3xl">
+                        {value}
+                      </div>
+
+                      <div className="mt-1 text-xs font-bold text-slate-500 dark:text-slate-400">
+                        {label}
+                      </div>
+                    </div>
+                  </motion.div>
                 ))}
               </motion.div>
-
-              {/* CTA */}
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.25, ease }}
-                className="mt-6"
-              >
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-[0_8px_30px_rgba(99,102,241,0.35)] transition hover:opacity-90 hover:shadow-[0_12px_40px_rgba(99,102,241,0.45)]"
-                >
-                  Get your first order free
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </motion.div>
             </div>
-
-            {/* Right: stats strip */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.1, ease }}
-              className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3 lg:flex-col"
-            >
-              {stats.map(({ value, label }, i) => (
-                <motion.div
-                  key={label}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.15 + i * 0.08, ease }}
-                  className="rounded-xl border border-border/60 bg-card px-4 py-3 sm:flex-1 sm:min-w-[120px] lg:min-w-0"
-                >
-                  <div className="text-xl font-bold tracking-tight gradient-text md:text-2xl">{value}</div>
-                  <div className="mt-0.5 text-xs text-muted-foreground">{label}</div>
-                </motion.div>
-              ))}
-            </motion.div>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function PortfolioHeroBackground() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+    >
+      <div className="absolute left-1/2 top-0 h-72 w-[24rem] -translate-x-1/2 rounded-full bg-indigo-500/[0.08] blur-3xl dark:bg-indigo-400/[0.08] sm:w-[40rem]" />
+
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.11),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(168,85,247,0.06),transparent_38%)] dark:bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(168,85,247,0.08),transparent_38%)]" />
+
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:34px_34px] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] md:bg-[size:42px_42px]" />
+    </div>
   );
 }

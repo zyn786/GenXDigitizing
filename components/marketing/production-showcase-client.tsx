@@ -252,7 +252,7 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
   );
 
   return (
-    <section className="relative isolate overflow-hidden bg-[#f7f7fb] px-4 py-16 text-slate-950 dark:bg-[#050814] dark:text-white md:px-8 md:py-24 lg:py-28">
+    <section className="relative isolate overflow-hidden bg-[#f7f7fb] px-4 py-10 text-slate-950 dark:bg-[#050814] dark:text-white sm:py-12 md:px-8 md:py-24 lg:py-28">
       <ProductionBackground />
 
       <div className="page-shell relative z-10">
@@ -263,27 +263,17 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
             Our Work
           </div>
 
-          <h2 className="mt-5 text-3xl font-black tracking-[-0.055em] text-slate-950 dark:text-white md:text-5xl lg:text-6xl">
+          <h2 className="mt-4 text-3xl font-black tracking-[-0.05em] text-slate-950 dark:text-white sm:text-4xl md:mt-5 md:text-5xl lg:text-6xl">
             Real stitch quality.
             <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-blue-600 bg-clip-text text-transparent dark:from-indigo-300 dark:via-violet-300 dark:to-blue-300">
               Clean vector artwork.
             </span>
           </h2>
 
-          <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-600 dark:text-white/58 md:text-base">
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-600 dark:text-white/58 md:mt-5 md:text-base md:leading-7">
             See how rough artwork becomes production-ready embroidery, custom
             patches, vector files, and print-ready artwork.
           </p>
-
-          <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-
-            <Link
-              href="/portfolio"
-              className="inline-flex min-h-[46px] items-center justify-center rounded-full border border-slate-300 bg-white/70 px-5 py-3 text-sm font-bold text-slate-800 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:hover:bg-white/[0.1]"
-            >
-              View Portfolio
-            </Link>
-          </div>
         </div>
 
         {/* Trust pills */}
@@ -326,13 +316,13 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
         )}
 
         {/* Phone */}
-        <div className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden">
+        <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden">
           {displayItems.map((item, index) => (
             <ShowcaseCard
               key={item.id}
               item={item}
-              priority={index < 2}
-              className="w-[84vw] shrink-0 snap-center"
+              priority={index === 0}
+              className="w-[82vw] shrink-0 snap-center"
               mobile
             />
           ))}
@@ -451,6 +441,13 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
           animation: gx-node-pulse 3.5s ease-in-out infinite;
         }
 
+        @media (max-width: 767px) {
+          .gx-thread-drift,
+          .gx-stitch-dash,
+          .gx-node-pulse {
+            animation: none !important;
+          }
+        }
         @media (prefers-reduced-motion: reduce) {
           .gx-marquee-track,
           .gx-thread-drift,
@@ -506,7 +503,7 @@ function ShowcaseCard({
         className={cn(
           "relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white/70 shadow-sm shadow-slate-950/5 backdrop-blur transition-all duration-300 dark:border-white/[0.08] dark:bg-white/[0.035] dark:shadow-black/20",
           mobile
-            ? "h-[360px]"
+            ? "h-[310px] sm:h-[340px]"
             : "h-[335px] group-hover/card:z-20 group-hover/card:-translate-y-2 group-hover/card:scale-[1.035] group-hover/card:border-slate-300 group-hover/card:shadow-2xl group-hover/card:shadow-slate-950/15 dark:group-hover/card:border-white/[0.22] dark:group-hover/card:shadow-black/45",
         )}
       >
@@ -524,9 +521,10 @@ function ShowcaseCard({
                   alt={item.title}
                   fill
                   priority={priority}
+                  loading={priority ? "eager" : "lazy"}
                   draggable={false}
-                  className="object-cover transition-transform duration-700 ease-out group-hover/card:scale-110"
-                  sizes="(max-width: 640px) 84vw, (max-width: 1024px) 22rem, 24rem"
+                  className="object-cover transition-transform duration-500 ease-out md:group-hover/card:scale-110"
+                  sizes="(max-width: 640px) 82vw, (max-width: 1024px) 22rem, 24rem"
                 />
 
                 {beforeUrl && (
@@ -542,9 +540,10 @@ function ShowcaseCard({
                       src={beforeUrl}
                       alt={`Before: ${item.title}`}
                       fill
+                      loading="lazy"
                       draggable={false}
                       className="object-cover"
-                      sizes="(max-width: 640px) 84vw, (max-width: 1024px) 22rem, 24rem"
+                      sizes="(max-width: 640px) 82vw, (max-width: 1024px) 22rem, 24rem"
                     />
                   </div>
                 )}
@@ -586,13 +585,13 @@ function ShowcaseCard({
               </span>
             </div>
 
-            <div className="absolute bottom-0 left-0 right-0 z-[4] p-5">
-              <h3 className="line-clamp-1 text-lg font-black leading-snug text-white">
+            <div className="absolute bottom-0 left-0 right-0 z-[4] p-4 md:p-5">
+              <h3 className="line-clamp-1 text-base font-black leading-snug text-white md:text-lg">
                 {item.title}
               </h3>
 
               {item.description && (
-                <p className="mt-2 line-clamp-2 text-xs leading-5 text-white/64">
+                <p className="mt-1.5 line-clamp-2 text-[11px] leading-5 text-white/64 md:mt-2 md:text-xs">
                   {item.description}
                 </p>
               )}
