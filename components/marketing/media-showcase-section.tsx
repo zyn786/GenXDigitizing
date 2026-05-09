@@ -98,7 +98,7 @@ export function MediaShowcaseSection() {
         </div>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:mt-10 lg:grid-cols-4">
-          {MACHINE_FEATURES.map((feature, index) => (
+          {MACHINE_FEATURES.map((feature) => (
             <div
               key={feature.title}
               className="relative overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white/80 p-4 shadow-sm shadow-slate-950/5 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.045] dark:shadow-black/20 sm:rounded-[1.5rem] sm:p-5"

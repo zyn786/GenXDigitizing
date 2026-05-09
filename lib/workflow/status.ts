@@ -100,14 +100,16 @@ export function getPaymentStatusLabel(status: OrderPaymentStatus): string {
 /* ------------------------------------------------------------------ */
 
 const CLIENT_STATUS_LABELS: Record<string, string> = {
+  NEW: "Order Received",
   SUBMITTED: "Order Received",
+  QUOTED: "Quote Ready",
   UNDER_REVIEW: "Under Review",
-  ASSIGNED_TO_DESIGNER: "In Production",
-  IN_PROGRESS: "In Production",
+  ASSIGNED_TO_DESIGNER: "Assigned",
+  IN_PROGRESS: "In Progress",
   PROOF_READY: "Proof Ready",
-  REVISION_REQUESTED: "Revision In Progress",
-  APPROVED: "Proof Approved",
-  DELIVERED: "Completed",
+  REVISION_REQUESTED: "Revision Requested",
+  APPROVED: "Approved",
+  DELIVERED: "Final Files Unlocked",
   CLOSED: "Completed",
   CANCELLED: "Cancelled",
 };
@@ -117,9 +119,11 @@ export function getClientWorkflowStatusLabel(status: string): string {
 }
 
 const CLIENT_STATUS_TONES: Record<string, string> = {
+  NEW: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
   SUBMITTED: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  QUOTED: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
   UNDER_REVIEW: "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  ASSIGNED_TO_DESIGNER: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  ASSIGNED_TO_DESIGNER: "border-indigo-500/20 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
   IN_PROGRESS: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
   PROOF_READY: "border-violet-500/20 bg-violet-500/10 text-violet-600 dark:text-violet-400",
   REVISION_REQUESTED: "border-fuchsia-500/20 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400",

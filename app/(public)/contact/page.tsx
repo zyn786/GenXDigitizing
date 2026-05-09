@@ -9,6 +9,18 @@ export const metadata: Metadata = {
   title: "Contact",
   description:
     "Send a project inquiry or get a quote. We reply within one business day.",
+  openGraph: {
+    title: "Contact — GenX Digitizing",
+    description:
+      "Send a project inquiry or get a quote. We reply within one business day.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact — GenX Digitizing",
+    description:
+      "Send a project inquiry or get a quote. We reply within one business day.",
+  },
 };
 
 export default function ContactPage() {

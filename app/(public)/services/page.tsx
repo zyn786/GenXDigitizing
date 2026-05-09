@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 
-import { ProductionShowcaseClient } from "@/components/marketing/production-showcase-client";
-
 import { ServicesHeroSection } from "@/components/marketing/services-hero-section";
 import { TrustStrip } from "@/components/marketing/trust-strip";
 import { ServiceCategoryGrid } from "@/components/marketing/service-category-grid";

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { checkRateLimit, getClientIp } from "@/lib/auth/rate-limit";
+
 const contactSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
@@ -9,6 +11,23 @@ const contactSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request.headers);
+  const limit = checkRateLimit(`contact:${ip}`, 3, 10 * 60_000);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message: "Too many requests. Please try again in a few minutes.",
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)),
+        },
+      }
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = contactSchema.safeParse(body);
 

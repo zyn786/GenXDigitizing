@@ -117,7 +117,7 @@ function ServiceCard({
 
   React.useEffect(() => {
     if (!showImage) {
-      setImageLoaded(false);
+      React.startTransition(() => setImageLoaded(false));
     }
   }, [showImage]);
 

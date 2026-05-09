@@ -38,7 +38,7 @@ export function SiteHeader() {
   );
 
   React.useEffect(() => {
-    setMobileOpen(false);
+    React.startTransition(() => setMobileOpen(false));
   }, [pathname]);
 
   React.useEffect(() => {

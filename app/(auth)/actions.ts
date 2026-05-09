@@ -1,6 +1,7 @@
 "use server";
 
 import type { Route } from "next";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 import { VerificationTokenPurpose } from "@prisma/client";
@@ -8,6 +9,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/password";
+import { checkRateLimit, getClientIp } from "@/lib/auth/rate-limit";
 import { registerSchema } from "@/lib/auth/schemas";
 import { signIn } from "@/auth";
 import {
@@ -86,6 +88,12 @@ function redirectToLogin(params: Record<string, string | undefined>): never {
 }
 
 export async function registerAction(formData: FormData): Promise<void> {
+  const ip = getClientIp(await headers());
+  const limit = checkRateLimit(`register:${ip}`, 5, 60_000);
+  if (!limit.allowed) {
+    redirectToLogin({ mode: "register", error: "rate-limited" });
+  }
+
   const parsed = registerSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
@@ -180,6 +188,15 @@ export async function signInPasswordAction(formData: FormData): Promise<void> {
   const passwordEntry = formData.get("password");
   const redirectTo = getSafeRedirect(formData.get("redirectTo"));
 
+  const ip = getClientIp(await headers());
+  const limit = checkRateLimit(`login:${ip}`, 5, 60_000);
+  if (!limit.allowed) {
+    redirectToLogin({
+      error: "rate-limited",
+      next: redirectTo,
+    });
+  }
+
   if (typeof emailEntry !== "string" || typeof passwordEntry !== "string") {
     redirectToLogin({
       error: "invalid-email-or-password",
@@ -213,6 +230,12 @@ export async function signInPasswordAction(formData: FormData): Promise<void> {
 export async function requestPasswordResetAction(
   formData: FormData
 ): Promise<void> {
+  const ip = getClientIp(await headers());
+  const limit = checkRateLimit(`forgot-password:${ip}`, 3, 10 * 60_000);
+  if (!limit.allowed) {
+    redirectWithParams(FORGOT_PASSWORD_ROUTE, { error: "rate-limited" });
+  }
+
   const parsed = forgotPasswordSchema.safeParse({
     email: formData.get("email"),
   });

@@ -12,6 +12,19 @@ export const metadata: Metadata = {
   title: "Pricing",
   description: "Transparent digitizing pricing from $15. First order free for new clients. Rush and same-day options available.",
   alternates: { canonical: `${baseUrl}/pricing` },
+  openGraph: {
+    title: "Pricing — GenX Digitizing",
+    description:
+      "Transparent digitizing pricing from $15. First order free for new clients. Rush and same-day options available.",
+    url: `${baseUrl}/pricing`,
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pricing — GenX Digitizing",
+    description:
+      "Transparent digitizing pricing from $15. First order free for new clients. Rush and same-day options available.",
+  },
 };
 
 export default function PricingPage() {

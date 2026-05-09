@@ -6,9 +6,21 @@ import { PortfolioHeroSection } from "@/components/marketing/portfolio-hero-sect
 import { PortfolioClient } from "./portfolio-client";
 
 export const metadata: Metadata = {
-  title: "Portfolio",
+  title: "Portfolio — GenX Digitizing",
   description:
     "Browse before and after examples of our embroidery digitizing, vector art, and custom patch work.",
+  openGraph: {
+    title: "Portfolio — GenX Digitizing",
+    description:
+      "Browse before and after examples of our embroidery digitizing, vector art, and custom patch work.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Portfolio — GenX Digitizing",
+    description:
+      "Browse before and after examples of our embroidery digitizing, vector art, and custom patch work.",
+  },
 };
 
 export default async function PortfolioPage() {

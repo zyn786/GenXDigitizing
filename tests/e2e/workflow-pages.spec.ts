@@ -62,3 +62,38 @@ test("manager login redirects to admin orders", async ({ page }) => {
     })
   ).toBeVisible();
 });
+
+test("client can view order status page without login", async ({ page }) => {
+  await page.goto("/order-status");
+  await expect(
+    page.getByRole("heading", { name: /track your order/i })
+  ).toBeVisible();
+});
+
+test("unauthenticated access to /client/orders redirects to login", async ({
+  page,
+}) => {
+  await page.goto("/client/orders");
+  await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+});
+
+test("unauthenticated access to /admin redirects to login", async ({
+  page,
+}) => {
+  await page.goto("/admin");
+  await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+});
+
+test("unauthenticated API call to /api/admin/staff returns 401", async ({
+  request,
+}) => {
+  const response = await request.get("/api/admin/staff");
+  expect(response.status()).toBe(401);
+});
+
+test("unauthenticated API call to /api/client/orders returns 401", async ({
+  request,
+}) => {
+  const response = await request.get("/api/client/orders");
+  expect(response.status()).toBe(401);
+});

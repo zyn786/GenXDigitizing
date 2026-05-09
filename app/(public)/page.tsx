@@ -13,6 +13,20 @@ export const metadata: Metadata = {
   title: "GenX Digitizing — Premium Embroidery Digitizing, Vector Art & Custom Patches",
   description:
     "Production-ready embroidery digitizing, vector art conversion, and custom patch setup delivered within 24 hours. Revisions included.",
+  openGraph: {
+    title: "GenX Digitizing — Premium Embroidery Digitizing",
+    description:
+      "Production-ready embroidery digitizing, vector art, and custom patches delivered within 24 hours.",
+    url: "https://genxdigitizing.com",
+    siteName: "GenX Digitizing",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GenX Digitizing — Premium Embroidery Digitizing",
+    description:
+      "Production-ready embroidery digitizing, vector art, and custom patches delivered within 24 hours.",
+  },
 };
 
 export default function HomePage() {

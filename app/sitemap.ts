@@ -1,54 +1,68 @@
 import type { MetadataRoute } from "next";
+
+import { prisma } from "@/lib/db";
+import { serviceSummaries, nicheSummaries } from "@/lib/marketing-data";
 import { getSiteUrl } from "@/lib/site-url";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const base = getSiteUrl();
+const BASE_URL = (() => {
+  try {
+    return getSiteUrl();
+  } catch {
+    return process.env.NEXT_PUBLIC_SITE_URL ?? "https://genxdigitizing.com";
+  }
+})();
 
-  const staticRoutes = [
-    { url: "/", changeFrequency: "weekly" as const, priority: 1.0 },
-    { url: "/services", changeFrequency: "weekly" as const, priority: 0.9 },
-    { url: "/portfolio", changeFrequency: "weekly" as const, priority: 0.9 },
-    { url: "/pricing", changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: "/quote", changeFrequency: "weekly" as const, priority: 0.7 },
-    { url: "/order", changeFrequency: "weekly" as const, priority: 0.7 },
-    { url: "/contact", changeFrequency: "monthly" as const, priority: 0.6 },
-    { url: "/order-status", changeFrequency: "monthly" as const, priority: 0.5 },
-    { url: "/privacy-policy", changeFrequency: "yearly" as const, priority: 0.2 },
-    { url: "/terms-and-conditions", changeFrequency: "yearly" as const, priority: 0.2 },
-    { url: "/refund-policy", changeFrequency: "yearly" as const, priority: 0.2 },
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const now = new Date();
+
+  const staticRoutes: MetadataRoute.Sitemap = [
+    { url: BASE_URL, lastModified: now, changeFrequency: "weekly", priority: 1.0 },
+    { url: `${BASE_URL}/services`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${BASE_URL}/pricing`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${BASE_URL}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE_URL}/quote`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/order`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/order-status`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${BASE_URL}/privacy-policy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${BASE_URL}/terms-and-conditions`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${BASE_URL}/refund-policy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
 
-  const serviceSlugs = [
-    "embroidery-digitizing",
-    "vector-art",
-    "custom-patches",
-  ];
+  const serviceRoutes: MetadataRoute.Sitemap = serviceSummaries.map((s) => ({
+    url: `${BASE_URL}/services/${s.slug}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.85,
+  }));
 
-  const nicheSlugs = [
-    "left-chest-logo",
-    "cap-hat-logo",
-    "3d-puff",
-    "jacket-back",
-    "full-back",
-    "jpg-to-vector",
-    "print-ready-artwork",
-  ];
+  const nicheRoutes: MetadataRoute.Sitemap = nicheSummaries.map((n) => ({
+    url: `${BASE_URL}/niches/${n.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  let portfolioLastMod = now;
+  try {
+    const latest = await prisma.portfolioItem.findFirst({
+      where: { isVisible: true, approvalStatus: "APPROVED" },
+      orderBy: { updatedAt: "desc" },
+      select: { updatedAt: true },
+    });
+    if (latest) portfolioLastMod = latest.updatedAt;
+  } catch {
+    // non-fatal — use current date
+  }
 
   return [
-    ...staticRoutes.map((r) => ({
-      url: `${base}${r.url}`,
-      changeFrequency: r.changeFrequency,
-      priority: r.priority,
-    })),
-    ...serviceSlugs.map((slug) => ({
-      url: `${base}/services/${slug}`,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    })),
-    ...nicheSlugs.map((slug) => ({
-      url: `${base}/niches/${slug}`,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    })),
+    ...staticRoutes,
+    ...serviceRoutes,
+    ...nicheRoutes,
+    {
+      url: `${BASE_URL}/portfolio`,
+      lastModified: portfolioLastMod,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
   ];
 }

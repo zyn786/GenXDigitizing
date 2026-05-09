@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -90,8 +91,10 @@ function SitePreloader({
   const onRevealRef = useRef(onReveal);
   const onDoneRef = useRef(onDone);
 
-  onRevealRef.current = onReveal;
-  onDoneRef.current = onDone;
+  useLayoutEffect(() => {
+    onRevealRef.current = onReveal;
+    onDoneRef.current = onDone;
+  });
 
   useEffect(() => {
     if (prefersReduced) {
