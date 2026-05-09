@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -22,11 +24,8 @@ const stats = [
 
 const tickerItems = [
   "First Design On Us",
-  "Embroidery Digitizing",
-  "Vector Redraw",
-  "Custom Patches",
-  "DTF / Screen Print Ready",
   "Bulk Orders, Bigger Savings",
+  "Free First Order",
 ];
 
 const floatingCards = [
@@ -52,22 +51,59 @@ const floatingCards = [
   },
 ];
 
+const portfolioSlides = [
+  {
+    src: "/images/After-1.png",
+    title: "Jacket Front Digitizing",
+    label: "Clean stitch proof",
+    href: "/portfolio",
+  },
+  {
+    src: "/images/After-2.png",
+    title: "Vector Conversion",
+    label: "Sharp output",
+    href: "/portfolio",
+  },
+  {
+    src: "/images/After-3.png",
+    title: "Cap & jacket Back Digitizing",
+    label: "Production-ready files",
+    href: "/portfolio",
+  },
+  {
+    src: "/images/After-4.png",
+    title: "Patch Artwork",
+    label: "Place it on anything",
+    href: "/portfolio",
+  },
+];
+
 export function HeroSection() {
   const prefersReduced = useReducedMotion();
 
   return (
-    <section className="relative -mt-20 min-h-screen overflow-hidden bg-[#f7f7fb] text-slate-950 dark:bg-[#050814] dark:text-white">
+    <section className="relative min-h-[100svh] overflow-hidden bg-[#f7f7fb] text-slate-950 dark:bg-[#050814] dark:text-white">
       <HeroBackground />
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col justify-center px-4 pb-28 pt-28 sm:pb-32 md:px-8 md:pt-36 lg:pb-32">
+      <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-start px-4 pb-24 pt-[7.35rem] sm:pb-28 sm:pt-32 md:px-8 md:pb-32 md:pt-36 lg:justify-center lg:pb-32 lg:pt-40">
+        {/* MOBILE SERVICE SLIDER */}
+        <motion.div
+          initial={prefersReduced ? {} : { opacity: 0, y: 16 }}
+          animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.05, ease }}
+          className="mb-5 block lg:hidden"
+        >
+          <MobileServiceSlider />
+        </motion.div>
+
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
           {/* LEFT CONTENT */}
           <div className="text-center lg:text-left">
             <motion.div
               initial={prefersReduced ? {} : { opacity: 0, y: 18 }}
               animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, ease }}
-              className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-white/70 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.06] dark:text-indigo-200 sm:tracking-[0.28em] md:mb-7 md:px-4 md:py-2 md:text-[10px] lg:mx-0"
+              transition={{ duration: 0.55, delay: 0.08, ease }}
+              className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-white/70 px-3 py-1.5 text-[8px] font-bold uppercase tracking-[0.18em] text-indigo-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.06] dark:text-indigo-200 sm:tracking-[0.28em] md:mb-7 md:px-4 md:py-2 md:text-[10px] lg:mx-0"
             >
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.9)]" />
               <Sparkles className="h-3 w-3 opacity-70" />
@@ -77,8 +113,8 @@ export function HeroSection() {
             <motion.h1
               initial={prefersReduced ? {} : { opacity: 0, y: 24 }}
               animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.65, delay: 0.08, ease }}
-              className="mx-auto max-w-4xl text-[2.65rem] font-black leading-[0.98] tracking-[-0.06em] text-slate-950 dark:text-white sm:text-5xl md:text-6xl lg:mx-0 lg:text-[4.65rem]"
+              transition={{ duration: 0.65, delay: 0.12, ease }}
+              className="mx-auto max-w-4xl text-[2.18rem] font-black leading-[1.02] tracking-[-0.055em] text-slate-950 dark:text-white sm:text-5xl md:text-6xl lg:mx-0 lg:text-[4.65rem] lg:leading-[0.98]"
             >
               Digitizing that looks{" "}
               <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-blue-600 bg-clip-text text-transparent dark:from-indigo-300 dark:via-violet-300 dark:to-blue-300">
@@ -89,31 +125,33 @@ export function HeroSection() {
             <motion.p
               initial={prefersReduced ? {} : { opacity: 0, y: 20 }}
               animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.18, ease }}
-              className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-600 dark:text-white/58 md:text-base lg:mx-0"
+              transition={{ duration: 0.55, delay: 0.2, ease }}
+              className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-600 dark:text-white/58 md:text-base lg:mx-0"
             >
               Embroidery digitizing, clean vector redraws, custom patches, and
               print-ready artwork delivered with sharp stitch quality, fast
               turnaround, and a full revision path.
             </motion.p>
 
+            {/* BUTTONS */}
             <motion.div
               initial={prefersReduced ? {} : { opacity: 0, y: 20 }}
               animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.28, ease }}
-              className="mt-7 flex flex-col items-center gap-3 lg:items-start"
+              className="mt-5 flex flex-col items-center gap-3 lg:items-start"
             >
-              <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-center lg:justify-start">
+              <div className="mx-auto flex w-full max-w-[360px] flex-row items-center justify-center gap-2 sm:max-w-none sm:flex-wrap lg:mx-0 lg:justify-start">
                 <Button
                   asChild
                   variant="premium"
                   shape="pill"
-                  size="lg"
-                  className="min-h-[46px] w-full shadow-xl shadow-indigo-500/20 sm:w-auto"
+                  size="sm"
+                  className="h-10 min-w-0 flex-1 px-3 text-[11px] font-bold shadow-xl shadow-indigo-500/20 sm:h-11 sm:flex-none sm:px-5 sm:text-sm"
                 >
                   <Link href="/contact">
-                    Get a free quote
-                    <ArrowRight className="h-4 w-4" />
+                    <span className="sm:hidden">New Quote</span>
+                    <span className="hidden sm:inline">Get a free quote</span>
+                    <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </Link>
                 </Button>
 
@@ -121,24 +159,30 @@ export function HeroSection() {
                   asChild
                   variant="outline"
                   shape="pill"
-                  size="lg"
-                  className="min-h-[46px] w-full border-slate-300 bg-white/60 text-slate-900 backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/[0.06] dark:text-white dark:hover:bg-white/[0.1] sm:w-auto"
+                  size="sm"
+                  className="h-10 min-w-0 flex-1 border-slate-300 bg-white/60 px-3 text-[11px] font-bold text-slate-900 backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/[0.06] dark:text-white dark:hover:bg-white/[0.1] sm:h-11 sm:flex-none sm:px-5 sm:text-sm"
                 >
-                  <Link href="/orders">Place Direct Order</Link>
+                  <Link href="/orders">
+                    <span className="sm:hidden">Order Now</span>
+                    <span className="hidden sm:inline">Place Direct Order</span>
+                  </Link>
                 </Button>
 
                 <Button
-                  asChild
-                  variant="ghost"
-                  shape="pill"
-                  size="lg"
-                  className="min-h-[46px] w-full border border-slate-300 bg-white/30 text-slate-800 backdrop-blur hover:bg-white/70 dark:border-white/15 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.1] sm:w-auto"
-                >
-                  <Link href="/portfolio">View our work</Link>
-                </Button>
+                asChild
+                variant="ghost"
+                shape="pill"
+                size="sm"
+                className="h-10 min-w-0 flex-1 border border-slate-300 bg-white/30 px-3 text-[11px] font-bold text-slate-800 backdrop-blur hover:bg-white/70 dark:border-white/15 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.1] sm:h-11 sm:flex-none sm:px-5 sm:text-sm"
+              >
+                <Link href="/login">
+                  <span className="sm:hidden">Login/Signup</span>
+                  <span className="hidden sm:inline">Client portal</span>
+                </Link>
+              </Button>
               </div>
 
-              <p className="text-[11px] tracking-wide text-slate-500 dark:text-white/35">
+              <p className="text-[10px] tracking-wide text-slate-500 dark:text-white/35 sm:text-[11px]">
                 Free first file · No credit card required · 24-hr turnaround
               </p>
             </motion.div>
@@ -148,21 +192,31 @@ export function HeroSection() {
               initial={prefersReduced ? {} : { opacity: 0, y: 16 }}
               animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.4, ease }}
-              className="mx-auto mt-7 flex w-fit max-w-full overflow-hidden rounded-3xl border border-slate-200 bg-white/70 shadow-xl shadow-slate-950/5 backdrop-blur divide-x divide-slate-200 dark:border-white/[0.1] dark:bg-white/[0.055] dark:divide-white/[0.08] lg:mx-0"
+              className="mx-auto mt-5 grid w-full max-w-[340px] grid-cols-3 overflow-hidden rounded-2xl border border-slate-200 bg-white/70 shadow-lg shadow-slate-950/5 backdrop-blur divide-x divide-slate-200 dark:border-white/[0.1] dark:bg-white/[0.055] dark:divide-white/[0.08] sm:max-w-md lg:mx-0 lg:w-fit"
             >
               {stats.map(({ value, label }) => (
                 <div
                   key={label}
-                  className="min-w-0 px-3 py-3 text-center sm:px-7 sm:py-4"
+                  className="min-w-0 px-2 py-2.5 text-center sm:px-7 sm:py-4"
                 >
-                  <div className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-lg font-black tracking-tight text-transparent dark:from-indigo-300 dark:to-violet-300 sm:text-2xl">
+                  <div className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-base font-black tracking-tight text-transparent dark:from-indigo-300 dark:to-violet-300 sm:text-2xl">
                     {value}
                   </div>
-                  <div className="mt-0.5 text-[9px] text-slate-500 dark:text-white/45 sm:text-[11px]">
+                  <div className="mt-0.5 text-[7.5px] font-semibold text-slate-500 dark:text-white/45 sm:text-[11px]">
                     {label}
                   </div>
                 </div>
               ))}
+            </motion.div>
+
+            {/* MOBILE PORTFOLIO PREVIEW BELOW STATS */}
+            <motion.div
+              initial={prefersReduced ? {} : { opacity: 0, y: 18 }}
+              animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.48, ease }}
+              className="mx-auto mt-5 block w-full max-w-[460px] lg:hidden"
+            >
+              <MobilePortfolioPreview prefersReduced={Boolean(prefersReduced)} />
             </motion.div>
           </div>
 
@@ -179,19 +233,19 @@ export function HeroSection() {
       </div>
 
       {/* TICKER */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 overflow-hidden whitespace-nowrap border-t border-slate-200 bg-white/70 py-3 shadow-[0_-20px_60px_rgba(15,23,42,0.06)] backdrop-blur-md dark:border-white/[0.07] dark:bg-[#07111f]/70 md:py-4">
-        <div className="hero-ticker-track">
-          {[...tickerItems, ...tickerItems].map((item, index) => (
-            <span
-              key={`${item}-${index}`}
-              className="inline-flex shrink-0 items-center whitespace-nowrap px-5 text-xs font-black italic uppercase tracking-wide text-indigo-700 dark:text-indigo-300 sm:text-sm md:px-10 md:text-lg"
-            >
-              <span className="mr-5 text-violet-500/50 md:mr-10">◆</span>
-              {item}
-            </span>
-          ))}
-        </div>
-      </div>
+<div className="fixed bottom-0 left-0 right-0 z-[60] overflow-hidden whitespace-nowrap border-t border-slate-200 bg-white/80 py-3.5 shadow-[0_-20px_60px_rgba(15,23,42,0.08)] backdrop-blur-md dark:border-white/[0.07] dark:bg-[#07111f]/85 md:absolute md:z-20 md:py-4">
+  <div className="hero-ticker-track">
+    {[...tickerItems, ...tickerItems].map((item, index) => (
+      <span
+        key={`${item}-${index}`}
+        className="inline-flex shrink-0 items-center whitespace-nowrap px-6 text-sm font-black italic uppercase tracking-wide text-indigo-700 dark:text-indigo-300 sm:text-base md:px-10 md:text-xl"
+      >
+        <span className="mr-5 text-violet-500/50 md:mr-10">◆</span>
+        {item}
+      </span>
+    ))}
+  </div>
+</div>
 
       <style jsx global>{`
         @keyframes hero-ticker {
@@ -212,6 +266,15 @@ export function HeroSection() {
           }
         }
 
+        @keyframes hero-mobile-service-scroll {
+          from {
+            transform: translate3d(0, 0, 0);
+          }
+          to {
+            transform: translate3d(-33.333%, 0, 0);
+          }
+        }
+
         @keyframes hero-stitch-flow {
           to {
             stroke-dashoffset: -260;
@@ -228,10 +291,54 @@ export function HeroSection() {
           }
         }
 
+        @keyframes hero-mobile-thread-flow {
+          to {
+            stroke-dashoffset: -260;
+          }
+        }
+
+        @keyframes hero-mobile-thread-flow-reverse {
+          to {
+            stroke-dashoffset: 260;
+          }
+        }
+
+        @keyframes hero-mobile-thread-float {
+          0%,
+          100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate3d(14px, -10px, 0) rotate(1deg);
+          }
+        }
+
+        @keyframes hero-mobile-thread-float-reverse {
+          0%,
+          100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate3d(-14px, 10px, 0) rotate(-1deg);
+          }
+        }
+
+        @keyframes hero-mobile-node-pulse {
+          0%,
+          100% {
+            transform: scale(1);
+            opacity: 0.45;
+          }
+          50% {
+            transform: scale(1.55);
+            opacity: 0.95;
+          }
+        }
+
         .hero-ticker-track {
           display: inline-block;
           min-width: max-content;
-          animation: hero-ticker 34s linear infinite;
+          animation: hero-ticker 22s linear infinite;
         }
 
         .hero-card-track {
@@ -239,6 +346,17 @@ export function HeroSection() {
         }
 
         .hero-card-marquee:hover .hero-card-track {
+          animation-play-state: paused;
+        }
+
+        .hero-mobile-service-track {
+          display: flex;
+          width: max-content;
+          animation: hero-mobile-service-scroll 18s linear infinite;
+          will-change: transform;
+        }
+
+        .hero-mobile-service-slider:hover .hero-mobile-service-track {
           animation-play-state: paused;
         }
 
@@ -251,16 +369,162 @@ export function HeroSection() {
           animation: hero-float 7s ease-in-out infinite;
         }
 
+        .hero-mobile-thread-dash {
+          stroke-dasharray: 10 12;
+          animation: hero-mobile-thread-flow 14s linear infinite;
+        }
+
+        .hero-mobile-thread-dash-slow {
+          stroke-dasharray: 4 10;
+          animation: hero-mobile-thread-flow 18s linear infinite;
+        }
+
+        .hero-mobile-thread-dash-reverse {
+          stroke-dasharray: 10 12;
+          animation: hero-mobile-thread-flow-reverse 16s linear infinite;
+        }
+
+        .hero-mobile-thread-float {
+          animation: hero-mobile-thread-float 7s ease-in-out infinite;
+        }
+
+        .hero-mobile-thread-float-reverse {
+          animation: hero-mobile-thread-float-reverse 8s ease-in-out infinite;
+        }
+
+        .hero-mobile-node-pulse {
+          transform-box: fill-box;
+          transform-origin: center;
+          animation: hero-mobile-node-pulse 3.2s ease-in-out infinite;
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .hero-ticker-track,
           .hero-card-track,
+          .hero-mobile-service-track,
           .hero-stitch-dash,
-          .hero-float {
+          .hero-float,
+          .hero-mobile-thread-dash,
+          .hero-mobile-thread-dash-slow,
+          .hero-mobile-thread-dash-reverse,
+          .hero-mobile-thread-float,
+          .hero-mobile-thread-float-reverse,
+          .hero-mobile-node-pulse {
             animation: none !important;
           }
         }
       `}</style>
     </section>
+  );
+}
+
+function MobilePortfolioPreview({
+  prefersReduced,
+}: {
+  prefersReduced: boolean;
+}) {
+  const [active, setActive] = React.useState(0);
+
+  React.useEffect(() => {
+    if (prefersReduced || portfolioSlides.length <= 1) return;
+
+    const interval = window.setInterval(() => {
+      setActive((current) => (current + 1) % portfolioSlides.length);
+    }, 2600);
+
+    return () => window.clearInterval(interval);
+  }, [prefersReduced]);
+
+  const slide = portfolioSlides[active];
+
+  return (
+    <Link href={slide.href || "/portfolio"} className="group block">
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] p-2.5 shadow-2xl shadow-black/25 backdrop-blur-xl transition duration-300 group-active:scale-[0.98]">
+        <div className="relative h-[235px] overflow-hidden rounded-[1.65rem] border border-white/10 bg-slate-950 sm:h-[270px]">
+          <motion.div
+            key={slide.src}
+            initial={prefersReduced ? {} : { opacity: 0, scale: 1.08, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.6, ease }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={slide.src}
+              alt={slide.title}
+              fill
+              priority={active === 0}
+              className="object-cover object-center"
+              sizes="(max-width: 640px) calc(100vw - 32px), 460px"
+            />
+          </motion.div>
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/5" />
+
+          <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3">
+            <div className="min-w-0 text-left">
+              <p className="truncate text-lg font-black leading-tight text-white">
+                {slide.title}
+              </p>
+              <p className="mt-1 truncate text-xs font-bold text-white/58">
+                {slide.label}
+              </p>
+            </div>
+
+            <div className="flex shrink-0 gap-1">
+              {portfolioSlides.map((item, index) => (
+                <span
+                  key={item.src}
+                  className={[
+                    "h-1.5 rounded-full transition-all duration-300",
+                    active === index ? "w-6 bg-white" : "w-1.5 bg-white/35",
+                  ].join(" ")}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="absolute bottom-0 left-0 h-1 w-full bg-white/15">
+            <motion.div
+              key={active}
+              initial={prefersReduced ? { width: "100%" } : { width: "0%" }}
+              animate={{ width: "100%" }}
+              transition={{ duration: 2.6, ease: "linear" }}
+              className="h-full bg-white"
+            />
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function MobileServiceSlider() {
+  const sliderItems = [...floatingCards, ...floatingCards, ...floatingCards];
+
+  return (
+    <div className="hero-mobile-service-slider -mx-4 overflow-hidden px-4 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+      <div className="hero-mobile-service-track flex w-max gap-2.5">
+        {sliderItems.map((card, index) => (
+          <div
+            key={`${card.title}-${index}`}
+            className="flex w-52 shrink-0 items-center gap-3 rounded-[1.45rem] border border-slate-200 bg-white/70 p-3 text-left shadow-lg shadow-slate-950/5 backdrop-blur-xl dark:border-white/[0.1] dark:bg-white/[0.055] dark:shadow-black/20"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-base dark:border-white/10 dark:bg-white/[0.06]">
+              {card.icon}
+            </div>
+
+            <div className="min-w-0">
+              <p className="truncate text-xs font-black text-slate-950 dark:text-white">
+                {card.title}
+              </p>
+              <p className="mt-0.5 truncate text-[11px] font-bold text-slate-500 dark:text-white/42">
+                {card.label}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -402,8 +666,137 @@ function HeroBackground() {
 
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.07)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_42%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.055)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.055)_1px,transparent_1px)]" />
 
+      <MobileHeroThreads />
       <HeroSvgBackground />
     </>
+  );
+}
+
+function MobileHeroThreads() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-[2] overflow-hidden md:hidden"
+    >
+      <div className="absolute inset-0 opacity-45 [background-image:radial-gradient(rgba(79,70,229,0.24)_1px,transparent_1px)] [background-size:18px_18px] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_28%,black,transparent_72%)] dark:opacity-35 dark:[background-image:radial-gradient(rgba(255,255,255,0.14)_1px,transparent_1px)]" />
+
+      <svg
+        className="hero-mobile-thread-float absolute -left-24 top-[5.5rem] h-44 w-[42rem] opacity-65 dark:opacity-45"
+        viewBox="0 0 680 180"
+        fill="none"
+      >
+        <path
+          d="M20 98 C92 28 168 154 252 82 C340 6 420 148 512 66 C570 16 628 42 662 72"
+          stroke="url(#mobileHeroThreadOne)"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+
+        <path
+          className="hero-mobile-thread-dash"
+          d="M20 98 C92 28 168 154 252 82 C340 6 420 148 512 66 C570 16 628 42 662 72"
+          stroke="rgba(99,102,241,0.7)"
+          strokeWidth="1.1"
+          strokeLinecap="round"
+        />
+
+        <circle
+          className="hero-mobile-node-pulse"
+          cx="92"
+          cy="28"
+          r="4"
+          fill="#6366f1"
+        />
+        <circle
+          className="hero-mobile-node-pulse"
+          cx="252"
+          cy="82"
+          r="4"
+          fill="#38bdf8"
+          style={{ animationDelay: "0.45s" }}
+        />
+        <circle
+          className="hero-mobile-node-pulse"
+          cx="512"
+          cy="66"
+          r="4"
+          fill="#a855f7"
+          style={{ animationDelay: "0.9s" }}
+        />
+
+        <defs>
+          <linearGradient
+            id="mobileHeroThreadOne"
+            x1="20"
+            y1="0"
+            x2="662"
+            y2="180"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stopColor="#6366f1" />
+            <stop offset="0.5" stopColor="#a855f7" />
+            <stop offset="1" stopColor="#38bdf8" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <svg
+        className="absolute -right-28 top-[16rem] h-56 w-[34rem] rotate-[-8deg] opacity-45 dark:opacity-30"
+        viewBox="0 0 540 220"
+        fill="none"
+      >
+        <path
+          className="hero-mobile-thread-dash-slow"
+          d="M34 142 C92 42 184 198 260 96 C342 -12 438 158 506 54"
+          stroke="rgba(245,158,11,0.58)"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
+
+        <path
+          d="M80 158 L110 108 M188 178 L220 130 M342 122 L376 76 M454 92 L488 48"
+          stroke="rgba(15,23,42,0.22)"
+          strokeWidth="1"
+          className="dark:stroke-white/20"
+        />
+      </svg>
+
+      <svg
+        className="hero-mobile-thread-float-reverse absolute -left-36 bottom-20 h-48 w-[46rem] opacity-40 dark:opacity-28"
+        viewBox="0 0 720 200"
+        fill="none"
+      >
+        <path
+          d="M24 118 C108 188 198 42 296 126 C394 210 482 44 584 120 C642 164 686 130 712 104"
+          stroke="url(#mobileHeroThreadTwo)"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+
+        <path
+          className="hero-mobile-thread-dash-reverse"
+          d="M24 118 C108 188 198 42 296 126 C394 210 482 44 584 120 C642 164 686 130 712 104"
+          stroke="rgba(56,189,248,0.58)"
+          strokeWidth="1.1"
+          strokeLinecap="round"
+        />
+
+        <defs>
+          <linearGradient
+            id="mobileHeroThreadTwo"
+            x1="24"
+            y1="0"
+            x2="712"
+            y2="200"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stopColor="#38bdf8" />
+            <stop offset="0.5" stopColor="#6366f1" />
+            <stop offset="1" stopColor="#f59e0b" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
   );
 }
 
