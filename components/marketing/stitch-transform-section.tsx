@@ -88,12 +88,12 @@ export function StitchTransformSection() {
       ref={ref}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative isolate overflow-hidden bg-[#f7f7fb] px-4 py-10 text-slate-950 dark:bg-[#050814] dark:text-white sm:py-12 md:px-8 md:py-24 lg:py-28"
+      className="relative isolate overflow-hidden bg-[#F7F8FF] px-4 py-10 text-[#050816] dark:bg-[#050814] dark:text-slate-100 sm:py-12 md:px-8 md:py-24 lg:py-28"
     >
       <SectionBackground />
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-indigo-500/25 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-px bg-gradient-to-r from-transparent via-violet-500/25 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-slate-300/80 to-transparent dark:via-white/15" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-px bg-gradient-to-r from-transparent via-slate-300/80 to-transparent dark:via-white/15" />
 
       <div className="page-shell relative z-10">
         <motion.div
@@ -102,19 +102,19 @@ export function StitchTransformSection() {
           transition={{ duration: 0.35, ease }}
           className="mx-auto mb-8 max-w-4xl text-center md:mb-12"
         >
-          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.06] dark:text-indigo-200 sm:tracking-[0.28em]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#6D35FF]/20 bg-white/80 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-[#5B21B6] shadow-sm backdrop-blur dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300 sm:tracking-[0.28em]">
             <Sparkles className="h-3.5 w-3.5" />
             Stitch by stitch
           </div>
 
-          <h2 className="mt-4 text-3xl font-black tracking-[-0.05em] text-slate-950 dark:text-white sm:text-4xl md:mt-5 md:text-5xl lg:text-6xl">
+          <h2 className="mt-4 text-3xl font-black tracking-[-0.05em] text-[#050816] dark:text-slate-100 sm:text-4xl md:mt-5 md:text-5xl lg:text-6xl">
             Your artwork, built to run on a{" "}
-            <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-blue-600 bg-clip-text text-transparent dark:from-indigo-300 dark:via-violet-300 dark:to-blue-300">
+            <span className="bg-gradient-to-r from-[#6D35FF] via-[#7C3AED] to-[#2563EB] bg-clip-text text-transparent dark:from-indigo-300 dark:via-cyan-300 dark:to-blue-300">
               real machine.
             </span>
           </h2>
 
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-600 dark:text-white/58 md:mt-5 md:text-base md:leading-7">
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-[#525866] dark:text-slate-400 md:mt-5 md:text-base md:leading-7">
             Digitizing is not just tracing. Every file is built with correct
             underlay, optimized stitch density, clean routing, and production
             logic for commercial embroidery machines.
@@ -124,9 +124,9 @@ export function StitchTransformSection() {
             {trustItems.map((item) => (
               <span
                 key={item}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/70 px-2.5 py-1.5 text-[10px] font-bold text-slate-600 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.05] dark:text-white/55 sm:px-3 sm:text-[11px]"
+                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 px-2.5 py-1.5 text-[10px] font-bold text-slate-600 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-[#0B1120] dark:text-slate-300 sm:px-3 sm:text-[11px]"
               >
-                <CheckCircle2 className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-300" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-[#2563EB] dark:text-indigo-300" />
                 {item}
               </span>
             ))}
@@ -243,18 +243,19 @@ function MobilePreview({
   setActiveIndex: React.Dispatch<React.SetStateAction<number>>;
 }) {
   return (
-    <div className="mx-auto w-full overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white/80 p-2.5 shadow-lg shadow-slate-950/10 backdrop-blur-xl dark:border-white/[0.1] dark:bg-white/[0.055] dark:shadow-black/30 sm:rounded-[1.75rem] sm:p-3">
+    <div className="mx-auto w-full overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white/85 p-2.5 shadow-lg shadow-slate-950/10 backdrop-blur-xl dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/30 sm:rounded-[1.75rem] sm:p-3">
       <div className="mb-2.5 grid gap-2 px-1 sm:mb-3 sm:gap-3">
         <div className="text-center">
-          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-300 sm:text-[10px]">
+          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2563EB] dark:text-indigo-300 sm:text-[10px]">
             Preview
           </p>
-          <h3 className="mt-1 text-base font-black tracking-tight text-slate-950 dark:text-white sm:text-lg">
+
+          <h3 className="mt-1 text-base font-black tracking-tight text-[#050816] dark:text-slate-100 sm:text-lg">
             Before / After
           </h3>
         </div>
 
-        <div className="mx-auto flex rounded-full border border-slate-200 bg-slate-50 p-1 dark:border-white/10 dark:bg-white/[0.06]">
+        <div className="mx-auto flex rounded-full border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-[#0F172A]">
           {(["before", "after"] as const).map((view) => (
             <button
               key={view}
@@ -263,8 +264,8 @@ function MobilePreview({
               className={[
                 "rounded-full px-3.5 py-1.5 text-[9px] font-black uppercase tracking-[0.12em] transition sm:px-4 sm:text-[10px]",
                 mobileView === view
-                  ? "bg-slate-950 text-white dark:bg-white dark:text-slate-950"
-                  : "text-slate-500 dark:text-white/45",
+                  ? "bg-gradient-to-r from-[#6D35FF] to-[#2563EB] text-white shadow-sm shadow-[#6D35FF]/20 dark:from-indigo-500 dark:to-blue-500"
+                  : "text-slate-500 hover:text-[#050816] dark:text-slate-400 dark:hover:text-slate-100",
               ].join(" ")}
             >
               {view}
@@ -273,7 +274,7 @@ function MobilePreview({
         </div>
       </div>
 
-      <div className="relative h-[260px] overflow-hidden rounded-[1.15rem] border border-slate-200 bg-slate-950 dark:border-white/10 dark:bg-slate-950 xs:h-[290px] sm:h-[340px]">
+      <div className="relative h-[260px] overflow-hidden rounded-[1.15rem] border border-slate-200 bg-[#050816] dark:border-slate-800 xs:h-[290px] sm:h-[340px]">
         <Image
           key={`${activeIndex}-${mobileView}`}
           src={mobileView === "before" ? activeImage.real : activeImage.digital}
@@ -285,7 +286,7 @@ function MobilePreview({
         />
 
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/35 to-transparent p-3 text-center sm:p-4">
-          <span className="inline-flex rounded-full bg-white px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-slate-950 sm:text-[10px]">
+          <span className="inline-flex rounded-full bg-white px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#050816] sm:text-[10px]">
             {mobileView === "before" ? "Original artwork" : "Digitized output"}
           </span>
         </div>
@@ -313,20 +314,21 @@ function DesktopPreview({
 }) {
   return (
     <>
-      <div className="absolute -inset-6 rounded-[3rem] bg-gradient-to-br from-indigo-500/20 via-violet-500/10 to-blue-500/20 blur-3xl" />
+      <div className="absolute -inset-6 rounded-[3rem] bg-gradient-to-br from-[#6D35FF]/18 via-[#7C3AED]/8 to-[#2563EB]/18 blur-3xl dark:from-indigo-500/16 dark:via-cyan-500/8 dark:to-blue-500/12" />
 
-      <div className="relative rounded-[2rem] border border-slate-200 bg-white/75 p-4 shadow-2xl shadow-slate-950/10 backdrop-blur-xl dark:border-white/[0.1] dark:bg-white/[0.055] dark:shadow-black/30">
+      <div className="relative rounded-[2rem] border border-slate-200 bg-white/85 p-4 shadow-2xl shadow-slate-950/10 backdrop-blur-xl dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/30">
         <div className="mb-4 flex items-center justify-between gap-4 px-1">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-indigo-600 dark:text-indigo-300">
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#2563EB] dark:text-indigo-300">
               Before / After
             </p>
-            <h3 className="mt-1 text-xl font-black tracking-tight text-slate-950 dark:text-white">
+
+            <h3 className="mt-1 text-xl font-black tracking-tight text-[#050816] dark:text-slate-100">
               Artwork to stitch preview
             </h3>
           </div>
 
-          <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:border-white/10 dark:bg-white/[0.06] dark:text-white/45">
+          <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:border-slate-700 dark:bg-[#0F172A] dark:text-slate-400">
             Auto running
           </div>
         </div>
@@ -337,7 +339,7 @@ function DesktopPreview({
             setActiveIndex={setActiveIndex}
           />
 
-          <div className="order-1 min-h-[420px] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-950/95 p-3 dark:border-white/10 lg:order-2 lg:min-h-[500px]">
+          <div className="order-1 min-h-[420px] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-[#050816] p-3 dark:border-slate-800 lg:order-2 lg:min-h-[500px]">
             <motion.div
               key={activeIndex}
               initial={prefersReduced ? false : { opacity: 0, scale: 0.98 }}
@@ -386,10 +388,12 @@ function ThumbnailRow({
             aria-pressed={isActive}
             className={[
               "relative shrink-0 overflow-hidden rounded-xl border transition-all duration-200 sm:rounded-2xl",
-              mobile ? "h-10 w-10 sm:h-12 sm:w-12" : "h-16 w-16 lg:h-[72px] lg:w-[72px]",
+              mobile
+                ? "h-10 w-10 sm:h-12 sm:w-12"
+                : "h-16 w-16 lg:h-[72px] lg:w-[72px]",
               isActive
-                ? "scale-105 border-indigo-500 shadow-lg shadow-indigo-500/20"
-                : "border-slate-200 opacity-60 hover:scale-105 hover:opacity-100 dark:border-white/10",
+                ? "scale-105 border-[#6D35FF] shadow-lg shadow-[#6D35FF]/20"
+                : "border-slate-200 opacity-60 hover:scale-105 hover:border-[#2563EB]/40 hover:opacity-100 dark:border-slate-700",
             ].join(" ")}
           >
             <Image
@@ -417,19 +421,19 @@ function DetailsPanel({ compact = false }: { compact?: boolean }) {
   return (
     <div
       className={[
-        "rounded-[1.5rem] border border-slate-200 bg-white/75 shadow-sm shadow-slate-950/5 backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.045] dark:shadow-black/20 md:rounded-[1.75rem]",
+        "rounded-[1.5rem] border border-slate-200 bg-white/85 shadow-sm shadow-slate-950/5 backdrop-blur-xl dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/20 md:rounded-[1.75rem]",
         compact ? "p-4 sm:p-5" : "p-6",
       ].join(" ")}
     >
-      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-indigo-600 dark:text-indigo-300 md:tracking-[0.24em]">
+      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#2563EB] dark:text-indigo-300 md:tracking-[0.24em]">
         Production logic
       </p>
 
-      <h3 className="mt-2.5 text-lg font-black tracking-tight text-slate-950 dark:text-white sm:text-xl md:mt-3 md:text-2xl">
+      <h3 className="mt-2.5 text-lg font-black tracking-tight text-[#050816] dark:text-slate-100 sm:text-xl md:mt-3 md:text-2xl">
         Built for clean stitches, fewer trims, and smoother runs.
       </h3>
 
-      <p className="mt-2.5 text-sm leading-6 text-slate-600 dark:text-white/52 md:mt-3 md:leading-7">
+      <p className="mt-2.5 text-sm leading-6 text-[#525866] dark:text-slate-400 md:mt-3 md:leading-7">
         Each design is planned for fabric behavior, stitch type, direction,
         density, and machine movement — not only how the artwork looks on
         screen.
@@ -453,7 +457,7 @@ function CalloutCards({
         <motion.div
           key={label}
           className={[
-            "group rounded-[1.35rem] border border-slate-200 bg-white/75 shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-950/5 dark:border-white/[0.08] dark:bg-white/[0.045] dark:hover:border-white/[0.16] dark:hover:shadow-black/20 md:rounded-[1.5rem]",
+            "group rounded-[1.35rem] border border-slate-200 bg-white/85 shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:bg-white hover:shadow-xl hover:shadow-slate-950/5 dark:border-slate-800 dark:bg-[#0B1120] dark:hover:border-slate-700 dark:hover:bg-[#0F172A] dark:hover:shadow-black/20 md:rounded-[1.5rem]",
             compact ? "p-3.5 sm:p-4" : "p-4",
           ].join(" ")}
           initial={prefersReduced ? false : { opacity: 0, y: 12 }}
@@ -465,15 +469,16 @@ function CalloutCards({
           }}
         >
           <div className="flex items-start gap-3 md:gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/[0.06] md:h-11 md:w-11 md:rounded-2xl">
-              <CheckCircle2 className="h-5 w-5 text-indigo-600 dark:text-indigo-300" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#6D35FF]/15 bg-[#6D35FF]/10 dark:border-indigo-400/20 dark:bg-indigo-400/10 md:h-11 md:w-11 md:rounded-2xl">
+              <CheckCircle2 className="h-5 w-5 text-[#2563EB] dark:text-indigo-300" />
             </div>
 
             <div>
-              <div className="text-sm font-black text-slate-950 dark:text-white">
+              <div className="text-sm font-black text-[#050816] dark:text-slate-100">
                 {label}
               </div>
-              <div className="mt-1 text-xs leading-5 text-slate-500 dark:text-white/48 md:leading-6">
+
+              <div className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400 md:leading-6">
                 {desc}
               </div>
             </div>
@@ -487,9 +492,9 @@ function CalloutCards({
 function SectionBackground() {
   return (
     <>
-      <div className="absolute inset-0 -z-30 bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(168,85,247,0.1),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(59,130,246,0.08),transparent_38%)] md:bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.14),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(168,85,247,0.12),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(59,130,246,0.1),transparent_38%)]" />
+      <div className="absolute inset-0 -z-30 bg-[radial-gradient(circle_at_18%_20%,rgba(109,53,255,0.13),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(37,99,235,0.1),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(14,165,233,0.08),transparent_38%)] dark:bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(59,130,246,0.08),transparent_38%)]" />
 
-      <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:34px_34px] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] md:bg-[size:42px_42px] md:dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)]" />
+      <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:34px_34px] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] md:bg-[size:42px_42px]" />
 
       <ThreadLines position="top" />
       <ThreadLines position="bottom" />
@@ -499,13 +504,13 @@ function SectionBackground() {
 
 function ThreadLines({ position }: { position: "top" | "bottom" }) {
   const isBottom = position === "bottom";
-  const gradientId = isBottom ? "threadGoldBlueBottom" : "threadGoldBlueTop";
+  const gradientId = isBottom ? "threadPurpleBlueBottom" : "threadPurpleBlueTop";
 
   return (
     <svg
       viewBox="0 0 1200 120"
       className={[
-        "pointer-events-none absolute inset-x-0 hidden h-28 w-full opacity-55 dark:opacity-35 md:block",
+        "pointer-events-none absolute inset-x-0 hidden h-28 w-full opacity-42 dark:opacity-26 md:block",
         isBottom ? "bottom-0 rotate-180" : "top-0",
       ].join(" ")}
       preserveAspectRatio="none"
@@ -522,7 +527,7 @@ function ThreadLines({ position }: { position: "top" | "bottom" }) {
       <path
         d="M0 42 C120 8 210 92 335 42 C470 -12 555 112 702 48 C835 -8 950 74 1200 32"
         fill="none"
-        stroke="rgba(99,102,241,0.5)"
+        stroke="rgba(109,53,255,0.42)"
         strokeWidth="1.2"
         strokeLinecap="round"
         className="stitch-transform-dash"
@@ -531,7 +536,7 @@ function ThreadLines({ position }: { position: "top" | "bottom" }) {
       <path
         d="M0 78 C150 112 244 20 390 74 C540 132 650 22 790 76 C930 130 1040 56 1200 84"
         fill="none"
-        stroke="rgba(196,149,42,0.5)"
+        stroke="rgba(37,99,235,0.38)"
         strokeWidth="1.5"
         strokeLinecap="round"
         className="stitch-transform-dash-delayed"
@@ -546,9 +551,9 @@ function ThreadLines({ position }: { position: "top" | "bottom" }) {
           y2="120"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#c4952a" />
-          <stop offset="0.45" stopColor="#6366f1" />
-          <stop offset="1" stopColor="#38bdf8" />
+          <stop stopColor="#6D35FF" />
+          <stop offset="0.45" stopColor="#2563EB" />
+          <stop offset="1" stopColor="#0EA5E9" />
         </linearGradient>
       </defs>
     </svg>

@@ -25,7 +25,7 @@ export function FinalCtaBanner() {
   const prefersReduced = useReducedMotion();
 
   return (
-    <section className="relative isolate overflow-hidden bg-[#f7f7fb] px-4 py-12 text-slate-950 dark:bg-[#050814] dark:text-white md:px-8 md:py-20 lg:py-24">
+    <section className="relative isolate overflow-hidden bg-[#F7F8FF] px-4 py-12 text-[#050816] dark:bg-[#050814] dark:text-slate-100 md:px-8 md:py-20 lg:py-24">
       <CtaBackground />
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-slate-300/80 to-transparent dark:via-white/15" />
@@ -39,7 +39,7 @@ export function FinalCtaBanner() {
           transition={{ duration: 0.38, ease }}
           className="relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white/90 p-3 shadow-xl shadow-slate-950/10 backdrop-blur-xl dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/30 sm:rounded-[2rem] md:p-4"
         >
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/8 via-transparent to-cyan-500/8 dark:from-indigo-400/8 dark:to-cyan-400/6" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#6D35FF]/8 via-transparent to-[#0EA5E9]/8 dark:from-indigo-400/8 dark:to-cyan-400/6" />
           <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-bl-full bg-gradient-to-br from-slate-100 to-transparent opacity-80 dark:from-indigo-400/10" />
 
           <div className="relative overflow-hidden rounded-[1.45rem] border border-slate-200 bg-white/85 px-5 py-8 dark:border-slate-800 dark:bg-[#0F172A] sm:rounded-[1.75rem] md:px-8 md:py-10 lg:px-10 lg:py-12">
@@ -47,19 +47,19 @@ export function FinalCtaBanner() {
 
             <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_0.72fr] lg:items-center">
               <div className="text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700 shadow-sm backdrop-blur dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300 sm:tracking-[0.24em]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#6D35FF]/20 bg-white/80 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-[#5B21B6] shadow-sm backdrop-blur dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300 sm:tracking-[0.24em]">
                   <Sparkles className="h-3.5 w-3.5" />
                   Get started today
                 </div>
 
-                <h2 className="mx-auto mt-5 max-w-3xl text-3xl font-black tracking-[-0.055em] text-slate-950 dark:text-slate-100 sm:text-4xl md:text-5xl lg:mx-0 lg:text-6xl">
+                <h2 className="mx-auto mt-5 max-w-3xl text-3xl font-black tracking-[-0.055em] text-[#050816] dark:text-slate-100 sm:text-4xl md:text-5xl lg:mx-0 lg:text-6xl">
                   Ready for embroidery files that{" "}
-                  <span className="bg-gradient-to-r from-indigo-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent dark:from-indigo-300 dark:via-cyan-300 dark:to-blue-300">
+                  <span className="bg-gradient-to-r from-[#6D35FF] via-[#7C3AED] to-[#2563EB] bg-clip-text text-transparent dark:from-indigo-300 dark:via-cyan-300 dark:to-blue-300">
                     run without rework?
                   </span>
                 </h2>
 
-                <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base lg:mx-0">
+                <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-[#525866] dark:text-slate-400 sm:text-base lg:mx-0">
                   Send us your artwork and get a production-ready proof back
                   within 24 hours. No setup confusion, no guesswork — just clean
                   files your decorator can run.
@@ -71,7 +71,7 @@ export function FinalCtaBanner() {
                       key={item}
                       className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-[11px] font-bold text-slate-600 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-[#111C31] dark:text-slate-300"
                     >
-                      <CheckCircle2 className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-300" />
+                      <CheckCircle2 className="h-3.5 w-3.5 text-[#2563EB] dark:text-indigo-300" />
                       {item}
                     </span>
                   ))}
@@ -80,10 +80,9 @@ export function FinalCtaBanner() {
                 <div className="mt-8 flex flex-col justify-center gap-2.5 sm:flex-row lg:justify-start">
                   <Button
                     asChild
-                    variant="premium"
                     shape="pill"
                     size="lg"
-                    className="min-h-[46px] w-full shadow-lg shadow-indigo-500/20 sm:w-auto"
+                    className="min-h-[46px] w-full border-0 bg-gradient-to-r from-[#6D35FF] to-[#2563EB] text-white shadow-lg shadow-[#6D35FF]/20 transition hover:-translate-y-0.5 hover:opacity-95 dark:from-indigo-500 dark:to-blue-500 sm:w-auto"
                   >
                     <Link href="/contact">
                       Get a free quote
@@ -96,7 +95,7 @@ export function FinalCtaBanner() {
                     variant="outline"
                     shape="pill"
                     size="lg"
-                    className="min-h-[46px] w-full border-slate-300 bg-white/80 text-slate-900 backdrop-blur hover:bg-white dark:border-slate-700 dark:bg-[#0B1120] dark:text-slate-100 dark:hover:bg-[#111C31] sm:w-auto"
+                    className="min-h-[46px] w-full border-slate-300 bg-white/80 text-[#050816] backdrop-blur hover:-translate-y-0.5 hover:bg-white dark:border-slate-700 dark:bg-[#0B1120] dark:text-slate-100 dark:hover:bg-[#111C31] sm:w-auto"
                   >
                     <Link href="/order">Place direct order</Link>
                   </Button>
@@ -106,7 +105,7 @@ export function FinalCtaBanner() {
                     variant="ghost"
                     shape="pill"
                     size="lg"
-                    className="min-h-[46px] w-full border border-slate-300 bg-white/40 text-slate-800 backdrop-blur hover:bg-white/80 dark:border-slate-700 dark:bg-[#0B1120]/70 dark:text-slate-200 dark:hover:bg-[#111C31] sm:w-auto"
+                    className="min-h-[46px] w-full border border-slate-300 bg-white/45 text-[#050816] backdrop-blur hover:-translate-y-0.5 hover:bg-white/80 dark:border-slate-700 dark:bg-[#0B1120]/70 dark:text-slate-200 dark:hover:bg-[#111C31] sm:w-auto"
                   >
                     <Link href="/login">Client portal</Link>
                   </Button>
@@ -115,32 +114,33 @@ export function FinalCtaBanner() {
 
               <div className="hidden lg:block">
                 <div className="relative">
-                  <div className="absolute -inset-6 rounded-[3rem] bg-gradient-to-br from-indigo-500/15 via-cyan-500/8 to-blue-500/10 blur-3xl" />
+                  <div className="absolute -inset-6 rounded-[3rem] bg-gradient-to-br from-[#6D35FF]/18 via-[#7C3AED]/8 to-[#2563EB]/18 blur-3xl dark:from-indigo-500/16 dark:via-cyan-500/8 dark:to-blue-500/12" />
 
                   <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white/90 p-5 shadow-xl shadow-slate-950/10 backdrop-blur-xl dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/30">
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/8 via-transparent to-cyan-500/8 dark:from-indigo-400/8 dark:to-cyan-400/6" />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#6D35FF]/8 via-transparent to-[#0EA5E9]/8 dark:from-indigo-400/8 dark:to-cyan-400/6" />
 
                     <div className="relative z-10">
                       <div className="mb-5 flex items-center justify-between gap-4">
                         <div>
-                          <p className="text-[10px] font-black uppercase tracking-[0.26em] text-indigo-600 dark:text-indigo-300">
+                          <p className="text-[10px] font-black uppercase tracking-[0.26em] text-[#2563EB] dark:text-indigo-300">
                             Start order
                           </p>
-                          <h3 className="mt-1 text-xl font-black tracking-tight text-slate-950 dark:text-slate-100">
+
+                          <h3 className="mt-1 text-xl font-black tracking-tight text-[#050816] dark:text-slate-100">
                             Upload artwork now
                           </h3>
                         </div>
 
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-500/10 bg-indigo-500/10 text-indigo-600 dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#6D35FF]/10 bg-[#6D35FF]/10 text-[#2563EB] dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300">
                           <UploadCloud className="h-5 w-5" />
                         </div>
                       </div>
 
                       <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-[#0F172A]">
-                        <div className="rounded-2xl border border-dashed border-indigo-500/35 bg-white/80 p-5 text-center dark:border-indigo-400/30 dark:bg-[#0B1120]">
-                          <UploadCloud className="mx-auto h-8 w-8 text-indigo-600 dark:text-indigo-300" />
+                        <div className="rounded-2xl border border-dashed border-[#6D35FF]/35 bg-white/80 p-5 text-center dark:border-indigo-400/30 dark:bg-[#0B1120]">
+                          <UploadCloud className="mx-auto h-8 w-8 text-[#2563EB] dark:text-indigo-300" />
 
-                          <p className="mt-3 text-sm font-black text-slate-950 dark:text-slate-100">
+                          <p className="mt-3 text-sm font-black text-[#050816] dark:text-slate-100">
                             JPG, PNG, PDF, AI, EPS
                           </p>
 
@@ -154,7 +154,8 @@ export function FinalCtaBanner() {
                             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                               Proof delivery
                             </span>
-                            <span className="text-xs font-black text-slate-950 dark:text-slate-100">
+
+                            <span className="text-xs font-black text-[#050816] dark:text-slate-100">
                               Within 24 hr
                             </span>
                           </div>
@@ -163,17 +164,19 @@ export function FinalCtaBanner() {
                             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                               Final files
                             </span>
-                            <span className="text-xs font-black text-slate-950 dark:text-slate-100">
+
+                            <span className="text-xs font-black text-[#050816] dark:text-slate-100">
                               DST / PES
                             </span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="mt-4 rounded-2xl border border-indigo-500/15 bg-indigo-500/10 p-4 dark:border-indigo-400/20 dark:bg-indigo-400/10">
+                      <div className="mt-4 rounded-2xl border border-[#2563EB]/15 bg-[#2563EB]/10 p-4 dark:border-indigo-400/20 dark:bg-indigo-400/10">
                         <div className="flex items-start gap-3">
-                          <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-indigo-700 dark:text-indigo-300" />
-                          <p className="text-xs leading-6 text-slate-600 dark:text-slate-400">
+                          <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB] dark:text-indigo-300" />
+
+                          <p className="text-xs leading-6 text-[#525866] dark:text-slate-400">
                             Proof images stay visible for review. Final machine
                             files unlock after payment approval.
                           </p>
@@ -238,12 +241,12 @@ function CtaBackground() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.11),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(168,85,247,0.06),transparent_38%)] dark:bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(168,85,247,0.08),transparent_38%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(109,53,255,0.13),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(37,99,235,0.1),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(14,165,233,0.08),transparent_38%)] dark:bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(59,130,246,0.08),transparent_38%)]" />
 
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:34px_34px] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] md:bg-[size:42px_42px]" />
 
       <svg
-        className="cta-thread-float absolute -left-32 top-8 hidden h-64 w-[52rem] opacity-35 dark:opacity-22 md:block"
+        className="cta-thread-float absolute -left-32 top-8 hidden h-64 w-[52rem] opacity-42 dark:opacity-28 md:block"
         viewBox="0 0 840 260"
         fill="none"
       >
@@ -253,10 +256,11 @@ function CtaBackground() {
           strokeWidth="2.4"
           strokeLinecap="round"
         />
+
         <path
           className="cta-thread-dash"
           d="M24 140 C118 42 212 226 326 108 C442 -12 548 214 662 92 C728 22 778 56 820 84"
-          stroke="rgba(99,102,241,0.45)"
+          stroke="rgba(109,53,255,0.42)"
           strokeWidth="1.2"
           strokeLinecap="round"
         />
@@ -270,15 +274,15 @@ function CtaBackground() {
             y2="260"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#6366f1" />
-            <stop offset="0.5" stopColor="#38bdf8" />
-            <stop offset="1" stopColor="#2563eb" />
+            <stop stopColor="#6D35FF" />
+            <stop offset="0.5" stopColor="#2563EB" />
+            <stop offset="1" stopColor="#0EA5E9" />
           </linearGradient>
         </defs>
       </svg>
 
       <svg
-        className="cta-thread-float absolute -right-32 bottom-8 hidden h-64 w-[52rem] rotate-180 opacity-30 dark:opacity-18 md:block"
+        className="cta-thread-float absolute -right-32 bottom-8 hidden h-64 w-[52rem] rotate-180 opacity-36 dark:opacity-24 md:block"
         viewBox="0 0 840 260"
         fill="none"
       >
@@ -288,10 +292,11 @@ function CtaBackground() {
           strokeWidth="2.4"
           strokeLinecap="round"
         />
+
         <path
           className="cta-thread-dash"
           d="M24 140 C118 42 212 226 326 108 C442 -12 548 214 662 92 C728 22 778 56 820 84"
-          stroke="rgba(56,189,248,0.38)"
+          stroke="rgba(37,99,235,0.4)"
           strokeWidth="1.2"
           strokeLinecap="round"
         />
@@ -305,9 +310,9 @@ function CtaBackground() {
             y2="260"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#38bdf8" />
-            <stop offset="0.5" stopColor="#6366f1" />
-            <stop offset="1" stopColor="#2563eb" />
+            <stop stopColor="#0EA5E9" />
+            <stop offset="0.5" stopColor="#2563EB" />
+            <stop offset="1" stopColor="#6D35FF" />
           </linearGradient>
         </defs>
       </svg>

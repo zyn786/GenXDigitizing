@@ -1,3 +1,4 @@
 - [Phase 11A.0 hardening](phase_11a0_hardening.md) — Asset auth, designer assignment guards, payment+proof role narrowing, FINAL_FILE filtering applied May 2026
 - [Phase 11A.1 proof viewer](phase_11a1_proof_viewer.md) — Client proof-files endpoint + UI with signed URLs, MIME allowlist, proofStatus gate added May 2026
 - [Phase 11A.2 admin proof parity](phase_11a2_admin_proof_parity.md) — Admin/designer proof-files endpoint + AdminProofPreview + uploader fileType selector added May 2026
+- [Phase 11B production hardening](phase_11b_hardening.md) — middleware.ts edge guards, rate limiting, OG metadata, client status label refresh applied 2026-05-10

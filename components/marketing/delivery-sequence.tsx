@@ -29,9 +29,9 @@ const steps = [
     time: "2 min setup",
     file: "Logo.png",
     output: "Order brief created",
-    color: "from-indigo-500/35 via-blue-500/12 to-transparent",
-    iconColor: "text-indigo-700 dark:text-indigo-300",
-    soft: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300",
+    color: "from-[#2563EB]/28 via-[#0EA5E9]/10 to-transparent",
+    iconColor: "text-[#2563EB] dark:text-indigo-300",
+    soft: "bg-[#2563EB]/10 text-[#1D4ED8] dark:bg-indigo-400/10 dark:text-indigo-300",
   },
   {
     number: "02",
@@ -43,9 +43,9 @@ const steps = [
     time: "Within 24 hr",
     file: "Proof.jpg",
     output: "Visual proof ready",
-    color: "from-violet-500/35 via-fuchsia-500/12 to-transparent",
-    iconColor: "text-violet-700 dark:text-violet-300",
-    soft: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
+    color: "from-[#6D35FF]/30 via-[#7C3AED]/10 to-transparent",
+    iconColor: "text-[#6D35FF] dark:text-cyan-300",
+    soft: "bg-[#6D35FF]/10 text-[#5B21B6] dark:bg-cyan-400/10 dark:text-cyan-300",
   },
   {
     number: "03",
@@ -57,9 +57,9 @@ const steps = [
     time: "Revision path",
     file: "Revision note",
     output: "Approved proof",
-    color: "from-amber-500/35 via-orange-500/12 to-transparent",
-    iconColor: "text-amber-700 dark:text-amber-300",
-    soft: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+    color: "from-[#7C3AED]/28 via-[#2563EB]/10 to-transparent",
+    iconColor: "text-[#7C3AED] dark:text-blue-300",
+    soft: "bg-[#7C3AED]/10 text-[#6D28D9] dark:bg-blue-400/10 dark:text-blue-300",
   },
   {
     number: "04",
@@ -71,9 +71,9 @@ const steps = [
     time: "Files unlocked",
     file: "DST / PES / EMB",
     output: "Production-ready",
-    color: "from-emerald-500/35 via-teal-500/12 to-transparent",
-    iconColor: "text-emerald-700 dark:text-emerald-300",
-    soft: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    color: "from-[#0EA5E9]/28 via-[#2563EB]/10 to-transparent",
+    iconColor: "text-[#0284C7] dark:text-indigo-300",
+    soft: "bg-[#0EA5E9]/10 text-[#0369A1] dark:bg-indigo-400/10 dark:text-indigo-300",
   },
 ];
 
@@ -124,9 +124,12 @@ export function DeliverySequence() {
     <section
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative isolate overflow-hidden bg-[#f7f7fb] px-4 py-10 text-slate-950 dark:bg-[#050814] dark:text-white sm:py-12 md:px-8 md:py-20 lg:py-28"
+      className="relative isolate overflow-hidden bg-[#F7F8FF] px-4 py-10 text-[#050816] dark:bg-[#050814] dark:text-slate-100 sm:py-12 md:px-8 md:py-20 lg:py-28"
     >
       <DeliveryBackground />
+
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-slate-300/80 to-transparent dark:via-white/15" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-px bg-gradient-to-r from-transparent via-slate-300/80 to-transparent dark:via-white/15" />
 
       <div className="page-shell relative z-10">
         <motion.div
@@ -136,19 +139,19 @@ export function DeliverySequence() {
           transition={{ duration: 0.35, ease }}
           className="mx-auto mb-7 max-w-4xl text-center md:mb-12"
         >
-          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.06] dark:text-indigo-200 sm:tracking-[0.28em]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#6D35FF]/20 bg-white/80 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-[#5B21B6] shadow-sm backdrop-blur dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300 sm:tracking-[0.28em]">
             <Sparkles className="h-3.5 w-3.5" />
             How it works
           </div>
 
-          <h2 className="mt-4 text-3xl font-black tracking-[-0.045em] text-slate-950 dark:text-white sm:text-4xl md:mt-5 md:text-5xl lg:text-6xl">
+          <h2 className="mt-4 text-3xl font-black tracking-[-0.045em] text-[#050816] dark:text-slate-100 sm:text-4xl md:mt-5 md:text-5xl lg:text-6xl">
             Simple order flow to{" "}
-            <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-blue-600 bg-clip-text text-transparent dark:from-indigo-300 dark:via-violet-300 dark:to-blue-300">
+            <span className="bg-gradient-to-r from-[#6D35FF] via-[#7C3AED] to-[#2563EB] bg-clip-text text-transparent dark:from-indigo-300 dark:via-cyan-300 dark:to-blue-300">
               production-ready files.
             </span>
           </h2>
 
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-600 dark:text-white/58 md:mt-5 md:text-base md:leading-7">
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-[#525866] dark:text-slate-400 md:mt-5 md:text-base md:leading-7">
             Upload artwork, review the proof, request revisions, and unlock
             final machine files after payment approval.
           </p>
@@ -164,17 +167,17 @@ export function DeliverySequence() {
           {trustItems.map((item) => (
             <span
               key={item}
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/70 px-2.5 py-1.5 text-[10px] font-bold text-slate-600 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.05] dark:text-white/55 sm:px-3 sm:text-[11px]"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 px-2.5 py-1.5 text-[10px] font-bold text-slate-600 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-[#0B1120] dark:text-slate-300 sm:px-3 sm:text-[11px]"
             >
-              <CheckCircle2 className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-300" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#2563EB] dark:text-indigo-300" />
               {item}
             </span>
           ))}
         </motion.div>
 
-        {/* Mobile / tablet premium vertical timeline */}
+        {/* Mobile / tablet timeline */}
         <div className="relative mx-auto grid max-w-xl gap-9 pb-2 lg:hidden">
-          <div className="absolute bottom-6 left-[28px] top-3 w-px bg-gradient-to-b from-violet-500/35 via-slate-300/50 to-transparent dark:from-violet-400/45 dark:via-white/10 dark:to-transparent" />
+          <div className="absolute bottom-6 left-[28px] top-3 w-px bg-gradient-to-b from-[#6D35FF]/35 via-slate-300/50 to-transparent dark:from-indigo-400/45 dark:via-white/10 dark:to-transparent" />
 
           {steps.map((step, index) => {
             const Icon = step.icon;
@@ -194,38 +197,38 @@ export function DeliverySequence() {
               >
                 <div className="relative z-10 pt-1">
                   <div
-                    className="text-4xl font-black leading-none tracking-[-0.1em] text-violet-600 dark:text-violet-500 sm:text-5xl"
+                    className="bg-gradient-to-b from-[#6D35FF] to-[#2563EB] bg-clip-text text-4xl font-black leading-none tracking-[-0.1em] text-transparent sm:text-5xl"
                     style={{
                       textShadow:
-                        "0 0 18px rgba(168,85,247,0.55), 0 0 34px rgba(99,102,241,0.25)",
+                        "0 0 18px rgba(109,53,255,0.28), 0 0 34px rgba(37,99,235,0.18)",
                     }}
                   >
                     {step.number}
                   </div>
                 </div>
 
-                <div className="group relative overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white/80 p-4 shadow-lg shadow-slate-950/10 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.065] dark:shadow-black/20 sm:rounded-[1.5rem] sm:p-5">
+                <div className="group relative overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white/85 p-4 shadow-lg shadow-slate-950/10 backdrop-blur-xl dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/20 sm:rounded-[1.5rem] sm:p-5">
                   <div
-                    className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${step.color} opacity-20 dark:opacity-25`}
+                    className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${step.color} opacity-35 dark:opacity-25`}
                   />
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(15,23,42,0.08)_1px,transparent_1px)] [background-size:18px_18px] opacity-25 dark:bg-[radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] dark:opacity-30" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(15,23,42,0.055)_1px,transparent_1px)] [background-size:18px_18px] opacity-25 dark:bg-[radial-gradient(rgba(255,255,255,0.035)_1px,transparent_1px)] dark:opacity-30" />
 
                   <div className="relative z-10">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-violet-700 dark:border-violet-400/20 dark:bg-violet-400/10 dark:text-violet-300">
+                      <span className="rounded-full border border-[#6D35FF]/20 bg-[#6D35FF]/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#5B21B6] dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300">
                         Step {step.number}
                       </span>
 
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white/70 shadow-sm dark:border-white/10 dark:bg-white/[0.06]">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white/80 shadow-sm dark:border-slate-700 dark:bg-[#0F172A]">
                         <Icon className={`h-4 w-4 ${step.iconColor}`} />
                       </div>
                     </div>
 
-                    <h3 className="mt-3 text-base font-black tracking-tight text-slate-950 dark:text-white sm:text-lg">
+                    <h3 className="mt-3 text-base font-black tracking-tight text-[#050816] dark:text-slate-100 sm:text-lg">
                       {step.title}
                     </h3>
 
-                    <p className="mt-2 text-xs leading-6 text-slate-600 dark:text-white/55 sm:text-[13px]">
+                    <p className="mt-2 text-xs leading-6 text-[#525866] dark:text-slate-400 sm:text-[13px]">
                       {step.text}
                     </p>
 
@@ -236,7 +239,7 @@ export function DeliverySequence() {
                         {step.chip}
                       </span>
 
-                      <span className="rounded-full border border-slate-200 bg-white/70 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:border-white/10 dark:bg-white/[0.06] dark:text-white/35">
+                      <span className="rounded-full border border-slate-200 bg-white/80 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:border-slate-700 dark:bg-[#0F172A] dark:text-slate-500">
                         {step.time}
                       </span>
                     </div>
@@ -248,13 +251,13 @@ export function DeliverySequence() {
 
           <div className="relative grid grid-cols-[58px_1fr] items-start gap-4">
             <div className="relative z-10 flex justify-center pt-1">
-              <div className="h-3 w-3 rounded-full bg-violet-500 shadow-[0_0_18px_rgba(168,85,247,0.7)] dark:bg-violet-400" />
+              <div className="h-3 w-3 rounded-full bg-[#6D35FF] shadow-[0_0_18px_rgba(109,53,255,0.55)] dark:bg-indigo-300" />
             </div>
 
-            <div className="rounded-[1.35rem] border border-indigo-500/15 bg-indigo-500/10 p-4 shadow-lg shadow-slate-950/10 backdrop-blur-xl dark:border-violet-400/15 dark:bg-violet-400/10 dark:shadow-black/20 sm:rounded-[1.5rem]">
+            <div className="rounded-[1.35rem] border border-[#2563EB]/15 bg-[#2563EB]/10 p-4 shadow-lg shadow-slate-950/10 backdrop-blur-xl dark:border-indigo-400/15 dark:bg-indigo-400/10 dark:shadow-black/20 sm:rounded-[1.5rem]">
               <div className="flex items-start gap-3">
-                <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-indigo-700 dark:text-violet-300" />
-                <p className="text-xs leading-6 text-slate-600 dark:text-white/55">
+                <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB] dark:text-indigo-300" />
+                <p className="text-xs leading-6 text-[#525866] dark:text-slate-400">
                   Final DST/PES production files stay locked until payment is
                   approved. Proof images remain visible for client review.
                 </p>
@@ -272,7 +275,7 @@ export function DeliverySequence() {
             transition={{ duration: 0.35, delay: 0.08, ease }}
             className="mb-8"
           >
-            <div className="mx-auto flex w-full gap-3 rounded-[2rem] border border-slate-200 bg-white/65 p-2 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
+            <div className="mx-auto flex w-full gap-3 rounded-[2rem] border border-slate-200 bg-white/70 p-2 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-[#0B1120]">
               {steps.map((step, index) => {
                 const Icon = step.icon;
                 const isActive = activeStep === index;
@@ -286,8 +289,8 @@ export function DeliverySequence() {
                     className={[
                       "group relative flex-1 overflow-hidden rounded-[1.5rem] border px-4 py-3 text-left transition-all duration-300",
                       isActive
-                        ? "border-indigo-500/30 bg-white shadow-lg shadow-indigo-500/10 dark:border-indigo-400/25 dark:bg-white/[0.075]"
-                        : "border-transparent hover:bg-white/70 dark:hover:bg-white/[0.055]",
+                        ? "border-[#6D35FF]/30 bg-white shadow-lg shadow-[#6D35FF]/10 dark:border-indigo-400/25 dark:bg-[#0F172A]"
+                        : "border-transparent hover:bg-white/80 dark:hover:bg-[#0F172A]",
                     ].join(" ")}
                   >
                     <div
@@ -303,18 +306,18 @@ export function DeliverySequence() {
                         className={[
                           "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border shadow-sm transition",
                           isActive
-                            ? "border-white/60 bg-white/80 dark:border-white/10 dark:bg-white/[0.08]"
-                            : "border-slate-200 bg-white/55 dark:border-white/10 dark:bg-white/[0.04]",
+                            ? "border-white/80 bg-white/90 dark:border-slate-700 dark:bg-[#0B1120]"
+                            : "border-slate-200 bg-white/70 dark:border-slate-700 dark:bg-[#0F172A]",
                         ].join(" ")}
                       >
                         <Icon className={`h-4 w-4 ${step.iconColor}`} />
                       </div>
 
                       <div>
-                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-white/30">
+                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
                           Step {step.number}
                         </div>
-                        <div className="mt-0.5 text-sm font-black text-slate-950 dark:text-white">
+                        <div className="mt-0.5 text-sm font-black text-[#050816] dark:text-slate-100">
                           {step.chip}
                         </div>
                       </div>
@@ -349,14 +352,14 @@ export function DeliverySequence() {
                     <button
                       type="button"
                       onClick={() => setActiveStep(index)}
-                      className="group block w-full rounded-[2rem] text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f7f7fb] dark:focus-visible:ring-offset-[#050814]"
+                      className="group block w-full rounded-[2rem] text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6D35FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F7F8FF] dark:focus-visible:ring-offset-[#050814]"
                     >
                       <Card
                         className={[
-                          "relative overflow-hidden rounded-[2rem] border bg-white/82 shadow-sm shadow-slate-950/5 backdrop-blur-xl transition-all duration-300 dark:bg-white/[0.045] dark:shadow-black/20",
+                          "relative overflow-hidden rounded-[2rem] border bg-white/85 shadow-sm shadow-slate-950/5 backdrop-blur-xl transition-all duration-300 dark:bg-[#0B1120] dark:shadow-black/20",
                           isActive
-                            ? "border-indigo-500/35 shadow-2xl shadow-indigo-500/10 dark:border-indigo-400/30 dark:shadow-black/40"
-                            : "border-slate-200 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-950/10 dark:border-white/[0.08] dark:hover:border-white/[0.14]",
+                            ? "border-[#6D35FF]/35 shadow-2xl shadow-[#6D35FF]/10 dark:border-indigo-400/30 dark:shadow-black/40"
+                            : "border-slate-200 hover:-translate-y-1 hover:border-slate-300 hover:bg-white hover:shadow-xl hover:shadow-slate-950/10 dark:border-slate-800 dark:hover:border-slate-700 dark:hover:bg-[#0F172A]",
                         ].join(" ")}
                       >
                         <div
@@ -376,18 +379,18 @@ export function DeliverySequence() {
                                 className={[
                                   "flex h-12 w-12 items-center justify-center rounded-2xl border shadow-sm transition-all duration-300",
                                   isActive
-                                    ? "scale-105 border-white/50 bg-white/85 dark:border-white/10 dark:bg-white/[0.09]"
-                                    : "border-slate-200 bg-white/70 dark:border-white/10 dark:bg-white/[0.05]",
+                                    ? "scale-105 border-white/80 bg-white/90 dark:border-slate-700 dark:bg-[#0F172A]"
+                                    : "border-slate-200 bg-white/75 dark:border-slate-700 dark:bg-[#0F172A]",
                                 ].join(" ")}
                               >
                                 {isDone ? (
-                                  <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-300" />
+                                  <CheckCircle2 className="h-5 w-5 text-[#2563EB] dark:text-indigo-300" />
                                 ) : (
                                   <Icon className={`h-5 w-5 ${step.iconColor}`} />
                                 )}
                               </div>
 
-                              <div className="absolute -right-1 -top-1 rounded-full border border-white bg-slate-950 px-1.5 py-0.5 text-[8px] font-black text-white dark:border-slate-900 dark:bg-white dark:text-slate-950">
+                              <div className="absolute -right-1 -top-1 rounded-full border border-white bg-[#050816] px-1.5 py-0.5 text-[8px] font-black text-white dark:border-slate-900 dark:bg-indigo-400 dark:text-slate-950">
                                 {step.number}
                               </div>
                             </div>
@@ -400,16 +403,16 @@ export function DeliverySequence() {
                                   {step.chip}
                                 </span>
 
-                                <span className="rounded-full border border-slate-200 bg-white/70 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 dark:border-white/10 dark:bg-white/[0.05] dark:text-white/30">
+                                <span className="rounded-full border border-slate-200 bg-white/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 dark:border-slate-700 dark:bg-[#0F172A] dark:text-slate-500">
                                   {step.time}
                                 </span>
                               </div>
 
-                              <h3 className="mt-3 text-lg font-black tracking-tight text-slate-950 dark:text-white">
+                              <h3 className="mt-3 text-lg font-black tracking-tight text-[#050816] dark:text-slate-100">
                                 {step.title}
                               </h3>
 
-                              <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-white/52">
+                              <p className="mt-2 text-sm leading-7 text-[#525866] dark:text-slate-400">
                                 {step.text}
                               </p>
                             </div>
@@ -434,27 +437,27 @@ export function DeliverySequence() {
               className="sticky top-28"
             >
               <div className="relative">
-                <div className="absolute -inset-6 rounded-[3rem] bg-gradient-to-br from-indigo-500/20 via-violet-500/10 to-blue-500/15 blur-3xl" />
+                <div className="absolute -inset-6 rounded-[3rem] bg-gradient-to-br from-[#6D35FF]/18 via-[#7C3AED]/8 to-[#2563EB]/18 blur-3xl dark:from-indigo-500/16 dark:via-cyan-500/8 dark:to-blue-500/12" />
 
-                <Card className="relative overflow-hidden rounded-[2.25rem] border border-slate-200 bg-white/82 shadow-2xl shadow-slate-950/10 backdrop-blur-xl dark:border-white/[0.1] dark:bg-white/[0.055] dark:shadow-black/30">
+                <Card className="relative overflow-hidden rounded-[2.25rem] border border-slate-200 bg-white/85 shadow-2xl shadow-slate-950/10 backdrop-blur-xl dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/30">
                   <CardContent className="p-6">
                     <div className="mb-5 flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.28em] text-indigo-600 dark:text-indigo-300">
+                        <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#2563EB] dark:text-indigo-300">
                           Live workflow preview
                         </p>
-                        <h3 className="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white">
+                        <h3 className="mt-1 text-2xl font-black tracking-tight text-[#050816] dark:text-slate-100">
                           {active.shortTitle}
                         </h3>
                       </div>
 
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/[0.06]">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-[#0F172A]">
                         <ActiveIcon className={`h-5 w-5 ${active.iconColor}`} />
                       </div>
                     </div>
 
-                    <div className="relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-slate-950 p-5 text-white dark:border-white/10">
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.42),transparent_32%),radial-gradient(circle_at_85%_80%,rgba(168,85,247,0.25),transparent_32%)]" />
+                    <div className="relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-[#050816] p-5 text-white dark:border-slate-800">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(109,53,255,0.42),transparent_32%),radial-gradient(circle_at_85%_80%,rgba(37,99,235,0.28),transparent_32%)]" />
                       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:34px_34px] opacity-30" />
 
                       <div className="relative z-10">
@@ -463,7 +466,7 @@ export function DeliverySequence() {
                             Step {active.number}
                           </span>
 
-                          <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-950">
+                          <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-[#050816]">
                             {active.chip}
                           </span>
                         </div>
@@ -480,7 +483,7 @@ export function DeliverySequence() {
                               {active.title}
                             </h4>
 
-                            <p className="mt-3 text-sm leading-7 text-white/58">
+                            <p className="mt-3 text-sm leading-7 text-white/62">
                               {active.text}
                             </p>
                           </div>
@@ -513,7 +516,7 @@ export function DeliverySequence() {
                                   className={[
                                     "flex h-7 w-7 items-center justify-center rounded-full border text-[10px] font-black transition",
                                     completed
-                                      ? "border-indigo-300 bg-indigo-300 text-slate-950"
+                                      ? "border-indigo-300 bg-indigo-300 text-[#050816]"
                                       : "border-white/15 bg-white/5 text-white/30",
                                   ].join(" ")}
                                 >
@@ -527,7 +530,7 @@ export function DeliverySequence() {
                                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/10">
                                   <div
                                     className={[
-                                      "h-full rounded-full bg-gradient-to-r from-indigo-300 to-violet-300 transition-all duration-700",
+                                      "h-full rounded-full bg-gradient-to-r from-[#6D35FF] to-[#0EA5E9] transition-all duration-700",
                                       completed ? "w-full" : "w-0",
                                     ].join(" ")}
                                   />
@@ -540,7 +543,7 @@ export function DeliverySequence() {
                         <div className="mt-8 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
                           <div className="flex items-start gap-3">
                             <LockKeyhole className="mt-0.5 h-4 w-4 text-indigo-200" />
-                            <p className="text-xs leading-6 text-white/58">
+                            <p className="text-xs leading-6 text-white/62">
                               Final machine files stay locked until payment is
                               approved. Proof images remain visible for client
                               review.
@@ -612,10 +615,11 @@ function WorkflowPreviewBox({
 }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-white/40">
+      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-white/42">
         <Icon className="h-3.5 w-3.5" />
         {label}
       </div>
+
       <p className="mt-2 text-sm font-bold text-white">{value}</p>
     </div>
   );
@@ -627,12 +631,12 @@ function DeliveryBackground() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(168,85,247,0.1),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(59,130,246,0.08),transparent_38%)] dark:bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.14),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(168,85,247,0.12),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(59,130,246,0.1),transparent_38%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(109,53,255,0.13),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(37,99,235,0.1),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(14,165,233,0.08),transparent_38%)] dark:bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(59,130,246,0.08),transparent_38%)]" />
 
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:34px_34px] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] md:bg-[size:42px_42px]" />
 
       <svg
-        className="delivery-thread-float absolute -left-32 top-10 hidden h-64 w-[52rem] opacity-55 dark:opacity-35 md:block"
+        className="delivery-thread-float absolute -left-32 top-10 hidden h-64 w-[52rem] opacity-42 dark:opacity-28 md:block"
         viewBox="0 0 840 260"
         fill="none"
       >
@@ -642,10 +646,11 @@ function DeliveryBackground() {
           strokeWidth="2.4"
           strokeLinecap="round"
         />
+
         <path
           className="delivery-thread-dash"
           d="M24 140 C118 42 212 226 326 108 C442 -12 548 214 662 92 C728 22 778 56 820 84"
-          stroke="rgba(99,102,241,0.5)"
+          stroke="rgba(109,53,255,0.42)"
           strokeWidth="1.2"
           strokeLinecap="round"
         />
@@ -659,15 +664,15 @@ function DeliveryBackground() {
             y2="260"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#6366f1" />
-            <stop offset="0.5" stopColor="#a855f7" />
-            <stop offset="1" stopColor="#38bdf8" />
+            <stop stopColor="#6D35FF" />
+            <stop offset="0.5" stopColor="#2563EB" />
+            <stop offset="1" stopColor="#0EA5E9" />
           </linearGradient>
         </defs>
       </svg>
 
       <svg
-        className="delivery-thread-float absolute -right-32 bottom-8 hidden h-64 w-[52rem] rotate-180 opacity-45 dark:opacity-28 md:block"
+        className="delivery-thread-float absolute -right-32 bottom-8 hidden h-64 w-[52rem] rotate-180 opacity-36 dark:opacity-24 md:block"
         viewBox="0 0 840 260"
         fill="none"
       >
@@ -677,10 +682,11 @@ function DeliveryBackground() {
           strokeWidth="2.4"
           strokeLinecap="round"
         />
+
         <path
           className="delivery-thread-dash"
           d="M24 140 C118 42 212 226 326 108 C442 -12 548 214 662 92 C728 22 778 56 820 84"
-          stroke="rgba(245,158,11,0.52)"
+          stroke="rgba(37,99,235,0.4)"
           strokeWidth="1.2"
           strokeLinecap="round"
         />
@@ -694,9 +700,9 @@ function DeliveryBackground() {
             y2="260"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#f59e0b" />
-            <stop offset="0.5" stopColor="#a855f7" />
-            <stop offset="1" stopColor="#6366f1" />
+            <stop stopColor="#0EA5E9" />
+            <stop offset="0.5" stopColor="#2563EB" />
+            <stop offset="1" stopColor="#6D35FF" />
           </linearGradient>
         </defs>
       </svg>

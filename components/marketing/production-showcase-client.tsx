@@ -35,53 +35,53 @@ const SERVICE_ACCENTS: Record<
 > = {
   EMBROIDERY_DIGITIZING: {
     badge:
-      "border-indigo-500/25 bg-indigo-500/10 text-indigo-700 dark:border-indigo-400/30 dark:bg-indigo-400/[0.12] dark:text-indigo-200",
+      "border-[#2563EB]/25 bg-[#2563EB]/10 text-[#1D4ED8] dark:border-indigo-400/25 dark:bg-indigo-400/10 dark:text-indigo-200",
     grad:
-      "from-indigo-100 via-white to-slate-100 dark:from-indigo-950 dark:via-indigo-900/60 dark:to-[#060d1a]",
-    glow: "from-indigo-500/20 to-violet-500/10",
+      "from-[#EEF3FF] via-white to-[#F7F8FF] dark:from-[#0B1120] dark:via-[#0F172A] dark:to-[#050814]",
+    glow: "from-[#2563EB]/22 via-[#6D35FF]/12 to-[#0EA5E9]/10",
   },
   VECTOR_ART: {
     badge:
-      "border-violet-500/25 bg-violet-500/10 text-violet-700 dark:border-violet-400/30 dark:bg-violet-400/[0.12] dark:text-violet-200",
+      "border-[#6D35FF]/25 bg-[#6D35FF]/10 text-[#5B21B6] dark:border-cyan-400/25 dark:bg-cyan-400/10 dark:text-cyan-200",
     grad:
-      "from-violet-100 via-white to-slate-100 dark:from-violet-950 dark:via-violet-900/60 dark:to-[#060d1a]",
-    glow: "from-violet-500/20 to-fuchsia-500/10",
+      "from-[#F1ECFF] via-white to-[#EEF3FF] dark:from-[#0B1120] dark:via-[#0F172A] dark:to-[#050814]",
+    glow: "from-[#6D35FF]/24 via-[#7C3AED]/12 to-[#2563EB]/10",
   },
   VECTOR_REDRAW: {
     badge:
-      "border-violet-500/25 bg-violet-500/10 text-violet-700 dark:border-violet-400/30 dark:bg-violet-400/[0.12] dark:text-violet-200",
+      "border-[#6D35FF]/25 bg-[#6D35FF]/10 text-[#5B21B6] dark:border-cyan-400/25 dark:bg-cyan-400/10 dark:text-cyan-200",
     grad:
-      "from-violet-100 via-white to-slate-100 dark:from-violet-950 dark:via-violet-900/60 dark:to-[#060d1a]",
-    glow: "from-violet-500/20 to-fuchsia-500/10",
+      "from-[#F1ECFF] via-white to-[#EEF3FF] dark:from-[#0B1120] dark:via-[#0F172A] dark:to-[#050814]",
+    glow: "from-[#6D35FF]/24 via-[#7C3AED]/12 to-[#2563EB]/10",
   },
   CUSTOM_PATCHES: {
     badge:
-      "border-amber-500/25 bg-amber-500/10 text-amber-700 dark:border-amber-400/30 dark:bg-amber-400/[0.12] dark:text-amber-200",
+      "border-[#0EA5E9]/25 bg-[#0EA5E9]/10 text-[#0369A1] dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-200",
     grad:
-      "from-amber-100 via-white to-slate-100 dark:from-amber-950 dark:via-amber-900/50 dark:to-[#060d1a]",
-    glow: "from-amber-500/20 to-orange-500/10",
+      "from-[#EAF8FF] via-white to-[#EEF3FF] dark:from-[#0B1120] dark:via-[#0F172A] dark:to-[#050814]",
+    glow: "from-[#0EA5E9]/22 via-[#2563EB]/12 to-[#6D35FF]/10",
   },
   COLOR_SEPARATION: {
     badge:
-      "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/[0.12] dark:text-emerald-200",
+      "border-[#2563EB]/25 bg-[#2563EB]/10 text-[#1D4ED8] dark:border-indigo-400/25 dark:bg-indigo-400/10 dark:text-indigo-200",
     grad:
-      "from-emerald-100 via-white to-slate-100 dark:from-emerald-950 dark:via-emerald-900/50 dark:to-[#060d1a]",
-    glow: "from-emerald-500/20 to-teal-500/10",
+      "from-[#EEF3FF] via-white to-[#EAF8FF] dark:from-[#0B1120] dark:via-[#0F172A] dark:to-[#050814]",
+    glow: "from-[#2563EB]/20 via-[#0EA5E9]/12 to-[#6D35FF]/8",
   },
   DTF_SCREEN_PRINT: {
     badge:
-      "border-blue-500/25 bg-blue-500/10 text-blue-700 dark:border-blue-400/30 dark:bg-blue-400/[0.12] dark:text-blue-200",
+      "border-[#0EA5E9]/25 bg-[#0EA5E9]/10 text-[#0369A1] dark:border-cyan-400/25 dark:bg-cyan-400/10 dark:text-cyan-200",
     grad:
-      "from-blue-100 via-white to-slate-100 dark:from-blue-950 dark:via-blue-900/50 dark:to-[#060d1a]",
-    glow: "from-blue-500/20 to-cyan-500/10",
+      "from-[#EAF8FF] via-white to-[#F7F8FF] dark:from-[#0B1120] dark:via-[#0F172A] dark:to-[#050814]",
+    glow: "from-[#0EA5E9]/20 via-[#2563EB]/12 to-[#6D35FF]/8",
   },
 };
 
 const DEFAULT_ACCENT = {
   badge:
-    "border-slate-300 bg-white/70 text-slate-600 dark:border-white/15 dark:bg-white/[0.07] dark:text-white/60",
+    "border-slate-300 bg-white/80 text-slate-600 dark:border-slate-700 dark:bg-[#0B1120] dark:text-slate-300",
   grad:
-    "from-slate-100 via-white to-slate-200 dark:from-slate-900 dark:via-slate-900/60 dark:to-[#060d1a]",
+    "from-slate-100 via-white to-slate-200 dark:from-[#0B1120] dark:via-[#0F172A] dark:to-[#050814]",
   glow: "from-slate-500/10 to-slate-500/5",
 };
 
@@ -252,44 +252,41 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
   );
 
   return (
-    <section className="relative isolate overflow-hidden bg-[#f7f7fb] px-4 py-10 text-slate-950 dark:bg-[#050814] dark:text-white sm:py-12 md:px-8 md:py-24 lg:py-28">
+    <section className="relative isolate overflow-hidden bg-[#F7F8FF] px-4 py-10 text-[#050816] dark:bg-[#050814] dark:text-slate-100 sm:py-12 md:px-8 md:py-24 lg:py-28">
       <ProductionBackground />
 
       <div className="page-shell relative z-10">
-        {/* Header */}
         <div className="mx-auto mb-8 max-w-4xl text-center md:mb-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-white/75 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.28em] text-indigo-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.06] dark:text-indigo-200">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#6D35FF]/20 bg-white/80 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.28em] text-[#5B21B6] shadow-sm backdrop-blur dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300">
             <Sparkles className="h-3.5 w-3.5" />
             Our Work
           </div>
 
-          <h2 className="mt-4 text-3xl font-black tracking-[-0.05em] text-slate-950 dark:text-white sm:text-4xl md:mt-5 md:text-5xl lg:text-6xl">
+          <h2 className="mt-4 text-3xl font-black tracking-[-0.05em] text-[#050816] dark:text-slate-100 sm:text-4xl md:mt-5 md:text-5xl lg:text-6xl">
             Real stitch quality.
-            <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-blue-600 bg-clip-text text-transparent dark:from-indigo-300 dark:via-violet-300 dark:to-blue-300">
+            <span className="block bg-gradient-to-r from-[#6D35FF] via-[#7C3AED] to-[#2563EB] bg-clip-text text-transparent dark:from-indigo-300 dark:via-cyan-300 dark:to-blue-300">
               Clean vector artwork.
             </span>
           </h2>
 
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-600 dark:text-white/58 md:mt-5 md:text-base md:leading-7">
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-[#525866] dark:text-slate-400 md:mt-5 md:text-base md:leading-7">
             See how rough artwork becomes production-ready embroidery, custom
             patches, vector files, and print-ready artwork.
           </p>
         </div>
 
-        {/* Trust pills */}
         <div className="mx-auto mb-8 flex max-w-4xl flex-wrap justify-center gap-2">
           {MACHINE_FEATURES.map((feature) => (
             <span
               key={feature.title}
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[11px] font-bold text-slate-600 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.05] dark:text-white/55"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-[11px] font-bold text-slate-600 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-[#0B1120] dark:text-slate-300"
             >
-              <CheckCircle2 className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-300" />
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#2563EB] dark:text-indigo-300" />
               {feature.title}
             </span>
           ))}
         </div>
 
-        {/* Category filter */}
         {categories.length > 1 && (
           <div className="mx-auto mb-8 flex max-w-5xl gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:flex-wrap md:justify-center md:overflow-visible">
             {categories.map((category) => {
@@ -302,10 +299,10 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
                   aria-pressed={isActive}
                   onClick={() => setActive(category.key)}
                   className={cn(
-                    "shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition-all duration-300",
+                    "shrink-0 rounded-full border px-4 py-2 text-xs font-black transition-all duration-300",
                     isActive
-                      ? "border-indigo-500/30 bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 dark:border-indigo-400/40 dark:bg-indigo-400/15 dark:text-indigo-100"
-                      : "border-slate-200 bg-white/70 text-slate-500 hover:border-slate-300 hover:text-slate-950 dark:border-white/[0.09] dark:bg-white/[0.04] dark:text-white/45 dark:hover:border-white/20 dark:hover:text-white/75",
+                      ? "border-transparent bg-gradient-to-r from-[#6D35FF] to-[#2563EB] text-white shadow-lg shadow-[#6D35FF]/20 dark:from-indigo-500 dark:to-blue-500"
+                      : "border-slate-200 bg-white/80 text-slate-500 shadow-sm hover:border-slate-300 hover:bg-white hover:text-[#050816] dark:border-slate-700 dark:bg-[#0B1120] dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-[#111C31] dark:hover:text-slate-100",
                   )}
                 >
                   {category.label}
@@ -315,7 +312,6 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
           </div>
         )}
 
-        {/* Phone */}
         <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden">
           {displayItems.map((item, index) => (
             <ShowcaseCard
@@ -328,7 +324,6 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
           ))}
         </div>
 
-        {/* Desktop */}
         <div className="gx-marquee hidden overflow-hidden md:block md:[mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
           <div
             key={active}
@@ -349,22 +344,21 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
           </div>
         </div>
 
-        {/* Feature cards: desktop/tablet only */}
         <div className="mt-10 hidden gap-3 sm:grid-cols-2 md:grid lg:grid-cols-4">
           {MACHINE_FEATURES.map((feature) => (
             <div
               key={feature.title}
-              className="rounded-3xl border border-slate-200 bg-white/75 p-5 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-950/5 dark:border-white/[0.08] dark:bg-white/[0.04] dark:hover:border-white/[0.14] dark:hover:shadow-black/20"
+              className="rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:shadow-slate-950/5 dark:border-slate-800 dark:bg-[#0B1120] dark:hover:border-slate-700 dark:hover:bg-[#0F172A] dark:hover:shadow-black/20"
             >
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-xl dark:border-white/[0.08] dark:bg-white/[0.06]">
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-[#6D35FF]/15 bg-[#6D35FF]/10 text-xl dark:border-indigo-400/20 dark:bg-indigo-400/10">
                 {feature.icon}
               </div>
 
-              <h3 className="text-sm font-black text-slate-950 dark:text-white">
+              <h3 className="text-sm font-black text-[#050816] dark:text-slate-100">
                 {feature.title}
               </h3>
 
-              <p className="mt-2 text-xs leading-6 text-slate-500 dark:text-white/48">
+              <p className="mt-2 text-xs leading-6 text-slate-500 dark:text-slate-400">
                 {feature.desc}
               </p>
             </div>
@@ -448,6 +442,7 @@ export function ProductionShowcaseClient({ items }: { items: ShowcaseItem[] }) {
             animation: none !important;
           }
         }
+
         @media (prefers-reduced-motion: reduce) {
           .gx-marquee-track,
           .gx-thread-drift,
@@ -501,16 +496,16 @@ function ShowcaseCard({
 
       <div
         className={cn(
-          "relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white/70 shadow-sm shadow-slate-950/5 backdrop-blur transition-all duration-300 dark:border-white/[0.08] dark:bg-white/[0.035] dark:shadow-black/20",
+          "relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white/80 shadow-sm shadow-slate-950/5 backdrop-blur transition-all duration-300 dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/20",
           mobile
             ? "h-[310px] sm:h-[340px]"
-            : "h-[335px] group-hover/card:z-20 group-hover/card:-translate-y-2 group-hover/card:scale-[1.035] group-hover/card:border-slate-300 group-hover/card:shadow-2xl group-hover/card:shadow-slate-950/15 dark:group-hover/card:border-white/[0.22] dark:group-hover/card:shadow-black/45",
+            : "h-[335px] group-hover/card:z-20 group-hover/card:-translate-y-2 group-hover/card:scale-[1.035] group-hover/card:border-slate-300 group-hover/card:shadow-2xl group-hover/card:shadow-slate-950/15 dark:group-hover/card:border-slate-700 dark:group-hover/card:bg-[#0F172A] dark:group-hover/card:shadow-black/45",
         )}
       >
         <Link
           href={href}
           tabIndex={isDuplicate ? -1 : undefined}
-          className="block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#050814]"
+          className="block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6D35FF] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#050814]"
           aria-label={`View portfolio case: ${item.title}`}
         >
           <div className="relative h-full overflow-hidden rounded-[1.7rem]">
@@ -550,12 +545,12 @@ function ShowcaseCard({
               </>
             ) : (
               <div className={cn("absolute inset-0 bg-gradient-to-br", accent.grad)}>
-                <div className="absolute inset-0 bg-[radial-gradient(rgba(15,23,42,0.08)_1px,transparent_1px)] [background-size:18px_18px] dark:bg-[radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(rgba(15,23,42,0.055)_1px,transparent_1px)] [background-size:18px_18px] dark:bg-[radial-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)]" />
 
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative h-36 w-36 rounded-full border border-slate-300/60 bg-white/35 shadow-inner dark:border-white/10 dark:bg-white/[0.03]">
-                    <div className="absolute inset-6 rounded-full border border-dashed border-slate-400/60 dark:border-white/15" />
-                    <div className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-slate-300/80 bg-white/50 shadow-sm dark:border-white/10 dark:bg-white/[0.04]" />
+                  <div className="relative h-36 w-36 rounded-full border border-slate-300/60 bg-white/40 shadow-inner dark:border-slate-700 dark:bg-[#0B1120]/50">
+                    <div className="absolute inset-6 rounded-full border border-dashed border-slate-400/60 dark:border-slate-600" />
+                    <div className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-slate-300/80 bg-white/60 shadow-sm dark:border-slate-700 dark:bg-[#0F172A]" />
                     <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-6xl opacity-[0.14] dark:opacity-[0.08]">
                       ✦
                     </span>
@@ -568,7 +563,7 @@ function ShowcaseCard({
 
             <div className="absolute left-4 right-4 top-4 z-[4] flex items-start justify-between gap-2">
               {item.isFeatured ? (
-                <span className="rounded-full border border-amber-400/35 bg-amber-400/[0.18] px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-amber-100 shadow-sm backdrop-blur">
+                <span className="rounded-full border border-white/20 bg-white/18 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-white shadow-sm backdrop-blur">
                   Featured
                 </span>
               ) : (
@@ -577,7 +572,7 @@ function ShowcaseCard({
 
               <span
                 className={cn(
-                  "rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide shadow-sm backdrop-blur",
+                  "rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wide shadow-sm backdrop-blur",
                   accent.badge,
                 )}
               >
@@ -591,7 +586,7 @@ function ShowcaseCard({
               </h3>
 
               {item.description && (
-                <p className="mt-1.5 line-clamp-2 text-[11px] leading-5 text-white/64 md:mt-2 md:text-xs">
+                <p className="mt-1.5 line-clamp-2 text-[11px] leading-5 text-white/68 md:mt-2 md:text-xs">
                   {item.description}
                 </p>
               )}
@@ -602,7 +597,7 @@ function ShowcaseCard({
                     {item.tags.slice(0, 3).map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full bg-white/[0.13] px-2 py-1 text-[10px] font-medium text-white/70 backdrop-blur"
+                        className="rounded-full bg-white/[0.15] px-2 py-1 text-[10px] font-medium text-white/75 backdrop-blur"
                       >
                         {tag}
                       </span>
@@ -610,7 +605,7 @@ function ShowcaseCard({
                   </div>
                 )}
 
-                <span className="ml-auto inline-flex items-center text-[11px] font-bold uppercase tracking-widest text-white/80">
+                <span className="ml-auto inline-flex items-center text-[11px] font-black uppercase tracking-widest text-white/85">
                   View
                   <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                 </span>
@@ -625,7 +620,7 @@ function ShowcaseCard({
             tabIndex={isDuplicate ? -1 : undefined}
             aria-pressed={showBefore}
             onClick={() => setShowBefore((value) => !value)}
-            className="absolute left-5 top-16 z-[5] rounded-full border border-white/20 bg-black/55 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white shadow-lg backdrop-blur transition hover:bg-black/70"
+            className="absolute left-5 top-16 z-[5] rounded-full border border-white/20 bg-black/55 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-white shadow-lg backdrop-blur transition hover:bg-black/70"
           >
             {showBefore ? "Show After" : "Show Before"}
           </button>
@@ -638,9 +633,9 @@ function ShowcaseCard({
 function ProductionBackground() {
   return (
     <>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_15%_45%,rgba(99,102,241,0.16),transparent_58%),radial-gradient(ellipse_42%_36%_at_85%_20%,rgba(139,92,246,0.12),transparent_55%),radial-gradient(ellipse_36%_52%_at_55%_92%,rgba(59,130,246,0.09),transparent_55%)] dark:bg-[radial-gradient(ellipse_60%_55%_at_15%_50%,rgba(99,102,241,0.16),transparent_58%),radial-gradient(ellipse_44%_38%_at_85%_22%,rgba(139,92,246,0.11),transparent_55%),radial-gradient(ellipse_36%_52%_at_55%_92%,rgba(59,130,246,0.08),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_15%_45%,rgba(109,53,255,0.13),transparent_58%),radial-gradient(ellipse_42%_36%_at_85%_20%,rgba(37,99,235,0.1),transparent_55%),radial-gradient(ellipse_36%_52%_at_55%_92%,rgba(14,165,233,0.08),transparent_55%)] dark:bg-[radial-gradient(ellipse_60%_55%_at_15%_50%,rgba(99,102,241,0.12),transparent_58%),radial-gradient(ellipse_44%_38%_at_85%_22%,rgba(56,189,248,0.08),transparent_55%),radial-gradient(ellipse_36%_52%_at_55%_92%,rgba(59,130,246,0.08),transparent_55%)]" />
 
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(15,23,42,0.09)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_78%_78%_at_50%_50%,black_25%,transparent_72%)] dark:bg-[radial-gradient(rgba(255,255,255,0.055)_1px,transparent_1px)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(15,23,42,0.055)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_78%_78%_at_50%_50%,black_25%,transparent_72%)] dark:bg-[radial-gradient(rgba(255,255,255,0.035)_1px,transparent_1px)]" />
 
       <ProductionSvgAtmosphere />
     </>
@@ -654,7 +649,7 @@ function ProductionSvgAtmosphere() {
       className="pointer-events-none absolute inset-0 z-[1] overflow-hidden"
     >
       <svg
-        className="gx-thread-drift absolute -left-20 top-16 hidden h-64 w-[42rem] opacity-70 dark:opacity-50 md:block"
+        className="gx-thread-drift absolute -left-20 top-16 hidden h-64 w-[42rem] opacity-42 dark:opacity-28 md:block"
         viewBox="0 0 680 260"
         fill="none"
       >
@@ -667,7 +662,7 @@ function ProductionSvgAtmosphere() {
         <path
           className="gx-stitch-dash"
           d="M20 160 C120 40 210 240 320 120 C430 0 520 210 660 82"
-          stroke="rgba(99,102,241,0.55)"
+          stroke="rgba(109,53,255,0.42)"
           strokeWidth="1"
           strokeLinecap="round"
         />
@@ -680,23 +675,24 @@ function ProductionSvgAtmosphere() {
             y2="260"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#6366f1" />
-            <stop offset="0.5" stopColor="#8b5cf6" />
-            <stop offset="1" stopColor="#38bdf8" />
+            <stop stopColor="#6D35FF" />
+            <stop offset="0.5" stopColor="#2563EB" />
+            <stop offset="1" stopColor="#0EA5E9" />
           </linearGradient>
         </defs>
       </svg>
 
       <svg
-        className="absolute right-4 top-10 hidden h-72 w-72 opacity-50 dark:opacity-35 md:block"
+        className="absolute right-4 top-10 hidden h-72 w-72 opacity-32 dark:opacity-22 md:block"
         viewBox="0 0 280 280"
         fill="none"
       >
         <path
           d="M48 188 C72 76 170 56 218 108 C254 146 202 218 120 204"
-          stroke="rgba(99,102,241,0.35)"
+          stroke="rgba(109,53,255,0.32)"
           strokeWidth="1.5"
         />
+
         {[48, 120, 218].map((x, index) => (
           <circle
             key={x}
@@ -705,31 +701,32 @@ function ProductionSvgAtmosphere() {
             cx={x}
             cy={index === 0 ? 188 : index === 1 ? 204 : 108}
             r="5"
-            fill="#6366f1"
+            fill={index === 0 ? "#6D35FF" : index === 1 ? "#0EA5E9" : "#2563EB"}
           />
         ))}
+
         <path
           d="M48 188 L28 204 M48 188 L68 172 M120 204 L98 224 M120 204 L143 184 M218 108 L240 92 M218 108 L196 124"
-          stroke="rgba(15,23,42,0.35)"
+          stroke="rgba(15,23,42,0.18)"
           strokeWidth="1"
-          className="dark:stroke-white/30"
+          className="dark:stroke-white/15"
         />
       </svg>
 
       <svg
-        className="absolute bottom-8 left-6 hidden h-56 w-56 rotate-[-10deg] opacity-45 dark:opacity-30 lg:block"
+        className="absolute bottom-8 left-6 hidden h-56 w-56 rotate-[-10deg] opacity-24 dark:opacity-16 lg:block"
         viewBox="0 0 240 240"
         fill="none"
       >
         <path
           d="M120 22 L185 48 L214 114 L191 183 L120 218 L49 183 L26 114 L55 48 Z"
-          stroke="rgba(245,158,11,0.48)"
+          stroke="rgba(14,165,233,0.34)"
           strokeWidth="2"
         />
         <path
           className="gx-stitch-dash"
           d="M120 39 L173 60 L197 115 L178 171 L120 200 L62 171 L43 115 L67 60 Z"
-          stroke="rgba(245,158,11,0.55)"
+          stroke="rgba(37,99,235,0.36)"
           strokeWidth="1.5"
         />
       </svg>

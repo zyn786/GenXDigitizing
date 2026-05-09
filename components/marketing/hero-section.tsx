@@ -26,6 +26,15 @@ const tickerItems = [
   "First Design On Us",
   "Bulk Orders, Bigger Savings",
   "Free First Order",
+  "First Design On Us",
+  "Bulk Orders, Bigger Savings",
+  "Free First Order",
+  "First Design On Us",
+  "Bulk Orders, Bigger Savings",
+  "Free First Order",
+  "First Design On Us",
+  "Bulk Orders, Bigger Savings",
+  "Free First Order",
 ];
 
 const floatingCards = [
@@ -66,7 +75,7 @@ const portfolioSlides = [
   },
   {
     src: "/images/After-3.png",
-    title: "Cap & jacket Back Digitizing",
+    title: "Cap & Jacket Back Digitizing",
     label: "Production-ready files",
     href: "/portfolio",
   },
@@ -82,14 +91,13 @@ export function HeroSection() {
   const prefersReduced = useReducedMotion();
 
   return (
-    <section className="relative min-h-[100svh] overflow-hidden bg-[#f7f7fb] text-slate-950 dark:bg-[#050814] dark:text-white">
+    <section className="relative min-h-[100svh] overflow-hidden bg-[#F7F8FF] text-[#050816] dark:bg-[#050814] dark:text-slate-100">
       <HeroBackground />
 
       <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-start px-4 pb-24 pt-[7.35rem] sm:pb-28 sm:pt-32 md:px-8 md:pb-32 md:pt-36 lg:justify-center lg:pb-32 lg:pt-40">
-        {/* MOBILE SERVICE SLIDER */}
         <motion.div
-          initial={prefersReduced ? {} : { opacity: 0, y: 16 }}
-          animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
+          initial={prefersReduced ? false : { opacity: 0, y: 16 }}
+          animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.05, ease }}
           className="mb-5 block lg:hidden"
         >
@@ -97,56 +105,53 @@ export function HeroSection() {
         </motion.div>
 
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
-          {/* LEFT CONTENT */}
           <div className="text-center lg:text-left">
             <motion.div
-              initial={prefersReduced ? {} : { opacity: 0, y: 18 }}
-              animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
+              initial={prefersReduced ? false : { opacity: 0, y: 18 }}
+              animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.08, ease }}
-              className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-white/70 px-3 py-1.5 text-[8px] font-bold uppercase tracking-[0.18em] text-indigo-700 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.06] dark:text-indigo-200 sm:tracking-[0.28em] md:mb-7 md:px-4 md:py-2 md:text-[10px] lg:mx-0"
+              className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-[#6D35FF]/20 bg-white/80 px-3 py-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-[#5B21B6] shadow-sm shadow-slate-950/5 backdrop-blur dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300 sm:tracking-[0.28em] md:mb-7 md:px-4 md:py-2 md:text-[10px] lg:mx-0"
             >
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.9)]" />
-              <Sparkles className="h-3 w-3 opacity-70" />
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#6D35FF] shadow-[0_0_10px_rgba(109,53,255,0.8)] dark:bg-indigo-300" />
+              <Sparkles className="h-3 w-3 opacity-80" />
               Premium Embroidery Digitizing
             </motion.div>
 
             <motion.h1
-              initial={prefersReduced ? {} : { opacity: 0, y: 24 }}
-              animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
+              initial={prefersReduced ? false : { opacity: 0, y: 24 }}
+              animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.12, ease }}
-              className="mx-auto max-w-4xl text-[2.18rem] font-black leading-[1.02] tracking-[-0.055em] text-slate-950 dark:text-white sm:text-5xl md:text-6xl lg:mx-0 lg:text-[4.65rem] lg:leading-[0.98]"
+              className="mx-auto max-w-4xl text-[2.18rem] font-black leading-[1.02] tracking-[-0.065em] text-[#050816] dark:text-slate-100 sm:text-5xl md:text-6xl lg:mx-0 lg:text-[4.65rem] lg:leading-[0.98]"
             >
               Digitizing that looks{" "}
-              <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-blue-600 bg-clip-text text-transparent dark:from-indigo-300 dark:via-violet-300 dark:to-blue-300">
+              <span className="bg-gradient-to-r from-[#6D35FF] via-[#7C3AED] to-[#2563EB] bg-clip-text text-transparent dark:from-indigo-300 dark:via-cyan-300 dark:to-blue-300">
                 ready before it stitches.
               </span>
             </motion.h1>
 
             <motion.p
-              initial={prefersReduced ? {} : { opacity: 0, y: 20 }}
-              animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
+              initial={prefersReduced ? false : { opacity: 0, y: 20 }}
+              animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.2, ease }}
-              className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-600 dark:text-white/58 md:text-base lg:mx-0"
+              className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#525866] dark:text-slate-400 md:text-base lg:mx-0"
             >
               Embroidery digitizing, clean vector redraws, custom patches, and
               print-ready artwork delivered with sharp stitch quality, fast
               turnaround, and a full revision path.
             </motion.p>
 
-            {/* BUTTONS */}
             <motion.div
-              initial={prefersReduced ? {} : { opacity: 0, y: 20 }}
-              animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
+              initial={prefersReduced ? false : { opacity: 0, y: 20 }}
+              animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.28, ease }}
               className="mt-5 flex flex-col items-center gap-3 lg:items-start"
             >
               <div className="mx-auto flex w-full max-w-[360px] flex-row items-center justify-center gap-2 sm:max-w-none sm:flex-wrap lg:mx-0 lg:justify-start">
                 <Button
                   asChild
-                  variant="premium"
                   shape="pill"
                   size="sm"
-                  className="h-10 min-w-0 flex-1 px-3 text-[11px] font-bold shadow-xl shadow-indigo-500/20 sm:h-11 sm:flex-none sm:px-5 sm:text-sm"
+                  className="h-10 min-w-0 flex-1 border-0 bg-gradient-to-r from-[#6D35FF] to-[#2563EB] px-3 text-[11px] font-black text-white shadow-xl shadow-[#6D35FF]/20 transition hover:-translate-y-0.5 hover:opacity-95 sm:h-11 sm:flex-none sm:px-5 sm:text-sm"
                 >
                   <Link href="/contact">
                     <span className="sm:hidden">New Quote</span>
@@ -160,59 +165,58 @@ export function HeroSection() {
                   variant="outline"
                   shape="pill"
                   size="sm"
-                  className="h-10 min-w-0 flex-1 border-slate-300 bg-white/60 px-3 text-[11px] font-bold text-slate-900 backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/[0.06] dark:text-white dark:hover:bg-white/[0.1] sm:h-11 sm:flex-none sm:px-5 sm:text-sm"
+                  className="h-10 min-w-0 flex-1 border-slate-300 bg-white/80 px-3 text-[11px] font-black text-[#050816] shadow-sm backdrop-blur hover:bg-white dark:border-slate-700 dark:bg-[#0B1120] dark:text-slate-100 dark:hover:bg-[#111C31] sm:h-11 sm:flex-none sm:px-5 sm:text-sm"
                 >
-                  <Link href="/orders">
+                  <Link href="/order">
                     <span className="sm:hidden">Order Now</span>
                     <span className="hidden sm:inline">Place Direct Order</span>
                   </Link>
                 </Button>
 
                 <Button
-                asChild
-                variant="ghost"
-                shape="pill"
-                size="sm"
-                className="h-10 min-w-0 flex-1 border border-slate-300 bg-white/30 px-3 text-[11px] font-bold text-slate-800 backdrop-blur hover:bg-white/70 dark:border-white/15 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.1] sm:h-11 sm:flex-none sm:px-5 sm:text-sm"
-              >
-                <Link href="/login">
-                  <span className="sm:hidden">Login/Signup</span>
-                  <span className="hidden sm:inline">Client portal</span>
-                </Link>
-              </Button>
+                  asChild
+                  variant="ghost"
+                  shape="pill"
+                  size="sm"
+                  className="h-10 min-w-0 flex-1 border border-slate-300 bg-white/55 px-3 text-[11px] font-black text-[#050816] shadow-sm backdrop-blur hover:bg-white dark:border-slate-700 dark:bg-[#0B1120]/80 dark:text-slate-200 dark:hover:bg-[#111C31] sm:h-11 sm:flex-none sm:px-5 sm:text-sm"
+                >
+                  <Link href="/login">
+                    <span className="sm:hidden">Login/Signup</span>
+                    <span className="hidden sm:inline">Client portal</span>
+                  </Link>
+                </Button>
               </div>
 
-              <p className="text-[10px] tracking-wide text-slate-500 dark:text-white/35 sm:text-[11px]">
+              <p className="text-[10px] font-medium tracking-wide text-slate-500 dark:text-slate-500 sm:text-[11px]">
                 Free first file · No credit card required · 24-hr turnaround
               </p>
             </motion.div>
 
-            {/* STATS */}
             <motion.div
-              initial={prefersReduced ? {} : { opacity: 0, y: 16 }}
-              animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
+              initial={prefersReduced ? false : { opacity: 0, y: 16 }}
+              animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.4, ease }}
-              className="mx-auto mt-5 grid w-full max-w-[340px] grid-cols-3 overflow-hidden rounded-2xl border border-slate-200 bg-white/70 shadow-lg shadow-slate-950/5 backdrop-blur divide-x divide-slate-200 dark:border-white/[0.1] dark:bg-white/[0.055] dark:divide-white/[0.08] sm:max-w-md lg:mx-0 lg:w-fit"
+              className="mx-auto mt-5 grid w-full max-w-[340px] grid-cols-3 overflow-hidden rounded-2xl border border-slate-200 bg-white/80 shadow-lg shadow-slate-950/5 backdrop-blur divide-x divide-slate-200 dark:border-slate-800 dark:bg-[#0B1120] dark:divide-slate-800 sm:max-w-md lg:mx-0 lg:w-fit"
             >
               {stats.map(({ value, label }) => (
                 <div
                   key={label}
                   className="min-w-0 px-2 py-2.5 text-center sm:px-7 sm:py-4"
                 >
-                  <div className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-base font-black tracking-tight text-transparent dark:from-indigo-300 dark:to-violet-300 sm:text-2xl">
+                  <div className="bg-gradient-to-r from-[#6D35FF] to-[#2563EB] bg-clip-text text-base font-black tracking-tight text-transparent dark:from-indigo-300 dark:to-cyan-300 sm:text-2xl">
                     {value}
                   </div>
-                  <div className="mt-0.5 text-[7.5px] font-semibold text-slate-500 dark:text-white/45 sm:text-[11px]">
+
+                  <div className="mt-0.5 text-[7.5px] font-bold text-slate-500 dark:text-slate-400 sm:text-[11px]">
                     {label}
                   </div>
                 </div>
               ))}
             </motion.div>
 
-            {/* MOBILE PORTFOLIO PREVIEW BELOW STATS */}
             <motion.div
-              initial={prefersReduced ? {} : { opacity: 0, y: 18 }}
-              animate={prefersReduced ? {} : { opacity: 1, y: 0 }}
+              initial={prefersReduced ? false : { opacity: 0, y: 18 }}
+              animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.48, ease }}
               className="mx-auto mt-5 block w-full max-w-[460px] lg:hidden"
             >
@@ -220,10 +224,13 @@ export function HeroSection() {
             </motion.div>
           </div>
 
-          {/* DESKTOP VISUAL ONLY */}
           <motion.div
-            initial={prefersReduced ? {} : { opacity: 0, x: 30, scale: 0.96 }}
-            animate={prefersReduced ? {} : { opacity: 1, x: 0, scale: 1 }}
+            initial={
+              prefersReduced ? false : { opacity: 0, x: 30, scale: 0.96 }
+            }
+            animate={
+              prefersReduced ? undefined : { opacity: 1, x: 0, scale: 1 }
+            }
             transition={{ duration: 0.75, delay: 0.18, ease }}
             className="relative mx-auto hidden w-full max-w-[520px] lg:block"
           >
@@ -232,20 +239,19 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* TICKER */}
-<div className="fixed bottom-0 left-0 right-0 z-[60] overflow-hidden whitespace-nowrap border-t border-slate-200 bg-white/80 py-3.5 shadow-[0_-20px_60px_rgba(15,23,42,0.08)] backdrop-blur-md dark:border-white/[0.07] dark:bg-[#07111f]/85 md:absolute md:z-20 md:py-4">
-  <div className="hero-ticker-track">
-    {[...tickerItems, ...tickerItems].map((item, index) => (
-      <span
-        key={`${item}-${index}`}
-        className="inline-flex shrink-0 items-center whitespace-nowrap px-6 text-sm font-black italic uppercase tracking-wide text-indigo-700 dark:text-indigo-300 sm:text-base md:px-10 md:text-xl"
-      >
-        <span className="mr-5 text-violet-500/50 md:mr-10">◆</span>
-        {item}
-      </span>
-    ))}
-  </div>
-</div>
+      <div className="fixed bottom-0 left-0 right-0 z-[60] overflow-hidden whitespace-nowrap border-t border-slate-200 bg-white/90 py-3.5 shadow-[0_-20px_60px_rgba(15,23,42,0.08)] backdrop-blur-md dark:border-slate-800 dark:bg-[#0B1120]/90 md:absolute md:z-20 md:py-4">
+        <div className="hero-ticker-track">
+          {[...tickerItems, ...tickerItems].map((item, index) => (
+            <span
+              key={`${item}-${index}`}
+              className="inline-flex shrink-0 items-center whitespace-nowrap px-6 text-sm font-black italic uppercase tracking-wide text-[#2563EB] dark:text-indigo-300 sm:text-base md:px-10 md:text-xl"
+            >
+              <span className="mr-5 text-[#6D35FF]/55 md:mr-10">◆</span>
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
 
       <style jsx global>{`
         @keyframes hero-ticker {
@@ -253,7 +259,7 @@ export function HeroSection() {
             transform: translate3d(0, 0, 0);
           }
           to {
-            transform: translate3d(-50%, 0, 0);
+            transform: translate3d(-40%, 0, 0);
           }
         }
 
@@ -338,7 +344,7 @@ export function HeroSection() {
         .hero-ticker-track {
           display: inline-block;
           min-width: max-content;
-          animation: hero-ticker 22s linear infinite;
+          animation: hero-ticker 60s linear infinite;
         }
 
         .hero-card-track {
@@ -439,11 +445,11 @@ function MobilePortfolioPreview({
 
   return (
     <Link href={slide.href || "/portfolio"} className="group block">
-      <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.055] p-2.5 shadow-2xl shadow-black/25 backdrop-blur-xl transition duration-300 group-active:scale-[0.98]">
-        <div className="relative h-[235px] overflow-hidden rounded-[1.65rem] border border-white/10 bg-slate-950 sm:h-[270px]">
+      <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white/80 p-2.5 shadow-xl shadow-slate-950/10 backdrop-blur-xl transition duration-300 group-active:scale-[0.98] dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/30">
+        <div className="relative h-[235px] overflow-hidden rounded-[1.65rem] border border-slate-200 bg-slate-950 dark:border-slate-800 sm:h-[270px]">
           <motion.div
             key={slide.src}
-            initial={prefersReduced ? {} : { opacity: 0, scale: 1.08, y: 10 }}
+            initial={prefersReduced ? false : { opacity: 0, scale: 1.08, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.6, ease }}
             className="absolute inset-0"
@@ -465,7 +471,7 @@ function MobilePortfolioPreview({
               <p className="truncate text-lg font-black leading-tight text-white">
                 {slide.title}
               </p>
-              <p className="mt-1 truncate text-xs font-bold text-white/58">
+              <p className="mt-1 truncate text-xs font-bold text-white/65">
                 {slide.label}
               </p>
             </div>
@@ -489,7 +495,7 @@ function MobilePortfolioPreview({
               initial={prefersReduced ? { width: "100%" } : { width: "0%" }}
               animate={{ width: "100%" }}
               transition={{ duration: 2.6, ease: "linear" }}
-              className="h-full bg-white"
+              className="h-full bg-gradient-to-r from-[#6D35FF] to-[#2563EB]"
             />
           </div>
         </div>
@@ -507,17 +513,17 @@ function MobileServiceSlider() {
         {sliderItems.map((card, index) => (
           <div
             key={`${card.title}-${index}`}
-            className="flex w-52 shrink-0 items-center gap-3 rounded-[1.45rem] border border-slate-200 bg-white/70 p-3 text-left shadow-lg shadow-slate-950/5 backdrop-blur-xl dark:border-white/[0.1] dark:bg-white/[0.055] dark:shadow-black/20"
+            className="flex w-52 shrink-0 items-center gap-3 rounded-[1.45rem] border border-slate-200 bg-white/80 p-3 text-left shadow-lg shadow-slate-950/5 backdrop-blur-xl dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/20"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-base dark:border-white/10 dark:bg-white/[0.06]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-base dark:border-slate-700 dark:bg-[#0F172A]">
               {card.icon}
             </div>
 
             <div className="min-w-0">
-              <p className="truncate text-xs font-black text-slate-950 dark:text-white">
+              <p className="truncate text-xs font-black text-[#050816] dark:text-slate-100">
                 {card.title}
               </p>
-              <p className="mt-0.5 truncate text-[11px] font-bold text-slate-500 dark:text-white/42">
+              <p className="mt-0.5 truncate text-[11px] font-bold text-slate-500 dark:text-slate-400">
                 {card.label}
               </p>
             </div>
@@ -531,26 +537,27 @@ function MobileServiceSlider() {
 function DesktopProductionVisual() {
   return (
     <>
-      <div className="absolute -inset-8 rounded-[3rem] bg-gradient-to-br from-indigo-500/20 via-violet-500/10 to-blue-500/20 blur-3xl" />
+      <div className="absolute -inset-8 rounded-[3rem] bg-gradient-to-br from-[#6D35FF]/18 via-[#7C3AED]/8 to-[#2563EB]/18 blur-3xl dark:from-indigo-500/16 dark:via-cyan-500/8 dark:to-blue-500/12" />
 
-      <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white/75 p-4 shadow-2xl shadow-slate-950/10 backdrop-blur-xl dark:border-white/[0.1] dark:bg-white/[0.055] dark:shadow-black/30">
+      <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white/85 p-4 shadow-2xl shadow-slate-950/10 backdrop-blur-xl dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/30">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.25em] text-indigo-600 dark:text-indigo-300">
+            <p className="text-xs font-black uppercase tracking-[0.25em] text-[#2563EB] dark:text-indigo-300">
               Live Production
             </p>
-            <h3 className="mt-1 text-xl font-black tracking-tight text-slate-950 dark:text-white">
+
+            <h3 className="mt-1 text-xl font-black tracking-tight text-[#050816] dark:text-slate-100">
               From artwork to stitch file
             </h3>
           </div>
 
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-indigo-600 dark:border-white/10 dark:bg-white/[0.06] dark:text-indigo-300">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-[#2563EB] dark:border-slate-700 dark:bg-[#0F172A] dark:text-indigo-300">
             <Layers3 className="h-5 w-5" />
           </div>
         </div>
 
-        <div className="relative h-[340px] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-950 dark:border-white/10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(99,102,241,0.42),transparent_30%),radial-gradient(circle_at_78%_68%,rgba(168,85,247,0.25),transparent_32%)]" />
+        <div className="relative h-[340px] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-[#050816] dark:border-slate-800">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(109,53,255,0.45),transparent_30%),radial-gradient(circle_at_78%_68%,rgba(37,99,235,0.32),transparent_32%)]" />
 
           <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:34px_34px] opacity-35" />
 
@@ -571,11 +578,11 @@ function DesktopProductionVisual() {
               stroke="rgba(255,255,255,0.22)"
               strokeWidth="1.5"
             />
-            <circle cx="128" cy="230" r="6" fill="#818cf8" />
-            <circle cx="154" cy="104" r="6" fill="#a78bfa" />
-            <circle cx="250" cy="212" r="6" fill="#60a5fa" />
-            <circle cx="326" cy="92" r="6" fill="#c084fc" />
-            <circle cx="398" cy="230" r="6" fill="#818cf8" />
+            <circle cx="128" cy="230" r="6" fill="#6D35FF" />
+            <circle cx="154" cy="104" r="6" fill="#7C3AED" />
+            <circle cx="250" cy="212" r="6" fill="#2563EB" />
+            <circle cx="326" cy="92" r="6" fill="#0EA5E9" />
+            <circle cx="398" cy="230" r="6" fill="#6D35FF" />
 
             <defs>
               <linearGradient
@@ -586,25 +593,25 @@ function DesktopProductionVisual() {
                 y2="340"
                 gradientUnits="userSpaceOnUse"
               >
-                <stop stopColor="#818cf8" />
-                <stop offset="0.5" stopColor="#c084fc" />
-                <stop offset="1" stopColor="#38bdf8" />
+                <stop stopColor="#6D35FF" />
+                <stop offset="0.5" stopColor="#7C3AED" />
+                <stop offset="1" stopColor="#0EA5E9" />
               </linearGradient>
             </defs>
           </svg>
 
           <div className="absolute left-5 top-5 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white shadow-xl backdrop-blur-md">
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/50">
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/50">
               Source
             </p>
-            <p className="mt-1 text-sm font-bold">Rough Logo.png</p>
+            <p className="mt-1 text-sm font-black">Rough Logo.png</p>
           </div>
 
           <div className="absolute bottom-5 right-5 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-white shadow-xl backdrop-blur-md">
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/50">
+            <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/50">
               Output
             </p>
-            <p className="mt-1 text-sm font-bold">DST · PES · PDF Proof</p>
+            <p className="mt-1 text-sm font-black">DST · PES · PDF Proof</p>
           </div>
 
           <div className="absolute left-1/2 top-1/2 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[2rem] border border-white/15 bg-white/10 shadow-2xl backdrop-blur-md">
@@ -613,22 +620,22 @@ function DesktopProductionVisual() {
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/[0.045]">
-            <BadgeCheck className="mb-2 h-5 w-5 text-indigo-600 dark:text-indigo-300" />
-            <p className="text-sm font-bold text-slate-950 dark:text-white">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-[#0F172A]">
+            <BadgeCheck className="mb-2 h-5 w-5 text-[#2563EB] dark:text-indigo-300" />
+            <p className="text-sm font-black text-[#050816] dark:text-slate-100">
               Proof-first flow
             </p>
-            <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-white/45">
+            <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
               JPG/PNG approval before final files.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/[0.045]">
-            <Sparkles className="mb-2 h-5 w-5 text-violet-600 dark:text-violet-300" />
-            <p className="text-sm font-bold text-slate-950 dark:text-white">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-[#0F172A]">
+            <Sparkles className="mb-2 h-5 w-5 text-[#6D35FF] dark:text-cyan-300" />
+            <p className="text-sm font-black text-[#050816] dark:text-slate-100">
               Clean production
             </p>
-            <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-white/45">
+            <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
               Better trims, fills, and stitch paths.
             </p>
           </div>
@@ -640,14 +647,14 @@ function DesktopProductionVisual() {
           {[...floatingCards, ...floatingCards].map((card, index) => (
             <div
               key={`${card.title}-${index}`}
-              className="flex w-48 shrink-0 items-center gap-3 rounded-2xl border border-white/15 bg-slate-950/75 p-3 text-white shadow-xl backdrop-blur-xl"
+              className="flex w-48 shrink-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white/90 p-3 text-[#050816] shadow-xl shadow-slate-950/10 backdrop-blur-xl dark:border-slate-800 dark:bg-[#0B1120] dark:text-slate-100"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-lg">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-lg dark:bg-[#0F172A]">
                 {card.icon}
               </div>
               <div>
                 <p className="text-xs font-black">{card.title}</p>
-                <p className="mt-0.5 text-[10px] text-white/45">
+                <p className="mt-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
                   {card.label}
                 </p>
               </div>
@@ -662,9 +669,9 @@ function DesktopProductionVisual() {
 function HeroBackground() {
   return (
     <>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.18),transparent_32%),radial-gradient(circle_at_80%_15%,rgba(168,85,247,0.16),transparent_30%),radial-gradient(circle_at_50%_90%,rgba(59,130,246,0.12),transparent_36%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.22),transparent_32%),radial-gradient(circle_at_80%_15%,rgba(168,85,247,0.18),transparent_30%),radial-gradient(circle_at_50%_90%,rgba(59,130,246,0.12),transparent_36%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(109,53,255,0.15),transparent_32%),radial-gradient(circle_at_80%_15%,rgba(37,99,235,0.13),transparent_30%),radial-gradient(circle_at_50%_90%,rgba(14,165,233,0.09),transparent_36%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.18),transparent_32%),radial-gradient(circle_at_80%_15%,rgba(56,189,248,0.1),transparent_30%),radial-gradient(circle_at_50%_90%,rgba(59,130,246,0.1),transparent_36%)]" />
 
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.07)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_42%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.055)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.055)_1px,transparent_1px)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.045)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_42%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)]" />
 
       <MobileHeroThreads />
       <HeroSvgBackground />
@@ -678,10 +685,10 @@ function MobileHeroThreads() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 z-[2] overflow-hidden md:hidden"
     >
-      <div className="absolute inset-0 opacity-45 [background-image:radial-gradient(rgba(79,70,229,0.24)_1px,transparent_1px)] [background-size:18px_18px] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_28%,black,transparent_72%)] dark:opacity-35 dark:[background-image:radial-gradient(rgba(255,255,255,0.14)_1px,transparent_1px)]" />
+      <div className="absolute inset-0 opacity-35 [background-image:radial-gradient(rgba(109,53,255,0.2)_1px,transparent_1px)] [background-size:18px_18px] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_28%,black,transparent_72%)] dark:opacity-25 dark:[background-image:radial-gradient(rgba(255,255,255,0.12)_1px,transparent_1px)]" />
 
       <svg
-        className="hero-mobile-thread-float absolute -left-24 top-[5.5rem] h-44 w-[42rem] opacity-65 dark:opacity-45"
+        className="hero-mobile-thread-float absolute -left-24 top-[5.5rem] h-44 w-[42rem] opacity-55 dark:opacity-35"
         viewBox="0 0 680 180"
         fill="none"
       >
@@ -695,7 +702,7 @@ function MobileHeroThreads() {
         <path
           className="hero-mobile-thread-dash"
           d="M20 98 C92 28 168 154 252 82 C340 6 420 148 512 66 C570 16 628 42 662 72"
-          stroke="rgba(99,102,241,0.7)"
+          stroke="rgba(109,53,255,0.55)"
           strokeWidth="1.1"
           strokeLinecap="round"
         />
@@ -705,14 +712,14 @@ function MobileHeroThreads() {
           cx="92"
           cy="28"
           r="4"
-          fill="#6366f1"
+          fill="#6D35FF"
         />
         <circle
           className="hero-mobile-node-pulse"
           cx="252"
           cy="82"
           r="4"
-          fill="#38bdf8"
+          fill="#2563EB"
           style={{ animationDelay: "0.45s" }}
         />
         <circle
@@ -720,7 +727,7 @@ function MobileHeroThreads() {
           cx="512"
           cy="66"
           r="4"
-          fill="#a855f7"
+          fill="#0EA5E9"
           style={{ animationDelay: "0.9s" }}
         />
 
@@ -733,36 +740,36 @@ function MobileHeroThreads() {
             y2="180"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#6366f1" />
-            <stop offset="0.5" stopColor="#a855f7" />
-            <stop offset="1" stopColor="#38bdf8" />
+            <stop stopColor="#6D35FF" />
+            <stop offset="0.5" stopColor="#7C3AED" />
+            <stop offset="1" stopColor="#0EA5E9" />
           </linearGradient>
         </defs>
       </svg>
 
       <svg
-        className="absolute -right-28 top-[16rem] h-56 w-[34rem] rotate-[-8deg] opacity-45 dark:opacity-30"
+        className="absolute -right-28 top-[16rem] h-56 w-[34rem] rotate-[-8deg] opacity-35 dark:opacity-25"
         viewBox="0 0 540 220"
         fill="none"
       >
         <path
           className="hero-mobile-thread-dash-slow"
           d="M34 142 C92 42 184 198 260 96 C342 -12 438 158 506 54"
-          stroke="rgba(245,158,11,0.58)"
+          stroke="rgba(14,165,233,0.5)"
           strokeWidth="1.4"
           strokeLinecap="round"
         />
 
         <path
           d="M80 158 L110 108 M188 178 L220 130 M342 122 L376 76 M454 92 L488 48"
-          stroke="rgba(15,23,42,0.22)"
+          stroke="rgba(15,23,42,0.18)"
           strokeWidth="1"
-          className="dark:stroke-white/20"
+          className="dark:stroke-white/15"
         />
       </svg>
 
       <svg
-        className="hero-mobile-thread-float-reverse absolute -left-36 bottom-20 h-48 w-[46rem] opacity-40 dark:opacity-28"
+        className="hero-mobile-thread-float-reverse absolute -left-36 bottom-20 h-48 w-[46rem] opacity-35 dark:opacity-24"
         viewBox="0 0 720 200"
         fill="none"
       >
@@ -776,7 +783,7 @@ function MobileHeroThreads() {
         <path
           className="hero-mobile-thread-dash-reverse"
           d="M24 118 C108 188 198 42 296 126 C394 210 482 44 584 120 C642 164 686 130 712 104"
-          stroke="rgba(56,189,248,0.58)"
+          stroke="rgba(37,99,235,0.46)"
           strokeWidth="1.1"
           strokeLinecap="round"
         />
@@ -790,9 +797,9 @@ function MobileHeroThreads() {
             y2="200"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#38bdf8" />
-            <stop offset="0.5" stopColor="#6366f1" />
-            <stop offset="1" stopColor="#f59e0b" />
+            <stop stopColor="#0EA5E9" />
+            <stop offset="0.5" stopColor="#2563EB" />
+            <stop offset="1" stopColor="#6D35FF" />
           </linearGradient>
         </defs>
       </svg>
@@ -807,7 +814,7 @@ function HeroSvgBackground() {
       className="pointer-events-none absolute inset-0 z-[1] overflow-hidden"
     >
       <svg
-        className="hero-float absolute -left-28 top-24 hidden h-72 w-[46rem] opacity-55 dark:opacity-40 md:block"
+        className="hero-float absolute -left-28 top-24 hidden h-72 w-[46rem] opacity-42 dark:opacity-28 md:block"
         viewBox="0 0 720 280"
         fill="none"
       >
@@ -820,7 +827,7 @@ function HeroSvgBackground() {
         <path
           className="hero-stitch-dash"
           d="M24 170 C128 42 218 250 340 126 C462 2 548 220 696 88"
-          stroke="rgba(99,102,241,0.45)"
+          stroke="rgba(109,53,255,0.42)"
           strokeWidth="1"
           strokeLinecap="round"
         />
@@ -833,48 +840,48 @@ function HeroSvgBackground() {
             y2="280"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#6366f1" />
-            <stop offset="0.5" stopColor="#a855f7" />
-            <stop offset="1" stopColor="#38bdf8" />
+            <stop stopColor="#6D35FF" />
+            <stop offset="0.5" stopColor="#7C3AED" />
+            <stop offset="1" stopColor="#0EA5E9" />
           </linearGradient>
         </defs>
       </svg>
 
       <svg
-        className="absolute right-[-5rem] top-20 hidden h-80 w-80 opacity-45 dark:opacity-30 md:block"
+        className="absolute right-[-5rem] top-20 hidden h-80 w-80 opacity-32 dark:opacity-22 md:block"
         viewBox="0 0 320 320"
         fill="none"
       >
         <path
           d="M58 212 C82 78 196 62 246 122 C284 168 220 246 132 230"
-          stroke="rgba(99,102,241,0.35)"
+          stroke="rgba(109,53,255,0.32)"
           strokeWidth="1.5"
         />
-        <circle cx="58" cy="212" r="6" fill="#6366f1" />
-        <circle cx="132" cy="230" r="6" fill="#60a5fa" />
-        <circle cx="246" cy="122" r="6" fill="#a855f7" />
+        <circle cx="58" cy="212" r="6" fill="#6D35FF" />
+        <circle cx="132" cy="230" r="6" fill="#0EA5E9" />
+        <circle cx="246" cy="122" r="6" fill="#7C3AED" />
         <path
           d="M58 212 L34 232 M58 212 L82 192 M132 230 L108 252 M132 230 L158 208 M246 122 L270 100 M246 122 L224 144"
-          stroke="rgba(15,23,42,0.28)"
+          stroke="rgba(15,23,42,0.18)"
           strokeWidth="1"
-          className="dark:stroke-white/25"
+          className="dark:stroke-white/18"
         />
       </svg>
 
       <svg
-        className="absolute bottom-20 left-8 hidden h-56 w-56 rotate-[-10deg] opacity-40 dark:opacity-25 lg:block"
+        className="absolute bottom-20 left-8 hidden h-56 w-56 rotate-[-10deg] opacity-28 dark:opacity-18 lg:block"
         viewBox="0 0 240 240"
         fill="none"
       >
         <path
           d="M120 22 L185 48 L214 114 L191 183 L120 218 L49 183 L26 114 L55 48 Z"
-          stroke="rgba(245,158,11,0.45)"
+          stroke="rgba(14,165,233,0.38)"
           strokeWidth="2"
         />
         <path
           className="hero-stitch-dash"
           d="M120 39 L173 60 L197 115 L178 171 L120 200 L62 171 L43 115 L67 60 Z"
-          stroke="rgba(245,158,11,0.55)"
+          stroke="rgba(37,99,235,0.42)"
           strokeWidth="1.5"
         />
       </svg>

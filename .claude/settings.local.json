@@ -25,7 +25,10 @@
       "Bash(echo \"BUILD_EXIT=$?\")",
       "Bash(echo \"LINT_EXIT=$?\")",
       "Bash(pnpm prisma *)",
-      "Bash(powershell *)"
+      "Bash(powershell *)",
+      "Bash(grep -v \"^E:\\\\\\\\\")",
+      "Bash(pnpm test *)",
+      "Bash(git stash *)"
     ]
   }
 }

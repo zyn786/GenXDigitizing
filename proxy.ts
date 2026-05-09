@@ -36,10 +36,38 @@ function isMarketingAllowed(pathname: string): boolean {
   return false;
 }
 
+const ADMIN_API_PATHS = ["/api/admin", "/api/designer"];
+const CLIENT_API_PATHS = ["/api/client"];
+
+const FULL_ADMIN_ROLES = new Set([
+  "SUPER_ADMIN",
+  "MANAGER",
+  "DESIGNER",
+  "CHAT_SUPPORT",
+  "MARKETING",
+]);
+
 export default auth((req) => {
   const { nextUrl, auth: session } = req;
   const pathname = nextUrl.pathname;
   const role = session?.user?.role;
+
+  // Protect admin API routes at edge
+  if (ADMIN_API_PATHS.some((p) => pathname.startsWith(p))) {
+    if (!session?.user) {
+      return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
+    }
+    if (!FULL_ADMIN_ROLES.has(role ?? "")) {
+      return NextResponse.json({ ok: false, message: "Forbidden." }, { status: 403 });
+    }
+  }
+
+  // Protect client API routes at edge
+  if (CLIENT_API_PATHS.some((p) => pathname.startsWith(p))) {
+    if (!session?.user) {
+      return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
+    }
+  }
 
   const isClientRoute = pathname.startsWith("/client");
   const isAdminRoute = pathname.startsWith("/admin");
@@ -92,5 +120,8 @@ export const config = {
     "/manager/:path*",
     "/marketing/:path*",
     "/chat-support/:path*",
+    "/api/admin/:path*",
+    "/api/client/:path*",
+    "/api/designer/:path*",
   ],
 };
