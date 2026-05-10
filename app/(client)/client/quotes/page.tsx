@@ -20,7 +20,7 @@ const QUOTE_STATUS_CONFIG: Record<string, { label: string; classes: string }> = 
   CLIENT_ACCEPTED: { label: "Accepted", classes: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300" },
   CLIENT_REJECTED: { label: "Declined", classes: "border-red-400/30 bg-red-500/10 text-red-300" },
   CONVERTED_TO_ORDER: { label: "Order placed", classes: "border-teal-400/30 bg-teal-500/10 text-teal-300" },
-  CANCELLED: { label: "Cancelled", classes: "border-white/10 bg-white/5 text-white/40" },
+  CANCELLED: { label: "Cancelled", classes: "border-white/10 bg-white/5 text-white/65" },
 };
 
 function parseServiceLabel(serviceType: string): string {

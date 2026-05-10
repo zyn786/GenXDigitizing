@@ -85,11 +85,11 @@ export function SiteFooter() {
           </div>
 
           <div className="mt-9 flex flex-col gap-3 border-t border-slate-200 pt-6 text-center dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:text-left">
-            <div className="text-xs text-slate-500 dark:text-white/40">
+            <div className="text-xs text-slate-500 dark:text-white/65">
               © {year} {siteConfig.name}. All rights reserved.
             </div>
 
-            <div className="text-xs text-slate-500 dark:text-white/40">
+            <div className="text-xs text-slate-500 dark:text-white/65">
               Production-ready embroidery digitizing &amp; vector art.
             </div>
           </div>

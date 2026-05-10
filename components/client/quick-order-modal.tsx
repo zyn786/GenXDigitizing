@@ -96,7 +96,7 @@ function buildDefault(): FormState {
 // ── Shared input styles ───────────────────────────────────────────────────────
 
 const inp =
-  "h-12 w-full rounded-2xl border border-white/[0.09] bg-white/[0.05] px-4 text-sm text-white outline-none placeholder:text-white/25 focus:border-white/20 focus:bg-white/[0.08] transition-all";
+  "h-12 w-full rounded-2xl border border-white/[0.09] bg-white/[0.05] px-4 text-sm text-white outline-none placeholder:text-white/50 focus:border-white/20 focus:bg-white/[0.08] transition-all";
 
 const sel =
   "h-12 w-full rounded-2xl border border-white/[0.09] bg-white/[0.05] px-4 text-sm text-white outline-none focus:border-white/20 transition-all appearance-none cursor-pointer";
@@ -105,7 +105,7 @@ const sel =
 
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
-    <div className="mb-2 text-xs font-medium text-white/45">
+    <div className="mb-2 text-xs font-medium text-white/70">
       {children}
       {required && <span className="ml-1 text-red-400/70">*</span>}
     </div>
@@ -124,7 +124,7 @@ function StepIndicator({ current }: { current: number }) {
               <div className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-bold transition-all duration-300 ${
                 done    ? "border-emerald-400/50 bg-emerald-500/15 text-emerald-300"
                 : active  ? "border-white/30 bg-white text-slate-950 shadow-[0_0_12px_rgba(255,255,255,0.2)]"
-                :           "border-white/[0.1] bg-white/[0.04] text-white/25"
+                :           "border-white/[0.1] bg-white/[0.04] text-white/60"
               }`}>
                 {done ? <Check className="h-3.5 w-3.5" /> : s.num}
               </div>
@@ -297,11 +297,11 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                     {mode === "order" ? <Package className="h-4 w-4 text-indigo-300" /> : <Layers className="h-4 w-4 text-sky-300" />}
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/30">{mode === "order" ? "Direct order" : "Quote request"}</div>
+                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/60">{mode === "order" ? "Direct order" : "Quote request"}</div>
                     <h2 className="text-base font-bold text-white">{mode === "order" ? "Place a New Order" : "Request a Quote"}</h2>
                   </div>
                 </div>
-                <button onClick={closeModal} aria-label="Close" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.06] text-white/40 transition hover:bg-white/[0.12] hover:text-white">
+                <button onClick={closeModal} aria-label="Close" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.06] text-white/65 transition hover:bg-white/[0.12] hover:text-white">
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -317,8 +317,8 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-foreground">{mode === "order" ? "Order Confirmed!" : "Quote Submitted!"}</p>
-                    <div className="mx-auto mt-3 w-fit rounded-xl border border-white/10 bg-white/[0.05] px-4 py-1.5 font-mono text-sm text-white/45">{orderNumber}</div>
-                    <p className="mt-4 text-sm leading-6 text-white/45">
+                    <div className="mx-auto mt-3 w-fit rounded-xl border border-white/10 bg-white/[0.05] px-4 py-1.5 font-mono text-sm text-white/70">{orderNumber}</div>
+                    <p className="mt-4 text-sm leading-6 text-white/70">
                       {mode === "order" ? "Your order is in our queue. We'll begin production shortly." : "We'll review your request and send pricing within 1 business day."}
                     </p>
                   </div>
@@ -349,7 +349,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                     <div className="space-y-5">
                       <div>
                         <p className="mb-1 text-lg font-semibold text-white">What service do you need?</p>
-                        <p className="text-sm text-white/40">Choose the type of design work, then pick your category.</p>
+                        <p className="text-sm text-white/65">Choose the type of design work, then pick your category.</p>
                       </div>
 
                       {/* Service cards */}
@@ -372,7 +372,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                               <span className="text-2xl leading-none">{meta.emoji}</span>
                               <div>
                                 <div className={`text-xs font-bold leading-snug ${active ? "text-white" : "text-white/60 group-hover:text-white/80"}`}>{s.label}</div>
-                                <div className={`mt-0.5 text-[10px] ${active ? a.text : "text-white/30"}`}>{meta.hint}</div>
+                                <div className={`mt-0.5 text-[10px] ${active ? a.text : "text-white/60"}`}>{meta.hint}</div>
                               </div>
                               {active && (
                                 <div className={`absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full ${a.bg} ${a.border}`}>
@@ -415,7 +415,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                     <div className="space-y-4">
                       <div>
                         <p className="mb-1 text-lg font-semibold text-white">Tell us about your design</p>
-                        <p className="text-sm text-white/40">Dimensions and placement help us price your design accurately.</p>
+                        <p className="text-sm text-white/65">Dimensions and placement help us price your design accurately.</p>
                       </div>
 
                       {/* Design title */}
@@ -473,7 +473,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                     <div className="space-y-5">
                       <div>
                         <p className="mb-1 text-lg font-semibold text-white">Production options</p>
-                        <p className="text-sm text-white/40">Set add-ons and choose your turnaround speed.</p>
+                        <p className="text-sm text-white/65">Set add-ons and choose your turnaround speed.</p>
                       </div>
 
                       {/* 3D Puff + Color qty */}
@@ -492,7 +492,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                                     className={`h-12 flex-1 rounded-2xl border text-sm font-semibold transition-all ${
                                       active
                                         ? "border-indigo-400/35 bg-indigo-500/10 text-indigo-200 shadow-sm"
-                                        : "border-white/[0.09] bg-white/[0.04] text-white/35 hover:border-white/[0.14] hover:text-white/60"
+                                        : "border-white/[0.09] bg-white/[0.04] text-white/60 hover:border-white/[0.14] hover:text-white/60"
                                     }`}
                                   >
                                     {v}
@@ -528,13 +528,13 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                                 }`}
                               >
                                 <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all ${active ? `${a.bg} ${a.border}` : "bg-white/[0.06]"}`}>
-                                  <Icon className={`h-4 w-4 ${active ? a.text : "text-white/25"}`} />
+                                  <Icon className={`h-4 w-4 ${active ? a.text : "text-white/60"}`} />
                                 </div>
                                 <div className="flex-1">
                                   <div className={`text-sm font-semibold ${active ? "text-white" : "text-white/55"}`}>{t.label}</div>
-                                  <div className="mt-0.5 text-xs text-white/30">{t.sub}</div>
+                                  <div className="mt-0.5 text-xs text-white/60">{t.sub}</div>
                                 </div>
-                                <span className={`rounded-xl border px-3 py-1 text-xs font-bold ${active ? `${a.border} ${a.text}` : "border-white/[0.08] text-white/25"}`}>
+                                <span className={`rounded-xl border px-3 py-1 text-xs font-bold ${active ? `${a.border} ${a.text}` : "border-white/[0.08] text-white/60"}`}>
                                   {t.badge}
                                 </span>
                                 <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-all ${active ? "border-white bg-white" : "border-white/20"}`}>
@@ -553,7 +553,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                     <div className="space-y-4">
                       <div>
                         <p className="mb-1 text-lg font-semibold text-white">Review &amp; confirm</p>
-                        <p className="text-sm text-white/40">Add any notes, then submit your {mode === "order" ? "order" : "quote request"}.</p>
+                        <p className="text-sm text-white/65">Add any notes, then submit your {mode === "order" ? "order" : "quote request"}.</p>
                       </div>
 
                       {/* Summary card */}
@@ -576,7 +576,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
 
                       {/* Reference files */}
                       <div>
-                        <FieldLabel>Reference files <span className="text-white/25 font-normal normal-case tracking-normal">(optional — artwork, mockups, inspiration)</span></FieldLabel>
+                        <FieldLabel>Reference files <span className="text-white/60 font-normal normal-case tracking-normal">(optional — artwork, mockups, inspiration)</span></FieldLabel>
                         <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-3">
                           <ReferenceFileUploader
                             files={refFiles}
@@ -589,13 +589,13 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
 
                       {/* Notes */}
                       <div>
-                        <FieldLabel>Notes / Special Instructions <span className="text-white/25 font-normal normal-case tracking-normal">(optional)</span></FieldLabel>
+                        <FieldLabel>Notes / Special Instructions <span className="text-white/60 font-normal normal-case tracking-normal">(optional)</span></FieldLabel>
                         <textarea
                           value={form.notes}
                           onChange={(e) => set("notes", e.target.value)}
                           rows={3}
                           placeholder="Placement details, garment type, color matching, revision instructions…"
-                          className="w-full resize-none rounded-2xl border border-white/[0.09] bg-white/[0.05] px-4 py-3.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-white/20 focus:bg-white/[0.08] transition-all"
+                          className="w-full resize-none rounded-2xl border border-white/[0.09] bg-white/[0.05] px-4 py-3.5 text-sm text-white outline-none placeholder:text-white/60 focus:border-white/20 focus:bg-white/[0.08] transition-all"
                         />
                       </div>
 
@@ -630,7 +630,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
                         Back
                       </button>
                     ) : (
-                      <div className="flex-1 text-xs text-white/25">Step {step} of {STEPS.length}</div>
+                      <div className="flex-1 text-xs text-white/60">Step {step} of {STEPS.length}</div>
                     )}
 
                     <div className="flex-1" />
@@ -676,7 +676,7 @@ export function QuickOrderModal({ mode, userName, userEmail, triggerClassName, t
 function SummaryRow({ label, value, highlight, accent }: { label: string; value: string; highlight?: boolean; accent?: boolean }) {
   return (
     <div className="flex items-center justify-between px-4 py-2.5">
-      <span className="text-xs text-white/35">{label}</span>
+      <span className="text-xs text-white/60">{label}</span>
       <span className={`max-w-[60%] truncate text-right text-xs font-semibold ${highlight ? "text-white" : accent ? "text-indigo-300" : "text-white/65"}`}>
         {value}
       </span>

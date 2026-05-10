@@ -28,7 +28,10 @@
       "Bash(powershell *)",
       "Bash(grep -v \"^E:\\\\\\\\\")",
       "Bash(pnpm test *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(node -e ' *)",
+      "Bash(pnpm run *)",
+      "Bash(xargs grep -l \"text-white/25\\\\|text-white/30\\\\|text-white/35\\\\|text-white/40\\\\|text-white/45\")"
     ]
   }
 }

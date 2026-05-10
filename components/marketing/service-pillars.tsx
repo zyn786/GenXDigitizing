@@ -361,136 +361,68 @@ function ServiceBackground() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(109,53,255,0.13),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(37,99,235,0.1),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(14,165,233,0.08),transparent_38%)] dark:bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(59,130,246,0.08),transparent_38%)]" />
+      {/* Base */}
+      <div className="absolute inset-0 bg-[#EEF4FF] dark:bg-[#040816]" />
 
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:34px_34px] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] md:bg-[size:42px_42px]" />
+      {/* Dark gradient mesh */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.18),transparent_28%),radial-gradient(circle_at_top_right,rgba(109,53,255,0.16),transparent_30%),radial-gradient(circle_at_bottom,rgba(14,165,233,0.14),transparent_34%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.22),transparent_28%),radial-gradient(circle_at_top_right,rgba(99,102,241,0.22),transparent_30%),radial-gradient(circle_at_bottom,rgba(6,182,212,0.16),transparent_34%)]" />
 
+      {/* Large ambient glows */}
+      <div className="absolute -left-32 top-[-8rem] h-[34rem] w-[34rem] rounded-full bg-[#2563EB]/18 blur-[140px] dark:bg-blue-600/22" />
+
+      <div className="absolute right-[-10rem] top-[4rem] h-[30rem] w-[30rem] rounded-full bg-[#6D35FF]/16 blur-[130px] dark:bg-indigo-500/24" />
+
+      <div className="absolute bottom-[-12rem] left-1/2 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full bg-[#0EA5E9]/14 blur-[150px] dark:bg-cyan-500/18" />
+
+      {/* Dark soft overlays */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0B1120]/[0.03] to-[#0B1120]/[0.08] dark:via-[#020617]/20 dark:to-black/40" />
+
+      {/* Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.05)_1px,transparent_1px)] bg-[size:42px_42px] [mask-image:radial-gradient(ellipse_72%_68%_at_50%_45%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)]" />
+
+      {/* Premium thread lines */}
       <svg
-        className="service-thread-float absolute -left-32 top-6 hidden h-64 w-[52rem] opacity-42 dark:opacity-28 md:block"
-        viewBox="0 0 840 260"
+        className="absolute left-[-8rem] top-6 hidden h-72 w-[64rem] opacity-40 dark:opacity-28 md:block"
+        viewBox="0 0 920 280"
         fill="none"
       >
         <path
-          d="M24 140 C118 42 212 226 326 108 C442 -12 548 214 662 92 C728 22 778 56 820 84"
-          stroke="url(#serviceThreadTop)"
-          strokeWidth="2.4"
+          d="M20 160 C120 40 250 250 390 110 C520 -20 650 230 860 80"
+          stroke="url(#threadGradient)"
+          strokeWidth="2"
           strokeLinecap="round"
         />
+
         <path
-          className="service-thread-dash"
-          d="M24 140 C118 42 212 226 326 108 C442 -12 548 214 662 92 C728 22 778 56 820 84"
-          stroke="rgba(109,53,255,0.42)"
-          strokeWidth="1.2"
-          strokeLinecap="round"
+          d="M20 160 C120 40 250 250 390 110 C520 -20 650 230 860 80"
+          stroke="rgba(255,255,255,0.18)"
+          strokeWidth="1"
+          strokeDasharray="10 12"
         />
+
         <defs>
           <linearGradient
-            id="serviceThreadTop"
-            x1="24"
+            id="threadGradient"
+            x1="20"
             y1="0"
-            x2="820"
+            x2="860"
             y2="260"
             gradientUnits="userSpaceOnUse"
           >
             <stop stopColor="#6D35FF" />
-            <stop offset="0.5" stopColor="#7C3AED" />
+            <stop offset="0.5" stopColor="#2563EB" />
             <stop offset="1" stopColor="#0EA5E9" />
           </linearGradient>
         </defs>
       </svg>
 
-      <svg
-        className="service-thread-float absolute -right-32 bottom-4 hidden h-64 w-[52rem] rotate-180 opacity-36 dark:opacity-24 md:block"
-        viewBox="0 0 840 260"
-        fill="none"
-      >
-        <path
-          d="M24 140 C118 42 212 226 326 108 C442 -12 548 214 662 92 C728 22 778 56 820 84"
-          stroke="url(#serviceThreadBottom)"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-        />
-        <path
-          className="service-thread-dash"
-          d="M24 140 C118 42 212 226 326 108 C442 -12 548 214 662 92 C728 22 778 56 820 84"
-          stroke="rgba(37,99,235,0.4)"
-          strokeWidth="1.2"
-          strokeLinecap="round"
-        />
-        <defs>
-          <linearGradient
-            id="serviceThreadBottom"
-            x1="24"
-            y1="0"
-            x2="820"
-            y2="260"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stopColor="#0EA5E9" />
-            <stop offset="0.5" stopColor="#2563EB" />
-            <stop offset="1" stopColor="#6D35FF" />
-          </linearGradient>
-        </defs>
-      </svg>
+      {/* Bottom glow line */}
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#2563EB]/30 to-transparent dark:via-cyan-400/30" />
 
-      <svg
-        className="absolute right-8 top-24 hidden h-72 w-72 opacity-32 dark:opacity-22 md:block"
-        viewBox="0 0 280 280"
-        fill="none"
-      >
-        <path
-          d="M48 188 C72 76 170 56 218 108 C254 146 202 218 120 204"
-          stroke="rgba(109,53,255,0.32)"
-          strokeWidth="1.5"
-        />
-        <circle
-          className="service-node-pulse"
-          cx="48"
-          cy="188"
-          r="5"
-          fill="#6D35FF"
-        />
-        <circle
-          className="service-node-pulse"
-          cx="120"
-          cy="204"
-          r="5"
-          fill="#0EA5E9"
-          style={{ animationDelay: "0.45s" }}
-        />
-        <circle
-          className="service-node-pulse"
-          cx="218"
-          cy="108"
-          r="5"
-          fill="#2563EB"
-          style={{ animationDelay: "0.9s" }}
-        />
-        <path
-          d="M48 188 L28 204 M48 188 L68 172 M120 204 L98 224 M120 204 L143 184 M218 108 L240 92 M218 108 L196 124"
-          stroke="rgba(15,23,42,0.18)"
-          strokeWidth="1"
-          className="dark:stroke-white/15"
-        />
-      </svg>
-
-      <svg
-        className="absolute bottom-16 left-8 hidden h-56 w-56 rotate-[-10deg] opacity-24 dark:opacity-16 lg:block"
-        viewBox="0 0 240 240"
-        fill="none"
-      >
-        <path
-          d="M120 22 L185 48 L214 114 L191 183 L120 218 L49 183 L26 114 L55 48 Z"
-          stroke="rgba(14,165,233,0.34)"
-          strokeWidth="2"
-        />
-        <path
-          className="service-thread-dash"
-          d="M120 39 L173 60 L197 115 L178 171 L120 200 L62 171 L43 115 L67 60 Z"
-          stroke="rgba(37,99,235,0.36)"
-          strokeWidth="1.5"
-        />
-      </svg>
+      {/* Noise texture */}
+      <div className="absolute inset-0 opacity-[0.035] mix-blend-overlay">
+        <div className="h-full w-full bg-[url('/noise.png')]" />
+      </div>
     </div>
   );
 }

@@ -241,12 +241,23 @@ function CtaBackground() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(109,53,255,0.13),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(37,99,235,0.1),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(14,165,233,0.08),transparent_38%)] dark:bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(59,130,246,0.08),transparent_38%)]" />
+      {/* Main dark premium gradient */}
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,#EFF6FF_0%,#EEF2FF_35%,#F5F3FF_70%,#F8FAFC_100%)] dark:bg-[linear-gradient(135deg,#050814_0%,#0B1120_35%,#111827_70%,#020617_100%)]" />
 
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:34px_34px] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] md:bg-[size:42px_42px]" />
+      {/* Large blurred glow orbs */}
+      <div className="absolute -left-32 top-0 h-[30rem] w-[30rem] rounded-full bg-[#6D35FF]/25 blur-3xl" />
+      <div className="absolute right-[-8rem] top-[20%] h-[26rem] w-[26rem] rounded-full bg-[#2563EB]/20 blur-3xl" />
+      <div className="absolute bottom-[-10rem] left-[30%] h-[28rem] w-[28rem] rounded-full bg-[#0EA5E9]/15 blur-3xl" />
 
+      {/* Soft radial overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_45%)]" />
+
+      {/* Grid texture */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:40px_40px] opacity-30 [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,black,transparent_78%)]" />
+
+      {/* Animated top thread */}
       <svg
-        className="cta-thread-float absolute -left-32 top-8 hidden h-64 w-[52rem] opacity-42 dark:opacity-28 md:block"
+        className="cta-thread-float absolute -left-32 top-8 hidden h-64 w-[52rem] opacity-40 md:block"
         viewBox="0 0 840 260"
         fill="none"
       >
@@ -260,7 +271,7 @@ function CtaBackground() {
         <path
           className="cta-thread-dash"
           d="M24 140 C118 42 212 226 326 108 C442 -12 548 214 662 92 C728 22 778 56 820 84"
-          stroke="rgba(109,53,255,0.42)"
+          stroke="rgba(255,255,255,0.25)"
           strokeWidth="1.2"
           strokeLinecap="round"
         />
@@ -281,8 +292,9 @@ function CtaBackground() {
         </defs>
       </svg>
 
+      {/* Bottom thread */}
       <svg
-        className="cta-thread-float absolute -right-32 bottom-8 hidden h-64 w-[52rem] rotate-180 opacity-36 dark:opacity-24 md:block"
+        className="cta-thread-float absolute -right-32 bottom-8 hidden h-64 w-[52rem] rotate-180 opacity-30 md:block"
         viewBox="0 0 840 260"
         fill="none"
       >
@@ -296,7 +308,7 @@ function CtaBackground() {
         <path
           className="cta-thread-dash"
           d="M24 140 C118 42 212 226 326 108 C442 -12 548 214 662 92 C728 22 778 56 820 84"
-          stroke="rgba(37,99,235,0.4)"
+          stroke="rgba(255,255,255,0.2)"
           strokeWidth="1.2"
           strokeLinecap="round"
         />

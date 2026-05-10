@@ -92,6 +92,7 @@ export function estimateOrderPrice(
     freeFirstDesignEnabled?: boolean;
     puffJacketBackBasePrice?: number;
     minPrice?: number;
+    bulkRules?: Array<{ minQty: number; discountPercent: number }>;
   },
 ): OrderEstimate {
   const {
@@ -113,6 +114,7 @@ export function estimateOrderPrice(
   const stitchRate = configOverrides?.stitchRatePer1000 ?? STITCH_RATE_PER_1000;
   const puffJBBase = configOverrides?.puffJacketBackBasePrice ?? PUFF_JACKET_BACK_BASE;
   const minPrice = configOverrides?.minPrice ?? MIN_PRICE;
+  const activeBulkRules = configOverrides?.bulkRules ?? BULK_RULES;
 
   const addons: { label: string; amount: number }[] = [];
   const discounts: { label: string; amount: number }[] = [];
@@ -234,7 +236,7 @@ export function estimateOrderPrice(
 
   /* ── Bulk discount ── */
   let discountPercent = 0;
-  for (const rule of BULK_RULES) {
+  for (const rule of activeBulkRules) {
     if (quantity >= rule.minQty) discountPercent = rule.discountPercent;
   }
 
@@ -250,7 +252,7 @@ export function estimateOrderPrice(
 
   /* ── Final ── */
   const subtotal = Math.round(subtotalBefore * 100) / 100;
-  let total = Math.round((subtotal + bulkDiscountAdj) * 100) / 100;
+  let total = Math.round((subtotal - bulkDiscountAdj) * 100) / 100;
   if (total < minPrice) {
     explanation.push(`Minimum price floor applied: ${formatCurrency(minPrice)}`);
     total = minPrice;

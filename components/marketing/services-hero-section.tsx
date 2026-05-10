@@ -140,11 +140,30 @@ function ServicesHeroBackground() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
     >
-      <div className="absolute left-1/2 top-0 h-72 w-[24rem] -translate-x-1/2 rounded-full bg-indigo-500/[0.08] blur-3xl dark:bg-indigo-400/[0.08] sm:w-[40rem]" />
+      {/* Main premium light background */}
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,#ffffff_0%,#f8f9ff_35%,#f3f6ff_65%,#eef2ff_100%)] dark:bg-[linear-gradient(180deg,#050814_0%,#0B1120_45%,#111827_100%)]" />
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.11),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(168,85,247,0.06),transparent_38%)] dark:bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(168,85,247,0.08),transparent_38%)]" />
+      {/* Purple / Blue ambient glows */}
+      <div className="absolute left-[-8rem] top-[-10rem] h-[28rem] w-[28rem] rounded-full bg-[#6D35FF]/14 blur-3xl dark:bg-indigo-500/16" />
 
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:34px_34px] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] md:bg-[size:42px_42px]" />
+      <div className="absolute right-[-6rem] top-[10%] h-[24rem] w-[24rem] rounded-full bg-[#2563EB]/12 blur-3xl dark:bg-blue-500/14" />
+
+      <div className="absolute bottom-[-10rem] left-[35%] h-[24rem] w-[24rem] rounded-full bg-[#0EA5E9]/10 blur-3xl dark:bg-cyan-500/10" />
+
+      {/* Top spotlight */}
+      <div className="absolute left-1/2 top-0 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-white/80 blur-3xl dark:bg-indigo-400/[0.08]" />
+
+      {/* Grid texture */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.045)_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] md:bg-[size:42px_42px]" />
+
+      {/* Soft radial overlays */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(109,53,255,0.10),transparent_30%),radial-gradient(circle_at_82%_18%,rgba(37,99,235,0.08),transparent_28%),radial-gradient(circle_at_50%_95%,rgba(14,165,233,0.06),transparent_34%)] dark:bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(168,85,247,0.08),transparent_38%)]" />
+
+      {/* Decorative blur line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#6D35FF]/25 to-transparent" />
+
+      {/* Extra cinematic overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.65),transparent_42%)] dark:bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.05),transparent_42%)]" />
     </div>
   );
 }

@@ -78,6 +78,8 @@ export async function getPricingCatalog(): Promise<PricingCatalog> {
   }
 }
 
+export { APPROVED_CATEGORY_KEYS, APPROVED_TIER_KEYS, filterApprovedCatalog } from "@/lib/pricing/filter";
+
 export const DEFAULT_PRICING_CATALOG: PricingCatalog = {
   categories: [
     {
@@ -87,12 +89,9 @@ export const DEFAULT_PRICING_CATALOG: PricingCatalog = {
       description: "Machine-ready embroidery files",
       isActive: true,
       tiers: [
-        { key: "left-chest", label: 'Left Chest / Small (up to 4")', price: 15, isActive: true },
-        { key: "standard", label: 'Standard Design (4"–8")', price: 25, isActive: true },
-        { key: "large", label: 'Large Design (8"–12")', price: 40, isActive: true },
-        { key: "jumbo", label: 'Jumbo / Full Back (12"+)', price: 65, isActive: true },
-        { key: "patches", label: "Patches & Custom Shapes", price: 35, isActive: true },
-        { key: "3d-puff", label: "3D Puff Digitizing", price: 45, isActive: true },
+        { key: "standard", label: 'Standard Design (4"–8")',   price: 25, isActive: true },
+        { key: "large",    label: 'Large Design (8"–12")',     price: 40, isActive: true },
+        { key: "jumbo",    label: 'Jumbo / Full Back (12"+)',  price: 65, isActive: true },
       ],
     },
     {
@@ -102,22 +101,9 @@ export const DEFAULT_PRICING_CATALOG: PricingCatalog = {
       description: "Crisp scalable vector artwork",
       isActive: true,
       tiers: [
-        { key: "basic", label: "Basic Logo (up to 2 colors)", price: 15, isActive: true },
-        { key: "standard", label: "Standard (up to 5 colors)", price: 25, isActive: true },
-        { key: "complex", label: "Complex Illustration", price: 45, isActive: true },
-        { key: "gradient", label: "Multi-color with Gradients", price: 65, isActive: true },
-      ],
-    },
-    {
-      key: "COLOR_SEPARATION",
-      label: "Color Separation",
-      emoji: "🎨",
-      description: "Separated layers for screen printing",
-      isActive: true,
-      tiers: [
-        { key: "simple", label: "Simple (up to 4 colors)", price: 20, isActive: true },
-        { key: "standard", label: "Standard (5–8 colors)", price: 35, isActive: true },
-        { key: "complex", label: "Complex / Simulated Process", price: 60, isActive: true },
+        { key: "basic",    label: "Basic Logo (up to 2 colors)", price: 15, isActive: true },
+        { key: "standard", label: "Standard (up to 5 colors)",   price: 25, isActive: true },
+        { key: "complex",  label: "Complex Illustration",         price: 45, isActive: true },
       ],
     },
     {
@@ -127,9 +113,9 @@ export const DEFAULT_PRICING_CATALOG: PricingCatalog = {
       description: "Film & screen printing artwork",
       isActive: true,
       tiers: [
-        { key: "single-color", label: "Single Color Artwork", price: 15, isActive: true },
-        { key: "spot-color", label: "Spot Color Film (up to 6 colors)", price: 35, isActive: true },
-        { key: "full-process", label: "Full Process / Simulated", price: 55, isActive: true },
+        { key: "single-color",  label: "Single Color Artwork",            price: 15, isActive: true },
+        { key: "spot-color",    label: "Spot Color Film (up to 6 colors)", price: 35, isActive: true },
+        { key: "full-process",  label: "Full Process / Simulated",         price: 55, isActive: true },
       ],
     },
   ],

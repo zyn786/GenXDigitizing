@@ -5,6 +5,7 @@ export const PRICING_CONFIG_KEYS = {
   FREE_FIRST_DESIGN_ENABLED: "free_first_design_enabled",
   PUFF_JACKET_BACK_BASE_PRICE: "puff_jacket_back_base_price",
   STITCH_PRICING_ENABLED: "stitch_pricing_enabled",
+  DEFAULT_TAX_PERCENT: "default_tax_percent",
 } as const;
 
 const DEFAULTS: Record<string, string> = {
@@ -12,6 +13,7 @@ const DEFAULTS: Record<string, string> = {
   free_first_design_enabled: "true",
   puff_jacket_back_base_price: "35.00",
   stitch_pricing_enabled: "true",
+  default_tax_percent: "0",
 };
 
 type ConfigRecord = { key: string; value: string };

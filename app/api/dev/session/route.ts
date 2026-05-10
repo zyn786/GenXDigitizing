@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 
 import { SESSION_COOKIE, type DemoCookieRole } from "@/lib/auth/session";
 
-// This endpoint only exists in development. Return 404 in production.
-const isDev = process.env.NODE_ENV !== "production";
+// This endpoint only exists in development. Requires explicit opt-in via env var.
+const isDev = process.env.NODE_ENV !== "production" && process.env.ALLOW_DEV_SESSION === "true";
 
 export async function POST(request: Request) {
   if (!isDev) {

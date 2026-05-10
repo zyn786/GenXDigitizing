@@ -53,6 +53,9 @@ export const quoteOrderSchema = z.object({
 
   // Lead source (optionally passed from referral context)
   leadSource: z.enum(LEAD_SOURCES).optional(),
+
+  // Coupon code (validated server-side against Coupon table)
+  couponCode: z.string().trim().toUpperCase().max(64).optional().or(z.literal("")),
 });
 
 export type QuoteOrderInput = z.infer<typeof quoteOrderSchema>;

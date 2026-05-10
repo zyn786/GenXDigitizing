@@ -60,19 +60,19 @@ export function BeforeAfterShowcase() {
                     <div className="text-sm font-black tracking-tight text-slate-950 dark:text-white">
                       {item.title}
                     </div>
-                    <div className="mt-0.5 text-xs font-medium text-slate-500 dark:text-white/45">
+                    <div className="mt-0.5 text-xs font-medium text-slate-500 dark:text-white/70">
                       {item.tag}
                     </div>
                   </div>
 
-                  <Badge className="shrink-0 rounded-full border-slate-200 bg-white/70 text-[10px] text-slate-500 dark:border-white/10 dark:bg-white/[0.055] dark:text-white/45">
+                  <Badge className="shrink-0 rounded-full border-slate-200 bg-white/70 text-[10px] text-slate-500 dark:border-white/10 dark:bg-white/[0.055] dark:text-white/70">
                     Case study
                   </Badge>
                 </div>
 
                 <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
                   <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 dark:border-white/10 dark:bg-white/[0.04]">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-white/35">
+                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-white/60">
                       Before
                     </div>
                     <div className="mt-1.5 text-sm leading-6 text-slate-600 dark:text-white/50">

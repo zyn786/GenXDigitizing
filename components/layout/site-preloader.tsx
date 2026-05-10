@@ -201,7 +201,7 @@ function SitePreloader({
             GenX Digitizing
           </div>
 
-          <div className="mt-1 text-[10px] font-black uppercase tracking-[0.26em] text-white/35">
+          <div className="mt-1 text-[10px] font-black uppercase tracking-[0.26em] text-white/60">
             Premium Embroidery Studio
           </div>
         </motion.div>

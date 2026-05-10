@@ -5,7 +5,7 @@ import type { Route } from "next";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { buildTitle } from "@/lib/site";
-import { DEFAULT_PRICING_CATALOG } from "@/lib/pricing/catalog";
+import { DEFAULT_PRICING_CATALOG, filterApprovedCatalog } from "@/lib/pricing/catalog";
 import { PricingEditor } from "@/components/admin/pricing-editor";
 import type { PricingCatalog } from "@/lib/pricing/catalog";
 import {
@@ -27,13 +27,15 @@ export default async function AdminPricingPage() {
     prisma.deliveryOption.findMany({ orderBy: { sortOrder: "asc" } }),
   ]);
 
-  const catalog: PricingCatalog = categories.length > 0
+  const rawCatalog: PricingCatalog = categories.length > 0
     ? {
         categories: categories.map((c) => ({ key: c.key, label: c.label, emoji: c.emoji ?? "", description: c.description ?? "", isActive: c.isActive, tiers: c.tiers.map((t) => ({ key: t.key, label: t.label, price: Number(t.basePrice), isActive: t.isActive })) })),
         addons: addons.length > 0 ? addons.map((a) => ({ key: a.key, label: a.label, price: Number(a.price), isActive: a.isActive })) : DEFAULT_PRICING_CATALOG.addons,
         delivery: delivery.length > 0 ? delivery.map((d) => ({ key: d.key, label: d.label, subLabel: d.subLabel ?? "", extraPrice: Number(d.extraPrice), isActive: d.isActive })) : DEFAULT_PRICING_CATALOG.delivery,
       }
     : DEFAULT_PRICING_CATALOG;
+
+  const catalog = filterApprovedCatalog(rawCatalog);
 
   return (
     <div className="grid gap-6">

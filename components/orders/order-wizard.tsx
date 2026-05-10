@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, ChevronDown, ChevronUp, ArrowLeft, Loader2 } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, ArrowLeft, Loader2, Sparkles, Zap, Clock, Tag } from "lucide-react";
 import { ReferenceFileUploader, type RefFile } from "@/components/shared/reference-file-uploader";
+import type { PricingCatalog } from "@/lib/pricing/catalog";
 
 /* ─────────────────────────────── Types ─────────────────────────────── */
 
@@ -12,42 +13,45 @@ type ServiceType = "EMBROIDERY_DIGITIZING" | "VECTOR_ART" | "COLOR_SEPARATION_DT
 type Turnaround  = "STANDARD" | "URGENT" | "SAME_DAY";
 
 interface WizardForm {
-  serviceType:       ServiceType | "";
-  nicheSlug:         string;
-  designTitle:       string;
-  placement:         string;
-  fabric:            string;
-  height:            string;
-  width:             string;
-  turnaround:        Turnaround;
-  colorQuantity:     string;
-  threeDPuff:        boolean;
-  notes:             string;
-  quantity:          string;
-  threadBrand:       string;
-  trimsUnderlay:     string;
-  stitchCount:       string;
-  threadColors:      string;
+  serviceType:        ServiceType | "";
+  nicheSlug:          string;
+  pricingTierKey:     string;
+  designTitle:        string;
+  placement:          string;
+  fabric:             string;
+  height:             string;
+  width:              string;
+  turnaround:         Turnaround;
+  colorQuantity:      string;
+  threeDPuff:         boolean;
+  notes:              string;
+  quantity:           string;
+  threadBrand:        string;
+  trimsUnderlay:      string;
+  stitchCount:        string;
+  threadColors:       string;
   colorThreadDetails: string;
-  outputFormats:     string[];
-  files:             RefFile[];
-  guestName:         string;
-  guestEmail:        string;
-  guestPhone:        string;
+  outputFormats:      string[];
+  files:              RefFile[];
+  guestName:          string;
+  guestEmail:         string;
+  guestPhone:         string;
 }
 
 export interface OrderWizardProps {
   user?:         { name?: string | null; email?: string | null } | null;
   isFirstOrder?: boolean;
+  catalog?:      PricingCatalog;
+  onComplete?:   () => void;
 }
 
 /* ─────────────────────────────── Data ──────────────────────────────── */
 
 const SERVICES: { type: ServiceType; title: string; subtitle: string; icon: string }[] = [
-  { type: "EMBROIDERY_DIGITIZING",  title: "Embroidery Digitizing",       subtitle: "Machine-ready stitch files",      icon: "🧵" },
-  { type: "VECTOR_ART",             title: "Vector Art Conversion",        subtitle: "Scalable vector artwork",         icon: "✏️" },
-  { type: "COLOR_SEPARATION_DTF",   title: "Color Separation / DTF",       subtitle: "Color sep / DTF screen setup",    icon: "🎨" },
-  { type: "CUSTOM_PATCHES",         title: "Custom Patches",               subtitle: "Patch production quoting",        icon: "🏷️" },
+  { type: "EMBROIDERY_DIGITIZING",  title: "Embroidery Digitizing", subtitle: "Machine-ready stitch files",   icon: "🧵" },
+  { type: "VECTOR_ART",             title: "Vector Art Conversion",  subtitle: "Scalable vector artwork",      icon: "✏️" },
+  { type: "COLOR_SEPARATION_DTF",   title: "Color Sep / DTF",        subtitle: "Color sep & DTF screen setup", icon: "🎨" },
+  { type: "CUSTOM_PATCHES",         title: "Custom Patches",          subtitle: "Patch production quoting",     icon: "🏷️" },
 ];
 
 const CATEGORIES: Record<ServiceType, { slug: string; label: string }[]> = {
@@ -76,17 +80,34 @@ const CATEGORIES: Record<ServiceType, { slug: string; label: string }[]> = {
   ],
 };
 
-const TURNAROUNDS: { value: Turnaround; label: string; hours: string }[] = [
-  { value: "STANDARD", label: "Standard", hours: "12 hours" },
-  { value: "URGENT",   label: "Rush",     hours: "6 hours"  },
-  { value: "SAME_DAY", label: "Urgent",   hours: "3 hours"  },
-];
+/* wizard serviceType → catalog category key */
+const SERVICE_TO_CATALOG: Record<ServiceType, string | null> = {
+  EMBROIDERY_DIGITIZING: "EMBROIDERY_DIGITIZING",
+  VECTOR_ART:            "VECTOR_REDRAW",
+  COLOR_SEPARATION_DTF:  "DTF_SCREEN_PRINT",
+  CUSTOM_PATCHES:        null,
+};
+
+/* wizard Turnaround → catalog delivery key */
+const TURNAROUND_TO_DELIVERY: Record<Turnaround, string> = {
+  STANDARD: "Standard",
+  URGENT:   "Rush",
+  SAME_DAY: "Urgent",
+};
+
+const TURNAROUND_META: Record<Turnaround, { label: string; hours: string; icon: typeof Clock }> = {
+  STANDARD: { label: "Standard",  hours: "12/15-hour delivery", icon: Clock },
+  URGENT:   { label: "Rush",      hours: "6-hour delivery",  icon: Zap },
+  SAME_DAY: { label: "Urgent",  hours: "3-hour delivery",  icon: Sparkles },
+};
+
+const TURNAROUND_ORDER: Turnaround[] = ["STANDARD", "URGENT", "SAME_DAY"];
 
 const PLACEMENT_OPTIONS = [
   { value: "HAT_FRONT",    label: "Cap / Hat" },
   { value: "LEFT_CHEST",   label: "Left Chest" },
   { value: "JACKET_BACK",  label: "Jacket Back" },
-  { value: "LARGE_DESIGN", label: "Large" },
+  { value: "LARGE_DESIGN", label: "Large Design" },
   { value: "SLEEVE_LEFT",  label: "Sleeve" },
   { value: "FULL_BACK",    label: "Full Back" },
   { value: "OTHER",        label: "Patch / Other / Custom" },
@@ -103,13 +124,43 @@ const STEP_LABELS = ["Service", "Design", "Options", "Confirm"];
 
 /* ───────────────────────── Style helpers ───────────────────────────── */
 
-const INPUT = "w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30 transition";
-const SELECT = "w-full rounded-xl border border-white/[0.08] bg-[#0e0f1c] px-4 py-3 text-sm text-white focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30 transition appearance-none cursor-pointer";
-const LABEL = "block text-xs font-semibold uppercase tracking-[0.12em] text-white/40 mb-2";
+const INPUT  = "w-full rounded-xl border border-white/[0.10] bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-white/50 focus:border-indigo-500/60 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 transition";
+const SELECT = "w-full rounded-xl border border-white/[0.10] bg-[#0d0f1e] px-4 py-3 text-sm text-white focus:border-indigo-500/60 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 transition appearance-none cursor-pointer";
+const LABEL  = "block text-[10px] font-black uppercase tracking-[0.16em] text-white/70 mb-2";
+
+/* ────────────────────── Pricing helpers ────────────────────────────── */
+
+function getCatalogCategory(serviceType: ServiceType | "", catalog: PricingCatalog | undefined) {
+  if (!serviceType || !catalog) return null;
+  const key = SERVICE_TO_CATALOG[serviceType];
+  if (!key) return null;
+  return catalog.categories.find((c) => c.key === key && c.isActive) ?? null;
+}
+
+function getDeliveryExtra(turnaround: Turnaround, catalog: PricingCatalog | undefined): number {
+  if (!catalog) {
+    return turnaround === "URGENT" ? 12 : turnaround === "SAME_DAY" ? 24 : 0;
+  }
+  const key = TURNAROUND_TO_DELIVERY[turnaround];
+  const opt = catalog.delivery.find((d) => d.key === key && d.isActive);
+  return opt ? Number(opt.extraPrice) : 0;
+}
+
+function computeEstimate(form: WizardForm, catalog: PricingCatalog | undefined): number | null {
+  if (!form.serviceType || form.serviceType === "CUSTOM_PATCHES") return null;
+  const cat = getCatalogCategory(form.serviceType, catalog);
+  if (!cat) return null;
+  const tier = cat.tiers.find((t) => t.key === form.pricingTierKey && t.isActive);
+  if (!tier) return null;
+  let total = tier.price;
+  total += getDeliveryExtra(form.turnaround, catalog);
+  if (form.threeDPuff && form.serviceType === "EMBROIDERY_DIGITIZING") total += 10;
+  return total;
+}
 
 /* ─────────────────────────── Component ─────────────────────────────── */
 
-export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
+export function OrderWizard({ user, isFirstOrder, catalog, onComplete }: OrderWizardProps) {
   const router  = useRouter();
   const isGuest = !user;
 
@@ -123,6 +174,7 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
   const [form, setForm] = useState<WizardForm>({
     serviceType:        "",
     nicheSlug:          "",
+    pricingTierKey:     "",
     designTitle:        "",
     placement:          "",
     fabric:             "",
@@ -254,37 +306,62 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
     }
   }
 
+  /* ── Derived pricing ──────────────────────────────────────────────── */
+  const catalogCategory = getCatalogCategory(form.serviceType, catalog);
+  const estimatedTotal  = computeEstimate(form, catalog);
+  const showEstimate    = estimatedTotal !== null && !isFirstOrder;
+
   /* ── Success screen ─────────────────────────────────────────────── */
   if (submitted) {
     return (
-      <div className="flex min-h-[480px] flex-col items-center justify-center gap-6 px-6 py-14 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-teal-500/15 ring-1 ring-teal-500/40">
-          <Check className="h-9 w-9 text-teal-400" />
+      <div className="flex min-h-[520px] flex-col items-center justify-center gap-7 px-6 py-16 text-center">
+        <div className="relative flex h-24 w-24 items-center justify-center">
+          <div className="absolute inset-0 animate-ping rounded-full bg-teal-500/20" style={{ animationDuration: "2s" }} />
+          <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-teal-500/30 bg-teal-500/10 shadow-xl shadow-teal-500/20">
+            <Check className="h-10 w-10 text-teal-400" strokeWidth={2.5} />
+          </div>
         </div>
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Order Confirmed!</h2>
+
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-teal-300">
+            <Sparkles className="h-3 w-3" />
+            Order Confirmed
+          </div>
+          <h2 className="text-2xl font-black tracking-tight text-white">
+            You&apos;re all set!
+          </h2>
           {orderRef && (
-            <p className="mt-2 font-mono text-sm text-white/40">{orderRef}</p>
+            <p className="font-mono text-sm text-white/60">{orderRef}</p>
           )}
-          <p className="mt-3 max-w-sm text-sm leading-7 text-white/50">
-            We&apos;ll review your order and get back to you with a proof within the turnaround window you selected.
+          <p className="mx-auto max-w-xs text-sm leading-7 text-white/70">
+            We&apos;ll review your order and deliver a proof within the turnaround window you selected.
           </p>
         </div>
+
         <div className="flex flex-wrap justify-center gap-3">
           {!isGuest && (
             <Link
               href="/client/orders"
-              className="rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-[#070816] transition hover:bg-white/90"
+              onClick={() => onComplete?.()}
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-6 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:opacity-90"
             >
               View My Orders
             </Link>
           )}
           <button
-            onClick={() => { setSubmitted(false); setStep(1); setForm(f => ({ ...f, files: [], notes: "", designTitle: "" })); }}
-            className="rounded-full border border-white/15 px-6 py-2.5 text-sm font-semibold text-white/70 transition hover:border-white/25 hover:bg-white/[0.05]"
+            onClick={() => { setSubmitted(false); setStep(1); setForm(f => ({ ...f, files: [], notes: "", designTitle: "", pricingTierKey: "" })); }}
+            className="inline-flex h-11 items-center gap-2 rounded-full border border-white/15 px-6 text-sm font-semibold text-white/60 transition hover:border-white/25 hover:bg-white/[0.05] hover:text-white/80"
           >
             Submit Another
           </button>
+          {onComplete && (
+            <button
+              onClick={onComplete}
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-white/15 px-6 text-sm font-semibold text-white/60 transition hover:border-white/25 hover:bg-white/[0.05] hover:text-white/80"
+            >
+              Close
+            </button>
+          )}
         </div>
       </div>
     );
@@ -292,71 +369,101 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
 
   /* ── Step content ───────────────────────────────────────────────── */
   const categories = form.serviceType ? CATEGORIES[form.serviceType] : [];
+  const progressPct = ((step - 1) / (STEP_LABELS.length - 1)) * 100;
 
   return (
     <div className="w-full">
+
       {/* ── Step indicator ── */}
-      <div className="mb-8 flex items-center justify-between px-1">
-        {STEP_LABELS.map((label, i) => {
-          const n         = i + 1;
-          const completed = step > n;
-          const current   = step === n;
-          return (
-            <div key={label} className="flex flex-1 items-center">
-              <div className="flex flex-col items-center gap-1.5">
+      <div className="mb-8">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/[0.08] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-indigo-300">
+            <Sparkles className="h-3 w-3" />
+            Step {step} of {STEP_LABELS.length}
+          </div>
+          <span className="text-[11px] font-semibold text-white/60">{STEP_LABELS[step - 1]}</span>
+        </div>
+
+        <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.07]">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-500"
+            style={{ width: `${progressPct === 0 ? 8 : progressPct}%` }}
+          />
+        </div>
+
+        <div className="mt-3 flex items-center justify-between px-0.5">
+          {STEP_LABELS.map((label, i) => {
+            const n         = i + 1;
+            const completed = step > n;
+            const current   = step === n;
+            return (
+              <div key={label} className="flex flex-col items-center gap-1.5">
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all
-                    ${completed ? "bg-teal-500 text-white"
-                    : current   ? "border-2 border-violet-500 text-violet-400 bg-violet-500/10"
-                    :             "border border-white/20 text-white/30"}`}
+                  className={`flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-black transition-all
+                    ${completed
+                      ? "bg-teal-500 text-white shadow-md shadow-teal-500/30"
+                      : current
+                      ? "border-2 border-indigo-500 bg-indigo-500/15 text-indigo-300"
+                      : "border border-white/15 text-white/20"}`}
                 >
-                  {completed ? <Check className="h-4 w-4" /> : n}
+                  {completed ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : n}
                 </div>
-                <span className={`hidden text-[10px] font-semibold uppercase tracking-widest sm:block
-                  ${completed ? "text-teal-400" : current ? "text-violet-400" : "text-white/25"}`}>
+                <span className={`hidden text-[9px] font-black uppercase tracking-[0.14em] sm:block
+                  ${completed ? "text-teal-400" : current ? "text-indigo-300" : "text-white/20"}`}>
                   {label}
                 </span>
               </div>
-              {i < STEP_LABELS.length - 1 && (
-                <div className={`mx-2 h-px flex-1 transition-colors
-                  ${step > n ? "bg-teal-500/40" : "bg-white/[0.07]"}`}
-                />
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* ── Step 1: Service ── */}
       {step === 1 && (
-        <div className="space-y-6">
+        <div className="space-y-7">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-white">Place a New Order</h2>
-            <p className="mt-1.5 text-sm text-white/40">What service do you need?</p>
+            <h2 className="text-2xl font-black tracking-tight text-white">Place a New Order</h2>
+            <p className="mt-1.5 text-sm text-white/65">Select a service and pick your category to get started.</p>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {SERVICES.map(svc => {
               const selected = form.serviceType === svc.type;
+              const catKey = SERVICE_TO_CATALOG[svc.type];
+              const catalogCat = catKey ? catalog?.categories.find(c => c.key === catKey && c.isActive) : null;
+              const startingPrice = catalogCat?.tiers[0]?.price;
               return (
                 <button
                   key={svc.type}
                   type="button"
-                  onClick={() => { set("serviceType", svc.type); set("nicheSlug", ""); }}
-                  className={`relative flex items-start gap-4 rounded-2xl border p-4 text-left transition-all
+                  onClick={() => { set("serviceType", svc.type); set("nicheSlug", ""); set("pricingTierKey", ""); }}
+                  className={`group relative flex items-center gap-4 rounded-2xl border p-5 text-left transition-all duration-200
                     ${selected
-                      ? "border-violet-500/50 bg-violet-500/[0.08] shadow-lg shadow-violet-500/[0.08]"
-                      : "border-white/[0.07] bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.04]"}`}
+                      ? "border-indigo-500/50 bg-indigo-500/[0.10] shadow-lg shadow-indigo-500/10"
+                      : "border-white/[0.08] bg-white/[0.03] hover:border-white/15 hover:bg-white/[0.05]"}`}
                 >
                   {selected && (
-                    <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-violet-500">
-                      <Check className="h-3 w-3 text-white" />
+                    <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/50">
+                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
                   )}
-                  <span className="text-2xl leading-none">{svc.icon}</span>
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold text-white">{svc.title}</div>
-                    <div className="mt-0.5 text-xs text-white/40">{svc.subtitle}</div>
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-2xl
+                    ${selected ? "bg-indigo-500/15" : "bg-white/[0.05] group-hover:bg-white/[0.08]"}`}>
+                    {svc.icon}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-black tracking-tight text-white">{svc.title}</div>
+                    <div className="mt-0.5 text-xs text-white/65">{svc.subtitle}</div>
+                    {startingPrice !== undefined && (
+                      <div className="mt-1.5 text-[10px] font-black text-indigo-300/70">
+                        From ${startingPrice}
+                      </div>
+                    )}
+                    {catKey === null && (
+                      <div className="mt-1.5 text-[10px] font-black text-white/60">
+                        Custom quote
+                      </div>
+                    )}
                   </div>
                 </button>
               );
@@ -365,7 +472,7 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
 
           {form.serviceType && (
             <div>
-              <p className={LABEL}>Category</p>
+              <p className={LABEL}>Category <span className="text-red-400">*</span></p>
               <div className="flex flex-wrap gap-2">
                 {categories.map(cat => {
                   const selected = form.nicheSlug === cat.slug;
@@ -374,10 +481,10 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
                       key={cat.slug}
                       type="button"
                       onClick={() => set("nicheSlug", cat.slug)}
-                      className={`rounded-full border px-4 py-2 text-xs font-semibold transition-all
+                      className={`rounded-full border px-4 py-2 text-xs font-bold transition-all
                         ${selected
-                          ? "border-violet-500/60 bg-violet-500/15 text-violet-300"
-                          : "border-white/[0.08] bg-white/[0.03] text-white/50 hover:border-white/20 hover:text-white/80"}`}
+                          ? "border-indigo-500/60 bg-indigo-500/15 text-indigo-300 shadow-sm shadow-indigo-500/20"
+                          : "border-white/[0.09] bg-white/[0.03] text-white/50 hover:border-white/20 hover:bg-white/[0.06] hover:text-white/80"}`}
                     >
                       {cat.label}
                     </button>
@@ -393,8 +500,8 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
       {step === 2 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-white">Tell us about your design</h2>
-            <p className="mt-1.5 text-sm text-white/40">Dimensions and placement help us price your design accurately.</p>
+            <h2 className="text-2xl font-black tracking-tight text-white">Tell us about your design</h2>
+            <p className="mt-1.5 text-sm text-white/65">Dimensions and placement help us price and produce your design accurately.</p>
           </div>
 
           <div>
@@ -423,7 +530,7 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
                   <option key={p.value} value={p.value}>{p.label}</option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
             </div>
           </div>
 
@@ -440,7 +547,7 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
                   <option key={f} value={f}>{f}</option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
             </div>
           </div>
 
@@ -471,41 +578,115 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
 
       {/* ── Step 3: Options ── */}
       {step === 3 && (
-        <div className="space-y-6">
+        <div className="space-y-7">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-white">Production options</h2>
-            <p className="mt-1.5 text-sm text-white/40">Set add-ons and choose your turnaround speed.</p>
+            <h2 className="text-2xl font-black tracking-tight text-white">Production options</h2>
+            <p className="mt-1.5 text-sm text-white/65">Choose your service tier and turnaround speed.</p>
           </div>
+
+          {/* First order callout */}
+          {isFirstOrder && !isGuest && (
+            <div className="flex items-center gap-3 rounded-2xl border border-indigo-500/25 bg-indigo-500/[0.08] px-4 py-3.5">
+              <Sparkles className="h-4 w-4 shrink-0 text-indigo-300" />
+              <p className="text-xs font-bold text-indigo-200">
+                Your first order is on us — this order is free regardless of turnaround speed.
+              </p>
+            </div>
+          )}
+
+          {/* Pricing tiers from catalog */}
+          {catalogCategory ? (
+            <div>
+              <p className={LABEL}>Service Tier</p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {catalogCategory.tiers.filter(t => t.isActive).map((tier) => {
+                  const selected = form.pricingTierKey === tier.key;
+                  return (
+                    <button
+                      key={tier.key}
+                      type="button"
+                      onClick={() => set("pricingTierKey", tier.key)}
+                      className={`relative flex flex-col gap-2 rounded-2xl border p-4 text-left transition-all duration-200
+                        ${selected
+                          ? "border-indigo-500/50 bg-indigo-500/[0.10] shadow-lg shadow-indigo-500/10"
+                          : "border-white/[0.08] bg-white/[0.03] hover:border-white/15 hover:bg-white/[0.05]"}`}
+                    >
+                      {selected && (
+                        <div className="absolute right-3 top-3 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500">
+                          <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
+                        </div>
+                      )}
+                      <div className={`flex h-8 w-8 items-center justify-center rounded-xl
+                        ${selected ? "bg-indigo-500/20 text-indigo-300" : "bg-white/[0.06] text-white/65"}`}>
+                        <Tag className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm font-black tracking-tight text-white leading-tight">{tier.label}</div>
+                      </div>
+                      <div className={`self-start rounded-full border px-2.5 py-1 text-[11px] font-black
+                        ${selected
+                          ? "border-indigo-500/30 bg-indigo-500/15 text-indigo-200"
+                          : "border-white/[0.08] bg-white/[0.04] text-white/50"}`}>
+                        ${tier.price}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : form.serviceType === "CUSTOM_PATCHES" ? (
+            <div className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3.5">
+              <Tag className="h-4 w-4 shrink-0 text-white/60" />
+              <p className="text-xs text-white/65">Patches are custom-quoted — pricing provided after we review your design.</p>
+            </div>
+          ) : null}
 
           {/* Turnaround */}
           <div>
             <p className={LABEL}>Turnaround Speed</p>
             <div className="grid gap-3 sm:grid-cols-3">
-              {TURNAROUNDS.map(t => {
-                const selected = form.turnaround === t.value;
+              {TURNAROUND_ORDER.map(t => {
+                const selected = form.turnaround === t;
+                const meta = TURNAROUND_META[t];
+                const Icon = meta.icon;
+                const extra = getDeliveryExtra(t, catalog);
+                const deliveryKey = TURNAROUND_TO_DELIVERY[t];
+                const deliveryOpt = catalog?.delivery.find(d => d.key === deliveryKey);
+                const isAvailable = !catalog || !!deliveryOpt?.isActive || t === "STANDARD";
+                const badgeLabel = extra === 0 ? "No rush fee" : `+$${extra}`;
+                const hoursLabel = deliveryOpt?.subLabel ?? meta.hours;
+
                 return (
                   <button
-                    key={t.value}
+                    key={t}
                     type="button"
-                    onClick={() => set("turnaround", t.value)}
-                    className={`flex flex-col items-start rounded-2xl border p-4 text-left transition-all
-                      ${selected
-                        ? "border-teal-500/50 bg-teal-500/[0.07] shadow-md shadow-teal-500/[0.08]"
-                        : "border-white/[0.07] bg-white/[0.02] hover:border-white/15"}`}
+                    disabled={!isAvailable}
+                    onClick={() => set("turnaround", t)}
+                    className={`relative flex flex-col gap-2 rounded-2xl border p-4 text-left transition-all duration-200
+                      ${!isAvailable ? "cursor-not-allowed opacity-40" :
+                        selected
+                          ? "border-indigo-500/50 bg-indigo-500/[0.10] shadow-lg shadow-indigo-500/10"
+                          : "border-white/[0.08] bg-white/[0.03] hover:border-white/15 hover:bg-white/[0.05]"}`}
                   >
-                    <div className="flex w-full items-center justify-between">
-                      <span className="text-sm font-semibold text-white">{t.label}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide
-                        ${selected ? "bg-teal-500/20 text-teal-300" : "bg-white/[0.06] text-white/40"}`}>
-                        Free
-                      </span>
-                    </div>
-                    <span className="mt-1.5 text-xs text-white/40">{t.hours}</span>
-                    {selected && (
-                      <div className="mt-3 flex h-4 w-4 items-center justify-center self-end rounded-full bg-teal-500">
-                        <Check className="h-2.5 w-2.5 text-white" />
+                    {selected && isAvailable && (
+                      <div className="absolute right-3 top-3 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500">
+                        <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
                       </div>
                     )}
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-xl
+                      ${selected ? "bg-indigo-500/20 text-indigo-300" : "bg-white/[0.06] text-white/65"}`}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-black tracking-tight text-white">{meta.label}</div>
+                      <div className="mt-0.5 text-xs text-white/65">{hoursLabel}</div>
+                    </div>
+                    <div className={`self-start rounded-full border px-2 py-0.5 text-[10px] font-black uppercase tracking-wide
+                      ${selected
+                        ? "border-indigo-500/30 bg-indigo-500/15 text-indigo-300"
+                        : "border-white/[0.08] bg-white/[0.04] text-white/60"}`}>
+                      {badgeLabel}
+                    </div>
                   </button>
                 );
               })}
@@ -524,37 +705,33 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
             />
           </div>
 
-          {/* Add-ons */}
+          {/* 3D Puff add-on */}
           {form.serviceType === "EMBROIDERY_DIGITIZING" && (
             <div>
               <p className={LABEL}>Add-ons</p>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { key: "threeDPuff", label: "3D Puff" },
-                ].map(addon => (
-                  <button
-                    key={addon.key}
-                    type="button"
-                    onClick={() => set("threeDPuff", !form.threeDPuff)}
-                    className={`rounded-full border px-4 py-2 text-xs font-semibold transition-all
-                      ${form.threeDPuff
-                        ? "border-violet-500/60 bg-violet-500/15 text-violet-300"
-                        : "border-white/[0.08] bg-white/[0.03] text-white/50 hover:border-white/20"}`}
-                  >
-                    {form.threeDPuff && <Check className="mr-1.5 inline h-3 w-3" />}
-                    {addon.label}
-                  </button>
-                ))}
-              </div>
+              <button
+                type="button"
+                onClick={() => set("threeDPuff", !form.threeDPuff)}
+                className={`flex items-center gap-3 rounded-2xl border px-5 py-3 text-sm transition-all
+                  ${form.threeDPuff
+                    ? "border-indigo-500/50 bg-indigo-500/[0.10] text-indigo-200"
+                    : "border-white/[0.08] bg-white/[0.03] text-white/50 hover:border-white/15 hover:text-white/70"}`}
+              >
+                <div className={`flex h-5 w-5 items-center justify-center rounded-md border transition-all
+                  ${form.threeDPuff ? "border-indigo-500 bg-indigo-500" : "border-white/20"}`}>
+                  {form.threeDPuff && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
+                </div>
+                <span className="font-bold">3D Puff Digitizing</span>
+                <span className="ml-auto text-xs text-white/60">+$10</span>
+              </button>
             </div>
           )}
 
-          {/* First order callout */}
-          {isFirstOrder && !isGuest && (
-            <div className="rounded-2xl border border-violet-500/20 bg-violet-500/[0.06] px-4 py-3">
-              <p className="text-xs font-semibold text-violet-300">
-                ✦ Your first order is on us — this order is free regardless of turnaround speed.
-              </p>
+          {/* Live price estimate pill */}
+          {showEstimate && form.pricingTierKey && (
+            <div className="flex items-center justify-between rounded-2xl border border-indigo-500/20 bg-indigo-500/[0.07] px-4 py-3">
+              <span className="text-xs font-black uppercase tracking-[0.12em] text-indigo-300/70">Estimated total</span>
+              <span className="text-lg font-black text-white">${estimatedTotal}</span>
             </div>
           )}
         </div>
@@ -564,14 +741,14 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
       {step === 4 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-white">Review &amp; confirm</h2>
-            <p className="mt-1.5 text-sm text-white/40">Add any notes, upload files, then submit your order.</p>
+            <h2 className="text-2xl font-black tracking-tight text-white">Review &amp; confirm</h2>
+            <p className="mt-1.5 text-sm text-white/65">Add any notes, upload your files, then place your order.</p>
           </div>
 
-          {/* Guest name/email */}
+          {/* Guest contact */}
           {isGuest && (
-            <div className="space-y-4 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
-              <p className="text-xs font-semibold uppercase tracking-widest text-white/40">Your contact details</p>
+            <div className="space-y-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
+              <p className={LABEL}>Your contact details</p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className={LABEL}>Full Name <span className="text-red-400">*</span></label>
@@ -590,9 +767,9 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
           )}
 
           {/* Order summary */}
-          <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/40">Order summary</p>
-            <div className="grid gap-2 text-sm sm:grid-cols-2">
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
+            <p className={LABEL}>Order summary</p>
+            <div className="grid gap-2 sm:grid-cols-2">
               {[
                 ["Service",     SERVICES.find(s => s.type === form.serviceType)?.title ?? "—"],
                 ["Category",    CATEGORIES[form.serviceType as ServiceType]?.find(c => c.slug === form.nicheSlug)?.label ?? "—"],
@@ -600,20 +777,57 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
                 ["Placement",   PLACEMENT_OPTIONS.find(p => p.value === form.placement)?.label ?? "—"],
                 ["Fabric",      form.fabric || "—"],
                 ["Size",        form.height && form.width ? `${form.height}" × ${form.width}"` : form.height ? `${form.height}"` : "—"],
-                ["Turnaround",  TURNAROUNDS.find(t => t.value === form.turnaround)?.label ?? "Standard"],
+                ["Turnaround",  TURNAROUND_META[form.turnaround]?.label ?? "Standard"],
                 ["Colors",      form.colorQuantity || "—"],
               ].map(([k, v]) => (
-                <div key={k} className="flex items-baseline justify-between gap-2 rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2">
-                  <span className="text-[11px] text-white/35">{k}</span>
-                  <span className="text-xs font-semibold text-white/80 text-right">{v}</span>
+                <div key={k} className="flex items-baseline justify-between gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+                  <span className="text-[10px] font-black uppercase tracking-[0.1em] text-white/60">{k}</span>
+                  <span className="text-xs font-bold text-white/75 text-right">{v}</span>
                 </div>
               ))}
             </div>
-            {isFirstOrder && !isGuest && (
-              <div className="mt-3 rounded-xl border border-teal-500/20 bg-teal-500/[0.06] px-3 py-2">
-                <span className="text-xs font-semibold text-teal-300">Estimated total: Free — first order</span>
+
+            {/* Pricing breakdown */}
+            {isFirstOrder && !isGuest ? (
+              <div className="mt-3 flex items-center gap-2 rounded-xl border border-teal-500/20 bg-teal-500/[0.07] px-3 py-2.5">
+                <Sparkles className="h-3.5 w-3.5 shrink-0 text-teal-400" />
+                <span className="text-xs font-bold text-teal-300">Estimated total: Free — first order promotion applied</span>
               </div>
-            )}
+            ) : estimatedTotal !== null && form.pricingTierKey ? (
+              <div className="mt-3 space-y-1.5">
+                {/* Tier line */}
+                {(() => {
+                  const tier = catalogCategory?.tiers.find(t => t.key === form.pricingTierKey);
+                  const rushExtra = getDeliveryExtra(form.turnaround, catalog);
+                  return (
+                    <>
+                      {tier && (
+                        <div className="flex items-center justify-between px-1 text-xs text-white/65">
+                          <span>{tier.label}</span>
+                          <span className="font-bold">${tier.price}</span>
+                        </div>
+                      )}
+                      {rushExtra > 0 && (
+                        <div className="flex items-center justify-between px-1 text-xs text-white/65">
+                          <span>{TURNAROUND_META[form.turnaround].label} delivery</span>
+                          <span className="font-bold">+${rushExtra}</span>
+                        </div>
+                      )}
+                      {form.threeDPuff && form.serviceType === "EMBROIDERY_DIGITIZING" && (
+                        <div className="flex items-center justify-between px-1 text-xs text-white/65">
+                          <span>3D Puff add-on</span>
+                          <span className="font-bold">+$10</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between rounded-xl border border-indigo-500/20 bg-indigo-500/[0.07] px-3 py-2 mt-2">
+                        <span className="text-xs font-black uppercase tracking-[0.1em] text-indigo-300/80">Estimated total</span>
+                        <span className="text-sm font-black text-white">${estimatedTotal}</span>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            ) : null}
           </div>
 
           {/* File upload */}
@@ -621,7 +835,7 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
             <p className={LABEL}>Reference Files</p>
             {isGuest && !form.guestEmail.trim() ? (
               <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-6 text-center">
-                <p className="text-xs text-white/30">Enter your email above to upload reference files.</p>
+                <p className="text-xs text-white/60">Enter your email above to upload reference files.</p>
               </div>
             ) : (
               <ReferenceFileUploader
@@ -631,7 +845,7 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
                 maxFiles={10}
               />
             )}
-            <p className="mt-2 text-[11px] text-white/25">JPG, PNG, PDF, SVG, ZIP · Max 30 MB each · Up to 10 files</p>
+            <p className="mt-2 text-[11px] text-white/60">JPG, PNG, PDF, SVG, ZIP · Max 30 MB each · Up to 10 files</p>
           </div>
 
           {/* Notes */}
@@ -647,24 +861,27 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
           </div>
 
           {/* Advanced section */}
-          <div className="rounded-2xl border border-white/[0.06] overflow-hidden">
+          <div className="overflow-hidden rounded-2xl border border-white/[0.07]">
             <button
               type="button"
               onClick={() => setShowAdvanced(v => !v)}
-              className="flex w-full items-center justify-between px-4 py-3.5 text-left transition hover:bg-white/[0.02]"
+              className="flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-white/[0.02]"
             >
               <div>
-                <p className="text-sm font-semibold text-white/80">Advanced Embroidery Options</p>
-                <p className="mt-0.5 text-xs text-white/30">Optional details for professional clients or exact production requirements.</p>
+                <p className="text-sm font-black tracking-tight text-white/80">Advanced Embroidery Options</p>
+                <p className="mt-0.5 text-xs text-white/60">Thread brand, stitch count, output formats, and more.</p>
               </div>
-              {showAdvanced
-                ? <ChevronUp className="h-4 w-4 shrink-0 text-white/40" />
-                : <ChevronDown className="h-4 w-4 shrink-0 text-white/40" />
-              }
+              <div className={`flex h-7 w-7 items-center justify-center rounded-full border transition-all
+                ${showAdvanced ? "border-indigo-500/40 bg-indigo-500/10 text-indigo-300" : "border-white/10 text-white/60"}`}>
+                {showAdvanced
+                  ? <ChevronUp className="h-3.5 w-3.5" />
+                  : <ChevronDown className="h-3.5 w-3.5" />
+                }
+              </div>
             </button>
 
             {showAdvanced && (
-              <div className="space-y-4 border-t border-white/[0.06] bg-white/[0.01] px-4 py-5">
+              <div className="space-y-4 border-t border-white/[0.06] bg-white/[0.01] px-5 py-5">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className={LABEL}>Quantity</label>
@@ -703,7 +920,6 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
                   />
                 </div>
 
-                {/* Output formats */}
                 <div>
                   <p className={LABEL}>Output File Formats</p>
                   <div className="flex flex-wrap gap-2">
@@ -714,27 +930,25 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
                           key={fmt}
                           type="button"
                           onClick={() => toggleFormat(fmt)}
-                          className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-all
+                          className={`rounded-full border px-3 py-1.5 text-xs font-black transition-all
                             ${active
-                              ? "border-violet-500/60 bg-violet-500/15 text-violet-300"
-                              : "border-white/[0.08] bg-white/[0.03] text-white/40 hover:border-white/20"}`}
+                              ? "border-indigo-500/60 bg-indigo-500/15 text-indigo-300"
+                              : "border-white/[0.08] bg-white/[0.03] text-white/65 hover:border-white/20 hover:text-white/70"}`}
                         >
                           {fmt}
                         </button>
                       );
                     })}
                   </div>
-                  <p className="mt-2 text-[11px] text-white/25">Machine formats. DST and PES selected by default.</p>
+                  <p className="mt-2 text-[11px] text-white/60">DST and PES selected by default.</p>
                 </div>
 
-                {/* Service policy */}
                 <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-white/30">Service Policy</p>
-                  <ul className="space-y-1.5 text-xs leading-5 text-white/35">
-                    <li>· LC to LC same-size adjustment and color change is free</li>
-                    <li>· LC to Jacket Back counts as a new design / new order</li>
-                    <li>· 3D Puff Jacket Back may require manual review</li>
-                    <li>· Final production files remain locked until payment is cleared</li>
+                  <p className={`${LABEL} mb-3`}>Service Policy</p>
+                  <ul className="space-y-2 text-xs leading-5 text-white/60">
+                    <li className="flex items-start gap-2"><span className="mt-0.5 text-indigo-400/60">·</span> Changing placement (e.g. Left Chest → Jacket Back) counts as a new design</li>
+                    <li className="flex items-start gap-2"><span className="mt-0.5 text-indigo-400/60">·</span> 3D Puff Jacket Back may require manual review and is a premium service</li>
+                    <li className="flex items-start gap-2"><span className="mt-0.5 text-indigo-400/60">·</span> Final production files are released after payment is cleared</li>
                   </ul>
                 </div>
               </div>
@@ -743,7 +957,8 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
 
           {/* Server error */}
           {serverError && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] px-4 py-3">
+            <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/[0.07] px-4 py-3.5">
+              <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-red-400" />
               <p className="text-xs font-semibold text-red-400">{serverError}</p>
             </div>
           )}
@@ -755,7 +970,7 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
         <button
           type="button"
           onClick={() => step > 1 ? setStep(s => s - 1) : router.back()}
-          className="flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-sm font-semibold text-white/60 transition hover:border-white/25 hover:bg-white/[0.05] hover:text-white/80"
+          className="flex items-center gap-2 rounded-full border border-white/12 px-5 py-2.5 text-sm font-semibold text-white/50 transition hover:border-white/20 hover:bg-white/[0.05] hover:text-white/75"
         >
           <ArrowLeft className="h-4 w-4" />
           {step > 1 ? "Back" : "Cancel"}
@@ -766,7 +981,7 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
             type="button"
             disabled={!canProceed()}
             onClick={() => setStep(s => s + 1)}
-            className="flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-bold text-[#070816] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-35"
+            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-7 py-2.5 text-sm font-black text-white shadow-lg shadow-indigo-500/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
           >
             Continue
           </button>
@@ -775,7 +990,7 @@ export function OrderWizard({ user, isFirstOrder }: OrderWizardProps) {
             type="button"
             disabled={!canProceed() || submitting}
             onClick={handleSubmit}
-            className="flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-bold text-[#070816] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-35"
+            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-7 py-2.5 text-sm font-black text-white shadow-lg shadow-indigo-500/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
           >
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             {submitting ? "Submitting…" : "Place Order"}

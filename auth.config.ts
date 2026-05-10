@@ -13,6 +13,13 @@ export const authConfig: NextAuthConfig = {
   // IMPORTANT: use jwt so proxy/auth() can read session from cookie
   session: { strategy: "jwt" },
 
+  cookies: {
+    sessionToken: {
+      name: "next-auth.session-token",
+      options: { httpOnly: true, sameSite: "strict", secure: process.env.NODE_ENV === "production", path: "/" },
+    },
+  },
+
   pages: {
     signIn: "/login",
   },

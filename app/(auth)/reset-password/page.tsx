@@ -40,7 +40,7 @@ export default async function ResetPasswordPage({
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10">
         <section className="w-full max-w-[560px] rounded-2xl border border-border/60 bg-card p-6 shadow-lg md:p-8">
           <div className="text-center">
-            <div className="text-xs uppercase tracking-[0.24em] text-white/45">
+            <div className="text-xs uppercase tracking-[0.24em] text-white/70">
               Password reset
             </div>
             <h1 className="mt-3 text-4xl font-bold tracking-tight">
@@ -74,7 +74,7 @@ export default async function ResetPasswordPage({
                 required
                 minLength={8}
                 placeholder="New password"
-                className="h-16 w-full rounded-[1.5rem] border border-white/10 bg-white/8 px-5 text-white placeholder:text-white/35 outline-none backdrop-blur-xl"
+                className="h-16 w-full rounded-[1.5rem] border border-white/10 bg-white/8 px-5 text-white placeholder:text-white/60 outline-none backdrop-blur-xl"
               />
 
               <button

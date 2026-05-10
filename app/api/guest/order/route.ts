@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { checkRateLimit, getClientIp } from "@/lib/auth/rate-limit";
 import { logActivity } from "@/lib/activity/logger";
 import { ensureDraftInvoiceForOrder } from "@/lib/billing/auto-invoice";
 import {
@@ -51,6 +52,15 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request.headers);
+  const limit = checkRateLimit(`guest-order:${ip}`, 5, 15 * 60_000);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { ok: false, message: "Too many requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(limit.retryAfterMs / 1000)) } }
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = schema.safeParse(body);
 

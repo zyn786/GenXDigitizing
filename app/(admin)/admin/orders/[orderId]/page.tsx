@@ -46,7 +46,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
   const userRole = session?.user?.role ?? null;
 
   const [order, invoice, rawOrder, designers, referenceFiles, proofReviewSetting] = await Promise.all([
-    getAdminOrder(orderId),
+    getAdminOrder(orderId, userRole === "DESIGNER" ? session?.user?.id : undefined),
     prisma.invoice.findFirst({
       where: { orderId },
       select: {

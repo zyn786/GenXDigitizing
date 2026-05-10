@@ -3,6 +3,13 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
+type PortfolioImage = {
+  id: string;
+  objectKey: string;
+  altText: string | null;
+  sortOrder: number;
+};
+
 type PortfolioItem = {
   id: string;
   title: string;
@@ -11,6 +18,7 @@ type PortfolioItem = {
   description: string | null;
   beforeImageKey: string | null;
   afterImageKey: string | null;
+  images: PortfolioImage[];
   tags: string[];
   isFeatured: boolean;
   isVisible: boolean;
@@ -309,6 +317,11 @@ export function PortfolioManager({
                       >
                         {APPROVAL_LABEL[item.approvalStatus] ?? item.approvalStatus}
                       </span>
+                      {item.images.length > 0 && (
+                        <span className="rounded-full bg-secondary/60 px-2 py-0.5 text-[10px] text-muted-foreground">
+                          {item.images.length} image{item.images.length !== 1 ? "s" : ""}
+                        </span>
+                      )}
                     </div>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {SERVICE_OPTIONS.find((s) => s.value === item.serviceKey)?.label ?? item.serviceKey}
@@ -491,13 +504,22 @@ function AddItemForm({
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [beforeUpload, setBeforeUpload] = useState<UploadState | null>(null);
-  const [afterUpload, setAfterUpload] = useState<UploadState | null>(null);
+  const [uploads, setUploads] = useState<(UploadState | null)[]>([null]);
   const [selectedService, setSelectedService] = useState("EMBROIDERY_DIGITIZING");
-  const beforeInputRef = useRef<HTMLInputElement>(null);
-  const afterInputRef = useRef<HTMLInputElement>(null);
 
   const nicheOptions = NICHE_OPTIONS[selectedService] ?? [];
+
+  function addSlot() {
+    if (uploads.length < 5) setUploads((prev) => [...prev, null]);
+  }
+
+  function removeSlot(i: number) {
+    setUploads((prev) => prev.filter((_, idx) => idx !== i));
+  }
+
+  function setUploadAt(i: number, state: UploadState | null) {
+    setUploads((prev) => prev.map((u, idx) => (idx === i ? state : u)));
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -506,9 +528,11 @@ function AddItemForm({
 
     const fd = new FormData(e.currentTarget);
     const tagsRaw = (fd.get("tags") as string).trim();
-    const tags = tagsRaw
-      ? tagsRaw.split(",").map((t) => t.trim()).filter(Boolean)
-      : [];
+    const tags = tagsRaw ? tagsRaw.split(",").map((t) => t.trim()).filter(Boolean) : [];
+
+    const images = uploads
+      .map((u, i) => (u?.status === "done" ? { objectKey: u.objectKey, sortOrder: i } : null))
+      .filter((x): x is { objectKey: string; sortOrder: number } => x !== null);
 
     const body = {
       title: fd.get("title") as string,
@@ -518,8 +542,7 @@ function AddItemForm({
       tags,
       isFeatured: fd.get("isFeatured") === "on",
       sortOrder: parseInt((fd.get("sortOrder") as string) || "0", 10),
-      beforeImageKey: beforeUpload?.status === "done" ? beforeUpload.objectKey : undefined,
-      afterImageKey: afterUpload?.status === "done" ? afterUpload.objectKey : undefined,
+      images: images.length > 0 ? images : undefined,
     };
 
     try {
@@ -621,21 +644,13 @@ function AddItemForm({
         />
       </FormField>
 
-      {/* Images */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ImageUploadField
-          label="Before image"
-          inputRef={beforeInputRef}
-          state={beforeUpload}
-          onStateChange={setBeforeUpload}
-        />
-        <ImageUploadField
-          label="After image"
-          inputRef={afterInputRef}
-          state={afterUpload}
-          onStateChange={setAfterUpload}
-        />
-      </div>
+      {/* Multi-image uploader */}
+      <MultiImageUploader
+        uploads={uploads}
+        onAdd={addSlot}
+        onRemove={removeSlot}
+        onStateChange={setUploadAt}
+      />
 
       {/* Featured */}
       <label className="flex cursor-pointer items-center gap-3">
@@ -678,103 +693,136 @@ type UploadState =
   | { status: "done"; fileName: string; objectKey: string }
   | { status: "error"; message: string };
 
-function ImageUploadField({
-  label,
-  inputRef,
-  state,
+async function uploadFile(
+  file: File,
+  onStateChange: (s: UploadState | null) => void
+) {
+  onStateChange({ status: "uploading", fileName: file.name });
+  try {
+    const intentRes = await fetch("/api/admin/portfolio-upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fileName: file.name, mimeType: file.type, sizeBytes: file.size }),
+    });
+    const intent = await intentRes.json() as { uploadUrl?: string; objectKey?: string; error?: string };
+    if (!intent.uploadUrl || !intent.objectKey) {
+      onStateChange({ status: "error", message: intent.error ?? "Upload failed." });
+      return;
+    }
+    const uploadRes = await fetch(intent.uploadUrl, {
+      method: "PUT",
+      body: file,
+      headers: { "Content-Type": file.type },
+    });
+    if (!uploadRes.ok) {
+      onStateChange({ status: "error", message: "Upload to storage failed." });
+      return;
+    }
+    onStateChange({ status: "done", fileName: file.name, objectKey: intent.objectKey });
+  } catch {
+    onStateChange({ status: "error", message: "Network error during upload." });
+  }
+}
+
+function MultiImageUploader({
+  uploads,
+  onAdd,
+  onRemove,
   onStateChange,
 }: {
-  label: string;
-  inputRef: React.RefObject<HTMLInputElement | null>;
-  state: UploadState | null;
-  onStateChange: (s: UploadState | null) => void;
+  uploads: (UploadState | null)[];
+  onAdd: () => void;
+  onRemove: (index: number) => void;
+  onStateChange: (index: number, state: UploadState | null) => void;
 }) {
-  async function handleFile(file: File) {
-    onStateChange({ status: "uploading", fileName: file.name });
-    try {
-      const intentRes = await fetch("/api/admin/portfolio-upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: file.name,
-          mimeType: file.type,
-          sizeBytes: file.size,
-        }),
-      });
-      const intent = await intentRes.json() as { uploadUrl?: string; objectKey?: string; error?: string };
-      if (!intent.uploadUrl || !intent.objectKey) {
-        onStateChange({ status: "error", message: intent.error ?? "Upload failed." });
-        return;
-      }
-      const uploadRes = await fetch(intent.uploadUrl, {
-        method: "PUT",
-        body: file,
-        headers: { "Content-Type": file.type },
-      });
-      if (!uploadRes.ok) {
-        onStateChange({ status: "error", message: "Upload to storage failed." });
-        return;
-      }
-      onStateChange({ status: "done", fileName: file.name, objectKey: intent.objectKey });
-    } catch {
-      onStateChange({ status: "error", message: "Network error during upload." });
-    }
-  }
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   return (
     <div className="grid gap-2">
-      <p className="text-sm font-medium">{label}</p>
-      <div
-        className="flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 bg-background px-4 py-4 text-center transition hover:border-primary/40"
-        onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          const file = e.dataTransfer.files[0];
-          if (file) handleFile(file);
-        }}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleFile(file);
-          }}
-        />
-        {!state && (
-          <p className="text-xs text-muted-foreground">
-            Click or drag to upload
-            <br />
-            JPG, PNG, WebP · max 10 MB
-          </p>
-        )}
-        {state?.status === "uploading" && (
-          <p className="text-xs text-muted-foreground">Uploading {state.fileName}…</p>
-        )}
-        {state?.status === "done" && (
-          <div className="grid gap-1">
-            <p className="text-xs text-emerald-600 dark:text-emerald-400">Uploaded</p>
-            <p className="max-w-full truncate text-xs text-muted-foreground">{state.fileName}</p>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onStateChange(null);
-                if (inputRef.current) inputRef.current.value = "";
-              }}
-              className="text-xs text-muted-foreground hover:text-red-600 dark:text-red-400"
-            >
-              Remove
-            </button>
-          </div>
-        )}
-        {state?.status === "error" && (
-          <p className="text-xs text-red-600 dark:text-red-400">{state.message}</p>
-        )}
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium">Images</p>
+        <p className="text-xs text-muted-foreground">{uploads.filter((u) => u?.status === "done").length} / 5 uploaded</p>
       </div>
+      <div className="grid gap-2">
+        {uploads.map((state, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 rounded-2xl border border-dashed border-border/80 bg-background px-4 py-3"
+          >
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary/80 text-[10px] font-bold text-muted-foreground">
+              {i + 1}
+            </span>
+
+            <div className="flex-1 min-w-0">
+              {!state && (
+                <button
+                  type="button"
+                  onClick={() => inputRefs.current[i]?.click()}
+                  className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                >
+                  Click to upload image
+                </button>
+              )}
+              {state?.status === "uploading" && (
+                <p className="truncate text-xs text-muted-foreground">Uploading {state.fileName}…</p>
+              )}
+              {state?.status === "done" && (
+                <p className="truncate text-xs text-emerald-600 dark:text-emerald-400">
+                  ✓ {state.fileName}
+                </p>
+              )}
+              {state?.status === "error" && (
+                <p className="truncate text-xs text-red-600 dark:text-red-400">{state.message}</p>
+              )}
+            </div>
+
+            <input
+              ref={(el) => { inputRefs.current[i] = el; }}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) uploadFile(file, (s) => onStateChange(i, s));
+              }}
+            />
+
+            {state?.status === "done" && (
+              <button
+                type="button"
+                onClick={() => {
+                  onStateChange(i, null);
+                  if (inputRefs.current[i]) inputRefs.current[i]!.value = "";
+                }}
+                className="shrink-0 text-xs text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
+              >
+                Remove
+              </button>
+            )}
+
+            {uploads.length > 1 && (
+              <button
+                type="button"
+                onClick={() => onRemove(i)}
+                className="shrink-0 text-xs text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
+                title="Remove slot"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+      {uploads.length < 5 && (
+        <button
+          type="button"
+          onClick={onAdd}
+          className="text-left text-xs text-primary/70 underline-offset-2 hover:text-primary hover:underline"
+        >
+          + Add another image ({5 - uploads.length} remaining)
+        </button>
+      )}
+      <p className="text-xs text-muted-foreground">JPG, PNG, WebP · max 10 MB each · up to 5 images</p>
     </div>
   );
 }

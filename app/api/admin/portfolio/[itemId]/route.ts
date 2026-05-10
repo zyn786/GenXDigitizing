@@ -35,8 +35,12 @@ export async function PATCH(request: Request, { params }: Props) {
     return NextResponse.json({ ok: false, message: "Invalid data." }, { status: 400 });
   }
 
-  const existing = await prisma.portfolioItem.findUnique({ where: { id: itemId }, select: { id: true } });
+  const existing = await prisma.portfolioItem.findUnique({ where: { id: itemId }, select: { id: true, createdByUserId: true } });
   if (!existing) return NextResponse.json({ ok: false }, { status: 404 });
+
+  if (session.user.role === "MARKETING" && existing.createdByUserId !== session.user.id) {
+    return NextResponse.json({ ok: false, message: "You can only edit your own portfolio drafts." }, { status: 403 });
+  }
 
   const item = await prisma.portfolioItem.update({
     where: { id: itemId },
@@ -61,8 +65,12 @@ export async function DELETE(_request: Request, { params }: Props) {
   }
 
   const { itemId } = await params;
-  const existing = await prisma.portfolioItem.findUnique({ where: { id: itemId }, select: { id: true, title: true } });
+  const existing = await prisma.portfolioItem.findUnique({ where: { id: itemId }, select: { id: true, title: true, createdByUserId: true } });
   if (!existing) return NextResponse.json({ ok: false }, { status: 404 });
+
+  if (session.user.role === "MARKETING" && existing.createdByUserId !== session.user.id) {
+    return NextResponse.json({ ok: false, message: "You can only delete your own portfolio drafts." }, { status: 403 });
+  }
 
   await prisma.portfolioItem.delete({ where: { id: itemId } });
 

@@ -123,5 +123,12 @@ export const config = {
     "/api/admin/:path*",
     "/api/client/:path*",
     "/api/designer/:path*",
+    "/api/workflow/:path*",
+    "/api/order/:path*",
+    "/api/quote/:path*",
+    "/api/payment-proof-upload/:path*",
+    "/api/upload/:path*",
+    "/api/assets/:path*",
+    "/api/invoices/:path*",
   ],
 };

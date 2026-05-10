@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { buildTitle } from "@/lib/site";
+import { getPricingCatalog, filterApprovedCatalog } from "@/lib/pricing/catalog";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { OrderWizard } from "@/components/orders/order-wizard";
 
@@ -24,6 +25,7 @@ async function getUnreadSupportCount(userId: string): Promise<number> {
 
 export default async function OrdersPage() {
   const session = await auth();
+  const catalog = filterApprovedCatalog(await getPricingCatalog());
 
   if (session?.user?.id) {
     const [dbUser, unreadCount] = await Promise.all([
@@ -62,6 +64,7 @@ export default async function OrdersPage() {
             <OrderWizard
               user={{ name: session.user.name, email: session.user.email }}
               isFirstOrder={isFirstOrder}
+              catalog={catalog}
             />
           </div>
         </div>
@@ -75,7 +78,7 @@ export default async function OrdersPage() {
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_50%_-10%,rgba(124,58,237,0.12),transparent_60%)]" />
       <div className="relative mx-auto w-full max-w-[760px] px-4 py-10 md:py-16">
         <div className="rounded-[1.75rem] border border-white/[0.06] bg-[#0e0f1c]/95 p-6 shadow-2xl shadow-black/50 backdrop-blur-xl md:p-8">
-          <OrderWizard />
+          <OrderWizard catalog={catalog} />
         </div>
       </div>
     </div>

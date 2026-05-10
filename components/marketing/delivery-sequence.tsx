@@ -517,7 +517,7 @@ export function DeliverySequence() {
                                     "flex h-7 w-7 items-center justify-center rounded-full border text-[10px] font-black transition",
                                     completed
                                       ? "border-indigo-300 bg-indigo-300 text-[#050816]"
-                                      : "border-white/15 bg-white/5 text-white/30",
+                                      : "border-white/15 bg-white/5 text-white/60",
                                   ].join(" ")}
                                 >
                                   {completed ? (

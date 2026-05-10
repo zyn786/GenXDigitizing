@@ -11,6 +11,7 @@ const DEFAULT_CONFIGS: ConfigRecord[] = [
   { key: "stitch_pricing_enabled", value: "true", label: "Enable stitch-count pricing", description: "When enabled and client provides stitch count, uses stitch-plan pricing instead of size-based." },
   { key: "free_first_design_enabled", value: "true", label: "Free first design for new clients", description: "When enabled, the first order from a new client is free." },
   { key: "puff_jacket_back_base_price", value: "35.00", label: "3D Puff Jacket Back base price ($)", description: "Flat rate for 3D Puff Jacket Back — treated as a separate premium service." },
+  { key: "default_tax_percent", value: "0", label: "Default sales tax (%)", description: "Applied automatically to new invoices. Set to 0 to disable. Example: 8.5 for 8.5% sales tax." },
 ];
 
 export function PricingConfigEditor() {
@@ -213,11 +214,11 @@ export function PricingConfigEditor() {
       <section className="rounded-[1.75rem] border border-border/80 bg-card p-6">
         <h3 className="font-semibold">Order Rules Reference</h3>
         <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-          <li className="flex items-start gap-2"><span className="text-emerald-500 mt-0.5">✓</span> LC to LC same-size adjustment &amp; color change are <strong>free</strong></li>
-          <li className="flex items-start gap-2"><span className="text-amber-500 mt-0.5">!</span> Changing from Left Chest to Jacket Back counts as a <strong>new design / new order</strong></li>
-          <li className="flex items-start gap-2"><span className="text-emerald-500 mt-0.5">✓</span> Free first design: controlled by the setting above</li>
+          <li className="flex items-start gap-2"><span className="text-amber-500 mt-0.5">!</span> Changing placement (e.g. Left Chest to Jacket Back) counts as a <strong>new design / new order</strong></li>
+          <li className="flex items-start gap-2"><span className="text-emerald-500 mt-0.5">✓</span> Free first design: controlled by the setting above — auto-detected via order history</li>
           <li className="flex items-start gap-2"><span className="text-indigo-500 mt-0.5">★</span> 3D Puff Jacket Back is a <strong>separate premium service</strong> — flat rate, not standard 3D Puff pricing</li>
           <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">$</span> Stitch-plan pricing: 1,000 stitches = $1.00 (admin-adjustable rate above)</li>
+          <li className="flex items-start gap-2"><span className="text-emerald-500 mt-0.5">%</span> Coupon codes validated at quote submission — discount auto-applied to invoice on creation</li>
         </ul>
       </section>
     </div>

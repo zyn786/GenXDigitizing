@@ -144,7 +144,7 @@ export function ReferenceFileUploader({
               ? "Uploading…"
               : "Drop files here or click to upload"}
           </span>
-          <span className="text-[11px] text-white/30">
+          <span className="text-[11px] text-white/60">
             JPG, PNG, PDF, SVG, ZIP · Max {MAX_MB} MB each · Up to {maxFiles} files
           </span>
         </button>
@@ -182,13 +182,13 @@ export function ReferenceFileUploader({
               <FileImage className="h-4 w-4 shrink-0 text-indigo-400" />
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium text-white">{f.fileName}</div>
-                <div className="text-xs text-white/40">{formatBytes(f.sizeBytes)}</div>
+                <div className="text-xs text-white/65">{formatBytes(f.sizeBytes)}</div>
               </div>
               <button
                 type="button"
                 onClick={() => removeFile(i)}
                 disabled={disabled}
-                className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-white/40 transition hover:bg-white/10 hover:text-white/70 disabled:opacity-40"
+                className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-white/65 transition hover:bg-white/10 hover:text-white/70 disabled:opacity-40"
               >
                 <X className="h-3.5 w-3.5" />
               </button>

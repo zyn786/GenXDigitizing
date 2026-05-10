@@ -23,7 +23,7 @@ export default async function AdminPortfolioPage() {
 
   const items = await prisma.portfolioItem.findMany({
     orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-    include: { createdBy: { select: { name: true } }, approvedBy: { select: { name: true } } },
+    include: { createdBy: { select: { name: true } }, approvedBy: { select: { name: true } }, images: true },
   });
 
   const pendingCount = items.filter((i) => i.approvalStatus === "PENDING_APPROVAL").length;

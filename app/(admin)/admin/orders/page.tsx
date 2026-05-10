@@ -1,5 +1,6 @@
 import type { Route } from "next";
 
+import { auth } from "@/auth";
 import { AdminOrderQueue } from "@/components/workflow/admin-order-queue";
 import { getAdminOrders } from "@/lib/workflow/repository";
 import {
@@ -12,7 +13,9 @@ import {
 } from "@/components/ui/breadcrumb";
 
 export default async function AdminOrdersPage() {
-  const orders = await getAdminOrders();
+  const session = await auth();
+  const designerId = session?.user?.role === "DESIGNER" ? session.user.id : undefined;
+  const orders = await getAdminOrders(designerId);
 
   return (
     <div className="grid gap-6">

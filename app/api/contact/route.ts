@@ -39,6 +39,10 @@ export async function POST(request: Request) {
   }
 
   const { name, email, service, message } = parsed.data;
+
+  function esc(v: string) {
+    return v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
   const apiKey = process.env.RESEND_API_KEY;
   const adminEmail = process.env.ADMIN_EMAIL ?? "support@genxdigitizing.com";
   const fromEmail = process.env.RESEND_FROM_EMAIL ?? "GenX Digitizing <support@genxdigitizing.com>";
@@ -59,12 +63,12 @@ export async function POST(request: Request) {
           <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
             <h2 style="margin-bottom:16px">New project inquiry</h2>
             <table style="width:100%;border-collapse:collapse;font-size:14px">
-              <tr><td style="padding:8px 0;color:#666;width:120px">Name</td><td style="padding:8px 0;font-weight:600">${name}</td></tr>
-              <tr><td style="padding:8px 0;color:#666">Email</td><td style="padding:8px 0;font-weight:600">${email}</td></tr>
-              <tr><td style="padding:8px 0;color:#666">Service</td><td style="padding:8px 0;font-weight:600">${service}</td></tr>
+              <tr><td style="padding:8px 0;color:#666;width:120px">Name</td><td style="padding:8px 0;font-weight:600">${esc(name)}</td></tr>
+              <tr><td style="padding:8px 0;color:#666">Email</td><td style="padding:8px 0;font-weight:600">${esc(email)}</td></tr>
+              <tr><td style="padding:8px 0;color:#666">Service</td><td style="padding:8px 0;font-weight:600">${esc(service)}</td></tr>
             </table>
             <div style="margin-top:20px;padding:16px;background:#f5f5f5;border-radius:8px;font-size:14px;line-height:1.6">
-              ${message.replace(/\n/g, "<br>")}
+              ${esc(message).replace(/\n/g, "<br>")}
             </div>
           </div>
         `,

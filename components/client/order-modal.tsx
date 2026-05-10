@@ -153,7 +153,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputCls =
-  "w-full rounded-[1rem] border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 focus:ring-2 focus:ring-white/10 transition";
+  "w-full rounded-[1rem] border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-white/60 outline-none focus:border-white/30 focus:ring-2 focus:ring-white/10 transition";
 
 // ─── Main Modal ───────────────────────────────────────────────────────────────
 
@@ -321,7 +321,7 @@ export function OrderModal({ open, onClose, catalog }: Props) {
           {/* Header */}
           <div className="relative flex shrink-0 items-center justify-between border-b border-white/8 px-6 py-4">
             <div>
-              <div className="text-[10px] uppercase tracking-[0.24em] text-white/40">Client portal</div>
+              <div className="text-[10px] uppercase tracking-[0.24em] text-white/65">Client portal</div>
               <h2 className="mt-0.5 text-lg font-bold text-white">Place a New Order</h2>
             </div>
             <button
@@ -385,7 +385,7 @@ export function OrderModal({ open, onClose, catalog }: Props) {
                           <span className="text-xl leading-none">{cat.emoji}</span>
                           <div>
                             <div className="text-xs font-semibold leading-tight">{cat.label}</div>
-                            <div className="mt-0.5 text-[10px] text-white/40">{cat.description}</div>
+                            <div className="mt-0.5 text-[10px] text-white/65">{cat.description}</div>
                           </div>
                         </button>
                       ))}
@@ -409,7 +409,7 @@ export function OrderModal({ open, onClose, catalog }: Props) {
                             </option>
                           ))}
                         </select>
-                        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/65" />
                       </div>
                       {selectedTier && (
                         <div className="mt-2 flex items-center justify-between rounded-[0.875rem] border border-violet-500/20 bg-violet-500/8 px-4 py-2.5">
@@ -423,7 +423,7 @@ export function OrderModal({ open, onClose, catalog }: Props) {
                   {/* Divider */}
                   <div className="flex items-center gap-3">
                     <div className="h-px flex-1 bg-white/8" />
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/30">Order details</span>
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/60">Order details</span>
                     <div className="h-px flex-1 bg-white/8" />
                   </div>
 
@@ -462,11 +462,11 @@ export function OrderModal({ open, onClose, catalog }: Props) {
                         }`}
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06]">
-                          <ImageIcon className="h-5 w-5 text-white/40" />
+                          <ImageIcon className="h-5 w-5 text-white/65" />
                         </div>
                         <div className="text-center">
                           <div className="text-sm font-medium text-white/60">Drop your file here or <span className="text-violet-400">click to upload</span></div>
-                          <div className="mt-1 text-xs text-white/30">JPG, PNG, WebP — up to 20 MB</div>
+                          <div className="mt-1 text-xs text-white/60">JPG, PNG, WebP — up to 20 MB</div>
                         </div>
                       </button>
                     )}
@@ -546,16 +546,16 @@ export function OrderModal({ open, onClose, catalog }: Props) {
                               onChange={() => setDelivery(opt.id)}
                               className="hidden"
                             />
-                            <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${selected ? "bg-violet-500/15 text-violet-400" : "bg-white/[0.06] text-white/40"}`}>
+                            <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${selected ? "bg-violet-500/15 text-violet-400" : "bg-white/[0.06] text-white/65"}`}>
                               <Icon className="h-4 w-4" />
                             </div>
                             <div className="flex-1">
                               <div className="text-sm font-semibold text-white">{opt.label}</div>
-                              <div className="text-xs text-white/40">{opt.sub}</div>
+                              <div className="text-xs text-white/65">{opt.sub}</div>
                             </div>
                             <div className="text-right">
                               {opt.extra === 0 ? (
-                                <span className="text-xs text-white/40">Included</span>
+                                <span className="text-xs text-white/65">Included</span>
                               ) : (
                                 <span className="text-sm font-semibold text-white">+${opt.extra}</span>
                               )}
@@ -619,18 +619,18 @@ export function OrderModal({ open, onClose, catalog }: Props) {
 
                 {selectedTier && (
                   <div className="mb-4 space-y-1.5">
-                    <div className="flex justify-between text-xs text-white/45">
+                    <div className="flex justify-between text-xs text-white/70">
                       <span>Base ({selectedTier.label})</span>
                       <span>${selectedTier.price}</span>
                     </div>
                     {deliveryOpt.extra > 0 && (
-                      <div className="flex justify-between text-xs text-white/45">
+                      <div className="flex justify-between text-xs text-white/70">
                         <span>{deliveryOpt.label}</span>
                         <span>+${deliveryOpt.extra}</span>
                       </div>
                     )}
                     {addons.filter((a) => addOns.includes(a.id as AddOnId)).map((a) => (
-                      <div key={a.id} className="flex justify-between text-xs text-white/45">
+                      <div key={a.id} className="flex justify-between text-xs text-white/70">
                         <span>{a.label}</span>
                         <span>+${a.price}</span>
                       </div>

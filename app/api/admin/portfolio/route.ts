@@ -5,6 +5,12 @@ import { prisma } from "@/lib/db";
 import { isAppAdminRole } from "@/lib/auth/session";
 import { logActivity } from "@/lib/activity/logger";
 
+const imageSchema = z.object({
+  objectKey: z.string().min(1),
+  altText: z.string().max(200).optional(),
+  sortOrder: z.number().int().optional(),
+});
+
 const createSchema = z.object({
   title: z.string().min(1).max(200),
   serviceKey: z.string().min(1),
@@ -18,6 +24,7 @@ const createSchema = z.object({
   sortOrder: z.number().int().optional(),
   seoTitle: z.string().max(120).optional(),
   seoDescription: z.string().max(300).optional(),
+  images: z.array(imageSchema).max(5).optional(),
 });
 
 export async function GET() {
@@ -31,6 +38,7 @@ export async function GET() {
     include: {
       createdBy:  { select: { name: true } },
       approvedBy: { select: { name: true } },
+      images:     { orderBy: { sortOrder: "asc" } },
     },
   });
 
@@ -53,15 +61,29 @@ export async function POST(request: Request) {
   const approvalStatus = isSuperAdmin ? "APPROVED" : "PENDING_APPROVAL";
   const isVisible = isSuperAdmin ? (parsed.data.isVisible ?? true) : false;
 
+  const { images, ...itemData } = parsed.data;
+
   const item = await prisma.portfolioItem.create({
     data: {
-      ...parsed.data,
-      tags: parsed.data.tags ?? [],
+      ...itemData,
+      tags: itemData.tags ?? [],
       createdByUserId: session.user.id ?? null,
       approvalStatus,
       isVisible,
       ...(isSuperAdmin ? { approvedByUserId: session.user.id, approvedAt: new Date() } : {}),
+      ...(images && images.length > 0
+        ? {
+            images: {
+              create: images.map((img, i) => ({
+                objectKey: img.objectKey,
+                altText: img.altText ?? null,
+                sortOrder: img.sortOrder ?? i,
+              })),
+            },
+          }
+        : {}),
     },
+    include: { images: { orderBy: { sortOrder: "asc" } } },
   });
 
   await logActivity({

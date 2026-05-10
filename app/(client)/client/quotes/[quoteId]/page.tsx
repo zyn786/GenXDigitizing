@@ -175,7 +175,7 @@ function QuoteStatusBadge({ status }: { status: string }) {
     CLIENT_ACCEPTED: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300",
     CLIENT_REJECTED: "border-red-400/30 bg-red-500/10 text-red-300",
     CONVERTED_TO_ORDER: "border-teal-400/30 bg-teal-500/10 text-teal-300",
-    CANCELLED: "border-white/10 bg-white/5 text-white/40",
+    CANCELLED: "border-white/10 bg-white/5 text-white/65",
   };
   const labels: Record<string, string> = {
     NEW: "Awaiting review",

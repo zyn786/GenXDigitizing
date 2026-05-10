@@ -26,8 +26,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }
 
-  const callerRole = session.user.role;
-  if (callerRole !== "SUPER_ADMIN" && callerRole !== "MANAGER") {
+  if (session.user.role !== "SUPER_ADMIN") {
     return NextResponse.json({ ok: false, message: "Forbidden." }, { status: 403 });
   }
 
@@ -41,15 +40,6 @@ export async function POST(request: Request) {
   }
 
   const { name, emailPrefix, role, department, password } = parsed.data;
-
-  // MANAGER cannot create SUPER_ADMIN (already blocked by schema) but also shouldn't
-  // elevate others past MANAGER. Only SUPER_ADMIN can create MANAGER accounts.
-  if (callerRole === "MANAGER" && role === "MANAGER") {
-    return NextResponse.json(
-      { ok: false, message: "Only Super Admins can create Admin accounts." },
-      { status: 403 }
-    );
-  }
 
   const email = `${emailPrefix.toLowerCase()}@${COMPANY_DOMAIN}`;
 

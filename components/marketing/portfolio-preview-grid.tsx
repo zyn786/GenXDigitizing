@@ -173,7 +173,7 @@ export function PortfolioPreviewGrid({
                     Featured
                   </Badge>
 
-                  <Badge className="rounded-full border-slate-200 bg-white/70 text-[10px] text-slate-500 dark:border-white/10 dark:bg-white/[0.055] dark:text-white/45">
+                  <Badge className="rounded-full border-slate-200 bg-white/70 text-[10px] text-slate-500 dark:border-white/10 dark:bg-white/[0.055] dark:text-white/70">
                     {featuredItem.badge}
                   </Badge>
                 </div>
@@ -248,7 +248,7 @@ function PortfolioPreviewCard({
               </Badge>
             )}
 
-            <Badge className="rounded-full border-slate-200 bg-white/70 text-[10px] text-slate-500 dark:border-white/10 dark:bg-white/[0.055] dark:text-white/45">
+            <Badge className="rounded-full border-slate-200 bg-white/70 text-[10px] text-slate-500 dark:border-white/10 dark:bg-white/[0.055] dark:text-white/70">
               {item.badge}
             </Badge>
           </div>
@@ -331,7 +331,7 @@ function PortfolioVisual({
 
       <div className="relative z-10 flex w-full flex-col justify-between p-4 sm:p-5">
         <div className="flex items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-white/45 bg-white/65 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-600 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.06] dark:text-white/45">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-white/45 bg-white/65 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-600 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.06] dark:text-white/70">
             <ImageIcon className="h-3.5 w-3.5" />
             Proof preview
           </div>
@@ -346,7 +346,7 @@ function PortfolioVisual({
         <div>
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-2xl border border-white/45 bg-white/55 p-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.045]">
-              <div className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-white/35">
+              <div className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-white/60">
                 Before
               </div>
               <div className="mt-1 h-1.5 rounded-full bg-slate-300/70 dark:bg-white/15" />
@@ -363,11 +363,11 @@ function PortfolioVisual({
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-3">
-            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-white/40">
+            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-white/65">
               {category}
             </div>
 
-            <div className="text-[10px] font-black text-slate-400 dark:text-white/30">
+            <div className="text-[10px] font-black text-slate-400 dark:text-white/60">
               #{String(index + 1).padStart(2, "0")}
             </div>
           </div>

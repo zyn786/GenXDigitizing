@@ -46,23 +46,71 @@ export async function POST(request: Request) {
   const data = parsed.data;
   const userId = session.user.id!;
 
-  const [config, bulkRules] = await Promise.all([
+  const [config, bulkRules, clientProfile] = await Promise.all([
     getAllPricingConfig(),
     getActiveBulkDiscountRules(),
+    prisma.clientProfile.findUnique({
+      where: { userId },
+      select: { totalOrderCount: true },
+    }),
   ]);
+
+  const mappedBulkRules = bulkRules.map((r) => ({
+    minQty: r.minQty,
+    discountPercent: typeof r.discountPercent === "number"
+      ? r.discountPercent
+      : (r.discountPercent as { toNumber(): number }).toNumber(),
+  }));
+
+  const freeFirstDesign = config["free_first_design_enabled"] === "true";
+  const isFirstOrder = (clientProfile?.totalOrderCount ?? 0) === 0;
 
   const pricingOpts = {
     stitchRatePer1000: parseFloat(config["stitch_rate_per_1000"] ?? "1.00"),
     stitchPricingEnabled: config["stitch_pricing_enabled"] === "true",
-    bulkRules: bulkRules.map((r) => ({
-      minQty: r.minQty,
-      discountPercent: typeof r.discountPercent === "number"
-        ? r.discountPercent
-        : (r.discountPercent as { toNumber(): number }).toNumber(),
-    })),
+    puffJacketBackBasePrice: parseFloat(config["puff_jacket_back_base_price"] ?? "35.00"),
+    bulkRules: mappedBulkRules,
+    freeFirstDesign,
+    isFirstOrder,
   };
 
   const pricing = computeQuotePricing(data, pricingOpts);
+
+  // Coupon validation & application
+  let couponDiscountAmount = 0;
+  let appliedCouponCode: string | null = null;
+  const rawCouponCode = data.couponCode?.trim().toUpperCase() || null;
+
+  if (rawCouponCode && !pricing.isFreeDesign) {
+    const coupon = await prisma.coupon.findUnique({
+      where: { code: rawCouponCode },
+      select: { id: true, code: true, discountType: true, discountValue: true, maxUses: true, usedCount: true, expiresAt: true, isActive: true },
+    });
+
+    const now = new Date();
+    const valid =
+      coupon &&
+      coupon.isActive &&
+      (coupon.expiresAt === null || coupon.expiresAt > now) &&
+      (coupon.maxUses === null || coupon.usedCount < coupon.maxUses);
+
+    if (!valid) {
+      return NextResponse.json(
+        { ok: false, message: "Coupon code is invalid, expired, or has reached its usage limit." },
+        { status: 422 }
+      );
+    }
+
+    const baseForDiscount = pricing.total;
+    couponDiscountAmount = coupon.discountType === "PERCENT"
+      ? Math.round(baseForDiscount * (Number(coupon.discountValue) / 100) * 100) / 100
+      : Math.min(Math.round(Number(coupon.discountValue) * 100) / 100, baseForDiscount);
+
+    appliedCouponCode = coupon.code;
+    await prisma.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
+  }
+
+  const finalTotal = Math.max(0, Math.round((pricing.total - couponDiscountAmount) * 100) / 100);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const order = await (prisma.workflowOrder.create as any)({
@@ -88,7 +136,9 @@ export async function POST(request: Request) {
       fileFormats: data.fileFormats,
       stitchCount: data.stitchCount ?? null,
       specialInstructions: data.specialInstructions || null,
-      estimatedPrice: pricing.total,
+      estimatedPrice: finalTotal,
+      couponCode: appliedCouponCode,
+      couponDiscountAmount: couponDiscountAmount > 0 ? couponDiscountAmount : null,
     },
   });
 
@@ -112,7 +162,7 @@ export async function POST(request: Request) {
     action: "quote.created",
     entityType: "order",
     entityId: order.id,
-    metadata: { orderNumber: order.orderNumber, serviceType: data.serviceType, estimatedPrice: pricing.total },
+    metadata: { orderNumber: order.orderNumber, serviceType: data.serviceType, estimatedPrice: finalTotal, couponCode: appliedCouponCode ?? undefined, couponDiscount: couponDiscountAmount > 0 ? couponDiscountAmount : undefined },
   });
 
   // Ops notification
@@ -139,6 +189,6 @@ export async function POST(request: Request) {
     message: "Quote request submitted successfully. We'll confirm pricing within one business day.",
     orderNumber: order.orderNumber,
     orderId: order.id,
-    pricing,
+    pricing: { ...pricing, total: finalTotal, couponCode: appliedCouponCode, couponDiscount: couponDiscountAmount > 0 ? couponDiscountAmount : null },
   });
 }

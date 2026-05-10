@@ -33,9 +33,9 @@ export default async function OrderStatusPage({ searchParams }: Props) {
           initialEmail={params.email ?? ""}
         />
 
-        <p className="mt-8 text-center text-xs text-white/25">
+        <p className="mt-8 text-center text-xs text-white/60">
           Need help?{" "}
-          <a href="/contact" className="text-white/45 underline underline-offset-2 hover:text-white/70 transition">
+          <a href="/contact" className="text-white/70 underline underline-offset-2 hover:text-white/70 transition">
             Contact support
           </a>
         </p>

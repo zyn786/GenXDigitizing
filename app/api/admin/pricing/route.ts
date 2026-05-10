@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { isAppAdminRole } from "@/lib/auth/session";
 import { logActivity } from "@/lib/activity/logger";
 
 const tierSchema = z.object({
@@ -45,7 +44,8 @@ const bodySchema = z.object({
 export async function PUT(request: Request) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ ok: false }, { status: 401 });
-  if (!isAppAdminRole(session.user.role)) return NextResponse.json({ ok: false }, { status: 403 });
+  const role = session.user.role;
+  if (role !== "SUPER_ADMIN" && role !== "MANAGER") return NextResponse.json({ ok: false }, { status: 403 });
 
   const body = await request.json().catch(() => null);
   const parsed = bodySchema.safeParse(body);
@@ -54,6 +54,17 @@ export async function PUT(request: Request) {
   }
 
   const { categories, addons, delivery } = parsed.data;
+
+  // Capture before-state for audit trail.
+  const beforeCategories = await prisma.serviceCategory.findMany({
+    include: { tiers: true },
+    orderBy: { sortOrder: "asc" },
+  });
+  const beforeSnapshot = beforeCategories.map((c) => ({
+    key: c.key,
+    label: c.label,
+    tiers: c.tiers.map((t) => ({ key: t.key, label: t.label, basePrice: Number(t.basePrice) })),
+  }));
 
   // Upsert categories and tiers
   for (const cat of categories) {
@@ -117,11 +128,21 @@ export async function PUT(request: Request) {
     }
   }
 
+  const afterSnapshot = categories.map((c) => ({
+    key: c.key,
+    label: c.label,
+    tiers: c.tiers.map((t) => ({ key: t.key, label: t.label, basePrice: t.basePrice })),
+  }));
+
   await logActivity({
     actor: { id: session.user.id, email: session.user.email, role: session.user.role },
     action: "pricing.updated",
     entityType: "Pricing",
-    metadata: { categoriesCount: categories.length },
+    metadata: {
+      categoriesCount: categories.length,
+      before: beforeSnapshot,
+      after: afterSnapshot,
+    },
   });
 
   return NextResponse.json({ ok: true });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Pencil, Check, X } from "lucide-react";
 import type { PricingCatalog } from "@/lib/pricing/catalog";
 
 type Tab = "categories" | "addons" | "delivery";
@@ -20,7 +21,34 @@ export function PricingEditor({ initialCatalog }: { initialCatalog: PricingCatal
       const res = await fetch("/api/admin/pricing", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(catalog),
+        body: JSON.stringify({
+          categories: catalog.categories.map((cat) => ({
+            key: cat.key,
+            label: cat.label,
+            emoji: cat.emoji,
+            description: cat.description,
+            isActive: cat.isActive,
+            tiers: cat.tiers.map((tier) => ({
+              key: tier.key,
+              label: tier.label,
+              basePrice: tier.price,
+              isActive: tier.isActive,
+            })),
+          })),
+          addons: catalog.addons.map((a) => ({
+            key: a.key,
+            label: a.label,
+            price: a.price,
+            isActive: a.isActive,
+          })),
+          delivery: catalog.delivery.map((d) => ({
+            key: d.key,
+            label: d.label,
+            subLabel: d.subLabel,
+            extraPrice: d.extraPrice,
+            isActive: d.isActive,
+          })),
+        }),
       });
       const json = await res.json() as { ok: boolean; message?: string };
       if (!json.ok) {
@@ -42,6 +70,17 @@ export function PricingEditor({ initialCatalog }: { initialCatalog: PricingCatal
       categories: prev.categories.map((c) =>
         c.key === catKey
           ? { ...c, tiers: c.tiers.map((t) => (t.key === tierKey ? { ...t, price } : t)) }
+          : c
+      ),
+    }));
+  }
+
+  function updateTierLabel(catKey: string, tierKey: string, label: string) {
+    setCatalog((prev) => ({
+      ...prev,
+      categories: prev.categories.map((c) =>
+        c.key === catKey
+          ? { ...c, tiers: c.tiers.map((t) => (t.key === tierKey ? { ...t, label } : t)) }
           : c
       ),
     }));
@@ -74,6 +113,13 @@ export function PricingEditor({ initialCatalog }: { initialCatalog: PricingCatal
     }));
   }
 
+  function updateAddonLabel(key: string, label: string) {
+    setCatalog((prev) => ({
+      ...prev,
+      addons: prev.addons.map((a) => (a.key === key ? { ...a, label } : a)),
+    }));
+  }
+
   function toggleAddon(key: string) {
     setCatalog((prev) => ({
       ...prev,
@@ -85,6 +131,13 @@ export function PricingEditor({ initialCatalog }: { initialCatalog: PricingCatal
     setCatalog((prev) => ({
       ...prev,
       delivery: prev.delivery.map((d) => (d.key === key ? { ...d, extraPrice } : d)),
+    }));
+  }
+
+  function updateDeliveryLabel(key: string, label: string) {
+    setCatalog((prev) => ({
+      ...prev,
+      delivery: prev.delivery.map((d) => (d.key === key ? { ...d, label } : d)),
     }));
   }
 
@@ -144,19 +197,16 @@ export function PricingEditor({ initialCatalog }: { initialCatalog: PricingCatal
 
               <div className="divide-y divide-border/80">
                 {cat.tiers.map((tier) => (
-                  <div key={tier.key} className="flex items-center gap-3 px-5 py-3">
-                    <p className="flex-1 text-sm text-muted-foreground">{tier.label}</p>
-                    <PriceInput
-                      value={tier.price}
-                      prefix="$"
-                      onChange={(v) => updateTierPrice(cat.key, tier.key, v)}
-                    />
-                    <ActiveToggle
-                      active={tier.isActive}
-                      onToggle={() => toggleTier(cat.key, tier.key)}
-                      small
-                    />
-                  </div>
+                  <TierRow
+                    key={tier.key}
+                    label={tier.label}
+                    price={tier.price}
+                    isActive={tier.isActive}
+                    onLabelChange={(label) => updateTierLabel(cat.key, tier.key, label)}
+                    onPriceChange={(price) => updateTierPrice(cat.key, tier.key, price)}
+                    onToggle={() => toggleTier(cat.key, tier.key)}
+                    pricePrefix="$"
+                  />
                 ))}
               </div>
             </div>
@@ -167,26 +217,24 @@ export function PricingEditor({ initialCatalog }: { initialCatalog: PricingCatal
       {/* Add-ons */}
       {activeTab === "addons" && (
         <div className="overflow-hidden rounded-[2rem] border border-border/80 bg-card/70">
-          <div className="hidden grid-cols-[1fr_auto_auto] gap-4 border-b border-border/80 px-5 py-3 text-xs uppercase tracking-[0.2em] text-muted-foreground sm:grid">
+          <div className="hidden grid-cols-[1fr_auto_auto_auto] gap-4 border-b border-border/80 px-5 py-3 text-xs uppercase tracking-[0.2em] text-muted-foreground sm:grid">
             <div>Add-on</div>
             <div>Price</div>
             <div>Status</div>
+            <div>Edit</div>
           </div>
           <div className="divide-y divide-border/80">
             {catalog.addons.map((addon) => (
-              <div key={addon.key} className="flex items-center gap-3 px-5 py-3.5">
-                <p className="flex-1 text-sm">{addon.label}</p>
-                <PriceInput
-                  value={addon.price}
-                  prefix="$"
-                  onChange={(v) => updateAddonPrice(addon.key, v)}
-                />
-                <ActiveToggle
-                  active={addon.isActive}
-                  onToggle={() => toggleAddon(addon.key)}
-                  small
-                />
-              </div>
+              <TierRow
+                key={addon.key}
+                label={addon.label}
+                price={addon.price}
+                isActive={addon.isActive}
+                onLabelChange={(label) => updateAddonLabel(addon.key, label)}
+                onPriceChange={(price) => updateAddonPrice(addon.key, price)}
+                onToggle={() => toggleAddon(addon.key)}
+                pricePrefix="$"
+              />
             ))}
           </div>
         </div>
@@ -195,29 +243,25 @@ export function PricingEditor({ initialCatalog }: { initialCatalog: PricingCatal
       {/* Delivery */}
       {activeTab === "delivery" && (
         <div className="overflow-hidden rounded-[2rem] border border-border/80 bg-card/70">
-          <div className="hidden grid-cols-[1fr_auto_auto] gap-4 border-b border-border/80 px-5 py-3 text-xs uppercase tracking-[0.2em] text-muted-foreground sm:grid">
+          <div className="hidden grid-cols-[1fr_auto_auto_auto] gap-4 border-b border-border/80 px-5 py-3 text-xs uppercase tracking-[0.2em] text-muted-foreground sm:grid">
             <div>Speed</div>
             <div>Extra price</div>
             <div>Status</div>
+            <div>Edit</div>
           </div>
           <div className="divide-y divide-border/80">
             {catalog.delivery.map((d) => (
-              <div key={d.key} className="flex items-center gap-3 px-5 py-3.5">
-                <div className="flex-1">
-                  <p className="text-sm">{d.label}</p>
-                  {d.subLabel && <p className="text-xs text-muted-foreground">{d.subLabel}</p>}
-                </div>
-                <PriceInput
-                  value={d.extraPrice}
-                  prefix="+$"
-                  onChange={(v) => updateDeliveryPrice(d.key, v)}
-                />
-                <ActiveToggle
-                  active={d.isActive}
-                  onToggle={() => toggleDelivery(d.key)}
-                  small
-                />
-              </div>
+              <TierRow
+                key={d.key}
+                label={d.label}
+                subLabel={d.subLabel}
+                price={d.extraPrice}
+                isActive={d.isActive}
+                onLabelChange={(label) => updateDeliveryLabel(d.key, label)}
+                onPriceChange={(price) => updateDeliveryPrice(d.key, price)}
+                onToggle={() => toggleDelivery(d.key)}
+                pricePrefix="+$"
+              />
             ))}
           </div>
         </div>
@@ -238,6 +282,94 @@ export function PricingEditor({ initialCatalog }: { initialCatalog: PricingCatal
         )}
         {error && <p className="text-sm text-red-400">{error}</p>}
       </div>
+    </div>
+  );
+}
+
+function TierRow({
+  label,
+  subLabel,
+  price,
+  isActive,
+  onLabelChange,
+  onPriceChange,
+  onToggle,
+  pricePrefix,
+}: {
+  label: string;
+  subLabel?: string;
+  price: number;
+  isActive: boolean;
+  onLabelChange: (label: string) => void;
+  onPriceChange: (price: number) => void;
+  onToggle: () => void;
+  pricePrefix: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(label);
+
+  function commitEdit() {
+    const trimmed = draft.trim();
+    if (trimmed) onLabelChange(trimmed);
+    else setDraft(label);
+    setEditing(false);
+  }
+
+  function cancelEdit() {
+    setDraft(label);
+    setEditing(false);
+  }
+
+  return (
+    <div className="flex items-center gap-3 px-5 py-3">
+      <div className="flex-1 min-w-0">
+        {editing ? (
+          <input
+            type="text"
+            autoFocus
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitEdit();
+              if (e.key === "Escape") cancelEdit();
+            }}
+            className="w-full rounded-xl border border-primary/60 bg-background px-3 py-1 text-sm outline-none focus:ring-2 focus:ring-primary/40"
+          />
+        ) : (
+          <div>
+            <p className="text-sm text-muted-foreground">{label}</p>
+            {subLabel && <p className="text-xs text-muted-foreground/60">{subLabel}</p>}
+          </div>
+        )}
+      </div>
+      <PriceInput value={price} prefix={pricePrefix} onChange={onPriceChange} />
+      <ActiveToggle active={isActive} onToggle={onToggle} small />
+      {editing ? (
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={commitEdit}
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 transition hover:bg-emerald-500/20"
+          >
+            <Check size={13} />
+          </button>
+          <button
+            type="button"
+            onClick={cancelEdit}
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/60 text-muted-foreground transition hover:bg-secondary"
+          >
+            <X size={13} />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => { setDraft(label); setEditing(true); }}
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/60 text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+        >
+          <Pencil size={13} />
+        </button>
+      )}
     </div>
   );
 }

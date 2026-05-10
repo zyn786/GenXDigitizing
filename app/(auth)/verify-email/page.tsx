@@ -64,7 +64,7 @@ export default async function VerifyEmailPage({
                 <Mail className="h-7 w-7 text-white/70" />
               )}
             </div>
-            <div className="text-xs uppercase tracking-[0.24em] text-white/45">
+            <div className="text-xs uppercase tracking-[0.24em] text-white/70">
               Email verification
             </div>
             <h1 className="mt-3 text-3xl font-bold tracking-tight">
@@ -150,7 +150,7 @@ export default async function VerifyEmailPage({
                   required
                   defaultValue={emailValue}
                   placeholder="Email"
-                  className="h-14 w-full rounded-[1.25rem] border border-white/10 bg-white/[0.06] px-4 text-white placeholder:text-white/35 outline-none backdrop-blur-xl focus:border-white/25"
+                  className="h-14 w-full rounded-[1.25rem] border border-white/10 bg-white/[0.06] px-4 text-white placeholder:text-white/60 outline-none backdrop-blur-xl focus:border-white/25"
                 />
                 <button
                   type="submit"

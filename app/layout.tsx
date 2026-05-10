@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 
 import "@/app/globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -52,9 +53,26 @@ export default function RootLayout({
       <body>
         <SessionProvider>
           <ThemeProvider>
-            {children}
+            <main id="main-content">{children}</main>
           </ThemeProvider>
         </SessionProvider>
+        <Script
+          id="tawk-to"
+          strategy="lazyOnload"
+          dangerouslySetInnerHTML={{
+            __html: `
+              var Tawk_API=Tawk_API||{},Tawk_LoadStart=new Date();
+              (function(){
+                var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+                s1.async=true;
+                s1.src='https://embed.tawk.to/6a004c3b06a7a01c3394a938/1jo8ijj04';
+                s1.charset='UTF-8';
+                s1.setAttribute('crossorigin','*');
+                s0.parentNode.insertBefore(s1,s0);
+              })();
+            `,
+          }}
+        />
       </body>
     </html>
   );

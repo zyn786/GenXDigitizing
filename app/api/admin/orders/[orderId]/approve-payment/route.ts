@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
 import { assertCanTransition, TransitionError } from "@/lib/workflow/transitions";
-import { sendFilesUnlockedEmail, writeNotificationLog } from "@/lib/notifications/email";
+import { sendFilesUnlockedEmail, sendPaymentRejectedEmail, writeNotificationLog } from "@/lib/notifications/email";
 
 const PAYMENT_APPROVAL_ROLES = ["SUPER_ADMIN", "MANAGER"] as const;
 
@@ -169,6 +169,34 @@ export async function POST(request: Request, { params }: Props) {
     entityId: orderId,
     metadata: { reason: reason ?? null, invoiceId: invoice.id },
   });
+
+  // Notify client of payment rejection
+  const clientEmail = order.clientUser?.email;
+  const clientName = order.clientUser?.name ?? "Valued Customer";
+  if (clientEmail) {
+    try {
+      await sendPaymentRejectedEmail({
+        to: clientEmail,
+        clientName,
+        orderNumber: order.orderNumber,
+        orderId: order.id,
+        invoiceNumber: invoice.invoiceNumber,
+        rejectionReason: reason ?? null,
+        recipientUserId: order.clientUser?.id ?? null,
+      });
+    } catch (err) {
+      await writeNotificationLog({
+        eventType: "PAYMENT_PENDING",
+        audience: "CLIENT",
+        channel: "EMAIL",
+        recipientUserId: order.clientUser?.id ?? null,
+        recipientAddress: clientEmail,
+        orderId: order.id,
+        status: "FAILED",
+        errorMessage: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  }
 
   return NextResponse.json({ ok: true, action: "rejected" });
 }

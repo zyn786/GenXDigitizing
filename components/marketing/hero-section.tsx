@@ -239,7 +239,7 @@ export function HeroSection() {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-[60] overflow-hidden whitespace-nowrap border-t border-slate-200 bg-white/90 py-3.5 shadow-[0_-20px_60px_rgba(15,23,42,0.08)] backdrop-blur-md dark:border-slate-800 dark:bg-[#0B1120]/90 md:absolute md:z-20 md:py-4">
+      <div className="fixed bottom-0 left-0 right-0 z-30 overflow-hidden whitespace-nowrap border-t border-slate-200 bg-white/90 py-3.5 shadow-[0_-20px_60px_rgba(15,23,42,0.08)] backdrop-blur-md dark:border-slate-800 dark:bg-[#0B1120]/90 md:absolute md:z-20 md:py-4">
         <div className="hero-ticker-track">
           {[...tickerItems, ...tickerItems].map((item, index) => (
             <span

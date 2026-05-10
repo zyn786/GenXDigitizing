@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { getAllPricingConfig } from "@/lib/pricing/config";
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
@@ -64,6 +65,8 @@ export async function POST(request: Request) {
       clientUserId: true,
       clientUser: { select: { name: true, email: true } },
       estimatedPrice: true,
+      couponCode: true,
+      couponDiscountAmount: true,
     },
   });
   if (!order) {
@@ -88,12 +91,23 @@ export async function POST(request: Request) {
     );
   }
 
+  // Fetch default tax rate from config.
+  const config = await getAllPricingConfig();
+  const taxPercent = parseFloat(config["default_tax_percent"] ?? "0");
+
   // Compute totals.
   const subtotal = lineItems.reduce(
     (sum, li) => sum + li.quantity * li.unitPrice,
     0
   );
-  const totalAmount = subtotal; // tax/discount applied separately via admin panel
+
+  // Apply coupon discount from order if present.
+  const couponDiscount = order.couponDiscountAmount ? Number(order.couponDiscountAmount) : 0;
+
+  const taxAmount = taxPercent > 0
+    ? Math.round(subtotal * (taxPercent / 100) * 100) / 100
+    : 0;
+  const totalAmount = Math.round((subtotal + taxAmount - couponDiscount) * 100) / 100;
   const balanceDue = totalAmount;
 
   const invoiceNumber = generateInvoiceNumber();
@@ -114,6 +128,10 @@ export async function POST(request: Request) {
           dueDate: computedDueDate,
           status: "DRAFT",
           subtotalAmount: subtotal,
+          taxPercent: taxPercent > 0 ? taxPercent : undefined,
+          taxLabel: taxPercent > 0 ? "Sales Tax" : undefined,
+          taxAmount: taxAmount > 0 ? taxAmount : undefined,
+          discountAmount: couponDiscount > 0 ? couponDiscount : undefined,
           totalAmount,
           balanceDue,
           notes: notes ?? null,
@@ -132,6 +150,19 @@ export async function POST(request: Request) {
             unitPrice: li.unitPrice,
             lineTotal: li.quantity * li.unitPrice,
             position: i,
+          },
+        });
+      }
+
+      // Auto-create InvoiceDiscount record for coupon if applicable.
+      if (couponDiscount > 0 && order.couponCode) {
+        await tx.invoiceDiscount.create({
+          data: {
+            invoiceId: created.id,
+            label: `Coupon: ${order.couponCode}`,
+            source: "COUPON",
+            percentage: 0,
+            appliedAmount: couponDiscount,
           },
         });
       }

@@ -1,12 +1,20 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Award, Cpu, Shapes } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const categories = [
   {
     icon: Cpu,
     title: "Embroidery Digitizing",
+    href: "/services/embroidery-digitizing",
     items: [
       "Left Chest Logo",
       "Cap / Hat Logo",
@@ -20,6 +28,7 @@ const categories = [
   {
     icon: Shapes,
     title: "Vector Art Conversion",
+    href: "/services/vector-art",
     items: [
       "JPG to Vector",
       "Logo Redraw",
@@ -33,6 +42,7 @@ const categories = [
   {
     icon: Award,
     title: "Custom Patches",
+    href: "/services/custom-patches",
     items: [
       "Embroidered Patches",
       "Chenille Patches",
@@ -47,59 +57,76 @@ const categories = [
 
 export function ServiceCategoryGrid() {
   return (
-    <section className="relative overflow-hidden bg-[#f7f7fb] px-4 py-10 text-slate-950 dark:bg-[#050814] dark:text-white md:px-8 md:py-14">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.12),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(168,85,247,0.1),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(59,130,246,0.08),transparent_38%)] dark:bg-[radial-gradient(circle_at_18%_20%,rgba(99,102,241,0.14),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(168,85,247,0.12),transparent_30%),radial-gradient(circle_at_50%_95%,rgba(59,130,246,0.1),transparent_38%)]" />
+    <section className="relative overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#f8f9ff_35%,#f3f6ff_100%)] px-4 py-12 text-slate-950 dark:bg-[linear-gradient(180deg,#050814_0%,#0B1120_100%)] dark:text-white md:px-8 md:py-16">
+
+      {/* TOP LINE */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-[#6D35FF]/25 to-transparent dark:via-white/15" />
+
+      {/* BOTTOM LINE */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-px bg-gradient-to-r from-transparent via-[#2563EB]/25 to-transparent dark:via-white/15" />
+
+      {/* BACKGROUND */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-[-10rem] top-[-12rem] h-[28rem] w-[28rem] rounded-full bg-[#6D35FF]/12 blur-3xl dark:bg-indigo-500/18" />
+        <div className="absolute right-[-8rem] top-[8%] h-[24rem] w-[24rem] rounded-full bg-[#2563EB]/10 blur-3xl dark:bg-blue-500/14" />
+        <div className="absolute bottom-[-10rem] left-[35%] h-[24rem] w-[24rem] rounded-full bg-[#0EA5E9]/10 blur-3xl dark:bg-cyan-500/10" />
+
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.03)_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] md:bg-[size:42px_42px]" />
+      </div>
 
       <div className="page-shell relative z-10">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+
           {categories.map((category) => {
             const Icon = category.icon;
 
             return (
               <Card
                 key={category.title}
-                className="group relative overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white/80 shadow-sm shadow-slate-950/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:bg-white hover:shadow-xl hover:shadow-slate-950/10 dark:border-white/10 dark:bg-white/[0.045] dark:shadow-black/20 dark:hover:border-white/[0.16] dark:hover:bg-white/[0.065] sm:rounded-[1.75rem] lg:rounded-[2rem]"
+                className="group relative overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/80 shadow-xl backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-[#6D35FF]/20 hover:shadow-2xl hover:shadow-[#6D35FF]/10 dark:border-white/10 dark:bg-white/[0.045] dark:hover:border-white/[0.14]"
               >
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-violet-500/10 opacity-70" />
-                <div className="pointer-events-none absolute right-0 top-0 h-24 w-24 rounded-bl-full bg-gradient-to-br from-slate-100 to-transparent opacity-70 dark:from-white/[0.06]" />
+                {/* glow */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#6D35FF]/8 via-transparent to-[#2563EB]/8 opacity-80" />
 
-                <CardHeader className="relative z-10 pb-3 p-5 sm:p-6">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-500/10 bg-indigo-500/10 text-indigo-700 dark:border-indigo-400/10 dark:bg-indigo-400/10 dark:text-indigo-300 sm:h-12 sm:w-12">
-                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                <CardHeader className="relative z-10 p-6 pb-4">
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6D35FF]/10 to-[#2563EB]/10 text-[#5B21B6] dark:text-indigo-300">
+                    <Icon className="h-6 w-6" />
                   </div>
 
-                  <CardTitle className="text-lg font-black tracking-tight text-slate-950 dark:text-white sm:text-xl">
+                  <CardTitle className="text-xl font-black text-slate-950 dark:text-white">
                     {category.title}
                   </CardTitle>
                 </CardHeader>
 
-                <CardContent className="relative z-10 px-5 pb-5 sm:px-6 sm:pb-6">
-                  <p className="text-sm leading-6 text-slate-600 dark:text-white/55">
+                <CardContent className="relative z-10 px-6 pb-6">
+                  <p className="text-sm leading-7 text-slate-600 dark:text-slate-400">
                     {category.text}
                   </p>
 
-                  <div className="mt-5 flex flex-wrap gap-1.5 sm:gap-2">
+                  <div className="mt-6 flex flex-wrap gap-2">
                     {category.items.map((item) => (
                       <span
                         key={item}
-                        className="rounded-full border border-slate-200 bg-white/70 px-2.5 py-1 text-[10px] font-bold text-slate-600 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/[0.055] dark:text-white/50 sm:px-3 sm:text-xs"
+                        className="rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[11px] font-bold text-slate-600 dark:border-white/10 dark:bg-white/[0.055] dark:text-slate-300"
                       >
                         {item}
                       </span>
                     ))}
                   </div>
 
+                  {/* BUTTON → redirects correctly */}
                   <Link
-                    href="/contact"
-                    className="mt-5 inline-flex min-h-[38px] items-center gap-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3.5 py-2 text-xs font-bold text-indigo-700 transition-all hover:gap-2.5 hover:bg-indigo-500/15 dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-200 dark:hover:bg-indigo-400/15 sm:text-sm"
+                    href={category.href}
+                    className="mt-7 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6D35FF]/10 to-[#2563EB]/10 px-4 py-2.5 text-sm font-black text-[#5B21B6] transition-all hover:gap-3 hover:from-[#6D35FF]/15 hover:to-[#2563EB]/15 dark:text-indigo-200"
                   >
                     Ask about this service
-                    <ArrowRight className="h-3.5 w-3.5" />
+                    <ArrowRight className="h-4 w-4" />
                   </Link>
                 </CardContent>
               </Card>
             );
           })}
+
         </div>
       </div>
     </section>

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity/logger";
-import { sendOrderCreatedEmail, writeNotificationLog } from "@/lib/notifications/email";
+import { sendOrderCreatedEmail, sendQuoteAcceptedEmail, writeNotificationLog } from "@/lib/notifications/email";
 
 type Props = { params: Promise<{ orderId: string }> };
 
@@ -83,6 +83,21 @@ export async function POST(request: Request, { params }: Props) {
           errorMessage: err instanceof Error ? err.message : "Unknown error",
         });
       }
+    }
+
+    // Notify ops team of accepted quote
+    const opsEmail = process.env.OPS_EMAIL ?? process.env.ADMIN_EMAIL;
+    if (opsEmail && order.quotedPrice != null) {
+      try {
+        await sendQuoteAcceptedEmail({
+          to: opsEmail,
+          adminName: "Team",
+          orderNumber: order.orderNumber,
+          orderId: order.id,
+          clientName: clientName,
+          quotedPrice: Number(order.quotedPrice),
+        });
+      } catch { /* non-fatal */ }
     }
 
     return NextResponse.json({ ok: true, action: "accepted" });

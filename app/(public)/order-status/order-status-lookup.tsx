@@ -51,7 +51,7 @@ const PROOF_LABELS: Record<string, string> = {
   REVISION_REQUESTED:        "Revision in progress",
 };
 
-const inp = "h-12 w-full rounded-2xl border border-white/[0.12] bg-white/[0.06] px-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-indigo-400/40 focus:bg-white/[0.10] transition-all";
+const inp = "h-12 w-full rounded-2xl border border-white/[0.12] bg-white/[0.06] px-4 text-sm text-white outline-none placeholder:text-white/60 focus:border-indigo-400/40 focus:bg-white/[0.10] transition-all";
 
 type Props = { initialNumber: string; initialEmail: string };
 
@@ -155,7 +155,7 @@ export function OrderStatusLookup({ initialNumber, initialEmail }: Props) {
           {/* Header row */}
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/35">
+              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/60">
                 Order
               </div>
               <div className="mt-0.5 font-mono text-lg font-bold text-white">
@@ -171,7 +171,7 @@ export function OrderStatusLookup({ initialNumber, initialEmail }: Props) {
 
           {/* Progress bar */}
           <div>
-            <div className="mb-1.5 flex items-center justify-between text-xs text-white/40">
+            <div className="mb-1.5 flex items-center justify-between text-xs text-white/65">
               <span>Progress</span>
               <span>{order.progressPercent}%</span>
             </div>
@@ -197,7 +197,7 @@ export function OrderStatusLookup({ initialNumber, initialEmail }: Props) {
               },
             ].map(({ label, value }) => (
               <div key={label} className="rounded-2xl border border-white/[0.07] bg-white/[0.04] px-3 py-3">
-                <div className="text-[10px] uppercase tracking-[0.18em] text-white/35">{label}</div>
+                <div className="text-[10px] uppercase tracking-[0.18em] text-white/60">{label}</div>
                 <div className="mt-1 text-sm font-medium text-white/80">{value}</div>
               </div>
             ))}
@@ -209,7 +209,7 @@ export function OrderStatusLookup({ initialNumber, initialEmail }: Props) {
             </div>
           )}
 
-          <p className="text-center text-xs text-white/25">
+          <p className="text-center text-xs text-white/60">
             Want full access to proofs and files?{" "}
             <a href="/register" className="text-indigo-400 underline underline-offset-2 hover:text-indigo-300 transition">
               Create your account

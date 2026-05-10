@@ -14,7 +14,8 @@ export async function GET() {
     return NextResponse.json({ ok: false, message: "Forbidden." }, { status: 403 });
   }
 
-  const orders = await getAdminOrders();
+  const designerId = session.user.role === "DESIGNER" ? session.user.id : undefined;
+  const orders = await getAdminOrders(designerId);
 
   return NextResponse.json({ ok: true, orders });
 }

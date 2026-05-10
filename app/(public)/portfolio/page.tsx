@@ -45,6 +45,10 @@ export default async function PortfolioPage() {
       isFeatured: true,
       beforeImageKey: true,
       afterImageKey: true,
+      images: {
+        select: { id: true, objectKey: true, altText: true, sortOrder: true },
+        orderBy: { sortOrder: "asc" },
+      },
     },
   });
 

@@ -223,18 +223,22 @@ export async function getClientOrder(
   return row ? normalizeDbOrder(row) : null;
 }
 
-export async function getAdminOrders(): Promise<WorkflowOrder[]> {
+export async function getAdminOrders(designerUserId?: string): Promise<WorkflowOrder[]> {
+  const where: Record<string, unknown> = { status: { notIn: ["DRAFT"] } };
+  if (designerUserId) where.assignedToUserId = designerUserId;
   const rows = await prisma.workflowOrder.findMany({
-    where: { status: { notIn: ["DRAFT"] } },
+    where,
     include: DB_INCLUDE,
     orderBy: { createdAt: "desc" },
   });
   return rows.map(normalizeDbOrder);
 }
 
-export async function getAdminOrder(orderId: string): Promise<WorkflowOrder | null> {
-  const row = await prisma.workflowOrder.findUnique({
-    where: { id: orderId },
+export async function getAdminOrder(orderId: string, designerUserId?: string): Promise<WorkflowOrder | null> {
+  const where: Record<string, unknown> = { id: orderId };
+  if (designerUserId) where.assignedToUserId = designerUserId;
+  const row = await prisma.workflowOrder.findFirst({
+    where,
     include: DB_INCLUDE,
   });
   return row ? normalizeDbOrder(row) : null;

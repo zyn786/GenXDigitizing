@@ -12,11 +12,17 @@ export async function DELETE(_req: Request, { params }: Props) {
 
   const { fileId } = await params;
 
-  const deleted = await prisma.clientReferenceFile.deleteMany({
+  // Verify the file belongs to an order assigned to this designer
+  const file = await prisma.clientReferenceFile.findUnique({
     where: { id: fileId },
+    select: { order: { select: { assignedToUserId: true } } },
   });
+  if (!file) return NextResponse.json({ ok: false, message: "File not found." }, { status: 404 });
+  if (file.order.assignedToUserId !== session.user.id) {
+    return NextResponse.json({ ok: false, message: "Forbidden. This order is not assigned to you." }, { status: 403 });
+  }
 
-  if (deleted.count === 0) return NextResponse.json({ ok: false, message: "File not found." }, { status: 404 });
+  await prisma.clientReferenceFile.delete({ where: { id: fileId } });
 
   return NextResponse.json({ ok: true });
 }

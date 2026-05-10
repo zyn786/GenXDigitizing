@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PlaceOrderButton } from "@/components/orders/place-order-button";
 import { getClientInvoices } from "@/lib/billing/repository";
 import { getClientOrders } from "@/lib/workflow/repository";
 import { getClientWorkflowStatusLabel } from "@/lib/workflow/status";
@@ -78,12 +79,14 @@ export default async function ClientDashboardPage() {
                 New clients get their first embroidery digitizing order at no cost. Ready to get started?
               </p>
             </div>
-            <Button asChild variant="premium" shape="pill" size="lg" className="shrink-0">
-              <Link href="/orders">
-                Place Free Order
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
+            <PlaceOrderButton
+              user={{ name: session.user.name, email: session.user.email }}
+              isFirstOrder={true}
+              className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-6 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition hover:opacity-90"
+            >
+              Place Free Order
+              <ArrowRight className="h-4 w-4" />
+            </PlaceOrderButton>
           </CardContent>
         </Card>
       )}
@@ -170,12 +173,14 @@ export default async function ClientDashboardPage() {
           <CardContent className="p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Start something new</p>
             <div className="mt-3 flex flex-wrap gap-3">
-              <Button asChild variant="premium" shape="pill" size="sm">
-                <Link href="/orders">
-                  <Package className="h-3.5 w-3.5" />
-                  Place Order
-                </Link>
-              </Button>
+              <PlaceOrderButton
+                user={{ name: session.user.name, email: session.user.email }}
+                isFirstOrder={isFirstTime}
+                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-4 text-xs font-bold text-white shadow-md shadow-indigo-500/20 transition hover:opacity-90"
+              >
+                <Package className="h-3.5 w-3.5" />
+                Place Order
+              </PlaceOrderButton>
               <Button asChild variant="outline" shape="pill" size="sm">
                 <Link href="/client/quote">
                   <FileText className="h-3.5 w-3.5" />
@@ -226,9 +231,13 @@ export default async function ClientDashboardPage() {
           description="Ready to start? Request a quote or place a direct order."
           action={
             <div className="flex gap-3">
-              <Button asChild variant="premium" shape="pill" size="sm">
-                <Link href="/orders">Place Order</Link>
-              </Button>
+              <PlaceOrderButton
+                user={{ name: session.user.name, email: session.user.email }}
+                isFirstOrder={isFirstTime}
+                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-4 text-xs font-bold text-white shadow-md shadow-indigo-500/20 transition hover:opacity-90"
+              >
+                Place Order
+              </PlaceOrderButton>
               <Button asChild variant="outline" shape="pill" size="sm">
                 <Link href="/client/quote">Get a Quote</Link>
               </Button>

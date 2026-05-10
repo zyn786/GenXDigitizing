@@ -29,7 +29,8 @@ export async function GET(_request: Request, { params }: Props) {
   }
 
   const { orderId } = await params;
-  const order = await getAdminOrder(orderId);
+  const designerId = session.user.role === "DESIGNER" ? session.user.id : undefined;
+  const order = await getAdminOrder(orderId, designerId);
 
   if (!order) {
     return NextResponse.json({ ok: false, message: "Order not found." }, { status: 404 });

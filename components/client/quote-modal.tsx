@@ -140,7 +140,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputCls =
-  "w-full rounded-[1rem] border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 focus:ring-2 focus:ring-white/10 transition";
+  "w-full rounded-[1rem] border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-white/60 outline-none focus:border-white/30 focus:ring-2 focus:ring-white/10 transition";
 
 type Props = {
   open: boolean;
@@ -276,7 +276,7 @@ export function QuoteModal({ open, onClose, catalog }: Props) {
           {/* Header */}
           <div className="relative flex shrink-0 items-center justify-between border-b border-white/8 px-6 py-4">
             <div>
-              <div className="text-[10px] uppercase tracking-[0.24em] text-white/40">Client portal</div>
+              <div className="text-[10px] uppercase tracking-[0.24em] text-white/65">Client portal</div>
               <h2 className="mt-0.5 text-lg font-bold text-white">Request a Quote</h2>
             </div>
             <button
@@ -341,7 +341,7 @@ export function QuoteModal({ open, onClose, catalog }: Props) {
                           <span className="text-xl leading-none">{cat.emoji}</span>
                           <div>
                             <div className="text-xs font-semibold leading-tight">{cat.label}</div>
-                            <div className="mt-0.5 text-[10px] text-white/40">{cat.description}</div>
+                            <div className="mt-0.5 text-[10px] text-white/65">{cat.description}</div>
                           </div>
                         </button>
                       ))}
@@ -364,14 +364,14 @@ export function QuoteModal({ open, onClose, catalog }: Props) {
                             </option>
                           ))}
                         </select>
-                        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/65" />
                       </div>
                     </Field>
                   )}
 
                   <div className="flex items-center gap-3">
                     <div className="h-px flex-1 bg-white/8" />
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/30">Design details</span>
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/60">Design details</span>
                     <div className="h-px flex-1 bg-white/8" />
                   </div>
 
@@ -406,11 +406,11 @@ export function QuoteModal({ open, onClose, catalog }: Props) {
                         className={`flex w-full flex-col items-center justify-center gap-2 rounded-[1.25rem] border-2 border-dashed px-4 py-7 transition ${dragging ? "border-blue-400/60 bg-blue-500/8" : "border-white/12 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]"}`}
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06]">
-                          <ImageIcon className="h-5 w-5 text-white/40" />
+                          <ImageIcon className="h-5 w-5 text-white/65" />
                         </div>
                         <div className="text-center">
                           <div className="text-sm font-medium text-white/60">Drop your file or <span className="text-blue-400">click to upload</span></div>
-                          <div className="mt-1 text-xs text-white/30">JPG, PNG, WebP — up to 20 MB</div>
+                          <div className="mt-1 text-xs text-white/60">JPG, PNG, WebP — up to 20 MB</div>
                         </div>
                       </button>
                     )}
@@ -440,12 +440,12 @@ export function QuoteModal({ open, onClose, catalog }: Props) {
                         return (
                           <label key={opt.id} className={`flex cursor-pointer items-center gap-4 rounded-[1.25rem] border px-4 py-3 transition ${selected ? "border-blue-500/40 bg-blue-500/8" : "border-white/8 bg-white/[0.03] hover:border-white/15 hover:bg-white/[0.06]"}`}>
                             <input type="radio" name="turnaround" value={opt.id} checked={selected} onChange={() => setTurnaround(opt.id as TurnaroundId)} className="hidden" />
-                            <div className={`flex h-8 w-8 items-center justify-center rounded-xl ${selected ? "bg-blue-500/15 text-blue-400" : "bg-white/[0.06] text-white/40"}`}>
+                            <div className={`flex h-8 w-8 items-center justify-center rounded-xl ${selected ? "bg-blue-500/15 text-blue-400" : "bg-white/[0.06] text-white/65"}`}>
                               <Icon className="h-4 w-4" />
                             </div>
                             <div className="flex-1">
                               <div className="text-sm font-semibold text-white">{opt.label}</div>
-                              <div className="text-xs text-white/40">{opt.sub}</div>
+                              <div className="text-xs text-white/65">{opt.sub}</div>
                             </div>
                           </label>
                         );
@@ -464,7 +464,7 @@ export function QuoteModal({ open, onClose, catalog }: Props) {
                             </div>
                             <input type="checkbox" checked={checked} onChange={() => toggleAddOn(addon.id as AddOnId)} className="hidden" />
                             <span className="flex-1 text-sm text-white/80">{addon.label}</span>
-                            <span className="text-xs text-white/40">~${addon.price}</span>
+                            <span className="text-xs text-white/65">~${addon.price}</span>
                           </label>
                         );
                       })}
@@ -489,7 +489,7 @@ export function QuoteModal({ open, onClose, catalog }: Props) {
                 )}
                 {selectedTier && estimatedTotal > 0 && (
                   <div className="mb-3 flex items-center justify-between">
-                    <span className="text-xs text-white/45">Estimated starting from</span>
+                    <span className="text-xs text-white/70">Estimated starting from</span>
                     <span className="text-base font-bold text-white">${estimatedTotal}</span>
                   </div>
                 )}

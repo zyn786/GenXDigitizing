@@ -238,14 +238,14 @@ export function PortfolioClient({ items }: Props) {
       <div className="page-shell relative z-10">
         <div className="mb-6 grid gap-3 md:mb-8 md:grid-cols-[1fr_auto_auto] md:items-center">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-white/35" />
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-white/60" />
 
             <input
               type="text"
               placeholder="Search by title, service, tag, or description..."
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="h-12 w-full rounded-2xl border border-slate-200 bg-white/80 pl-11 pr-11 text-sm text-slate-950 shadow-sm outline-none backdrop-blur transition placeholder:text-slate-400 focus:border-indigo-500/35 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 dark:border-white/10 dark:bg-white/[0.055] dark:text-white dark:placeholder:text-white/30 dark:focus:border-white/20 dark:focus:bg-white/[0.08] dark:focus:ring-white/10"
+              className="h-12 w-full rounded-2xl border border-slate-200 bg-white/80 pl-11 pr-11 text-sm text-slate-950 shadow-sm outline-none backdrop-blur transition placeholder:text-slate-400 focus:border-indigo-500/35 focus:bg-white focus:ring-2 focus:ring-indigo-500/10 dark:border-white/10 dark:bg-white/[0.055] dark:text-white dark:placeholder:text-white/60 dark:focus:border-white/20 dark:focus:bg-white/[0.08] dark:focus:ring-white/10"
             />
 
             {search && (
@@ -253,7 +253,7 @@ export function PortfolioClient({ items }: Props) {
                 type="button"
                 onClick={() => setSearch("")}
                 aria-label="Clear search"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700 dark:text-white/35 dark:hover:text-white/70"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700 dark:text-white/60 dark:hover:text-white/70"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -284,7 +284,7 @@ export function PortfolioClient({ items }: Props) {
             <button
               type="button"
               onClick={clearFilters}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/80 px-4 text-sm font-bold text-slate-500 shadow-sm backdrop-blur transition hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-600 dark:border-white/10 dark:bg-white/[0.055] dark:text-white/45 dark:hover:border-red-400/30 dark:hover:bg-red-400/10 dark:hover:text-red-300 md:h-12"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/80 px-4 text-sm font-bold text-slate-500 shadow-sm backdrop-blur transition hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-600 dark:border-white/10 dark:bg-white/[0.055] dark:text-white/70 dark:hover:border-red-400/30 dark:hover:bg-red-400/10 dark:hover:text-red-300 md:h-12"
             >
               <X className="h-4 w-4" />
               Clear all
@@ -295,7 +295,7 @@ export function PortfolioClient({ items }: Props) {
         {showFilters && (
           <div className="mb-6 grid gap-3 rounded-[1.5rem] border border-slate-200 bg-white/75 p-4 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.055] sm:grid-cols-2 md:rounded-[1.75rem]">
             <label className="grid gap-2">
-              <span className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-white/40">
+              <span className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-white/65">
                 Service
               </span>
 
@@ -316,7 +316,7 @@ export function PortfolioClient({ items }: Props) {
 
             {availableNiches.length > 0 && (
               <label className="grid gap-2">
-                <span className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-white/40">
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-white/65">
                   Niche
                 </span>
 
@@ -339,7 +339,7 @@ export function PortfolioClient({ items }: Props) {
         )}
 
         {hasFilters && (
-          <div className="mb-4 text-sm font-medium text-slate-500 dark:text-white/40">
+          <div className="mb-4 text-sm font-medium text-slate-500 dark:text-white/65">
             Showing {filtered.length} of {pool.length} portfolio items
           </div>
         )}
@@ -349,7 +349,7 @@ export function PortfolioClient({ items }: Props) {
             <p className="text-lg font-black text-slate-950 dark:text-white">
               No matching portfolio items
             </p>
-            <p className="mt-2 text-sm text-slate-500 dark:text-white/45">
+            <p className="mt-2 text-sm text-slate-500 dark:text-white/70">
               Try different search terms or clear the filters.
             </p>
           </div>
@@ -414,6 +414,10 @@ function PortfolioCard({
           : "",
       ].join(" ")}
       onClick={onOpen}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
+      tabIndex={hasImages ? 0 : undefined}
+      role={hasImages ? "button" : undefined}
+      aria-label={hasImages ? `View ${item.title}` : undefined}
     >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-violet-500/10 opacity-70" />
 
@@ -422,7 +426,7 @@ function PortfolioCard({
           <div className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-700 dark:text-indigo-300">
             {SERVICE_LABELS[item.serviceKey] ?? item.serviceKey}
             {item.nicheSlug && NICHE_LABELS[item.nicheSlug] && (
-              <span className="ml-1 text-slate-400 dark:text-white/35">
+              <span className="ml-1 text-slate-400 dark:text-white/60">
                 · {NICHE_LABELS[item.nicheSlug]}
               </span>
             )}
@@ -436,7 +440,7 @@ function PortfolioCard({
             )}
 
             {item.tags[0] && (
-              <Badge className="rounded-full border-slate-200 bg-white/70 text-[10px] text-slate-500 dark:border-white/10 dark:bg-white/[0.055] dark:text-white/45">
+              <Badge className="rounded-full border-slate-200 bg-white/70 text-[10px] text-slate-500 dark:border-white/10 dark:bg-white/[0.055] dark:text-white/70">
                 {item.tags[0]}
               </Badge>
             )}
@@ -488,7 +492,7 @@ function PortfolioCard({
             {item.tags.slice(1, 4).map((tag) => (
               <Badge
                 key={tag}
-                className="rounded-full border-slate-200 bg-white/70 text-[10px] text-slate-500 dark:border-white/10 dark:bg-white/[0.055] dark:text-white/45"
+                className="rounded-full border-slate-200 bg-white/70 text-[10px] text-slate-500 dark:border-white/10 dark:bg-white/[0.055] dark:text-white/70"
               >
                 {tag}
               </Badge>
@@ -543,7 +547,7 @@ function BeforeAfterModal({
         </button>
 
         <div className="mb-4 pr-12">
-          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/65">
             {SERVICE_LABELS[item.serviceKey] ?? item.serviceKey}
           </div>
 

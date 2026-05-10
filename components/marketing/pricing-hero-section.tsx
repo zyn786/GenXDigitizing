@@ -48,7 +48,7 @@ export function PricingHeroSection() {
 
             <div className="grid gap-7 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-10">
               <div>
-                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 dark:text-white/40">
+                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 dark:text-white/65">
                   Pricing
                 </div>
 

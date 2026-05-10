@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 
-const ALLOWED_ROLES = new Set(["SUPER_ADMIN", "MANAGER"]);
+const ALLOWED_ROLES = new Set(["SUPER_ADMIN"]);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = prisma as any;
 

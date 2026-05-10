@@ -65,7 +65,7 @@ export function SplashScreen() {
           </div>
           <div>
             <div className="text-2xl font-bold tracking-tight text-white">GenX Digitizing</div>
-            <div className="text-xs uppercase tracking-[0.3em] text-white/40">Premium Embroidery Studio</div>
+            <div className="text-xs uppercase tracking-[0.3em] text-white/65">Premium Embroidery Studio</div>
           </div>
         </div>
 
@@ -74,7 +74,7 @@ export function SplashScreen() {
           <div className="absolute inset-y-0 left-0 animate-[splash-progress_2s_ease-in-out_forwards] bg-gradient-to-r from-indigo-400 to-violet-400 rounded-full" />
         </div>
 
-        <div className="text-xs uppercase tracking-[0.28em] text-white/35 animate-pulse">
+        <div className="text-xs uppercase tracking-[0.28em] text-white/60 animate-pulse">
           Loading
         </div>
       </div>
