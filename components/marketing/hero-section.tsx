@@ -278,7 +278,7 @@ export function HeroSection() {
             transform: translate3d(0, 0, 0);
           }
           to {
-            transform: translate3d(-33.333%, 0, 0);
+            transform: translate3d(-50%, 0, 0);
           }
         }
 
@@ -295,50 +295,6 @@ export function HeroSection() {
           }
           50% {
             transform: translate3d(0, -16px, 0);
-          }
-        }
-
-        @keyframes hero-mobile-thread-flow {
-          to {
-            stroke-dashoffset: -260;
-          }
-        }
-
-        @keyframes hero-mobile-thread-flow-reverse {
-          to {
-            stroke-dashoffset: 260;
-          }
-        }
-
-        @keyframes hero-mobile-thread-float {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 0) rotate(0deg);
-          }
-          50% {
-            transform: translate3d(14px, -10px, 0) rotate(1deg);
-          }
-        }
-
-        @keyframes hero-mobile-thread-float-reverse {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 0) rotate(0deg);
-          }
-          50% {
-            transform: translate3d(-14px, 10px, 0) rotate(-1deg);
-          }
-        }
-
-        @keyframes hero-mobile-node-pulse {
-          0%,
-          100% {
-            transform: scale(1);
-            opacity: 0.45;
-          }
-          50% {
-            transform: scale(1.55);
-            opacity: 0.95;
           }
         }
 
@@ -376,47 +332,12 @@ export function HeroSection() {
           animation: hero-float 7s ease-in-out infinite;
         }
 
-        .hero-mobile-thread-dash {
-          stroke-dasharray: 10 12;
-          animation: hero-mobile-thread-flow 14s linear infinite;
-        }
-
-        .hero-mobile-thread-dash-slow {
-          stroke-dasharray: 4 10;
-          animation: hero-mobile-thread-flow 18s linear infinite;
-        }
-
-        .hero-mobile-thread-dash-reverse {
-          stroke-dasharray: 10 12;
-          animation: hero-mobile-thread-flow-reverse 16s linear infinite;
-        }
-
-        .hero-mobile-thread-float {
-          animation: hero-mobile-thread-float 7s ease-in-out infinite;
-        }
-
-        .hero-mobile-thread-float-reverse {
-          animation: hero-mobile-thread-float-reverse 8s ease-in-out infinite;
-        }
-
-        .hero-mobile-node-pulse {
-          transform-box: fill-box;
-          transform-origin: center;
-          animation: hero-mobile-node-pulse 3.2s ease-in-out infinite;
-        }
-
         @media (prefers-reduced-motion: reduce) {
           .hero-ticker-track,
           .hero-card-track,
           .hero-mobile-service-track,
           .hero-stitch-dash,
-          .hero-float,
-          .hero-mobile-thread-dash,
-          .hero-mobile-thread-dash-slow,
-          .hero-mobile-thread-dash-reverse,
-          .hero-mobile-thread-float,
-          .hero-mobile-thread-float-reverse,
-          .hero-mobile-node-pulse {
+          .hero-float {
             animation: none !important;
           }
         }
@@ -677,140 +598,8 @@ function HeroBackground() {
 
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.045)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_42%,black,transparent_78%)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)]" />
 
-      <MobileHeroThreads />
       <HeroSvgBackground />
     </>
-  );
-}
-
-function MobileHeroThreads() {
-  const prefersReduced = useReducedMotion();
-  if (prefersReduced) return null;
-
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-[2] overflow-hidden md:hidden"
-    >
-      <div className="absolute inset-0 opacity-35 [background-image:radial-gradient(rgba(109,53,255,0.2)_1px,transparent_1px)] [background-size:18px_18px] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_28%,black,transparent_72%)] dark:opacity-25 dark:[background-image:radial-gradient(rgba(255,255,255,0.12)_1px,transparent_1px)]" />
-
-      <svg
-        className="hero-mobile-thread-float absolute -left-24 top-[5.5rem] h-44 w-[42rem] opacity-55 dark:opacity-35"
-        viewBox="0 0 680 180"
-        fill="none"
-      >
-        <path
-          d="M20 98 C92 28 168 154 252 82 C340 6 420 148 512 66 C570 16 628 42 662 72"
-          stroke="url(#mobileHeroThreadOne)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-
-        <path
-          className="hero-mobile-thread-dash"
-          d="M20 98 C92 28 168 154 252 82 C340 6 420 148 512 66 C570 16 628 42 662 72"
-          stroke="rgba(109,53,255,0.55)"
-          strokeWidth="1.1"
-          strokeLinecap="round"
-        />
-
-        <circle
-          className="hero-mobile-node-pulse"
-          cx="92"
-          cy="28"
-          r="4"
-          fill="#6D35FF"
-        />
-        <circle
-          className="hero-mobile-node-pulse"
-          cx="252"
-          cy="82"
-          r="4"
-          fill="#2563EB"
-          style={{ animationDelay: "0.45s" }}
-        />
-        <circle
-          className="hero-mobile-node-pulse"
-          cx="512"
-          cy="66"
-          r="4"
-          fill="#0EA5E9"
-          style={{ animationDelay: "0.9s" }}
-        />
-
-        <defs>
-          <linearGradient
-            id="mobileHeroThreadOne"
-            x1="20"
-            y1="0"
-            x2="662"
-            y2="180"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stopColor="#6D35FF" />
-            <stop offset="0.5" stopColor="#7C3AED" />
-            <stop offset="1" stopColor="#0EA5E9" />
-          </linearGradient>
-        </defs>
-      </svg>
-
-      <svg
-        className="absolute -right-28 top-[16rem] h-56 w-[34rem] rotate-[-8deg] opacity-35 dark:opacity-25"
-        viewBox="0 0 540 220"
-        fill="none"
-      >
-        <path
-          className="hero-mobile-thread-dash-slow"
-          d="M34 142 C92 42 184 198 260 96 C342 -12 438 158 506 54"
-          stroke="rgba(14,165,233,0.5)"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-        />
-
-        <path
-          d="M80 158 L110 108 M188 178 L220 130 M342 122 L376 76 M454 92 L488 48"
-          stroke="rgba(15,23,42,0.18)"
-          strokeWidth="1"
-          className="dark:stroke-white/15"
-        />
-      </svg>
-
-      <svg
-        className="hero-mobile-thread-float-reverse absolute -left-36 bottom-20 h-48 w-[46rem] opacity-35 dark:opacity-24"
-        viewBox="0 0 720 200"
-        fill="none"
-      >
-        <path
-          d="M24 118 C108 188 198 42 296 126 C394 210 482 44 584 120 C642 164 686 130 712 104"
-          stroke="url(#mobileHeroThreadTwo)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-
-        <path
-          className="hero-mobile-thread-dash-reverse"
-          d="M24 118 C108 188 198 42 296 126 C394 210 482 44 584 120 C642 164 686 130 712 104"
-          stroke="rgba(37,99,235,0.46)"
-          strokeWidth="1.1"
-          strokeLinecap="round"
-        />
-
-        <defs>
-          <linearGradient
-            id="mobileHeroThreadTwo"
-            x1="24"
-            y1="0"
-            x2="712"
-            y2="200"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stopColor="#0EA5E9" />
-            <stop offset="0.5" stopColor="#2563EB" />
-            <stop offset="1" stopColor="#6D35FF" />
-          </linearGradient>
-        </defs>
-      </svg>
-    </div>
   );
 }
 
