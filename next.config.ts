@@ -2,9 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
+  poweredByHeader: false,
+  reactStrictMode: true,
+  compress: true,
+  productionBrowserSourceMaps: false,
+
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 31536000,
+    deviceSizes: [480, 768, 1024, 1280, 1536],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       { protocol: "https", hostname: "**.amazonaws.com" },
       { protocol: "https", hostname: "**.r2.cloudflarestorage.com" },
@@ -12,29 +19,41 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "s3.lax.sharktech.net" },
     ],
   },
-  compress: true,
-  productionBrowserSourceMaps: false,
-  experimental: {},
+
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: [
+      "framer-motion",
+      "lucide-react",
+      "@radix-ui/react-accordion",
+      "@radix-ui/react-slot",
+    ],
+  },
 
   async headers() {
-    const isProd = process.env.NODE_ENV === "production";
     return [
-      // Immutable cache for hashed static assets — production only.
-      // In dev, filenames are not content-hashed so this would permanently cache stale bundles.
-      ...(isProd ? [{
+      // Immutable long-term cache for hashed static assets
+      {
         source: "/_next/static/(.*)",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],
-      }] : []),
-      // 1-day cache for public media files
+      },
+      // 1-year immutable cache for public images and fonts
       {
-        source: "/(.*\\.(?:png|jpg|jpeg|gif|webp|avif|ico|svg|mp4|webm|woff|woff2|ttf|otf))",
+        source: "/(images|fonts|brand)/(.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|woff|woff2))",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      // 1-day stale-while-revalidate for other media
+      {
+        source: "/(.*\\.(?:ico|mp4|webm|ttf|otf))",
         headers: [
           { key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" },
         ],
       },
-      // Security headers for all routes
+      // Security headers
       {
         source: "/(.*)",
         headers: [
@@ -45,7 +64,7 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "geolocation=(), microphone=(), camera=()" },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https: wss:; frame-src 'self' https://www.youtube.com; media-src 'self' https:;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://embed.tawk.to https://va.tawk.to; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https: wss:; frame-src 'self' https://www.youtube.com https://tawk.to; media-src 'self' https:;",
           },
         ],
       },

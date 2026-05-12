@@ -227,7 +227,8 @@ export function ServicePillars() {
   const showServiceImages = useDesktopServiceImages();
 
   return (
-    <section className="relative isolate overflow-hidden bg-[#F7F8FF] px-4 py-10 text-[#050816] dark:bg-[#050814] dark:text-slate-100 sm:py-12 md:px-8 md:py-24 lg:py-28">
+    // ↓ Only this line changed: pt-28 sm:pt-32 on mobile, md:+ unchanged
+    <section className="relative isolate overflow-hidden bg-[#F7F8FF] px-4 pb-10 pt-28 text-[#050816] dark:bg-[#050814] dark:text-slate-100 sm:pb-12 sm:pt-32 md:px-8 md:py-24 lg:py-28">
       <ServiceBackground />
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-gradient-to-r from-transparent via-slate-300/80 to-transparent dark:via-white/15" />
@@ -420,9 +421,10 @@ function ServiceBackground() {
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#2563EB]/30 to-transparent dark:via-cyan-400/30" />
 
       {/* Noise texture */}
-      <div className="absolute inset-0 opacity-[0.035] mix-blend-overlay">
-        <div className="h-full w-full bg-[url('/noise.png')]" />
-      </div>
+      <div
+        className="absolute inset-0 opacity-[0.035] mix-blend-overlay"
+        style={{ backgroundImage: "url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC42NSIgbnVtT2N0YXZlcz0iMyIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNuKSIvPjwvc3ZnPg==')" }}
+      />
     </div>
   );
 }

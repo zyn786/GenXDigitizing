@@ -1,10 +1,21 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 
 import { PricingHeroSection } from "@/components/marketing/pricing-hero-section";
-import { PricingNotesPanel } from "@/components/marketing/pricing-notes-panel";
-import { PricingPlansGrid } from "@/components/marketing/pricing-plans-grid";
-import { ServicesPageCta } from "@/components/marketing/services-page-cta";
 import { getSiteUrl } from "@/lib/site-url";
+
+const PricingPlansGrid = dynamic(
+  () => import("@/components/marketing/pricing-plans-grid").then((m) => ({ default: m.PricingPlansGrid })),
+  { ssr: true }
+);
+const PricingNotesPanel = dynamic(
+  () => import("@/components/marketing/pricing-notes-panel").then((m) => ({ default: m.PricingNotesPanel })),
+  { ssr: true }
+);
+const ServicesPageCta = dynamic(
+  () => import("@/components/marketing/services-page-cta").then((m) => ({ default: m.ServicesPageCta })),
+  { ssr: true }
+);
 
 const baseUrl = (() => { try { return getSiteUrl(); } catch { return "http://localhost:3000"; } })();
 

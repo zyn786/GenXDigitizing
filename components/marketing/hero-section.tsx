@@ -23,18 +23,19 @@ const stats = [
 ];
 
 const tickerItems = [
+  "USA #1 Digitizing Service",
   "First Design On Us",
   "Bulk Orders, Bigger Savings",
   "Free First Order",
+  "USA #1 Digitizing Service",
   "First Design On Us",
   "Bulk Orders, Bigger Savings",
   "Free First Order",
+  "USA #1 Digitizing Service",
   "First Design On Us",
   "Bulk Orders, Bigger Savings",
   "Free First Order",
-  "First Design On Us",
-  "Bulk Orders, Bigger Savings",
-  "Free First Order",
+
 ];
 
 const floatingCards = [
@@ -91,10 +92,10 @@ export function HeroSection() {
   const prefersReduced = useReducedMotion();
 
   return (
-    <section className="relative min-h-[100svh] overflow-hidden bg-[#F7F8FF] text-[#050816] dark:bg-[#050814] dark:text-slate-100">
+    <section className="relative min-h-[103svh] overflow-hidden bg-[#F7F8FF] text-[#050816] dark:bg-[#050814] dark:text-slate-100 sm:min-h-[100svh]">
       <HeroBackground />
 
-      <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-start px-4 pb-24 pt-[7.35rem] sm:pb-28 sm:pt-32 md:px-8 md:pb-32 md:pt-36 lg:justify-center lg:pb-32 lg:pt-40">
+      <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-start px-4 pb-24 pt-[10.5rem] sm:pb-28 sm:pt-40 md:px-8 md:pb-32 md:pt-40 lg:justify-center lg:pb-32 lg:pt-44">
         <motion.div
           initial={prefersReduced ? false : { opacity: 0, y: 16 }}
           animate={prefersReduced ? undefined : { opacity: 1, y: 0 }}
@@ -459,8 +460,11 @@ function MobilePortfolioPreview({
               alt={slide.title}
               fill
               priority={active === 0}
+              fetchPriority={active === 0 ? "high" : "auto"}
+              loading={active === 0 ? "eager" : "lazy"}
               className="object-cover object-center"
               sizes="(max-width: 640px) calc(100vw - 32px), 460px"
+              quality={75}
             />
           </motion.div>
 
@@ -505,7 +509,7 @@ function MobilePortfolioPreview({
 }
 
 function MobileServiceSlider() {
-  const sliderItems = [...floatingCards, ...floatingCards, ...floatingCards];
+  const sliderItems = [...floatingCards, ...floatingCards];
 
   return (
     <div className="hero-mobile-service-slider -mx-4 overflow-hidden px-4 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
@@ -680,6 +684,9 @@ function HeroBackground() {
 }
 
 function MobileHeroThreads() {
+  const prefersReduced = useReducedMotion();
+  if (prefersReduced) return null;
+
   return (
     <div
       aria-hidden="true"

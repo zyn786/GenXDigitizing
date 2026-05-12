@@ -13,6 +13,9 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
+  preload: true,
+  adjustFontFallback: true,
+  fallback: ["system-ui", "sans-serif"],
 });
 
 const baseUrl = (() => { try { return getSiteUrl(); } catch { return "http://localhost:3000"; } })();

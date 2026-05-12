@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LogoutButton } from "@/components/ui/logout-button";
 import { SiteLogo } from "@/components/branding/site-logo";
+import { ContactStrip } from "@/components/layout/contact-strip";
 import { siteConfig } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -80,8 +81,9 @@ export function SiteHeader() {
       >
         Skip to content
       </a>
-      <header className="fixed inset-x-0 top-0 z-50 px-4 pt-3 md:px-8 md:pt-4">
-        <div className="page-shell">
+      <header className="fixed inset-x-0 top-0 z-50 flex flex-col px-4 pt-2 md:px-8 md:pt-2.5">
+        <div className="page-shell flex flex-col gap-1.5">
+          <ContactStrip />
           <div
             className={cn(
               "relative overflow-hidden rounded-[1.65rem] border px-3 py-2.5 shadow-sm backdrop-blur-xl transition-all duration-300 md:px-5 md:py-3",
