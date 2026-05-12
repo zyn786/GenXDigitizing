@@ -223,6 +223,14 @@
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.08);
   }
 
+  /* Off-screen sections skip rendering until scrolled into view.
+     contain-intrinsic-size gives the browser an estimated height so
+     scrollbar doesn't jump. */
+  .content-lazy {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+  }
+
   /* 2D redesign: single subtle top glow */
   .hero-glow {
     background: radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.06), transparent 60%);

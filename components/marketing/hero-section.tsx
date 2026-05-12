@@ -282,6 +282,11 @@ export function HeroSection() {
           }
         }
 
+        @keyframes hero-slide-progress {
+          from { width: 0%; }
+          to   { width: 100%; }
+        }
+
         @keyframes hero-stitch-flow {
           to {
             stroke-dashoffset: -260;
@@ -351,31 +356,26 @@ function MobilePortfolioPreview({
 }: {
   prefersReduced: boolean;
 }) {
+  const mobileSlides = React.useMemo(() => portfolioSlides.slice(0, 2), []);
   const [active, setActive] = React.useState(0);
 
   React.useEffect(() => {
-    if (prefersReduced || portfolioSlides.length <= 1) return;
+    if (prefersReduced || mobileSlides.length <= 1) return;
 
     const interval = window.setInterval(() => {
-      setActive((current) => (current + 1) % portfolioSlides.length);
-    }, 2600);
+      setActive((current) => (current + 1) % mobileSlides.length);
+    }, 3200);
 
     return () => window.clearInterval(interval);
-  }, [prefersReduced]);
+  }, [prefersReduced, mobileSlides.length]);
 
-  const slide = portfolioSlides[active];
+  const slide = mobileSlides[active];
 
   return (
     <Link href={slide.href || "/portfolio"} className="group block">
       <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white/80 p-2.5 shadow-xl shadow-slate-950/10 backdrop-blur-xl transition duration-300 group-active:scale-[0.98] dark:border-slate-800 dark:bg-[#0B1120] dark:shadow-black/30">
         <div className="relative h-[235px] overflow-hidden rounded-[1.65rem] border border-slate-200 bg-slate-950 dark:border-slate-800 sm:h-[270px]">
-          <motion.div
-            key={slide.src}
-            initial={prefersReduced ? false : { opacity: 0, scale: 1.08, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.6, ease }}
-            className="absolute inset-0"
-          >
+          <div className="absolute inset-0">
             <Image
               src={slide.src}
               alt={slide.title}
@@ -383,11 +383,11 @@ function MobilePortfolioPreview({
               priority={active === 0}
               fetchPriority={active === 0 ? "high" : "auto"}
               loading={active === 0 ? "eager" : "lazy"}
-              className="object-cover object-center"
+              className="object-cover object-center transition-opacity duration-500"
               sizes="(max-width: 640px) calc(100vw - 32px), 460px"
-              quality={75}
+              quality={60}
             />
-          </motion.div>
+          </div>
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/5" />
 
@@ -402,7 +402,7 @@ function MobilePortfolioPreview({
             </div>
 
             <div className="flex shrink-0 gap-1">
-              {portfolioSlides.map((item, index) => (
+              {mobileSlides.map((item, index) => (
                 <span
                   key={item.src}
                   className={[
@@ -415,12 +415,9 @@ function MobilePortfolioPreview({
           </div>
 
           <div className="absolute bottom-0 left-0 h-1 w-full bg-white/15">
-            <motion.div
+            <div
               key={active}
-              initial={prefersReduced ? { width: "100%" } : { width: "0%" }}
-              animate={{ width: "100%" }}
-              transition={{ duration: 2.6, ease: "linear" }}
-              className="h-full bg-gradient-to-r from-[#6D35FF] to-[#2563EB]"
+              className="h-full animate-[hero-slide-progress_3.2s_linear] bg-gradient-to-r from-[#6D35FF] to-[#2563EB]"
             />
           </div>
         </div>
