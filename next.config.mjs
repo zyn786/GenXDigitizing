@@ -1,12 +1,5 @@
 
 const nextConfig = {
-  // Env vars available at build time (required by @supabase/ssr during SSR)
-  // NEXT_PUBLIC_* are public. Service role key set via Vercel dashboard.
-  env: {
-    NEXT_PUBLIC_SUPABASE_URL:       process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-    NEXT_PUBLIC_SUPABASE_ANON_KEY:  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
-  },
-
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" },

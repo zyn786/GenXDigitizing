@@ -3,62 +3,79 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/supabase";
 
+function getEnv(): { url: string; anonKey: string; serviceKey: string } {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  // During build on Vercel, env vars may not be set yet.
+  // Return placeholder values to prevent build crash.
+  // At runtime, actual env vars from Vercel dashboard will be used.
+  if (!url || !anonKey) {
+    if (process.env.VERCEL === "1") {
+      // Build-time on Vercel without env vars — use placeholders
+      // Set real values in Vercel dashboard to replace these at runtime
+      return {
+        url: "https://placeholder.supabase.co",
+        anonKey: "placeholder",
+        serviceKey: serviceKey || "placeholder",
+      };
+    }
+  }
+
+  if (!url || !anonKey) {
+    throw new Error(
+      "@supabase/ssr: Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. " +
+      "Set them in your Vercel project dashboard or .env.local file."
+    );
+  }
+
+  return { url, anonKey, serviceKey: serviceKey || "" };
+}
+
 /**
  * Standard server client — respects RLS via the user's session cookie.
- * Use in Server Components, Server Actions, Route Handlers.
  */
 export function createClient() {
-  // In Next.js 14 with @supabase/ssr >=0.3, cookies() is synchronous here
+  const { url, anonKey } = getEnv();
   const cookieStore = cookies();
 
-  return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // Ignore: called from a Server Component where cookies can't be set
-          }
-        },
+  return createServerClient<Database>(url, anonKey, {
+    cookies: {
+      getAll() { return cookieStore.getAll(); },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        } catch {}
       },
-    }
-  );
+    },
+  });
 }
 
 /**
  * Admin/service-role client — bypasses ALL Row Level Security.
- * Only use in server-side code (Route Handlers, Server Actions).
  * NEVER expose this to the browser.
  */
 export function createAdminClient() {
+  const { url, serviceKey } = getEnv();
   const cookieStore = cookies();
 
-  return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll(); },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {}
-        },
+  return createServerClient<Database>(url, serviceKey, {
+    cookies: {
+      getAll() { return cookieStore.getAll(); },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        } catch {}
       },
-      auth: {
-        autoRefreshToken: false,
-        persistSession:   false,
-      },
-    }
-  );
+    },
+    auth: {
+      autoRefreshToken: false,
+      persistSession:   false,
+    },
+  });
 }
