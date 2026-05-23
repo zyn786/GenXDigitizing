@@ -8,10 +8,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import * as Icons from "lucide-react";
 import { BadgeProvider, useBadges } from "@/hooks/BadgeProvider";
-import { MOBILE_TABS, NAV_SECTIONS, PORTAL_COLORS, isActiveRoute } from "@/lib/navigation";
+import { MOBILE_TABS, NAV_SECTIONS, PORTAL_COLORS, PORTAL_LABELS, isActiveRoute } from "@/lib/navigation";
 
 function NavIcon({ name, size = 20 }: { name: string; size?: number }) {
-  const Icon = (Icons as Record<string, React.ComponentType<{ size?: number }>>)[name];
+  const Icon = (Icons as any)[name];
   return Icon ? <Icon size={size} /> : <span>{name}</span>;
 }
 
@@ -52,10 +52,10 @@ function MenuDrawer({ open, onClose, role, badgeCounts, userName, userEmail }: {
   const handleClose = () => { setAnimating(false); setTimeout(() => onClose(), 300); };
   if (!open) return null;
 
-  const sections = NAV_SECTIONS[role] ?? [];
-  const portal = PORTAL_COLORS[role] ?? PORTAL_COLORS.admin;
+  const sections = NAV_SECTIONS[role as keyof typeof NAV_SECTIONS] ?? [];
+  const portal = PORTAL_COLORS[role as keyof typeof PORTAL_COLORS] ?? PORTAL_COLORS.admin;
   const accentColor = portal.color;
-  const panelLabel = `${PORTAL_LABELS[role] ?? "Portal"} Panel`;
+  const panelLabel = `${PORTAL_LABELS[role as keyof typeof PORTAL_LABELS] ?? "Portal"} Panel`;
 
   return (
     <>

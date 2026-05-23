@@ -10,7 +10,7 @@ import type { AuthUser } from "@/types";
 import * as Icons from "lucide-react";
 
 function NavIcon({ name, size = 16 }: { name: string; size?: number }) {
-  const Icon = (Icons as Record<string, React.ComponentType<{ size?: number }>>)[name];
+  const Icon = (Icons as any)[name];
   return Icon ? <Icon size={size} /> : null;
 }
 
