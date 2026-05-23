@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Recurse -File -Name)",
+      "Bash(Select-Object -First 50)",
+      "Bash(Get-ChildItem -Path \"F:\\\\Zuoyi_Final\\\\stitchpro\" -Depth 1)",
+      "Bash(Select-Object Name, Length, Mode)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(npx supabase *)",
+      "Bash(npm install *)",
+      "Bash(cd F:Zuoyi_Finalstitchpro *)",
+      "Bash(New-Item *)",
+      "Bash(npx vitest *)",
+      "Bash(curl *)",
+      "Bash(node *)"
+    ]
+  }
+}
