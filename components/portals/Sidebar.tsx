@@ -18,7 +18,7 @@ interface SidebarProps { user: AuthUser; badgeCounts?: Record<string, number>; }
 
 export function Sidebar({ user, badgeCounts = {} }: SidebarProps) {
   const pathname = usePathname();
-  const sections = NAV[user.role] ?? [];
+  const sections = NAV_SECTIONS[user.role] ?? [];
   const portal = PORTAL_COLORS[user.role];
 
   // Merge server initial counts with client real-time counts
