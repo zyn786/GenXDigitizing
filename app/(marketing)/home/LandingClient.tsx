@@ -5,6 +5,9 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, ArrowRight, Check, FileImage, ChevronRight, Clock, Sparkles } from "lucide-react";
 import { PricingCalculator } from "@/components/marketing/PricingCalculator";
+import { SewOutShowcase } from "@/components/marketing/SewOutShowcase";
+import { EnterpriseTestimonials } from "@/components/marketing/EnterpriseTestimonials";
+import { ProductionGuarantee } from "@/components/marketing/ProductionGuarantee";
 
 /* ═════════════════════════════════════════════════════════════
    HEADER
@@ -411,6 +414,12 @@ export function LandingClient() {
       {/* ── TABBED SERVICES ──────────────────────────────────── */}
       <TabbedServices />
 
+      {/* ── REAL-WORLD SEW-OUT SHOWCASE ──────────────────────── */}
+      <SewOutShowcase />
+
+      {/* ── ENTERPRISE TESTIMONIALS ──────────────────────────── */}
+      <EnterpriseTestimonials />
+
       {/* ── PRICING CALCULATOR ────────────────────────────────── */}
       <section className="py-16 sm:py-20 bg-[var(--elevated)]/50">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -429,6 +438,9 @@ export function LandingClient() {
           <PricingCalculator />
         </div>
       </section>
+
+      {/* ── PRODUCTION-READY GUARANTEE ───────────────────────── */}
+      <ProductionGuarantee />
     </div>
   );
 }
