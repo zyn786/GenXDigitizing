@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, ArrowRight, Check, FileImage, ChevronRight, Clock, Sparkles } from "lucide-react";
+import { PricingCalculator } from "@/components/marketing/PricingCalculator";
 
 /* ═════════════════════════════════════════════════════════════
    HEADER
@@ -409,6 +410,25 @@ export function LandingClient() {
 
       {/* ── TABBED SERVICES ──────────────────────────────────── */}
       <TabbedServices />
+
+      {/* ── PRICING CALCULATOR ────────────────────────────────── */}
+      <section className="py-16 sm:py-20 bg-[var(--elevated)]/50">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#10B981]/10 text-[#059669] border border-[#10B981]/20 mb-4">
+              <Sparkles size={12} />
+              Get an Instant Quote
+            </span>
+            <h2 className="font-jakarta font-extrabold text-3xl sm:text-4xl mb-2 tracking-tight">
+              Calculate your price
+              <span className="block bg-gradient-to-r from-[#2563EB] to-[#10B981] bg-clip-text text-transparent">
+                in 30 seconds
+              </span>
+            </h2>
+          </div>
+          <PricingCalculator />
+        </div>
+      </section>
     </div>
   );
 }
