@@ -8,6 +8,7 @@ import { PricingCalculator } from "@/components/marketing/PricingCalculator";
 import { SewOutShowcase } from "@/components/marketing/SewOutShowcase";
 import { EnterpriseTestimonials } from "@/components/marketing/EnterpriseTestimonials";
 import { ProductionGuarantee } from "@/components/marketing/ProductionGuarantee";
+import { OrderIntakeForm } from "@/components/marketing/OrderIntakeForm";
 
 /* ═════════════════════════════════════════════════════════════
    HEADER
@@ -436,6 +437,25 @@ export function LandingClient() {
             </h2>
           </div>
           <PricingCalculator />
+        </div>
+      </section>
+
+      {/* ── ORDER INTAKE FORM ────────────────────────────────── */}
+      <section className="py-16 sm:py-20 bg-[#0F1115]">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#2563EB]/20 text-[#60A5FA] border border-[#2563EB]/20 mb-4">
+              <Sparkles size={12} />
+              Start Your Production Order
+            </span>
+            <h2 className="font-jakarta font-extrabold text-3xl sm:text-4xl mb-2 tracking-tight text-white">
+              Ready to get
+              <span className="block bg-gradient-to-r from-[#2563EB] to-[#10B981] bg-clip-text text-transparent">
+                production files?
+              </span>
+            </h2>
+          </div>
+          <OrderIntakeForm />
         </div>
       </section>
 
