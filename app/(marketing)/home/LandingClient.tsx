@@ -9,6 +9,7 @@ import { SewOutShowcase } from "@/components/marketing/SewOutShowcase";
 import { EnterpriseTestimonials } from "@/components/marketing/EnterpriseTestimonials";
 import { ProductionGuarantee } from "@/components/marketing/ProductionGuarantee";
 import { OrderIntakeForm } from "@/components/marketing/OrderIntakeForm";
+import { GlassHeader } from "@/components/marketing/GlassHeader";
 
 /* ═════════════════════════════════════════════════════════════
    HEADER
@@ -350,7 +351,7 @@ function TabbedServices() {
 export function LandingClient() {
   return (
     <div className="bg-[var(--bg)] text-[var(--txt)] overflow-hidden">
-      <Header />
+      <GlassHeader />
 
       {/* ── HERO ──────────────────────────────────────────────── */}
       <section className="pt-28 sm:pt-32 lg:pt-36 pb-12 sm:pb-16 lg:pb-20">
