@@ -9,7 +9,7 @@ import { Upload, ArrowRight, Check, Zap, Shirt, Scissors, Clock, ChevronLeft, Sp
    ═══════════════════════════════════════════════════════ */
 type ServiceType = "digitizing" | "vector";
 type Placement = "left-chest" | "jacket-back";
-type Turnaround = "standard" | "rush";
+type Turnaround = "12h" | "6h" | "3h";
 
 interface FormData {
   name: string;
@@ -21,34 +21,32 @@ function calculatePrice(
   service: ServiceType,
   stitches: number,
   placement: Placement,
-  turnaround: Turnaround
-): { subtotal: number; speedPremium: number; total: number } {
+  _turnaround: Turnaround
+): { subtotal: number; total: number } {
   let subtotal = 0;
 
   if (service === "digitizing") {
-    // Base $10 for up to 5k stitches, +$1.50 per additional 1k
+    // Base $7 for up to 5k stitches, +$1 per additional 1k
     if (stitches <= 5000) {
-      subtotal = 10;
+      subtotal = 7;
     } else {
       const extraK = (stitches - 5000) / 1000;
-      subtotal = 10 + extraK * 1.5;
+      subtotal = 7 + extraK * 1;
     }
     // Placement multiplier
     if (placement === "jacket-back") {
-      subtotal *= 1.6; // 60% premium for large format
+      subtotal *= 1.6;
     }
   } else {
-    // Vector: Simple vs Complex
-    subtotal = placement === "jacket-back" ? 30 : 15;
+    // Vector: Simple $8 vs Complex $18
+    subtotal = placement === "jacket-back" ? 18 : 8;
   }
 
-  const speedMultiplier = turnaround === "rush" ? 1.3 : 1.0;
-  const speedPremium = subtotal * (speedMultiplier - 1);
-  const total = subtotal * speedMultiplier;
+  // All turnaround speeds are FREE — no multiplier
+  const total = subtotal;
 
   return {
     subtotal: Math.round(subtotal * 100) / 100,
-    speedPremium: Math.round(speedPremium * 100) / 100,
     total: Math.round(total * 100) / 100,
   };
 }
@@ -101,7 +99,7 @@ export function PricingCalculator() {
   const [service, setService] = useState<ServiceType>("digitizing");
   const [stitches, setStitches] = useState(5000);
   const [placement, setPlacement] = useState<Placement>("left-chest");
-  const [turnaround, setTurnaround] = useState<Turnaround>("standard");
+  const [turnaround, setTurnaround] = useState<Turnaround>("12h");
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState<FormData>({ name: "", email: "", file: null });
 
@@ -109,6 +107,8 @@ export function PricingCalculator() {
     () => calculatePrice(service, stitches, placement, turnaround),
     [service, stitches, placement, turnaround]
   );
+
+  const turnaroundLabel = turnaround === "12h" ? "Normal 12h" : turnaround === "6h" ? "Urgent 6h" : "Rush 3h";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,14 +167,14 @@ export function PricingCalculator() {
                           icon: Shirt,
                           title: "Embroidery Digitizing",
                           desc: "Production-ready stitch files for commercial machines",
-                          base: "From $10",
+                          base: "From $7",
                         },
                         {
                           id: "vector" as ServiceType,
                           icon: Scissors,
                           title: "Vector Conversion",
                           desc: "Clean AI, SVG, EPS files from any source artwork",
-                          base: "From $15",
+                          base: "From $8",
                         },
                       ].map((opt) => (
                         <button
@@ -247,7 +247,7 @@ export function PricingCalculator() {
                         </div>
                         {stitches > 5000 && (
                           <p className="text-[11px] text-[#F59E0B] mt-2">
-                            +$1.50 per additional 1,000 stitches above 5k
+                            +$1 per additional 1,000 stitches above 5k
                           </p>
                         )}
                       </div>
@@ -280,27 +280,25 @@ export function PricingCalculator() {
                     {/* Turnaround */}
                     <div>
                       <label className="text-sm font-semibold text-[var(--txt)] block mb-2">Turnaround Speed</label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-3 gap-2">
                         {[
-                          { id: "standard" as Turnaround, label: "Standard 24h", desc: "Base price", icon: Clock },
-                          { id: "rush" as Turnaround, label: "Rush 6h", desc: "+30%", icon: Zap },
+                          { id: "12h" as Turnaround, label: "Normal", sub: "12h", icon: Clock },
+                          { id: "6h" as Turnaround, label: "Urgent", sub: "6h", icon: Zap },
+                          { id: "3h" as Turnaround, label: "Rush", sub: "3h", icon: Zap },
                         ].map((opt) => (
                           <button
                             key={opt.id}
                             onClick={() => setTurnaround(opt.id)}
-                            className={`p-3.5 rounded-xl border-2 transition-all duration-200 ${
+                            className={`p-3 rounded-xl border-2 text-center transition-all duration-200 ${
                               turnaround === opt.id
-                                ? opt.id === "rush"
-                                  ? "border-[#F59E0B] bg-[#FEF3C7]/30"
-                                  : "border-[#2563EB] bg-[#2563EB]/[0.03]"
+                                ? "border-[#10B981] bg-[#ECFDF5]"
                                 : "border-[var(--border)] hover:border-[var(--border3)]"
                             }`}
                           >
-                            <div className="flex items-center justify-center gap-1.5 mb-0.5">
-                              <opt.icon size={14} className={turnaround === opt.id && opt.id === "rush" ? "text-[#F59E0B]" : "text-[var(--txt2)]"} />
-                              <span className="font-jakarta font-bold text-sm">{opt.label}</span>
-                            </div>
-                            <div className="text-[11px] text-[var(--txt3)]">{opt.desc}</div>
+                            <opt.icon size={14} className="mx-auto mb-1 text-[var(--txt2)]" />
+                            <div className="font-jakarta font-bold text-xs">{opt.label}</div>
+                            <div className="text-[11px] text-[var(--txt3)]">{opt.sub}</div>
+                            <div className="text-[10px] text-[#10B981] font-bold mt-0.5">FREE</div>
                           </button>
                         ))}
                       </div>
@@ -355,26 +353,12 @@ export function PricingCalculator() {
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-[var(--txt2)]">
-                            {turnaround === "standard" ? "Standard 24h" : "Rush 6h"}
-                          </span>
-                          <span className="font-semibold">
-                            {turnaround === "rush" ? "+30%" : "Included"}
-                          </span>
+                          <span className="text-[var(--txt2)]">Turnaround</span>
+                          <span className="font-semibold text-[#10B981]">{turnaroundLabel} — FREE</span>
                         </div>
                       </div>
-                      <div className="border-t border-[var(--border2)] pt-3 space-y-1.5">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-[var(--txt2)]">Subtotal</span>
-                          <span className="font-semibold">${price.subtotal.toFixed(2)}</span>
-                        </div>
-                        {price.speedPremium > 0 && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-[#F59E0B]">Speed premium</span>
-                            <span className="font-semibold text-[#F59E0B]">+${price.speedPremium.toFixed(2)}</span>
-                          </div>
-                        )}
-                        <div className="flex justify-between text-base pt-2 border-t border-[var(--border2)]">
+                      <div className="border-t border-[var(--border2)] pt-3">
+                        <div className="flex justify-between text-base">
                           <span className="font-jakarta font-bold">Total</span>
                           <span className="font-jakarta font-extrabold text-[#10B981]">${price.total.toFixed(2)}</span>
                         </div>
