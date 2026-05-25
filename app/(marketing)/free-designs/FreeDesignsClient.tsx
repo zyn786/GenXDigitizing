@@ -376,7 +376,7 @@ function DesignCard({
           <div className="flex flex-col flex-1 p-4 sm:p-5">
             {/* Title + badge row */}
             <div className="flex items-start justify-between gap-2 mb-3 sm:mb-4">
-              <h3 className="font-syne font-bold text-sm sm:text-base text-[var(--txt)] leading-snug line-clamp-2">
+              <h3 className="font-jakarta font-bold text-sm sm:text-base text-[var(--txt)] leading-snug line-clamp-2">
                 {design.title}
               </h3>
               {design.downloadCount > 0 && (
@@ -427,7 +427,7 @@ function DesignCard({
               disabled={downloading || !design.downloadUrl}
               className={cn(
                 "relative w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 rounded-xl",
-                "font-syne font-bold text-sm transition-all duration-300",
+                "font-jakarta font-bold text-sm transition-all duration-300",
                 "border-2 overflow-hidden group/btn",
                 downloaded
                   ? "border-[#16A34A] bg-[#16A34A]/8 text-[#16A34A]"
@@ -572,7 +572,7 @@ export function FreeDesignsClient() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className="font-syne font-extrabold text-[clamp(30px,6vw,60px)] leading-[1.08] mb-3 sm:mb-4"
+            className="font-jakarta font-extrabold text-[clamp(30px,6vw,60px)] leading-[1.08] mb-3 sm:mb-4"
           >
             Free Embroidery{" "}
             <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
@@ -640,7 +640,7 @@ export function FreeDesignsClient() {
               className="text-center py-16 sm:py-20"
             >
               <div className="text-5xl sm:text-6xl mb-4">⚠️</div>
-              <h3 className="font-syne font-bold text-lg sm:text-xl text-[var(--txt)] mb-1">
+              <h3 className="font-jakarta font-bold text-lg sm:text-xl text-[var(--txt)] mb-1">
                 Failed to load designs
               </h3>
               <p className="text-sm text-[var(--txt2)] max-w-[380px] mx-auto mb-4">
@@ -660,7 +660,7 @@ export function FreeDesignsClient() {
               className="text-center py-16 sm:py-20"
             >
               <div className="text-5xl sm:text-6xl mb-4">🧵</div>
-              <h3 className="font-syne font-bold text-lg sm:text-xl text-[var(--txt)] mb-1">
+              <h3 className="font-jakarta font-bold text-lg sm:text-xl text-[var(--txt)] mb-1">
                 {search ? "No results found" : "No free designs yet"}
               </h3>
               <p className="text-sm text-[var(--txt2)] max-w-[380px] mx-auto">

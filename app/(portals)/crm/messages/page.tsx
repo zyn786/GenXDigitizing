@@ -25,7 +25,7 @@ export default async function CRMMessagesPage() {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-5xl mb-4">📭</p>
-            <p className="font-syne font-bold text-base text-[var(--txt)] mb-1">No messages yet</p>
+            <p className="font-jakarta font-bold text-base text-[var(--txt)] mb-1">No messages yet</p>
             <p className="text-[13px] text-[var(--txt3)]">Client messages will appear here</p>
           </div>
         ) : (

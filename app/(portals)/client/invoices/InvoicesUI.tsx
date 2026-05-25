@@ -52,7 +52,7 @@ export function ClientInvoicesUI({ invoices, paymentStatus, demoInvoiceId }) {
   return (
     <div className="portal-content" style={{background:"var(--bg)"}}>
       <div className="mb-4 sm:mb-5">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+        <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{background:"linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>
           Invoices
         </h2>
@@ -88,7 +88,7 @@ export function ClientInvoicesUI({ invoices, paymentStatus, demoInvoiceId }) {
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:s.c.bgSoft,color:s.c.icon}}>{s.icon}</div>
                 <div className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold" style={{color:txt2}}>{s.label}</div>
               </div>
-              <div className="font-syne font-bold text-lg sm:text-xl" style={{color:s.c.text}}>{s.val}</div>
+              <div className="font-jakarta font-bold text-lg sm:text-xl" style={{color:s.c.text}}>{s.val}</div>
             </div>
           );
         })}
@@ -101,7 +101,7 @@ export function ClientInvoicesUI({ invoices, paymentStatus, demoInvoiceId }) {
       {invoices.length === 0 ? (
         <div className="text-center py-16 rounded-2xl border" style={{background:"var(--surface)",borderColor:"var(--border)"}}>
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{background:purple.bgSoft}}><Receipt size={22} style={{color:purple.icon}}/></div>
-          <p className="font-syne font-bold text-base mb-1" style={{color:txt}}>No invoices yet</p>
+          <p className="font-jakarta font-bold text-base mb-1" style={{color:txt}}>No invoices yet</p>
           <p className="text-sm" style={{color:txt3}}>Invoices are created when you place an order</p>
         </div>
       ) : (
@@ -117,7 +117,7 @@ export function ClientInvoicesUI({ invoices, paymentStatus, demoInvoiceId }) {
                 </div>
                 <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[12px] mb-2.5">
                   <span className="font-medium" style={{color:txt}}>{inv.orders?.service_tiers?.label||"—"}</span>
-                  <span className="font-syne font-extrabold text-right" style={{color:green.text}}>{formatCurrency(inv.amount)}</span>
+                  <span className="font-jakarta font-extrabold text-right" style={{color:green.text}}>{formatCurrency(inv.amount)}</span>
                   <span className="font-mono text-[11px]" style={{color:purple.text}}>{inv.orders?.order_number||"—"}</span>
                   <span className="text-right" style={{color:txt3}}>{formatDate(inv.created_at)}</span>
                 </div>
@@ -153,7 +153,7 @@ export function ClientInvoicesUI({ invoices, paymentStatus, demoInvoiceId }) {
                     <td className="p-3 font-mono text-xs font-bold" style={{color:cyan.text}}>{inv.invoice_number}</td>
                     <td className="p-3 font-mono text-[11px] font-bold" style={{color:purple.text}}>{inv.orders?.order_number||"—"}</td>
                     <td className="p-3 text-xs" style={{color:txt2}}>{inv.orders?.service_tiers?.label||"—"}</td>
-                    <td className="p-3 font-syne font-bold text-sm" style={{color:green.text}}>{formatCurrency(inv.amount)}</td>
+                    <td className="p-3 font-jakarta font-bold text-sm" style={{color:green.text}}>{formatCurrency(inv.amount)}</td>
                     <td className="p-3"><span className="px-2.5 py-1 rounded-full text-[10px] font-semibold border" style={{background:s.bg,color:s.color,borderColor:s.border}}>{inv.status}</span></td>
                     <td className="p-3 text-[11px]" style={{color:txt3}}>{formatDate(inv.created_at)}</td>
                     <td className="p-3"><div className="flex gap-1.5">

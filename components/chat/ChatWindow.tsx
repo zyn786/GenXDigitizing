@@ -22,7 +22,7 @@ function ClientInfoBanner() {
           <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center">
             <Info className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="font-syne font-bold text-xs sm:text-sm text-[var(--txt)]">
+          <span className="font-jakarta font-bold text-xs sm:text-sm text-[var(--txt)]">
             How can we help?
           </span>
         </div>
@@ -123,7 +123,7 @@ export function ChatWindow() {
             border border-[#7C3AED]/15 flex items-center justify-center mx-auto mb-5">
             <span className="text-3xl">💬</span>
           </div>
-          <h3 className="font-syne font-bold text-[15px] text-[var(--txt)] mb-2">
+          <h3 className="font-jakarta font-bold text-[15px] text-[var(--txt)] mb-2">
             {currentUserRole === "client" ? "Support Chat" : "Messages"}
           </h3>
           {currentUserRole === "client" ? (
@@ -195,7 +195,7 @@ export function ChatWindow() {
         {/* Name + status */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="font-syne font-bold text-sm sm:text-[15px] text-[var(--txt)] truncate">
+            <h3 className="font-jakarta font-bold text-sm sm:text-[15px] text-[var(--txt)] truncate">
               {currentUserRole === "client" ? "Support Team" : activeConversation.clientName}
             </h3>
             {activeConversation.priority === "urgent" && (

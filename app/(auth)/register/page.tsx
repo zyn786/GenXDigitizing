@@ -118,7 +118,7 @@ export default function RegisterPage() {
           bg-gradient-to-br from-[#16A34A]/15 to-[#2563EB]/15">
           <CheckCircle2 size={28} className="text-[#16A34A]" />
         </div>
-        <h2 className="font-syne font-bold text-xl text-[var(--txt)] mb-3">
+        <h2 className="font-jakarta font-bold text-xl text-[var(--txt)] mb-3">
           Account created! 🎉
         </h2>
         <p className="text-sm text-[var(--txt2)] leading-relaxed mb-6">
@@ -157,11 +157,11 @@ export default function RegisterPage() {
       {/* Logo */}
       <div className="flex items-center gap-3 mb-6 justify-center">
         <div className="w-10 h-10 rounded-[10px] flex items-center justify-center
-          bg-gradient-to-br from-[#2563EB] to-[#F97316] text-white font-syne font-bold text-xl">
+          bg-gradient-to-br from-[#2563EB] to-[#F97316] text-white font-jakarta font-bold text-xl">
           ✦
         </div>
         <div>
-          <div className="font-syne font-extrabold text-lg tracking-wide
+          <div className="font-jakarta font-extrabold text-lg tracking-wide
             bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
             GENX DIGITIZING
           </div>
@@ -187,7 +187,7 @@ export default function RegisterPage() {
       </div>
 
       <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-2xl p-6">
-        <h2 className="font-syne font-bold text-[17px] text-[var(--txt)] mb-5">
+        <h2 className="font-jakarta font-bold text-[17px] text-[var(--txt)] mb-5">
           Create your account
         </h2>
 

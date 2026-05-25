@@ -68,8 +68,8 @@ const config: Config = {
       },
 
       fontFamily: {
-        syne: ["var(--font-syne)", "'Syne'", "sans-serif"],
-        inter: ["var(--font-inter)", "sans-serif"],
+        jakarta: ["var(--font-jakarta)", "'Plus Jakarta Sans'", "system-ui", "sans-serif"],
+        inter: ["var(--font-inter)", "'Inter'", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
       },
 
@@ -162,10 +162,10 @@ const config: Config = {
       },
 
       backgroundImage: {
-        "gradient-brand":   "linear-gradient(135deg, #2563EB, #F97316)",
-        "gradient-blue":    "linear-gradient(135deg, #2563EB, #1D4ED8)",
-        "gradient-warm":    "linear-gradient(135deg, #F97316, #2563EB)",
-        "gradient-full":    "linear-gradient(135deg, #2563EB, #1D4ED8, #F97316)",
+        "gradient-brand":   "linear-gradient(135deg, #1E40AF, #EA580C)",
+        "gradient-blue":    "linear-gradient(135deg, #1E40AF, #2563EB)",
+        "gradient-warm":    "linear-gradient(135deg, #EA580C, #1E40AF)",
+        "gradient-full":    "linear-gradient(135deg, #1E40AF, #2563EB, #EA580C)",
         "gradient-success": "linear-gradient(135deg, #16A34A, #15803D)",
         "gradient-purple":  "linear-gradient(135deg, #7C3AED, #D946EF)",
         "gradient-green":   "linear-gradient(135deg, #10B981, #06B6D4)",
@@ -173,14 +173,15 @@ const config: Config = {
       },
 
       boxShadow: {
-        "card":       "0 1px 2px rgba(0,0,0,0.04)",
-        "card-hover": "0 4px 16px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04)",
-        "dropdown":   "0 4px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06)",
-        "modal":      "0 20px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.08)",
-        "toast":      "0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
-        "glow":       "0 0 24px rgba(37,99,235,0.2)",
-        "glow-lg":    "0 0 40px rgba(37,99,235,0.25)",
-        "inset":      "inset 0 1px 3px rgba(0,0,0,0.04)",
+        "card":       "0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06)",
+        "card-hover": "0 4px 16px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.04)",
+        "dropdown":   "0 4px 24px rgba(15,23,42,0.10), 0 1px 4px rgba(15,23,42,0.06)",
+        "modal":      "0 20px 60px rgba(15,23,42,0.10), 0 8px 20px rgba(15,23,42,0.06)",
+        "toast":      "0 8px 32px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06)",
+        "cta":        "0 4px 14px rgba(234,88,12,0.25), 0 1px 3px rgba(234,88,12,0.15)",
+        "nav":        "0 1px 3px rgba(15,23,42,0.04)",
+        "sticky":     "0 -4px 20px rgba(15,23,42,0.06)",
+        "inset":      "inset 0 1px 3px rgba(15,23,42,0.04)",
       },
 
       zIndex: {

@@ -67,7 +67,7 @@ export function AdminReviewsUI({ reviews, avgRating, total, fiveStarPct, fourPlu
     <div className="portal-content" style={{ background: "var(--bg)" }}>
       {/* Header with gradient */}
       <div className="mb-5 sm:mb-6">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+        <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{ background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
           Reviews
         </h2>
@@ -87,7 +87,7 @@ export function AdminReviewsUI({ reviews, avgRating, total, fiveStarPct, fourPlu
                 </div>
                 <div className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold" style={{ color: txt2 }}>{s.label}</div>
               </div>
-              <div className="font-syne font-bold text-lg sm:text-xl" style={{ color: c.text }}>{s.val}</div>
+              <div className="font-jakarta font-bold text-lg sm:text-xl" style={{ color: c.text }}>{s.val}</div>
             </div>
           );
         })}
@@ -117,7 +117,7 @@ export function AdminReviewsUI({ reviews, avgRating, total, fiveStarPct, fourPlu
       {filtered.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-3xl mb-2">⭐</p>
-          <p className="font-syne font-bold text-base mb-1" style={{ color: txt }}>No reviews found</p>
+          <p className="font-jakarta font-bold text-base mb-1" style={{ color: txt }}>No reviews found</p>
           <p className="text-sm" style={{ color: txt2 }}>
             {filter !== 0 ? "No reviews match the selected star filter." : "Reviews appear automatically after order delivery"}
           </p>
@@ -135,7 +135,7 @@ export function AdminReviewsUI({ reviews, avgRating, total, fiveStarPct, fourPlu
                 {/* Top row */}
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
                   <div className="flex items-center gap-2.5 sm:gap-3">
-                    <div className="w-9 h-9 sm:w-[38px] sm:h-[38px] rounded-full flex items-center justify-center text-[12px] sm:text-[13px] font-bold text-white flex-shrink-0 font-syne"
+                    <div className="w-9 h-9 sm:w-[38px] sm:h-[38px] rounded-full flex items-center justify-center text-[12px] sm:text-[13px] font-bold text-white flex-shrink-0 font-jakarta"
                       style={{ background: `linear-gradient(135deg,${clr[4].bg},${clr[3].bg})` }}>
                       {initials}
                     </div>

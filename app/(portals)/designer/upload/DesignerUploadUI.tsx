@@ -153,7 +153,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
             style={{ background: "rgba(16,185,129,0.10)" }}>
             <CheckCircle size={32} color="#10B981" />
           </div>
-          <h2 className="font-syne font-bold text-xl sm:text-2xl mb-2"
+          <h2 className="font-jakarta font-bold text-xl sm:text-2xl mb-2"
             style={{ background: "linear-gradient(135deg, #10B981, #06B6D4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
             Submitted!
           </h2>
@@ -186,7 +186,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
       <div className="flex items-center justify-center" style={{ minHeight: "60vh" }}>
         <div className="text-center rounded-2xl p-8 sm:p-10" style={{ background: "var(--surface)", border: "1px solid var(--border)", maxWidth: 400 }}>
           <p className="text-4xl mb-3">📭</p>
-          <p className="font-syne font-bold text-lg" style={{ color: txt }}>No tasks to upload</p>
+          <p className="font-jakarta font-bold text-lg" style={{ color: txt }}>No tasks to upload</p>
           <p className="text-sm mt-1.5 mb-5" style={{ color: txt2 }}>Start working on an assigned task first</p>
           <button onClick={() => router.push("/designer/tasks")}
             className="px-5 py-2.5 rounded-xl text-[13px] font-semibold text-white border-none cursor-pointer active:scale-[0.98] transition-all"
@@ -212,7 +212,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
               : designerName?.charAt(0)?.toUpperCase() || "D"}
           </div>
           <div className="flex-1 min-w-0">
-            <span className="font-syne font-bold text-[14px]" style={{ color: txt }}>{designerName}</span>
+            <span className="font-jakarta font-bold text-[14px]" style={{ color: txt }}>{designerName}</span>
             <span className="text-[11px] ml-2 px-2 py-0.5 rounded-full font-semibold"
               style={{ background: "rgba(124,58,237,0.10)", color: "#6D28D9", border: "1px solid rgba(124,58,237,0.25)" }}>Uploading</span>
           </div>
@@ -223,7 +223,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
       </div>
 
       {/* ── Title ── */}
-      <h2 className="font-syne font-bold text-xl sm:text-2xl leading-tight mb-1"
+      <h2 className="font-jakarta font-bold text-xl sm:text-2xl leading-tight mb-1"
         style={{ background: "linear-gradient(135deg, #7C3AED, #D946EF, #06B6D4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
         Upload Files
       </h2>
@@ -247,7 +247,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
             <div key={s.label} className="rounded-2xl p-3 sm:p-3.5 transition-all hover:translate-y-[-2px]"
               style={{ background: colors.bgSoft, border: `1px solid ${colors.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.03)" }}>
               <span className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold block mb-1.5" style={{ color: txt3 }}>{s.label}</span>
-              <div className="font-syne font-bold text-lg sm:text-xl" style={{ color: colors.text }}>{s.val}</div>
+              <div className="font-jakarta font-bold text-lg sm:text-xl" style={{ color: colors.text }}>{s.val}</div>
               <div className="text-[10px] mt-0.5" style={{ color: txt3 }}>{s.sub}</div>
             </div>
           );
@@ -256,7 +256,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
 
       {/* ── Form card ── */}
       <div className="rounded-2xl p-4 sm:p-6 mb-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-        <h3 className="font-syne font-bold text-[15px] sm:text-[16px] mb-5 flex items-center gap-2"
+        <h3 className="font-jakarta font-bold text-[15px] sm:text-[16px] mb-5 flex items-center gap-2"
           style={{ color: txt }}>
           <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{ background: "rgba(124,58,237,0.10)", color: "#7C3AED" }}>

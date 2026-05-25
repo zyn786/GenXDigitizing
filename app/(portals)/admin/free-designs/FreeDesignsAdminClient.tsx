@@ -276,7 +276,7 @@ export function FreeDesignsAdminClient() {
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: clr[2].bgSoft }}>
             <Database className="w-7 h-7" style={{ color: clr[2].icon }} />
           </div>
-          <h3 className="font-syne font-bold text-lg mb-2" style={{ color: txt }}>Database Setup Required</h3>
+          <h3 className="font-jakarta font-bold text-lg mb-2" style={{ color: txt }}>Database Setup Required</h3>
           <p className="text-sm mb-6 max-w-[380px] mx-auto leading-relaxed" style={{ color: txt2 }}>
             The free designs tables haven&apos;t been created yet. Run the migration SQL in your Supabase SQL Editor.
           </p>
@@ -294,7 +294,7 @@ export function FreeDesignsAdminClient() {
     <div className="portal-content" style={{ background: "var(--bg)" }}>
       {/* Header with gradient */}
       <div className="mb-5 sm:mb-6">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+        <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{ background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
           Free Designs
         </h2>
@@ -337,7 +337,7 @@ export function FreeDesignsAdminClient() {
       {filtered.length === 0 ? (
         <div className="text-center py-16 rounded-2xl border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           <div className="text-4xl mb-3">🧵</div>
-          <h3 className="font-syne font-bold text-lg mb-1" style={{ color: txt }}>No designs found</h3>
+          <h3 className="font-jakarta font-bold text-lg mb-1" style={{ color: txt }}>No designs found</h3>
           <p className="text-sm mb-4" style={{ color: txt2 }}>
             {filter !== "all" ? "No designs match the selected filter." : "Add your first free design to start sharing samples."}
           </p>
@@ -371,7 +371,7 @@ export function FreeDesignsAdminClient() {
 
               {/* Info */}
               <div className="p-3 sm:p-4">
-                <h3 className="font-syne font-bold text-sm mb-1.5" style={{ color: txt }}>{design.title}</h3>
+                <h3 className="font-jakarta font-bold text-sm mb-1.5" style={{ color: txt }}>{design.title}</h3>
                 <div className="flex flex-wrap gap-1 text-[10px] font-medium mb-2.5" style={{ color: txt2 }}>
                   <span>{formatNumber(design.stitchCount)} stitches</span><span>·</span>
                   <span>{design.colors} colors</span><span>·</span>
@@ -416,7 +416,7 @@ export function FreeDesignsAdminClient() {
             {/* Header */}
             <div className="sticky top-0 z-10 flex items-center justify-between px-4 sm:px-6 py-4 rounded-t-2xl"
               style={{ background: "var(--bg)", borderBottom: "1px solid var(--border)" }}>
-              <h3 className="font-syne font-bold text-lg" style={{ color: txt }}>
+              <h3 className="font-jakarta font-bold text-lg" style={{ color: txt }}>
                 {editingId ? "Edit Design" : "Add Free Design"}
               </h3>
               <button onClick={() => setShowModal(false)}

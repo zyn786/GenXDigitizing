@@ -89,7 +89,7 @@ export function AdminInvoicesUI({ invoices }: { invoices: any[] }) {
     <div className="portal-content" style={{ background: "var(--bg)" }}>
       {/* Header with gradient */}
       <div className="mb-5 sm:mb-6">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+        <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{ background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
           Invoices
         </h2>
@@ -116,7 +116,7 @@ export function AdminInvoicesUI({ invoices }: { invoices: any[] }) {
                 </div>
                 <div className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold" style={{ color: txt2 }}>{s.label}</div>
               </div>
-              <div className="font-syne font-bold text-lg sm:text-xl" style={{ color: c.text }}>{s.val}</div>
+              <div className="font-jakarta font-bold text-lg sm:text-xl" style={{ color: c.text }}>{s.val}</div>
             </div>
           );
         })}
@@ -176,7 +176,7 @@ export function AdminInvoicesUI({ invoices }: { invoices: any[] }) {
                     <span className="text-right" style={{ color: txt2 }}>{inv.orders?.service_tiers?.label??"—"}</span>
                   </div>
                   <div className="flex items-center justify-between mb-3">
-                    <span className="font-syne font-bold text-base" style={{ color: clr[1].text }}>{formatCurrency(inv.amount)}</span>
+                    <span className="font-jakarta font-bold text-base" style={{ color: clr[1].text }}>{formatCurrency(inv.amount)}</span>
                     <span style={{padding:"2px 6px",borderRadius:3,background:`${t.color}18`,color:t.color,fontSize:10,fontWeight:500}}>{t.icon} {t.label}</span>
                   </div>
                   <div className="flex gap-1.5 pt-2" style={{ borderTop: "1px solid var(--border)" }}>
@@ -235,7 +235,7 @@ export function AdminInvoicesUI({ invoices }: { invoices: any[] }) {
                       </td>
                       <td className="p-3 text-sm font-medium" style={{ color: txt }}>{inv.clients?.company_name??"—"}</td>
                       <td className="p-3 text-xs" style={{ color: txt2 }}>{inv.orders?.service_tiers?.label??"—"}</td>
-                      <td className="p-3 font-syne font-bold text-sm" style={{ color: clr[1].text }}>{formatCurrency(inv.amount)}</td>
+                      <td className="p-3 font-jakarta font-bold text-sm" style={{ color: clr[1].text }}>{formatCurrency(inv.amount)}</td>
                       <td className="p-3">
                         <span style={{padding:"3px 10px",borderRadius:20,fontSize:10,fontWeight:600,background:s.bg,color:s.color,border:`1px solid ${s.border}`}}>{inv.status}</span>
                       </td>

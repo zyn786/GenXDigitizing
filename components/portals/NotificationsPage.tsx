@@ -91,7 +91,7 @@ export function NotificationsPage({
                 : userName?.charAt(0)?.toUpperCase() || "U"}
             </div>
             <div className="flex-1 min-w-0">
-              <span className="font-syne font-bold text-[14px]" style={{ color: txt }}>{userName}</span>
+              <span className="font-jakarta font-bold text-[14px]" style={{ color: txt }}>{userName}</span>
               {userRole && (
                 <span className="text-[11px] ml-2 px-2 py-0.5 rounded-full font-semibold capitalize"
                   style={{ background: `rgba(${userRole === "designer" ? "16,185,129" : userRole === "admin" ? "59,130,246" : userRole === "crm" ? "99,102,241" : "14,165,233"}, 0.10)`, color: roleColor, border: `1px solid ${roleColor}40` }}>
@@ -112,7 +112,7 @@ export function NotificationsPage({
       {/* ── Title ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
         <div>
-          <h2 className="font-syne font-bold text-xl sm:text-2xl leading-tight"
+          <h2 className="font-jakarta font-bold text-xl sm:text-2xl leading-tight"
             style={{ background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
             Notifications
           </h2>
@@ -178,7 +178,7 @@ export function NotificationsPage({
       {filtered.length === 0 ? (
         <div className="text-center py-16 sm:py-20 rounded-2xl border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           <div className="text-5xl mb-4">🔔</div>
-          <h3 className="font-syne font-bold text-lg mb-1" style={{ color: txt }}>
+          <h3 className="font-jakarta font-bold text-lg mb-1" style={{ color: txt }}>
             {filter !== "all" ? "No matching notifications" : "No notifications yet"}
           </h3>
           <p className="text-sm px-4" style={{ color: txt2 }}>

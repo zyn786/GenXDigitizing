@@ -135,7 +135,7 @@ export function AdminDesignersClient({ designers }: { designers: any[] }) {
             style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: "var(--txt2)" }}>
             <ArrowLeft size={12} /> Back
           </button>
-          <h2 className="font-syne font-bold text-base sm:text-lg" style={{ color: "var(--txt)" }}>{u?.full_name}</h2>
+          <h2 className="font-jakarta font-bold text-base sm:text-lg" style={{ color: "var(--txt)" }}>{u?.full_name}</h2>
           <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold"
             style={{
               background: isActive ? CARD_COLORS[1].bgSoft : CARD_COLORS[5].bgSoft,
@@ -155,7 +155,7 @@ export function AdminDesignersClient({ designers }: { designers: any[] }) {
                 {getInitials(u?.full_name ?? "")}
               </div>
               <div>
-                <div className="font-syne font-bold text-base" style={{ color: "var(--txt)" }}>{u?.full_name}</div>
+                <div className="font-jakarta font-bold text-base" style={{ color: "var(--txt)" }}>{u?.full_name}</div>
                 <div className="text-xs mt-0.5" style={{ color: CARD_COLORS[3].text }}>{u?.email}</div>
                 <div className="flex items-center gap-1 mt-1">
                   {stars(detail.avg_rating)}
@@ -211,7 +211,7 @@ export function AdminDesignersClient({ designers }: { designers: any[] }) {
 
           {/* Recent jobs */}
           <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-            <h3 className="font-syne font-bold text-sm mb-3" style={{ color: "var(--txt)" }}>Recent Jobs</h3>
+            <h3 className="font-jakarta font-bold text-sm mb-3" style={{ color: "var(--txt)" }}>Recent Jobs</h3>
             {loading ? (
               <p className="text-sm text-center py-5" style={{ color: "var(--txt3)" }}>Loading…</p>
             ) : dOrders.length === 0 ? (
@@ -240,7 +240,7 @@ export function AdminDesignersClient({ designers }: { designers: any[] }) {
       {/* Header with gradient */}
       <div className="mb-5 sm:mb-6">
         <h2
-          className="font-syne font-bold text-xl sm:text-2xl"
+          className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{
             background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)",
             WebkitBackgroundClip: "text",
@@ -273,7 +273,7 @@ export function AdminDesignersClient({ designers }: { designers: any[] }) {
                 </div>
                 <div className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold" style={{ color: "var(--txt2)" }}>{s.label}</div>
               </div>
-              <div className="font-syne font-bold text-lg sm:text-xl" style={{ color: clr.text }}>{s.val}</div>
+              <div className="font-jakarta font-bold text-lg sm:text-xl" style={{ color: clr.text }}>{s.val}</div>
             </div>
           );
         })}
@@ -291,7 +291,7 @@ export function AdminDesignersClient({ designers }: { designers: any[] }) {
       {/* Add Designer Modal */}
       {showAddForm && (
         <div className="rounded-2xl p-5 mb-4" style={{ background: "var(--surface)", border: `1px solid ${CARD_COLORS[4].border}` }}>
-          <h3 className="font-syne font-bold text-sm mb-4" style={{ color: "var(--txt)" }}>Add New Designer</h3>
+          <h3 className="font-jakarta font-bold text-sm mb-4" style={{ color: "var(--txt)" }}>Add New Designer</h3>
           <div className="flex flex-col gap-2.5">
             <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Full name" style={inpStyle} />
             <input value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="Email address" type="email" style={inpStyle} />
@@ -314,7 +314,7 @@ export function AdminDesignersClient({ designers }: { designers: any[] }) {
       {designers.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-[40px] mb-2">🎨</p>
-          <p className="font-syne font-bold text-base" style={{ color: "var(--txt)" }}>No designers yet</p>
+          <p className="font-jakarta font-bold text-base" style={{ color: "var(--txt)" }}>No designers yet</p>
           <p className="text-sm mt-1.5" style={{ color: "var(--txt3)" }}>Add your first designer to start assigning orders</p>
         </div>
       ) : (
@@ -356,7 +356,7 @@ export function AdminDesignersClient({ designers }: { designers: any[] }) {
                       return (
                         <div key={l as string} className="rounded-xl p-2.5" style={{ background: "var(--elevated)" }}>
                           <div className="text-[10px] font-semibold" style={{ color: "var(--txt3)" }}>{l}</div>
-                          <div className="font-syne font-bold text-lg mt-0.5" style={{ color: clr.text }}>{v}</div>
+                          <div className="font-jakarta font-bold text-lg mt-0.5" style={{ color: clr.text }}>{v}</div>
                         </div>
                       );
                     })}

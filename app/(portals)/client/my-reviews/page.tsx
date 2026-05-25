@@ -27,7 +27,7 @@ export default async function MyReviewsPage() {
       <div className="portal-content" style={{ background: "var(--bg)" }}>
         {/* Header */}
         <div className="mb-4 sm:mb-5">
-          <h2 className="font-syne font-bold text-xl sm:text-2xl"
+          <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
             style={{ background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
             My Reviews
           </h2>
@@ -41,7 +41,7 @@ export default async function MyReviewsPage() {
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ background: "rgba(245,158,11,0.1)" }}>
               <Star size={22} style={{ color: "#F59E0B" }} />
             </div>
-            <p className="font-syne font-bold text-base mb-1" style={{ color: "var(--txt)" }}>No reviews yet</p>
+            <p className="font-jakarta font-bold text-base mb-1" style={{ color: "var(--txt)" }}>No reviews yet</p>
             <p className="text-sm" style={{ color: "var(--txt3)" }}>Reviews appear after delivered orders — find them in My Orders</p>
           </div>
         ) : list.map(r => (

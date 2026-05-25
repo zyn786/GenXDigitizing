@@ -134,7 +134,7 @@ export function AdminOrdersClient({ orders, designers, unreviewedEdits = {} as R
       {/* Header with gradient */}
       <div className="mb-5 sm:mb-6">
         <h2
-          className="font-syne font-bold text-xl sm:text-2xl"
+          className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{
             background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)",
             WebkitBackgroundClip: "text",
@@ -166,7 +166,7 @@ export function AdminOrdersClient({ orders, designers, unreviewedEdits = {} as R
                   {s.label}
                 </div>
               </div>
-              <div className="font-syne font-bold text-lg sm:text-xl" style={{ color: clr.text }}>{s.val}</div>
+              <div className="font-jakarta font-bold text-lg sm:text-xl" style={{ color: clr.text }}>{s.val}</div>
             </div>
           );
         })}
@@ -265,7 +265,7 @@ export function AdminOrdersClient({ orders, designers, unreviewedEdits = {} as R
                     </div>
                     {/* Price row — always visible */}
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="font-syne font-bold text-lg" style={{ color: "var(--txt)" }}>
+                      <span className="font-jakarta font-bold text-lg" style={{ color: "var(--txt)" }}>
                         {formatCurrency(o.price, "USD", true)}
                       </span>
                       {inv && (
@@ -347,7 +347,7 @@ export function AdminOrdersClient({ orders, designers, unreviewedEdits = {} as R
                       <td className="p-3">
                         {inv ? (
                           <div>
-                            <div className="font-syne font-bold text-sm" style={{ color: inv.status==="paid" ? CARD_COLORS[1].text : CARD_COLORS[2].text }}>${Number(o.price).toFixed(0)}</div>
+                            <div className="font-jakarta font-bold text-sm" style={{ color: inv.status==="paid" ? CARD_COLORS[1].text : CARD_COLORS[2].text }}>${Number(o.price).toFixed(0)}</div>
                             <span className="text-[10px] px-2 py-0.5 rounded-full inline-block mt-0.5 font-medium"
                               style={{
                                 background: inv.status==="paid" ? CARD_COLORS[1].bgSoft : CARD_COLORS[2].bgSoft,

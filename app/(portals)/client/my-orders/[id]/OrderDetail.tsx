@@ -30,7 +30,7 @@ function StatusTimeline({ status }: any) {
 }
 
 function Section({ title, icon, color, children }: any) {
-  return (<div className="rounded-2xl p-4 sm:p-5 mb-3" style={{background:"var(--surface)",border:"1px solid var(--border)"}}><div className="flex items-center gap-2.5 mb-3"><span style={{color}}>{icon}</span><h3 className="font-syne font-bold text-sm" style={{color:txt}}>{title}</h3></div>{children}</div>);
+  return (<div className="rounded-2xl p-4 sm:p-5 mb-3" style={{background:"var(--surface)",border:"1px solid var(--border)"}}><div className="flex items-center gap-2.5 mb-3"><span style={{color}}>{icon}</span><h3 className="font-jakarta font-bold text-sm" style={{color:txt}}>{title}</h3></div>{children}</div>);
 }
 
 function SpecRow({ label, value, mono }: any) {
@@ -161,7 +161,7 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
 
       {/* Header with gradient + quick info tabs */}
       <div className="mb-3 text-center">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+        <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{background:"linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>
           {order.order_number}
         </h2>
@@ -176,7 +176,7 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
             <span className={STATUS_CLASS[order.status]} style={{padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:600,border:"1px solid"}}>{STATUS_LABEL[order.status]}</span>
             <span style={{padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:600,background:`${t.color}18`,color:t.color,border:`1px solid ${t.color}35`}}>{t.icon} {t.label}</span>
           </div>
-          <span className="font-syne font-extrabold text-xl sm:text-2xl" style={{color:CLR.green.text}}>${Number(order.price).toFixed(0)}</span>
+          <span className="font-jakarta font-extrabold text-xl sm:text-2xl" style={{color:CLR.green.text}}>${Number(order.price).toFixed(0)}</span>
         </div>
         {/* Row 2: Info chips */}
         <div className="flex flex-wrap gap-1.5">
@@ -199,7 +199,7 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
         <div>
           {/* Specs — compact on mobile, only show key fields */}
           <div className="rounded-2xl p-3.5 sm:p-5 mb-3" style={{background:"var(--surface)",border:"1px solid var(--border)"}}>
-            <h3 className="font-syne font-bold text-[13px] sm:text-sm mb-2.5" style={{color:txt}}>Order Details</h3>
+            <h3 className="font-jakarta font-bold text-[13px] sm:text-sm mb-2.5" style={{color:txt}}>Order Details</h3>
             <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-[13px]">
               {order.design_name&&<><span style={{color:txt3}}>Design</span><span className="font-medium text-right" style={{color:txt}}>{order.design_name}</span></>}
               <span style={{color:txt3}}>Service</span><span className="font-medium text-right" style={{color:txt}}>{order.service_tiers?.label}</span>
@@ -219,13 +219,13 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
 
           {/* Artwork */}
           <div className="rounded-2xl p-3.5 sm:p-5 mb-3" style={{background:"var(--surface)",border:"1px solid var(--border)"}}>
-            <h3 className="font-syne font-bold text-[13px] sm:text-sm mb-2.5 flex items-center gap-2" style={{color:txt}}><ImageIcon size={14} style={{color:CLR.cyan.icon}}/> Artwork</h3>
+            <h3 className="font-jakarta font-bold text-[13px] sm:text-sm mb-2.5 flex items-center gap-2" style={{color:txt}}><ImageIcon size={14} style={{color:CLR.cyan.icon}}/> Artwork</h3>
             {artworkFiles.length>0?artworkFiles.map((f:any)=><FileCard key={f.id} file={f} icon={<ImageIcon size={14}/>} onPreview={setPreviewImage} onDownload={downloadFile}/>):<p className="text-xs text-center py-4" style={{color:txt3}}>No artwork uploaded</p>}
           </div>
 
           {/* Output — grouped by version */}
           <div className="rounded-2xl p-3.5 sm:p-5 mb-3 lg:mb-0" style={{background:"var(--surface)",border:"1px solid var(--border)"}}>
-            <h3 className="font-syne font-bold text-[13px] sm:text-sm mb-2.5 flex items-center gap-2" style={{color:txt}}><Download size={14} style={{color:CLR.green.icon}}/> Downloads</h3>
+            <h3 className="font-jakarta font-bold text-[13px] sm:text-sm mb-2.5 flex items-center gap-2" style={{color:txt}}><Download size={14} style={{color:CLR.green.icon}}/> Downloads</h3>
             {showOutputs?(
               outputFiles.length>0?(
                 (() => {
@@ -260,7 +260,7 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
           {/* Revision Messages */}
           {orderMessages?.length > 0 && (
             <div className="rounded-2xl p-3.5 sm:p-5 mb-3 lg:mb-0" style={{background:"var(--surface)",border:"1px solid var(--border)"}}>
-              <h3 className="font-syne font-bold text-[13px] sm:text-sm mb-2.5 flex items-center gap-2" style={{color:txt}}><MessageSquare size={14} style={{color:CLR.orange.icon}}/> Revision Messages</h3>
+              <h3 className="font-jakarta font-bold text-[13px] sm:text-sm mb-2.5 flex items-center gap-2" style={{color:txt}}><MessageSquare size={14} style={{color:CLR.orange.icon}}/> Revision Messages</h3>
               {orderMessages.map((msg:any) => {
                 const isMe = msg.sender?.id === userId;
                 return (
@@ -282,7 +282,7 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
           {/* Edit History */}
           {editLogs.length>0&&(
             <div className="rounded-2xl p-3.5 sm:p-5 mb-3 lg:mb-0" style={{background:"var(--surface)",border:"1px solid var(--border)"}}>
-              <h3 className="font-syne font-bold text-[13px] sm:text-sm mb-2.5" style={{color:txt}}>Edit History</h3>
+              <h3 className="font-jakarta font-bold text-[13px] sm:text-sm mb-2.5" style={{color:txt}}>Edit History</h3>
               {editLogs.map((log:any)=>(
                 <div key={log.id} className="py-2" style={{borderBottom:"1px solid var(--border)"}}>
                   <div className="flex items-center justify-between gap-2 mb-1">
@@ -306,7 +306,7 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
 
           {/* Help + Message tabs */}
           <div className="rounded-2xl p-3.5 sm:p-5 mb-3" style={{background:"var(--surface)",border:"1px solid var(--border)"}}>
-            <h3 className="font-syne font-bold text-[13px] sm:text-sm mb-2.5" style={{color:txt}}>Need help?</h3>
+            <h3 className="font-jakarta font-bold text-[13px] sm:text-sm mb-2.5" style={{color:txt}}>Need help?</h3>
             <p className="text-[12px] mb-3" style={{color:txt2}}>Have questions about your order? Message our support team — we typically reply within 1 hour.</p>
             <Link href={`/client/messages?order=${order.id}`} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold border-none cursor-pointer no-underline text-white active:scale-95 transition-all" style={{background:`linear-gradient(135deg,${CLR.purple.bg},${CLR.purple.icon})`}}><MessageSquare size={15}/> Message Support</Link>
           </div>

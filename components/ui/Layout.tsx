@@ -77,7 +77,7 @@ export function PageHeader({
                 : (name?.charAt(0)?.toUpperCase() || "U")}
             </div>
             <div className="flex-1 min-w-0">
-              <span className="font-syne font-bold text-md" style={{ color: "var(--txt)" }}>{name}</span>
+              <span className="font-jakarta font-bold text-md" style={{ color: "var(--txt)" }}>{name}</span>
               {badge && (
                 <span className="text-2xs ml-2 px-2 py-0.5 rounded-full font-semibold"
                   style={{ background: `${badgeBg}1a`, color: badgeBg, border: `1px solid ${badgeBg}40` }}>
@@ -91,7 +91,7 @@ export function PageHeader({
       </Section>
 
       {/* Title */}
-      <h2 className="font-syne font-bold text-xl sm:text-2xl leading-tight mb-1"
+      <h2 className="font-jakarta font-bold text-xl sm:text-2xl leading-tight mb-1"
         style={{
           background: titleGrad,
           WebkitBackgroundClip: "text",
@@ -140,7 +140,7 @@ export function StatGrid({ items }: { items: StatItem[] }) {
                 {s.label}
               </span>
             </div>
-            <div className="font-syne font-bold text-lg sm:text-xl" style={{ color: s.color.text }}>
+            <div className="font-jakarta font-bold text-lg sm:text-xl" style={{ color: s.color.text }}>
               {s.value}
             </div>
           </div>
@@ -255,7 +255,7 @@ export function EmptyState({ icon, title, description, action }: {
     <Section>
       <div className="text-center py-14 rounded-2xl border bg-[var(--surface)] border-[var(--border)]">
         {icon && <p className="text-4xl mb-3">{icon}</p>}
-        <p className="font-syne font-bold text-lg" style={{ color: "var(--txt)" }}>{title}</p>
+        <p className="font-jakarta font-bold text-lg" style={{ color: "var(--txt)" }}>{title}</p>
         {description && <p className="text-sm mt-1.5" style={{ color: "var(--txt2)" }}>{description}</p>}
         {action && <div className="mt-4">{action}</div>}
       </div>

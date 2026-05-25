@@ -56,7 +56,7 @@ function Section({ title, icon, colorIdx, children }: {
       style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
       <div className="flex items-center gap-2.5 mb-3">
         <span style={{ color: clr.icon }}>{icon}</span>
-        <h3 className="font-syne font-bold text-sm" style={{ color: "var(--txt)", margin: 0 }}>
+        <h3 className="font-jakarta font-bold text-sm" style={{ color: "var(--txt)", margin: 0 }}>
           {title}
         </h3>
       </div>
@@ -315,7 +315,7 @@ export function AdminOrderDetail({
               </div>
               {/* Price visible on mobile next to badges */}
               <div className="sm:hidden text-right flex-shrink-0">
-                <div className="text-xl font-syne font-extrabold" style={{ color: CARD_COLORS[1].text }}>
+                <div className="text-xl font-jakarta font-extrabold" style={{ color: CARD_COLORS[1].text }}>
                   ${Number(order.price).toFixed(0)}
                 </div>
               </div>
@@ -344,7 +344,7 @@ export function AdminOrderDetail({
 
           {/* Desktop: price + invoice on the right */}
           <div className="hidden sm:block text-right flex-shrink-0">
-            <div className="text-xl sm:text-2xl font-syne font-extrabold" style={{ color: CARD_COLORS[1].text }}>
+            <div className="text-xl sm:text-2xl font-jakarta font-extrabold" style={{ color: CARD_COLORS[1].text }}>
               ${Number(order.price).toFixed(0)}
             </div>
             {invoice && (
@@ -540,7 +540,7 @@ export function AdminOrderDetail({
               style={{ background: "var(--surface)", border: `1px solid ${CARD_COLORS[2].border}` }}>
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🔍</span>
-                <h3 className="font-syne font-bold text-sm" style={{ color: "var(--txt)" }}>Designer QA</h3>
+                <h3 className="font-jakarta font-bold text-sm" style={{ color: "var(--txt)" }}>Designer QA</h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
                   style={{ background: CARD_COLORS[2].bgSoft, color: CARD_COLORS[2].text, border: `1px solid ${CARD_COLORS[2].border}` }}>
                   Pending Review
@@ -596,7 +596,7 @@ export function AdminOrderDetail({
               style={{ background: "var(--surface)", border: `1px solid ${CARD_COLORS[5].border}` }}>
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🔄</span>
-                <h3 className="font-syne font-bold text-sm" style={{ color: "var(--txt)" }}>Revision Pending</h3>
+                <h3 className="font-jakarta font-bold text-sm" style={{ color: "var(--txt)" }}>Revision Pending</h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
                   style={{ background: CARD_COLORS[5].bgSoft, color: CARD_COLORS[5].text, border: `1px solid ${CARD_COLORS[5].border}` }}>
                   Awaiting Designer
@@ -614,7 +614,7 @@ export function AdminOrderDetail({
               style={{ background: "var(--surface)", border: `1px solid ${CARD_COLORS[3].border}` }}>
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">📦</span>
-                <h3 className="font-syne font-bold text-sm" style={{ color: "var(--txt)" }}>Release to Client</h3>
+                <h3 className="font-jakarta font-bold text-sm" style={{ color: "var(--txt)" }}>Release to Client</h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
                   style={{ background: CARD_COLORS[3].bgSoft, color: CARD_COLORS[3].text, border: `1px solid ${CARD_COLORS[3].border}` }}>
                   Approved — Hidden from Client
@@ -669,7 +669,7 @@ export function AdminOrderDetail({
               <div className="mb-3">
                 <div className="flex justify-between mb-1">
                   <span className="text-xs" style={{ color: "var(--txt2)" }}>Amount</span>
-                  <span className="font-syne font-bold text-base" style={{ color: CARD_COLORS[1].text }}>
+                  <span className="font-jakarta font-bold text-base" style={{ color: CARD_COLORS[1].text }}>
                     ${Number(invoice.amount).toFixed(2)}
                   </span>
                 </div>

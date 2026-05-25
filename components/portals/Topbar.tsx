@@ -139,7 +139,7 @@ function MobileSidebarDrawer({ user }: { user: AuthUser }) {
             <div className="flex items-center justify-between px-4 pt-5 pb-3">
               <div className="flex items-center gap-2.5">
                 <img src="/images/black_logo.png" alt="GenX" className="h-7 w-auto" />
-                <span className="font-syne font-extrabold text-[13px]"
+                <span className="font-jakarta font-extrabold text-[13px]"
                   style={{ background: "linear-gradient(135deg,#2FA4D7,#E76F2E)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>GENX</span>
               </div>
               <button onClick={handleClose} className="p-2 rounded-lg hover:bg-[var(--elevated)]" style={{ color: "var(--txt2)" }}>
@@ -215,7 +215,7 @@ export function Topbar({ title, subtitle, user }: TopbarProps) {
         <img src="/images/black_logo.png" alt="GenX" className="h-6 sm:h-7 w-auto flex-shrink-0 lg:hidden mr-2" />
         <div>
           <h1
-            className="font-syne font-bold text-sm sm:text-[15px]"
+            className="font-jakarta font-bold text-sm sm:text-[15px]"
             style={{
               background: "linear-gradient(90deg,var(--txt),var(--txt2))",
               WebkitBackgroundClip: "text",
@@ -286,7 +286,7 @@ export function Topbar({ title, subtitle, user }: TopbarProps) {
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
                   <div className="flex items-center gap-2">
-                    <span className="font-syne font-bold text-[13px]">
+                    <span className="font-jakarta font-bold text-[13px]">
                       Notifications
                     </span>
                     {unreadCount > 0 && (

@@ -28,7 +28,7 @@ function DoneScreen({done,totalPrice,qty,sel,serviceName,selTurn,router,setDone,
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{background:GREEN.bgSoft}}>
           <CheckCircle size={28} style={{color:GREEN.icon}}/>
         </div>
-        <h2 className="font-syne font-bold text-xl mb-2" style={{color:GREEN.text}}>Order Placed!</h2>
+        <h2 className="font-jakarta font-bold text-xl mb-2" style={{color:GREEN.text}}>Order Placed!</h2>
         <p className="text-[13px] leading-relaxed mb-4" style={{color:txt2}}>
           <strong className="font-mono text-base" style={{color:PURPLE.text}}>{done.order_number}</strong>
           <br/>submitted — our team is on it.
@@ -120,7 +120,7 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
   return (
     <div className="portal-content" style={{background:"var(--bg)"}}>
       <div className="mb-4 sm:mb-5">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+        <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{background:"linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>
           New Order
         </h2>

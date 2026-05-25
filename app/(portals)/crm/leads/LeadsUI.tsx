@@ -86,7 +86,7 @@ function AddLeadModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data: a
       <div className="w-full max-w-[480px] max-h-[90vh] overflow-y-auto rounded-2xl border p-6"
         style={{ background: "var(--bg)", borderColor: "var(--border2)" }} onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
-          <h3 className="font-syne font-bold text-lg" style={{ color: txt }}>Add Lead</h3>
+          <h3 className="font-jakarta font-bold text-lg" style={{ color: txt }}>Add Lead</h3>
           <button onClick={onClose} className="bg-transparent border-none cursor-pointer" style={{ color: txt3 }}><X size={16} /></button>
         </div>
         {[
@@ -161,7 +161,7 @@ function LeadDetailModal({ lead, onClose, onContact }: { lead: any; onClose: () 
               {getInitials(lead.contact_name)}
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="font-syne font-bold text-lg sm:text-xl mb-1" style={{ color: txt }}>{lead.contact_name}</h2>
+              <h2 className="font-jakarta font-bold text-lg sm:text-xl mb-1" style={{ color: txt }}>{lead.contact_name}</h2>
               <div className="flex items-center gap-2.5 flex-wrap">
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border"
                   style={{ background: sc.bgSoft, color: sc.text, borderColor: sc.border }}>{stage?.icon} {stage?.label}</span>
@@ -340,7 +340,7 @@ function ContactLeadModal({ lead, onClose }: { lead: any; onClose: () => void })
         onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
           <div>
-            <h3 className="font-syne font-bold text-lg mb-0.5" style={{ color: txt }}>Contact {lead.contact_name}</h3>
+            <h3 className="font-jakarta font-bold text-lg mb-0.5" style={{ color: txt }}>Contact {lead.contact_name}</h3>
             <p className="text-[11px] m-0" style={{ color: txt2 }}>{lead.email}</p>
           </div>
           <button onClick={onClose} className="bg-transparent border-none cursor-pointer" style={{ color: txt3 }}><X size={16} /></button>
@@ -385,7 +385,7 @@ export function CRMLeadsUI({ leads: initial, userId, fetchError }: { leads: any[
       <div className="portal-content" style={{ background: "var(--bg)" }}>
         <div className="text-center py-16 px-4">
           <div className="text-5xl mb-4">⚠️</div>
-          <h3 className="font-syne font-bold text-lg mb-2" style={{ color: txt }}>Failed to load leads</h3>
+          <h3 className="font-jakarta font-bold text-lg mb-2" style={{ color: txt }}>Failed to load leads</h3>
           <p className="text-sm mb-4" style={{ color: txt2 }}>{fetchError}</p>
           <button onClick={() => window.location.reload()}
             className="px-5 py-2 rounded-xl text-[13px] font-semibold border-none cursor-pointer text-white transition-all active:scale-95"
@@ -421,7 +421,7 @@ export function CRMLeadsUI({ leads: initial, userId, fetchError }: { leads: any[
     <div className="portal-content" style={{ background: "var(--bg)" }}>
       {/* Header with gradient */}
       <div className="mb-5 sm:mb-6">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+        <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{ background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
           Leads
         </h2>
@@ -445,7 +445,7 @@ export function CRMLeadsUI({ leads: initial, userId, fetchError }: { leads: any[
                 <span style={{ color: c.icon }}>{s.icon}</span>
                 <div>
                   <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: txt2 }}>{s.label}</div>
-                  <div className="font-syne font-bold text-base" style={{ color: c.text }}>{s.val}</div>
+                  <div className="font-jakarta font-bold text-base" style={{ color: c.text }}>{s.val}</div>
                 </div>
               </div>
             );

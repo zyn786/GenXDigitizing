@@ -59,7 +59,7 @@ export function Footer() {
 
           {/* Services */}
           <div>
-            <h4 className="font-syne font-bold text-xs uppercase tracking-[0.08em] text-[var(--txt3)] mb-4">
+            <h4 className="font-jakarta font-bold text-xs uppercase tracking-[0.08em] text-[var(--txt3)] mb-4">
               Services
             </h4>
             {SERVICES.map((s) => (
@@ -76,7 +76,7 @@ export function Footer() {
 
           {/* Company */}
           <div>
-            <h4 className="font-syne font-bold text-xs uppercase tracking-[0.08em] text-[var(--txt3)] mb-4">
+            <h4 className="font-jakarta font-bold text-xs uppercase tracking-[0.08em] text-[var(--txt3)] mb-4">
               Company
             </h4>
             {COMPANY.map(([label, href]) => (

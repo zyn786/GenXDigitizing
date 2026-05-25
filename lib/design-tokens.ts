@@ -101,7 +101,7 @@ export const colors = {
 
 export const typography = {
   fontFamily: {
-    heading: "var(--font-syne), 'Syne', sans-serif",
+    heading: "var(--font-jakarta), 'Syne', sans-serif",
     body:    "var(--font-inter), 'Inter', sans-serif",
     mono:    "'JetBrains Mono', 'Fira Code', monospace",
   },

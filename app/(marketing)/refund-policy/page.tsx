@@ -12,14 +12,14 @@ export default function RefundPolicyPage() {
         <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20 mb-4">
           Legal
         </span>
-        <h1 className="font-syne font-extrabold text-[clamp(28px,5vw,42px)] leading-[1.15] mb-3">
+        <h1 className="font-jakarta font-extrabold text-[clamp(28px,5vw,42px)] leading-[1.15] mb-3">
           Refund Policy
         </h1>
         <p className="text-[var(--txt3)] text-sm mb-10">Last updated: May 23, 2026</p>
 
         <div className="prose prose-sm max-w-none space-y-8 text-[var(--txt2)] leading-relaxed">
           <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl p-5">
-            <p className="font-syne font-bold text-[#166534] mb-1">Our Promise</p>
+            <p className="font-jakarta font-bold text-[#166534] mb-1">Our Promise</p>
             <p className="text-[#166534] text-sm">
               We stand behind every digitized file we deliver. With unlimited free revisions, most issues
               are resolved long before a refund is needed. If we cannot meet your requirements after
@@ -28,7 +28,7 @@ export default function RefundPolicyPage() {
           </div>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">1. Full Refunds — Before Work Begins</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">1. Full Refunds — Before Work Begins</h2>
             <p>
               You may cancel your order and receive a <strong>100% refund</strong> at any time before
               we begin digitizing your file. Once work has started, our digitizers have invested time
@@ -42,7 +42,7 @@ export default function RefundPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">2. Quality-Based Refunds</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">2. Quality-Based Refunds</h2>
             <p>
               If you are unsatisfied with the quality of our work and we cannot resolve the issue after
               reasonable revision attempts (typically 2–3 revision rounds addressing specific, actionable
@@ -56,7 +56,7 @@ export default function RefundPolicyPage() {
               ].map((tier) => (
                 <div key={tier.label} className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 text-center">
                   <p className="text-xs text-[var(--txt3)] uppercase tracking-wider font-semibold mb-2">{tier.label}</p>
-                  <p className="font-syne font-bold text-2xl text-[#2563EB] mb-1">{tier.refund}</p>
+                  <p className="font-jakarta font-bold text-2xl text-[#2563EB] mb-1">{tier.refund}</p>
                   <p className="text-xs text-[var(--txt3)]">{tier.desc}</p>
                 </div>
               ))}
@@ -68,7 +68,7 @@ export default function RefundPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">3. Non-Refundable Situations</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">3. Non-Refundable Situations</h2>
             <p>Refunds are not available in the following cases:</p>
             <ul className="list-disc pl-5 space-y-2">
               <li><strong>File already delivered and accepted</strong> — Once you download and use the digitized file in production, it is considered accepted.</li>
@@ -80,7 +80,7 @@ export default function RefundPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">4. Free Services Clause</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">4. Free Services Clause</h2>
             <p>
               Our free services — unlimited revisions, format conversions, rush/urgent turnaround — are
               complimentary and do not carry monetary value for refund calculations. Refund amounts are
@@ -89,7 +89,7 @@ export default function RefundPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">5. How to Request a Refund</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">5. How to Request a Refund</h2>
             <ol className="list-decimal pl-5 space-y-2">
               <li>Contact <a href="mailto:support@genxdigitizing.com" className="text-[#2563EB] hover:underline">support@genxdigitizing.com</a> with your order number</li>
               <li>Describe the specific issues you&apos;re experiencing</li>
@@ -103,7 +103,7 @@ export default function RefundPolicyPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">6. Contact</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">6. Contact</h2>
             <p>
               Refund questions or disputes? Reach us at{" "}
               <a href="mailto:support@genxdigitizing.com" className="text-[#2563EB] hover:underline font-medium">support@genxdigitizing.com</a>{" "}

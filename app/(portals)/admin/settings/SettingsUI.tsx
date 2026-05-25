@@ -105,7 +105,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
     <div className="portal-content" style={{ background: "var(--bg)" }}>
       {/* Header */}
       <div className="mb-5 sm:mb-6">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+        <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{ background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
           Settings
         </h2>
@@ -153,7 +153,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
           {tab === "company" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
               <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-                <h3 className="font-syne font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
+                <h3 className="font-jakarta font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
                   <Settings size={15} style={{ color: clr[0].icon }} /> Company Info
                 </h3>
                 <Field label="Company Name"><input style={inpStyle} value={company.name} onChange={e => setCompany(p => ({ ...p, name: e.target.value }))} /></Field>
@@ -168,7 +168,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
                 <div className="mt-2"><SaveBtn onClick={() => save("Company")} /></div>
               </div>
               <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-                <h3 className="font-syne font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
+                <h3 className="font-jakarta font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
                   <Palette size={15} style={{ color: clr[4].icon }} /> Branding
                 </h3>
                 <Field label="Platform Logo">
@@ -179,7 +179,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
                     <div className="text-center"><div className="text-2xl mb-1.5">🖼️</div><p className="text-xs" style={{ color: txt3 }}>Click to upload</p><p className="text-[11px] mt-1" style={{ color: txt3 }}>PNG · SVG · 200×60px</p></div>
                   </div>
                 </Field>
-                <h3 className="font-syne font-bold text-[13px] mb-3 mt-5 flex items-center gap-2" style={{ color: txt }}>
+                <h3 className="font-jakarta font-bold text-[13px] mb-3 mt-5 flex items-center gap-2" style={{ color: txt }}>
                   <Shield size={15} style={{ color: clr[0].icon }} /> Platform Status
                 </h3>
                 <div className="rounded-xl border" style={{ background: "var(--elevated)", borderColor: "var(--border)" }}>
@@ -198,7 +198,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
           {tab === "payoneer" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
               <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-                <h3 className="font-syne font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
+                <h3 className="font-jakarta font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
                   <CreditCard size={15} style={{ color: clr[3].icon }} /> Payoneer API
                 </h3>
                 <Field label="Environment">
@@ -220,7 +220,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
                 <div className="mt-2"><SaveBtn onClick={() => save("Payoneer")} /></div>
               </div>
               <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-                <h3 className="font-syne font-bold text-[13px] mb-3 flex items-center gap-2" style={{ color: txt }}>🌐 Webhook</h3>
+                <h3 className="font-jakarta font-bold text-[13px] mb-3 flex items-center gap-2" style={{ color: txt }}>🌐 Webhook</h3>
                 <p className="text-[13px] leading-relaxed mb-3" style={{ color: txt2 }}>Register this URL in your Payoneer merchant dashboard to receive payment events.</p>
                 <div className="rounded-xl p-3 mb-3 border font-mono" style={{ background: "var(--elevated)", borderColor: "var(--border2)" }}>
                   <code className="text-xs break-all" style={{ color: clr[3].text }}>
@@ -232,7 +232,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
                   {payoneer.env === "sandbox" ? "⚠️ Sandbox mode — no real payments" : "✓ Production mode — live payments enabled"}
                 </div>
                 <div className="mt-4">
-                  <h4 className="font-syne text-[13px] font-bold mb-2.5" style={{ color: txt }}>Events handled</h4>
+                  <h4 className="font-jakarta text-[13px] font-bold mb-2.5" style={{ color: txt }}>Events handled</h4>
                   {["PAYMENT_COMPLETED → marks invoice paid","PAYMENT_REFUNDED → marks order refunded","PAYMENT_FAILED → notifies admin"].map(e => (
                     <div key={e} className="flex items-start gap-2 text-xs py-1.5" style={{ color: txt2, borderBottom: "1px solid var(--border)" }}>
                       <span style={{ color: clr[1].text }}>✓</span> {e}
@@ -247,7 +247,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
           {tab === "email" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
               <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-                <h3 className="font-syne font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
+                <h3 className="font-jakarta font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
                   <Mail size={15} style={{ color: clr[4].icon }} /> Resend Configuration
                 </h3>
                 <Field label="API Key"><input style={{ ...inpStyle, fontFamily: "monospace" }} type="password" placeholder="re_xxxxxxxxxxxxxxxx" value={resend.api_key} onChange={e => setResend(p => ({ ...p, api_key: e.target.value }))} /></Field>
@@ -257,7 +257,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
                 <div className="mt-2"><SaveBtn onClick={() => save("Email")} /></div>
               </div>
               <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-                <h3 className="font-syne font-bold text-[13px] mb-3 flex items-center gap-2" style={{ color: txt }}>📧 Notification Templates</h3>
+                <h3 className="font-jakarta font-bold text-[13px] mb-3 flex items-center gap-2" style={{ color: txt }}>📧 Notification Templates</h3>
                 <p className="text-xs mb-3" style={{ color: txt3 }}>Templates in <code className="text-[11px] px-1.5 py-0.5 rounded font-mono" style={{ color: clr[4].text, background: clr[4].bgSoft }}>lib/email/index.ts</code></p>
                 <div className="flex flex-col gap-1.5">
                   {EMAIL_TEMPLATES.map(t => (
@@ -279,7 +279,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
           {tab === "sla" && (
             <div>
               <div className="rounded-2xl p-4 sm:p-5 mb-4" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-                <h3 className="font-syne font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
+                <h3 className="font-jakarta font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
                   <Clock size={15} style={{ color: clr[2].icon }} /> Turnaround Rules
                 </h3>
                 <div className="flex flex-col gap-2">
@@ -296,7 +296,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <input type="number" min="1" max="48" value={sla[item.key as keyof typeof sla]} onChange={e => setSla(p => ({ ...p, [item.key]: parseInt(e.target.value) || 1 }))}
-                          className="w-[55px] text-center font-syne font-bold text-base outline-none rounded-xl py-2 border"
+                          className="w-[55px] text-center font-jakarta font-bold text-base outline-none rounded-xl py-2 border"
                           style={{ background: "var(--surface)", color: clr[item.ci].text, borderColor: clr[item.ci].border }} />
                         <span className="text-[11px] font-medium" style={{ color: txt3 }}>hrs</span>
                       </div>
@@ -326,7 +326,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
                     <div key={r.role} className="rounded-2xl p-4 sm:p-5 h-full" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
                       <div className="flex items-center gap-2.5 mb-3 pb-3" style={{ borderBottom: "1px solid var(--border)" }}>
                         <div className="w-8 h-8 rounded-xl flex items-center justify-center text-base" style={{ background: c.bgSoft }}>{r.emoji}</div>
-                        <h3 className="font-syne font-bold text-[13px] capitalize" style={{ color: c.text }}>{r.role}</h3>
+                        <h3 className="font-jakarta font-bold text-[13px] capitalize" style={{ color: c.text }}>{r.role}</h3>
                       </div>
                       {Object.entries(r.perms).map(([key, val]) => (
                         <ToggleRow key={key} label={key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())} value={val} onChange={(v) => r.setPerms((p: any) => ({ ...p, [key]: v }))} />
@@ -343,7 +343,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
           {tab === "account" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
               <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-                <h3 className="font-syne font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
+                <h3 className="font-jakarta font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
                   <User size={15} style={{ color: clr[0].icon }} /> My Account
                 </h3>
                 <Field label="Full Name"><input style={inpStyle} value={account.full_name} onChange={e => setAccount(p => ({ ...p, full_name: e.target.value }))} /></Field>
@@ -351,7 +351,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
                 <div className="mt-2"><SaveBtn onClick={() => save("Account")} /></div>
               </div>
               <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-                <h3 className="font-syne font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>🔑 Change Password</h3>
+                <h3 className="font-jakarta font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>🔑 Change Password</h3>
                 <Field label="New Password"><input style={inpStyle} type="password" placeholder="Minimum 8 characters" /></Field>
                 <Field label="Confirm Password"><input style={inpStyle} type="password" placeholder="Re-enter password" /></Field>
                 <div className="mt-2"><SaveBtn onClick={() => toast.success("Password updated")} /></div>

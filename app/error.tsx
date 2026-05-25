@@ -25,7 +25,7 @@ export default function GlobalError({
           />
           <div className="text-center max-w-sm">
             <div className="text-5xl mb-5">⚡</div>
-            <h1 className="font-syne font-bold text-xl mb-2 text-[var(--txt)]">
+            <h1 className="font-jakarta font-bold text-xl mb-2 text-[var(--txt)]">
               Something went wrong
             </h1>
             <p className="text-sm text-[var(--txt3)] mb-6 leading-relaxed">

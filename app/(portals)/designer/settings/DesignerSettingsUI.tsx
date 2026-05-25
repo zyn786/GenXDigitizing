@@ -75,7 +75,7 @@ export function DesignerSettingsUI({ user, profile }: any) {
               : designerName?.charAt(0)?.toUpperCase() || "D"}
           </div>
           <div className="flex-1 min-w-0">
-            <span className="font-syne font-bold text-[14px]" style={{ color: txt }}>{designerName}</span>
+            <span className="font-jakarta font-bold text-[14px]" style={{ color: txt }}>{designerName}</span>
             <span className="text-[11px] ml-2 px-2 py-0.5 rounded-full font-semibold"
               style={{ background: "rgba(124,58,237,0.10)", color: "#6D28D9", border: "1px solid rgba(124,58,237,0.25)" }}>Settings</span>
           </div>
@@ -88,7 +88,7 @@ export function DesignerSettingsUI({ user, profile }: any) {
       </div>
 
       {/* ── Title ── */}
-      <h2 className="font-syne font-bold text-xl sm:text-2xl leading-tight mb-1"
+      <h2 className="font-jakarta font-bold text-xl sm:text-2xl leading-tight mb-1"
         style={{ background: "linear-gradient(135deg, #7C3AED, #D946EF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
         Settings
       </h2>
@@ -115,7 +115,7 @@ export function DesignerSettingsUI({ user, profile }: any) {
                   </div>
                   <span className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold" style={{ color: txt3 }}>{s.label}</span>
                 </div>
-                <div className="font-syne font-bold text-lg sm:text-xl" style={{ color: c.text }}>{s.val}</div>
+                <div className="font-jakarta font-bold text-lg sm:text-xl" style={{ color: c.text }}>{s.val}</div>
               </div>
             );
           })}
@@ -147,7 +147,7 @@ export function DesignerSettingsUI({ user, profile }: any) {
       {/* ── Profile section ── */}
       {section === "profile" && (
         <div className="rounded-2xl p-4 sm:p-6 mb-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-          <h3 className="font-syne font-bold text-[15px] mb-5 flex items-center gap-2" style={{ color: txt }}>
+          <h3 className="font-jakarta font-bold text-[15px] mb-5 flex items-center gap-2" style={{ color: txt }}>
             <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: "rgba(124,58,237,0.10)", color: "#7C3AED" }}>
               <User size={13} />
@@ -222,7 +222,7 @@ export function DesignerSettingsUI({ user, profile }: any) {
       {/* ── Performance section ── */}
       {section === "performance" && (
         <div className="rounded-2xl p-4 sm:p-6 mb-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-          <h3 className="font-syne font-bold text-[15px] mb-5 flex items-center gap-2" style={{ color: txt }}>
+          <h3 className="font-jakarta font-bold text-[15px] mb-5 flex items-center gap-2" style={{ color: txt }}>
             <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: "rgba(245,158,11,0.10)", color: "#D97706" }}>
               <Award size={13} />
@@ -235,7 +235,7 @@ export function DesignerSettingsUI({ user, profile }: any) {
               <div className="rounded-xl p-4 mb-4" style={{ background: "var(--elevated)", border: "1px solid var(--border)" }}>
                 <div className="flex items-center gap-3 mb-3">
                   <Stars n={Math.round(profile.avg_rating)} />
-                  <span className="font-syne font-bold text-xl" style={{ color: "#D97706" }}>
+                  <span className="font-jakarta font-bold text-xl" style={{ color: "#D97706" }}>
                     {Number(profile.avg_rating).toFixed(2)}
                   </span>
                 </div>
@@ -257,7 +257,7 @@ export function DesignerSettingsUI({ user, profile }: any) {
                       <span style={{ color: c }}>{icon}</span>
                       <span>{l}</span>
                     </div>
-                    <span className="font-syne font-bold text-[15px]" style={{ color: c }}>{v}</span>
+                    <span className="font-jakarta font-bold text-[15px]" style={{ color: c }}>{v}</span>
                   </div>
                 ))}
               </div>

@@ -68,7 +68,7 @@ export default function ResetPasswordPage() {
               bg-gradient-to-br from-[#2563EB] to-[#F97316] text-white">
               🧵
             </div>
-            <span className="font-syne font-extrabold text-xl
+            <span className="font-jakarta font-extrabold text-xl
               bg-gradient-to-r from-[var(--txt)] to-[var(--txt2)] bg-clip-text text-transparent">
               GenXdigitizing
             </span>
@@ -80,7 +80,7 @@ export default function ResetPasswordPage() {
           {done ? (
             <div className="text-center">
               <div className="text-[52px] mb-4">✅</div>
-              <h2 className="font-syne font-bold text-[22px] mb-2.5
+              <h2 className="font-jakarta font-bold text-[22px] mb-2.5
                 bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
                 Password Updated!
               </h2>
@@ -94,7 +94,7 @@ export default function ResetPasswordPage() {
           ) : !ready ? (
             <div className="text-center">
               <div className="text-[40px] mb-4">🔐</div>
-              <h2 className="font-syne font-bold text-xl text-[var(--txt)] mb-2.5">
+              <h2 className="font-jakarta font-bold text-xl text-[var(--txt)] mb-2.5">
                 Verifying Reset Link…
               </h2>
               <p className="text-sm text-[var(--txt2)] leading-relaxed">
@@ -108,7 +108,7 @@ export default function ResetPasswordPage() {
             <>
               <div className="mb-7 text-center">
                 <div className="text-[40px] mb-3.5">🔑</div>
-                <h1 className="font-syne font-bold text-2xl text-[var(--txt)] mb-2">
+                <h1 className="font-jakarta font-bold text-2xl text-[var(--txt)] mb-2">
                   Set New Password
                 </h1>
                 <p className="text-sm text-[var(--txt2)]">

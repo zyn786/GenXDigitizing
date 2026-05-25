@@ -332,7 +332,7 @@ function RotatingServiceText() {
           className="flex items-center"
         >
           <span
-            className={`font-syne font-extrabold text-[clamp(24px,7vw,62px)] leading-[1.1] bg-gradient-to-r ${svc.gradient} bg-clip-text text-transparent`}
+            className={`font-jakarta font-extrabold text-[clamp(24px,7vw,62px)] leading-[1.1] bg-gradient-to-r ${svc.gradient} bg-clip-text text-transparent`}
           >
             {svc.label}
           </span>
@@ -451,7 +451,7 @@ export function LandingClient({ services, process, testimonials, faqs, floatingC
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="font-syne font-extrabold text-[clamp(36px,8vw,68px)] leading-[1.05] mb-4 sm:mb-5 -tracking-[0.02em] text-[var(--txt)]"
+                className="font-jakarta font-extrabold text-[clamp(36px,8vw,68px)] leading-[1.05] mb-4 sm:mb-5 -tracking-[0.02em] text-[var(--txt)]"
               >
                 Your Trusted Source For
               </motion.h1>
@@ -523,7 +523,7 @@ export function LandingClient({ services, process, testimonials, faqs, floatingC
                 <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] animate-pulse" />
                 Operations Live
               </span>
-              <h2 className="font-syne font-extrabold text-2xl sm:text-3xl mb-2">Built on Trust & Speed</h2>
+              <h2 className="font-jakarta font-extrabold text-2xl sm:text-3xl mb-2">Built on Trust & Speed</h2>
               <p className="text-sm text-[var(--txt2)] max-w-lg mx-auto">Every order backed by real guarantees. No hidden terms. No surprises.</p>
             </div>
 
@@ -538,7 +538,7 @@ export function LandingClient({ services, process, testimonials, faqs, floatingC
               ].map((s) => (
                 <div key={s.label} className="text-center p-4 rounded-2xl bg-[var(--bg)]/60 border border-[var(--border)] lift">
                   <div className="text-2xl mb-2">{s.icon}</div>
-                  <div className="font-syne font-bold text-lg sm:text-xl mb-0.5" style={{ color: "var(--txt)" }}>
+                  <div className="font-jakarta font-bold text-lg sm:text-xl mb-0.5" style={{ color: "var(--txt)" }}>
                     {s.value}
                   </div>
                   <div className="text-2xs font-semibold text-[var(--txt2)] mb-0.5">{s.label}</div>
@@ -570,7 +570,7 @@ export function LandingClient({ services, process, testimonials, faqs, floatingC
                   bg-white/15 text-white border border-white/20">
                   How It Works
                 </span>
-                <h2 className="font-syne font-extrabold text-2xl md:text-4xl text-white mb-2">
+                <h2 className="font-jakarta font-extrabold text-2xl md:text-4xl text-white mb-2">
                   Order in Minutes, Delivered Fast
                 </h2>
               </div>
@@ -596,14 +596,14 @@ export function LandingClient({ services, process, testimonials, faqs, floatingC
                         </div>
                       )}
 
-                      <div className="font-syne font-extrabold text-xs tracking-[0.2em] uppercase mb-3 text-[#F97316]">
+                      <div className="font-jakarta font-extrabold text-xs tracking-[0.2em] uppercase mb-3 text-[#F97316]">
                         {phases[i]}
                       </div>
                       <div className="w-[52px] h-[52px] rounded-full mx-auto mb-3
                         bg-[#FFF7ED] border-2 border-[#F97316]/30 flex items-center justify-center text-[22px]">
                         {step.icon}
                       </div>
-                      <h3 className="font-syne font-bold text-base mb-1.5 text-[var(--txt)]">{step.title}</h3>
+                      <h3 className="font-jakarta font-bold text-base mb-1.5 text-[var(--txt)]">{step.title}</h3>
                       <p className="text-sm text-[var(--txt2)] leading-relaxed">{step.desc}</p>
                     </motion.div>
                   );
@@ -637,7 +637,7 @@ export function LandingClient({ services, process, testimonials, faqs, floatingC
 
                 <div className="text-[40px] mb-4">{svc.emoji}</div>
                 <h3
-                  className="font-syne font-bold text-xl mb-2.5 bg-clip-text text-transparent"
+                  className="font-jakarta font-bold text-xl mb-2.5 bg-clip-text text-transparent"
                   style={{ backgroundImage: svc.grad }}
                 >
                   {svc.title}
@@ -653,7 +653,7 @@ export function LandingClient({ services, process, testimonials, faqs, floatingC
                       style={{ borderColor: `${svc.color}12` }}
                     >
                       <span className="text-xs text-[var(--txt2)]">{t.size}</span>
-                      <span className="font-syne font-extrabold text-lg" style={{ color: svc.color }}>
+                      <span className="font-jakarta font-extrabold text-lg" style={{ color: svc.color }}>
                         {t.price}
                       </span>
                     </div>
@@ -726,7 +726,7 @@ export function LandingClient({ services, process, testimonials, faqs, floatingC
                   bg-white/15 text-white border border-white/20">
                   Always Included
                 </span>
-                <h2 className="font-syne font-extrabold text-2xl md:text-4xl text-white mb-2">
+                <h2 className="font-jakarta font-extrabold text-2xl md:text-4xl text-white mb-2">
                   Free With Every Order
                 </h2>
                 <p className="text-white/70 text-sm max-w-md mx-auto">
@@ -775,7 +775,7 @@ export function LandingClient({ services, process, testimonials, faqs, floatingC
               bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20 mb-4">
               From artwork to stitch file
             </span>
-            <h2 className="font-syne font-extrabold text-2xl sm:text-3xl md:text-4xl mb-3 leading-[1.15]">
+            <h2 className="font-jakarta font-extrabold text-2xl sm:text-3xl md:text-4xl mb-3 leading-[1.15]">
               Better trims, fills, and stitch paths.
             </h2>
             <p className="text-[var(--txt2)] text-sm max-w-lg mx-auto">
@@ -920,7 +920,7 @@ export function LandingClient({ services, process, testimonials, faqs, floatingC
 
             <div className="relative z-10">
               <div className="text-[56px] mb-4">🧵</div>
-              <h2 className="font-syne font-extrabold text-[clamp(32px,4vw,56px)] mb-4 leading-[1.08]">
+              <h2 className="font-jakarta font-extrabold text-[clamp(32px,4vw,56px)] mb-4 leading-[1.08]">
                 Ready to get started?
               </h2>
               <p className="text-lg text-[var(--txt2)] mb-10 max-w-[480px] mx-auto leading-relaxed">

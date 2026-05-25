@@ -18,11 +18,11 @@ function Logo() {
   return (
     <div className="flex items-center gap-3 mb-7 justify-center">
       <div className="w-10 h-10 rounded-[10px] flex items-center justify-center
-        bg-gradient-to-br from-[#2563EB] to-[#F97316] text-white font-syne font-bold text-xl">
+        bg-gradient-to-br from-[#2563EB] to-[#F97316] text-white font-jakarta font-bold text-xl">
         ✦
       </div>
       <div>
-        <div className="font-syne font-extrabold text-lg
+        <div className="font-jakarta font-extrabold text-lg
           bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
           GENX DIGITIZING
         </div>
@@ -134,7 +134,7 @@ function LoginForm() {
         <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-2xl p-6">
           <div className="text-center py-2">
             <div className="text-[40px] mb-3">📬</div>
-            <h2 className="font-syne font-bold text-[17px] text-[var(--txt)] mb-2">Check your email</h2>
+            <h2 className="font-jakarta font-bold text-[17px] text-[var(--txt)] mb-2">Check your email</h2>
             <p className="text-[13px] text-[var(--txt2)] leading-relaxed mb-4">
               We sent a magic link to <strong className="text-[var(--txt)]">{email}</strong>.
               Click it to sign in instantly.
@@ -163,7 +163,7 @@ function LoginForm() {
       )}
 
       <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-2xl p-6">
-        <h2 className="font-syne font-bold text-[17px] text-[var(--txt)] mb-5">
+        <h2 className="font-jakarta font-bold text-[17px] text-[var(--txt)] mb-5">
           {magicMode ? "Magic link sign in" : "Sign in"}
         </h2>
 

@@ -84,7 +84,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
           Transparent Pricing
         </Badge>
 
-        <h1 className="font-syne font-extrabold text-[clamp(32px,7vw,64px)] leading-[1.05] mb-4">
+        <h1 className="font-jakarta font-extrabold text-[clamp(32px,7vw,64px)] leading-[1.05] mb-4">
           Simple,
           <span className="block bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
             No-Surprise Pricing
@@ -153,7 +153,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
                       {theme.emoji}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h2 className="font-syne font-extrabold text-xl sm:text-3xl mb-1">{theme.name}</h2>
+                      <h2 className="font-jakarta font-extrabold text-xl sm:text-3xl mb-1">{theme.name}</h2>
                       <p className="text-[var(--txt2)] text-xs sm:text-sm">
                         {catMeta?.label || theme.name} — starting from ${Math.min(...tiersList.map(t => t.price))}
                       </p>
@@ -177,7 +177,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
                         {tier.label}
                       </Badge>
                       <div className="flex items-end gap-1.5 mb-1">
-                        <div className="font-syne font-extrabold text-2xl leading-none">${tier.price}</div>
+                        <div className="font-jakarta font-extrabold text-2xl leading-none">${tier.price}</div>
                         <span className="text-[10px] text-[var(--txt3)] mb-0.5">USD</span>
                       </div>
                       <div className="text-xs font-medium">{tier.size_desc}</div>
@@ -221,7 +221,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
                         {tier.label}
                       </Badge>
                       <div className="flex items-end gap-2 mb-3">
-                        <div className="font-syne font-extrabold text-5xl leading-none">${tier.price}</div>
+                        <div className="font-jakarta font-extrabold text-5xl leading-none">${tier.price}</div>
                         <span className="text-sm text-[var(--txt3)] mb-1">USD</span>
                       </div>
                       <div className="text-base font-medium mb-1">{tier.size_desc}</div>
@@ -252,7 +252,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#F59E0B]/10 text-[#92400E] border border-[#F59E0B]/20 mb-3">
               ⭐ Trusted by 500+ Clients
             </span>
-            <h2 className="font-syne font-extrabold text-xl sm:text-3xl mb-2">What Our Clients Say</h2>
+            <h2 className="font-jakarta font-extrabold text-xl sm:text-3xl mb-2">What Our Clients Say</h2>
             <p className="text-sm text-[var(--txt2)] max-w-lg mx-auto">Real feedback from real clients who trust us with their embroidery digitizing.</p>
           </div>
 
@@ -312,7 +312,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
         {/* FREE SECTION */}
         <div className="pt-6 sm:pt-8">
           <div className="text-center mb-8 sm:mb-10">
-            <h2 className="font-syne font-extrabold text-2xl sm:text-4xl mb-3">
+            <h2 className="font-jakarta font-extrabold text-2xl sm:text-4xl mb-3">
               What's Always
               <span className="block bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">Included Free</span>
             </h2>
@@ -326,7 +326,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#16A34A]/10 to-transparent" />
                 <div className="relative z-10">
                   <div className="text-2xl sm:text-4xl mb-2 sm:mb-4">{item.emoji}</div>
-                  <h3 className="font-syne font-bold text-sm sm:text-lg mb-1 sm:mb-2 text-[#16A34A]">{item.title}</h3>
+                  <h3 className="font-jakarta font-bold text-sm sm:text-lg mb-1 sm:mb-2 text-[#16A34A]">{item.title}</h3>
                   <p className="text-[11px] sm:text-sm text-[var(--txt2)] leading-relaxed">{item.desc}</p>
                 </div>
               </div>
@@ -338,7 +338,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
         <div className="relative overflow-hidden rounded-2xl sm:rounded-[36px] border border-[#2563EB]/20 bg-gradient-to-br from-[#2563EB]/15 via-white/40 to-[#F97316]/10 p-6 sm:p-12 text-center shadow-[0_0_60px_rgba(37,99,235,0.12)]">
           <GradientOrb color="#2563EB" size={200} className="-top-24 left-1/2 -translate-x-1/2 opacity-15" />
           <div className="relative z-10">
-            <h2 className="font-syne font-extrabold text-2xl sm:text-4xl mb-3 sm:mb-4">Ready to Get Started?</h2>
+            <h2 className="font-jakarta font-extrabold text-2xl sm:text-4xl mb-3 sm:mb-4">Ready to Get Started?</h2>
             <p className="text-sm sm:text-lg text-[var(--txt2)] max-w-2xl mx-auto mb-6 sm:mb-8">
               Create your account in seconds and start submitting professional embroidery jobs today.
             </p>

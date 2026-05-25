@@ -47,7 +47,7 @@ export function AdminDashClient({ stats, recentOrders, breakdown }: Props) {
       {/* Header */}
       <div className="mb-5 sm:mb-6">
         <h2
-          className="font-syne font-bold text-xl sm:text-2xl"
+          className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{
             background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)",
             WebkitBackgroundClip: "text",
@@ -90,7 +90,7 @@ export function AdminDashClient({ stats, recentOrders, breakdown }: Props) {
                 </p>
               </div>
               <p
-                className="font-syne font-extrabold text-[22px] sm:text-[26px] mb-1.5 leading-tight"
+                className="font-jakarta font-extrabold text-[22px] sm:text-[26px] mb-1.5 leading-tight"
                 style={{ color: clr.text }}
               >
                 {s.value}
@@ -123,7 +123,7 @@ export function AdminDashClient({ stats, recentOrders, breakdown }: Props) {
           style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
         >
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
-            <h3 className="font-syne font-bold text-sm" style={{ color: "var(--txt)" }}>
+            <h3 className="font-jakarta font-bold text-sm" style={{ color: "var(--txt)" }}>
               Weekly Volume
             </h3>
             <span
@@ -216,7 +216,7 @@ export function AdminDashClient({ stats, recentOrders, breakdown }: Props) {
           className="rounded-2xl p-4 sm:p-5"
           style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
         >
-          <h3 className="font-syne font-bold text-sm mb-4" style={{ color: "var(--txt)" }}>
+          <h3 className="font-jakarta font-bold text-sm mb-4" style={{ color: "var(--txt)" }}>
             Service Mix (30 days)
           </h3>
           {breakdown.length === 0 ? (
@@ -264,7 +264,7 @@ export function AdminDashClient({ stats, recentOrders, breakdown }: Props) {
           className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 sm:p-5"
           style={{ borderBottom: "1px solid var(--border)" }}
         >
-          <h3 className="font-syne font-bold text-sm" style={{ color: "var(--txt)" }}>
+          <h3 className="font-jakarta font-bold text-sm" style={{ color: "var(--txt)" }}>
             Recent Orders
           </h3>
           <Link
@@ -313,7 +313,7 @@ export function AdminDashClient({ stats, recentOrders, breakdown }: Props) {
                         <span>{o.service_tiers?.label ?? "—"}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="font-syne font-bold text-lg" style={{ color: "#059669" }}>
+                        <span className="font-jakarta font-bold text-lg" style={{ color: "#059669" }}>
                           ${o.price}
                         </span>
                         <span
@@ -388,7 +388,7 @@ export function AdminDashClient({ stats, recentOrders, breakdown }: Props) {
                             {o.output_format}
                           </span>
                         </td>
-                        <td className="px-4 py-3 font-syne font-bold text-[13px]" style={{ color: "#059669" }}>
+                        <td className="px-4 py-3 font-jakarta font-bold text-[13px]" style={{ color: "#059669" }}>
                           ${o.price}
                         </td>
                         <td className="px-4 py-3">

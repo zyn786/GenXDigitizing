@@ -12,14 +12,14 @@ export default function TermsPage() {
         <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20 mb-4">
           Legal
         </span>
-        <h1 className="font-syne font-extrabold text-[clamp(28px,5vw,42px)] leading-[1.15] mb-3">
+        <h1 className="font-jakarta font-extrabold text-[clamp(28px,5vw,42px)] leading-[1.15] mb-3">
           Terms &amp; Conditions
         </h1>
         <p className="text-[var(--txt3)] text-sm mb-10">Last updated: May 23, 2026</p>
 
         <div className="prose prose-sm max-w-none space-y-8 text-[var(--txt2)] leading-relaxed">
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">1. Acceptance of Terms</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">1. Acceptance of Terms</h2>
             <p>
               By accessing or using GenX Digitizing services (&quot;Services&quot;), you agree to be bound
               by these Terms &amp; Conditions. If you do not agree, please do not use our Services. We
@@ -29,7 +29,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">2. Services Provided</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">2. Services Provided</h2>
             <p>GenX Digitizing provides professional embroidery digitizing services including:</p>
             <ul className="list-disc pl-5 space-y-2">
               <li>Embroidery digitizing — converting artwork to machine-ready stitch files (DST, PES, EMB, JEF, XXX, VIP, HUS)</li>
@@ -43,7 +43,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">3. Orders &amp; Pricing</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">3. Orders &amp; Pricing</h2>
             <p>
               All prices are quoted in USD. Pricing is based on stitch count, design complexity, and size.
               Price estimates provided before order placement are final — we never increase prices after
@@ -58,7 +58,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">4. Revisions &amp; Quality Guarantee</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">4. Revisions &amp; Quality Guarantee</h2>
             <p>
               We offer unlimited free revisions on all orders. If the digitized output does not match
               your expectations or has errors, you may request revisions at no additional cost. Revision
@@ -68,7 +68,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">5. Payment Terms</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">5. Payment Terms</h2>
             <p>
               Payment is processed via Payoneer. For new clients, payment is required before file delivery.
               Established clients may be eligible for post-delivery payment terms. All invoices are due
@@ -77,7 +77,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">6. Refund Policy</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">6. Refund Policy</h2>
             <p>
               Our refund policy is detailed on our{" "}
               <a href="/refund-policy" className="text-[#2563EB] hover:underline">Refund Policy page</a>.
@@ -87,7 +87,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">7. Intellectual Property</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">7. Intellectual Property</h2>
             <p>
               You retain all rights to artwork and designs you upload. The digitized output files we produce
               are your property upon delivery and payment. We claim no ownership over your designs. We may,
@@ -97,7 +97,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">8. Limitation of Liability</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">8. Limitation of Liability</h2>
             <p>
               GenX Digitizing is not liable for indirect, incidental, or consequential damages arising from
               use of our Services. Our total liability for any claim related to our Services is limited to
@@ -108,7 +108,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">9. Account Responsibilities</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">9. Account Responsibilities</h2>
             <p>
               You are responsible for maintaining the confidentiality of your account credentials and for
               all activity under your account. You agree to provide accurate, current, and complete
@@ -117,7 +117,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">10. Termination</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">10. Termination</h2>
             <p>
               We reserve the right to suspend or terminate accounts for violation of these terms, fraudulent
               activity, or abusive behavior. You may close your account at any time by contacting support.
@@ -126,7 +126,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">11. Contact</h2>
+            <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-3">11. Contact</h2>
             <p>
               Questions about these terms? Contact us at{" "}
               <a href="mailto:support@genxdigitizing.com" className="text-[#2563EB] hover:underline font-medium">support@genxdigitizing.com</a>{" "}

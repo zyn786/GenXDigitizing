@@ -42,13 +42,13 @@ export default function ForgotPasswordPage() {
       {/* Logo */}
       <div className="flex items-center justify-center gap-3 mb-8">
         <div
-          className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white font-syne font-bold text-xl"
+          className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white font-jakarta font-bold text-xl"
           style={{ background: "linear-gradient(135deg,#2563EB,#F97316)" }}
         >
           ✦
         </div>
         <span
-          className="font-syne font-extrabold text-[18px]"
+          className="font-jakarta font-extrabold text-[18px]"
           style={{ background: "linear-gradient(135deg,#2563EB,#F97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
         >
           GENX DIGITIZING
@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
               style={{ background: "linear-gradient(135deg,#2563EB22,#F9731622)" }}>
               <CheckCircle2 size={26} className="text-[#16A34A]" />
             </div>
-            <h2 className="font-syne font-bold text-[17px] text-[var(--txt)] mb-2">Check your email</h2>
+            <h2 className="font-jakarta font-bold text-[17px] text-[var(--txt)] mb-2">Check your email</h2>
             <p className="text-[13px] text-[var(--txt2)] leading-relaxed">
               We sent a password reset link to{" "}
               <strong className="text-[var(--txt)]">{getValues("email")}</strong>.
@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <h2 className="font-syne font-bold text-[17px] text-[var(--txt)] mb-1">Forgot password?</h2>
+            <h2 className="font-jakarta font-bold text-[17px] text-[var(--txt)] mb-1">Forgot password?</h2>
             <p className="text-[13px] text-[var(--txt2)] mb-5 leading-snug">
               Enter your email and we&apos;ll send you a reset link.
             </p>

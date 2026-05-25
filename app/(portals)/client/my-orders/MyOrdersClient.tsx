@@ -141,7 +141,7 @@ export function MyOrdersClient({ orders, userId }: any) {
     <div className="portal-content" style={{background:"var(--bg)"}}>
       {/* Header */}
       <div className="mb-4 sm:mb-5">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+        <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{background:"linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>
           My Orders
         </h2>
@@ -169,7 +169,7 @@ export function MyOrdersClient({ orders, userId }: any) {
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{background:clr[0].bgSoft}}>
             <Package size={22} style={{color:clr[0].icon}}/>
           </div>
-          <p className="font-syne font-bold text-base mb-1" style={{color:txt}}>No orders here</p>
+          <p className="font-jakarta font-bold text-base mb-1" style={{color:txt}}>No orders here</p>
           <p className="text-sm" style={{color:txt3}}>Orders will appear once placed</p>
         </div>
       ) : filtered.map((o:any)=>{
@@ -191,7 +191,7 @@ export function MyOrdersClient({ orders, userId }: any) {
                 <span className={STATUS_CLASS[o.status]} style={{padding:"3px 8px",borderRadius:20,fontSize:10,fontWeight:600,border:"1px solid"}}>{STATUS_LABEL[o.status]}</span>
                 <span style={{padding:"3px 8px",borderRadius:20,fontSize:10,fontWeight:500,background:`${t.color}18`,color:t.color,border:`1px solid ${t.color}35`}}>{t.icon} {t.label}</span>
               </div>
-              <span className="font-syne font-extrabold text-base sm:text-lg flex-shrink-0" style={{color:clr[1].text}}>${Number(o.price).toFixed(0)}</span>
+              <span className="font-jakarta font-extrabold text-base sm:text-lg flex-shrink-0" style={{color:clr[1].text}}>${Number(o.price).toFixed(0)}</span>
             </div>
             {/* Row 2: Service info */}
             <div className="flex items-center gap-1.5 flex-wrap mb-2.5">

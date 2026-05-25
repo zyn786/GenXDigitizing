@@ -179,7 +179,7 @@ export function PortfolioModal({ item, onClose }: PortfolioModalProps) {
                     )}
                   </div>
                   <h2
-                    className="font-syne font-extrabold text-lg sm:text-xl md:text-2xl mb-1.5 sm:mb-2 bg-clip-text text-transparent"
+                    className="font-jakarta font-extrabold text-lg sm:text-xl md:text-2xl mb-1.5 sm:mb-2 bg-clip-text text-transparent"
                     style={{
                       backgroundImage: `linear-gradient(135deg, var(--txt), ${accent})`,
                     }}
@@ -211,7 +211,7 @@ export function PortfolioModal({ item, onClose }: PortfolioModalProps) {
 
             {/* Image gallery — collage */}
             <div className="p-4 sm:p-6 md:p-8">
-              <h3 className="font-syne font-bold text-xs sm:text-sm text-[var(--txt)] flex items-center gap-2 mb-3 sm:mb-4">
+              <h3 className="font-jakarta font-bold text-xs sm:text-sm text-[var(--txt)] flex items-center gap-2 mb-3 sm:mb-4">
                 <Sparkles size={14} style={{ color: accent }} />
                 Project Images
                 <span className="text-[var(--txt3)] font-normal text-xs">({item.images.length})</span>

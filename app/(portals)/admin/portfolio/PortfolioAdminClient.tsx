@@ -213,7 +213,7 @@ export function PortfolioAdminClient() {
             style={{ background: CARD_COLORS[4].bgSoft, border: `1px solid ${CARD_COLORS[4].border}` }}>
             🗄️
           </div>
-          <h2 className="font-syne font-bold text-lg mb-2" style={{ color: txt }}>Database Setup Required</h2>
+          <h2 className="font-jakarta font-bold text-lg mb-2" style={{ color: txt }}>Database Setup Required</h2>
           <p className="text-sm max-w-md mb-6" style={{ color: txt2 }}>
             The portfolio tables haven&apos;t been created yet. Run the migration SQL in your Supabase SQL Editor.
           </p>
@@ -235,7 +235,7 @@ export function PortfolioAdminClient() {
     <div className="portal-content" style={{ background: "var(--bg)" }}>
       {/* Header with gradient */}
       <div className="mb-5 sm:mb-6">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+        <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{ background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
           Portfolio
         </h2>
@@ -329,7 +329,7 @@ export function PortfolioAdminClient() {
             {/* Header */}
             <div className="sticky top-0 z-10 flex items-center justify-between p-4 sm:p-5 rounded-t-2xl"
               style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)" }}>
-              <h2 className="font-syne font-bold text-lg" style={{ color: txt }}>
+              <h2 className="font-jakarta font-bold text-lg" style={{ color: txt }}>
                 {editingId ? "Edit Project" : "New Project"}
               </h2>
               <button onClick={() => setShowModal(false)} className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors" style={{ color: txt3 }}

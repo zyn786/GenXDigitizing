@@ -78,7 +78,7 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
             {avatarUrl ? (
               <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-xl sm:text-3xl font-bold text-white font-syne w-full h-full flex items-center justify-center"
+              <span className="text-xl sm:text-3xl font-bold text-white font-jakarta w-full h-full flex items-center justify-center"
                 style={{ background: `linear-gradient(135deg,${clr[4].bg},${clr[5].bg})` }}>{initials}</span>
             )}
             <div className="absolute bottom-0 left-0 right-0 bg-black/50 h-[18px] flex items-center justify-center">
@@ -87,7 +87,7 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
           </div>
           <input ref={fileRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
           <div className="min-w-0">
-            <h2 className="font-syne font-bold text-[15px] sm:text-2xl leading-tight">
+            <h2 className="font-jakarta font-bold text-[15px] sm:text-2xl leading-tight">
               Welcome back,{" "}
               <span className="whitespace-nowrap" style={{ background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 {user.full_name || "there"}
@@ -137,7 +137,7 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
           return (
             <div key={s.label} className="flex-1 min-w-[90px] sm:min-w-[130px] rounded-2xl p-3 sm:p-3.5 text-center transition-all duration-200 hover:translate-y-[-2px]"
               style={{ background: c.bgSoft, border: `1px solid ${c.border}` }}>
-              <div className="font-syne font-extrabold text-2xl sm:text-3xl mb-1 leading-tight" style={{ color: c.text }}>{s.val}</div>
+              <div className="font-jakarta font-extrabold text-2xl sm:text-3xl mb-1 leading-tight" style={{ color: c.text }}>{s.val}</div>
               <div className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold" style={{ color: txt2 }}>{s.label}</div>
             </div>
           );
@@ -171,7 +171,7 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
         {/* Pricing */}
         <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-syne font-bold text-sm" style={{ color: txt }}>Service Pricing</h3>
+            <h3 className="font-jakarta font-bold text-sm" style={{ color: txt }}>Service Pricing</h3>
             <Link href="/client/new-order" className="inline-flex items-center gap-1 text-[11px] font-semibold no-underline" style={{ color: clr[4].text }}>
               Order now <ArrowUpRight size={11} />
             </Link>
@@ -196,7 +196,7 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <span style={{ color: txt3, fontSize: 10 }}>{t.est_hours}</span>
-                        <span className="font-syne font-bold text-sm" style={{ color: c.text }}>${Number(t.price).toFixed(0)}</span>
+                        <span className="font-jakarta font-bold text-sm" style={{ color: c.text }}>${Number(t.price).toFixed(0)}</span>
                       </div>
                     </div>
                   ))}
@@ -209,7 +209,7 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
         {/* Recent orders */}
         <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-syne font-bold text-sm" style={{ color: txt }}>Recent Orders</h3>
+            <h3 className="font-jakarta font-bold text-sm" style={{ color: txt }}>Recent Orders</h3>
             <Link href="/client/my-orders" className="inline-flex items-center gap-1 text-[11px] font-semibold no-underline" style={{ color: clr[4].text }}>
               View all <ArrowUpRight size={11} />
             </Link>
@@ -246,7 +246,7 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
                     <span className={STATUS_CLASS[o.status]} style={{ padding: "3px 8px", borderRadius: 20, fontSize: 10, fontWeight: 600, border: "1px solid" }}>
                       {STATUS_LABEL[o.status]}
                     </span>
-                    <span className="font-syne font-bold text-sm" style={{ color: clr[1].text }}>${Number(o.price).toFixed(0)}</span>
+                    <span className="font-jakarta font-bold text-sm" style={{ color: clr[1].text }}>${Number(o.price).toFixed(0)}</span>
                     <ChevronRight size={14} style={{ color: txt3 }} />
                   </div>
                 </div>

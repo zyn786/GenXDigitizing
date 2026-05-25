@@ -18,7 +18,7 @@ const TURN_COLORS = [
 export function Step2Turnaround({turn,setTurn,isBig,setStep}:any){
   return(
     <div className="rounded-2xl p-4 sm:p-5" style={{background:"var(--surface)",border:"1px solid var(--border)"}}>
-      <h3 className="font-syne font-bold text-sm mb-1" style={{color:txt}}>Choose turnaround speed</h3>
+      <h3 className="font-jakarta font-bold text-sm mb-1" style={{color:txt}}>Choose turnaround speed</h3>
       <p className="text-[13px] mb-3" style={{color:txt2}}>All speeds are <strong style={{color:GREEN.text}}>100% free</strong> — no rush surcharges ever.</p>
       {TURNS.map((t,i)=>{
         const c=TURN_COLORS[i];const s=turn===t.id;
@@ -32,7 +32,7 @@ export function Step2Turnaround({turn,setTurn,isBig,setStep}:any){
               </div>
               <div className="text-right flex items-center gap-3">
                 <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold border" style={{background:GREEN.bgSoft,color:GREEN.text,borderColor:GREEN.border}}>FREE</span>
-                <div className="font-syne font-bold text-sm" style={{color:c.text}}>{t.time}</div>
+                <div className="font-jakarta font-bold text-sm" style={{color:c.text}}>{t.time}</div>
               </div>
             </div>
           </div>

@@ -9,7 +9,7 @@ function Row({k,v,c}:{k:string;v:string;c?:string}){return(<div className="flex 
 export function Step4Confirm({sel,serviceName,selTurn,fmt,extras,designName,files,w,h,col,notes,qty,stitchCount,instructions,totalPrice,busy,placeOrder,setStep}:any){
   return(
     <div className="rounded-2xl p-4 sm:p-5" style={{background:"var(--surface)",border:"1px solid var(--border)"}}>
-      <h3 className="font-syne font-bold text-sm mb-3" style={{color:txt}}>Confirm your order</h3>
+      <h3 className="font-jakarta font-bold text-sm mb-3" style={{color:txt}}>Confirm your order</h3>
       <div className="rounded-xl p-3.5 mb-4" style={{background:"var(--elevated)",border:"1px solid var(--border)"}}>
         <p className="text-[10px] uppercase tracking-wider font-bold mb-2" style={{color:txt3}}>Order Summary</p>
         <Row k="Service" v={serviceName||sel?.label}/>
@@ -27,7 +27,7 @@ export function Step4Confirm({sel,serviceName,selTurn,fmt,extras,designName,file
       </div>
       <div className="rounded-xl p-3.5 mb-4 flex items-center justify-between" style={{background:GREEN.bgSoft,border:"1px solid "+GREEN.border}}>
         <div><span className="text-[13px] font-bold" style={{color:txt}}>Total{qty>1?" ("+qty+" items)":" "}</span><br/><span className="text-[10px]" style={{color:txt3}}>All turnaround speeds free · Unlimited revisions</span></div>
-        <span className="font-syne font-extrabold text-2xl" style={{color:GREEN.text}}>${totalPrice.toFixed(0)}</span>
+        <span className="font-jakarta font-extrabold text-2xl" style={{color:GREEN.text}}>${totalPrice.toFixed(0)}</span>
       </div>
       <div className="flex gap-2">
         <button onClick={()=>setStep(3)} className="flex-1 py-3 rounded-xl text-[14px] sm:text-[13px] font-medium cursor-pointer border flex items-center justify-center gap-1.5" style={{background:"var(--elevated)",color:txt2,borderColor:"var(--border2)"}}><ArrowLeft size={15}/> Back</button>

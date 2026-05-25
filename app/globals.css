@@ -3,46 +3,66 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════
-   CSS VARIABLES — Light mode
-   Brand: Blue #2563EB | Orange #F97316 | Green #16A34A
-   Background: warm off-white #FAFAF9 | Cards: #F7F8FF
+   CSS VARIABLES — v2 Design System
+   Brand: Deep Navy #1E40AF | CTA: Bold Orange #EA580C
+   Background: Cool architectural white #F8FAFC
+   Precision industrial B2B aesthetic
 ═══════════════════════════════ */
 :root {
-  /* Surfaces — Warm off-white / dark grey */
-  --bg:        #FAFAF9;
-  --surface:   #F7F8FF;
-  --elevated:  #E5E7EB;
-  --elevated2: #D1D5DB;
+  /* Surfaces — Cool architectural whites */
+  --bg:        #F8FAFC;
+  --surface:   #FFFFFF;
+  --elevated:  #F1F5F9;
+  --elevated2: #E2E8F0;
 
-  /* Text — Near-black / darker grey */
-  --txt:   #050816;
-  --txt2:  #374151;
-  --txt3:  #6B7280;
+  /* Text — Slate scale, high readability */
+  --txt:   #0F172A;
+  --txt2:  #475569;
+  --txt3:  #94A3B8;
 
-  /* Borders — increased contrast */
-  --border:  rgba(5, 8, 22, 0.10);
-  --border2: rgba(5, 8, 22, 0.16);
-  --border3: rgba(5, 8, 22, 0.22);
+  /* Borders — Clean slate grays */
+  --border:  #E2E8F0;
+  --border2: #CBD5E1;
+  --border3: #94A3B8;
 
-  /* Brand accents — Blue / Orange / Green */
-  --blue:       #2563EB;
-  --blue-light: #EFF3FF;
-  --blue-text:  #1D4ED8;
-  --blue-dark:  #1D4ED8;
-  --orange:       #F97316;
+  /* Brand — Deep navy engineering blue */
+  --blue:       #1E40AF;
+  --blue-light: #EFF6FF;
+  --blue-text:  #1E3A8A;
+  --blue-dark:  #1E3A8A;
+
+  /* CTA — Bold conversion orange */
+  --orange:       #EA580C;
   --orange-light: #FFF7ED;
   --orange-text:  #C2410C;
-  --success:       #16A34A;
-  --success-light: #F0FDF4;
-  --success-text:  #15803D;
+
+  /* Semantic */
+  --success:       #059669;
+  --success-light: #ECFDF5;
+  --success-text:  #047857;
   --red:         #DC2626;
   --red-light:   #FEF2F2;
   --red-text:    #B91C1C;
 
-  /* Neutral grey — darker for better contrast */
-  --grey:       #4B5563;
-  --grey-light: #6B7280;
-  --grey-dark:  #374151;
+  /* Neutral grey */
+  --grey:       #475569;
+  --grey-light: #94A3B8;
+  --grey-dark:  #334155;
+
+  /* Radius tokens */
+  --radius-xs:  6px;
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-xl:  20px;
+  --radius-2xl: 24px;
+
+  /* Shadows — Layered depth */
+  --shadow-card:       0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06);
+  --shadow-card-hover: 0 4px 16px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.04);
+  --shadow-cta:        0 4px 14px rgba(234,88,12,0.25), 0 1px 3px rgba(234,88,12,0.15);
+  --shadow-nav:        0 1px 3px rgba(15,23,42,0.04);
+  --shadow-sticky:     0 -4px 20px rgba(15,23,42,0.06);
 }
 
 /* ═══════════════════════════════
@@ -71,25 +91,26 @@ a, button, input, select, textarea,
 
   body {
     @apply antialiased;
-    font-family: var(--font-inter), 'Inter', sans-serif;
+    font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
     background-color: var(--bg);
     color: var(--txt);
-    font-size: 0.875rem; /* 14px — matches text-md token */
-    line-height: 1.5;
+    font-size: 16px;
+    line-height: 1.6;
     overflow-x: hidden;
     touch-action: manipulation;
     -webkit-overflow-scrolling: touch;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-syne), 'Syne', sans-serif;
-    letter-spacing: -0.015em;
+    font-family: var(--font-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
+    color: var(--txt);
   }
 
-  h1 { font-size: 2.25rem; line-height: 1.15; }  /* 36px */
-  h2 { font-size: 1.875rem; line-height: 1.2; }   /* 30px */
-  h3 { font-size: 1.5rem; line-height: 1.3; }      /* 24px */
-  h4 { font-size: 1.25rem; line-height: 1.35; }    /* 20px */
+  h1 { font-size: clamp(32px, 5.5vw, 56px); font-weight: 800; line-height: 1.08; letter-spacing: -0.025em; }
+  h2 { font-size: clamp(26px, 4vw, 40px);   font-weight: 700; line-height: 1.14; letter-spacing: -0.02em; }
+  h3 { font-size: clamp(20px, 2.5vw, 28px); font-weight: 700; line-height: 1.20; letter-spacing: -0.015em; }
+  h4 { font-size: clamp(18px, 2vw, 22px);   font-weight: 600; line-height: 1.24; letter-spacing: -0.01em; }
 
   /* Mobile-first touch targets */
   @media (max-width: 768px) {
@@ -266,11 +287,11 @@ a, button, input, select, textarea,
   }
 
   /* ── Gradient text ───────────────────────────────────────── */
-  .gtext        { background: linear-gradient(135deg, #2563EB, #F97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .gtext-blue   { background: linear-gradient(135deg, #2563EB, #1D4ED8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .gtext-warm   { background: linear-gradient(135deg, #F97316, #FB923C); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .gtext-green  { background: linear-gradient(135deg, #2563EB, #16A34A); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .gtext-full   { background: linear-gradient(135deg, #2563EB, #1D4ED8, #F97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .gtext        { background: linear-gradient(135deg, #1E40AF, #EA580C); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .gtext-blue   { background: linear-gradient(135deg, #1E40AF, #2563EB); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .gtext-warm   { background: linear-gradient(135deg, #EA580C, #F97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .gtext-green  { background: linear-gradient(135deg, #1E40AF, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .gtext-full   { background: linear-gradient(135deg, #1E40AF, #2563EB, #EA580C); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
   /* ── Divider ─────────────────────────────────────────────── */
   .divider { @apply my-3; border-top: 1px solid var(--border); }
@@ -280,18 +301,18 @@ a, button, input, select, textarea,
    UTILITIES
 ═══════════════════════════════ */
 @layer utilities {
-  .font-syne    { font-family: var(--font-syne), 'Syne', sans-serif; }
-  .font-inter   { font-family: var(--font-inter), 'Inter', sans-serif; }
+  .font-jakarta { font-family: var(--font-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif; }
+  .font-inter   { font-family: var(--font-inter), 'Inter', system-ui, sans-serif; }
   .font-mono-os { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
 
   .text-grad { @apply gtext; }
 
   .border-l-grad {
     border-left: 3px solid transparent;
-    border-image: linear-gradient(180deg, #2563EB, #F97316) 1;
+    border-image: linear-gradient(180deg, #1E40AF, #EA580C) 1;
   }
 
-  .ring-brand { @apply ring-2 ring-[#2563EB]/30; }
+  .ring-brand { @apply ring-2 ring-[#1E40AF]/30; }
   .bg-base    { background: var(--bg); }
   .bg-surface { background: var(--surface); }
   .bg-elevated{ background: var(--elevated); }

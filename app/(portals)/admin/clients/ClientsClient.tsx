@@ -97,7 +97,7 @@ export function AdminClientsClient({ clients }: { clients: any[] }) {
             style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: "var(--txt2)" }}>
             <ArrowLeft size={13}/> Back
           </button>
-          <h2 className="font-syne font-bold text-base sm:text-lg" style={{ color: "var(--txt)" }}>{detail.company_name}</h2>
+          <h2 className="font-jakarta font-bold text-base sm:text-lg" style={{ color: "var(--txt)" }}>{detail.company_name}</h2>
           <span style={{
             padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 600,
             background: tmeta.bg, color: tmeta.color, border: `1px solid ${tmeta.color}40`,
@@ -115,7 +115,7 @@ export function AdminClientsClient({ clients }: { clients: any[] }) {
                 {getInitials(detail.company_name)}
               </div>
               <div>
-                <div className="font-syne font-bold text-sm sm:text-base" style={{ color: "var(--txt)" }}>{detail.company_name}</div>
+                <div className="font-jakarta font-bold text-sm sm:text-base" style={{ color: "var(--txt)" }}>{detail.company_name}</div>
                 <div className="text-xs mt-0.5" style={{ color: CARD_COLORS[3].text }}>{u?.email}</div>
               </div>
             </div>
@@ -152,7 +152,7 @@ export function AdminClientsClient({ clients }: { clients: any[] }) {
 
           {/* Orders */}
           <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-            <h3 className="font-syne font-bold text-sm mb-3" style={{ color: "var(--txt)" }}>Order History</h3>
+            <h3 className="font-jakarta font-bold text-sm mb-3" style={{ color: "var(--txt)" }}>Order History</h3>
             {loadingDetail ? (
               <p className="text-xs text-center py-8" style={{ color: "var(--txt3)" }}>Loading…</p>
             ) : orders.length===0 ? (
@@ -164,7 +164,7 @@ export function AdminClientsClient({ clients }: { clients: any[] }) {
                   <div className="text-[11px] mt-0.5" style={{ color: "var(--txt2)" }}>{(o.service_tiers as any)?.label??"—"}</div>
                 </div>
                 <div className="text-right">
-                  <div className="font-syne font-bold text-sm" style={{ color: CARD_COLORS[1].text }}>${Number(o.price).toFixed(0)}</div>
+                  <div className="font-jakarta font-bold text-sm" style={{ color: CARD_COLORS[1].text }}>${Number(o.price).toFixed(0)}</div>
                   <div className="text-[10px] mt-0.5" style={{ color: "var(--txt3)" }}>{formatDate(o.created_at,{month:"short",day:"numeric"})}</div>
                 </div>
               </div>
@@ -181,7 +181,7 @@ export function AdminClientsClient({ clients }: { clients: any[] }) {
       {/* Header with gradient */}
       <div className="mb-5 sm:mb-6">
         <h2
-          className="font-syne font-bold text-xl sm:text-2xl"
+          className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{
             background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)",
             WebkitBackgroundClip: "text",
@@ -218,7 +218,7 @@ export function AdminClientsClient({ clients }: { clients: any[] }) {
                   {s.label}
                 </div>
               </div>
-              <div className="font-syne font-bold text-lg sm:text-xl" style={{ color: clr.text }}>{s.val}</div>
+              <div className="font-jakarta font-bold text-lg sm:text-xl" style={{ color: clr.text }}>{s.val}</div>
             </div>
           );
         })}
@@ -313,7 +313,7 @@ export function AdminClientsClient({ clients }: { clients: any[] }) {
               <div className="flex items-center gap-3 text-[13px]">
                 <span style={{ color: "var(--txt2)" }}>{c.country||"—"}</span>
                 <span className="font-semibold" style={{ color: CARD_COLORS[0].text }}>{c.order_count??0} orders</span>
-                <span className="font-syne font-bold ml-auto" style={{ color: CARD_COLORS[1].text }}>{formatCurrency(c.ltv)}</span>
+                <span className="font-jakarta font-bold ml-auto" style={{ color: CARD_COLORS[1].text }}>{formatCurrency(c.ltv)}</span>
                 <ChevronRight size={14} style={{ color: "var(--txt3)" }}/>
               </div>
             </div>
@@ -355,7 +355,7 @@ export function AdminClientsClient({ clients }: { clients: any[] }) {
                   <td className="p-3 text-xs" style={{ color: CARD_COLORS[3].text }}>{c.users?.email??"—"}</td>
                   <td className="p-3 text-xs" style={{ color: "var(--txt2)" }}>{c.country||"—"}</td>
                   <td className="p-3 text-sm font-semibold" style={{ color: CARD_COLORS[0].text }}>{c.order_count??0}</td>
-                  <td className="p-3 font-syne font-bold text-sm" style={{ color: CARD_COLORS[1].text }}>{formatCurrency(c.ltv)}</td>
+                  <td className="p-3 font-jakarta font-bold text-sm" style={{ color: CARD_COLORS[1].text }}>{formatCurrency(c.ltv)}</td>
                   <td className="p-3 text-xs" style={{ color: "var(--txt2)" }}>{c.users?.last_sign_in?formatRelative(c.users.last_sign_in):"Never"}</td>
                   <td className="p-3">
                     <span style={{

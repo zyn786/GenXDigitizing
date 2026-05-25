@@ -63,7 +63,7 @@ export function StatCard({
         )}
         <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--txt3)]">{label}</p>
       </div>
-      <p className="font-syne font-bold text-[20px]" style={accentColor ? { color: accentColor } : { color: "var(--txt)" }}>{value}</p>
+      <p className="font-jakarta font-bold text-[20px]" style={accentColor ? { color: accentColor } : { color: "var(--txt)" }}>{value}</p>
       {(delta || sub) && (
         <div className="flex items-center gap-1.5 mt-1">
           {delta && (
@@ -80,7 +80,7 @@ export function CardHeader({ title, action, subtitle }: { title: string; action?
   return (
     <div className="flex items-center justify-between mb-4">
       <div>
-        <h3 className="font-syne font-bold text-[13px] text-[var(--txt)]">{title}</h3>
+        <h3 className="font-jakarta font-bold text-[13px] text-[var(--txt)]">{title}</h3>
         {subtitle && <p className="text-[10px] text-[var(--txt3)] mt-0.5">{subtitle}</p>}
       </div>
       {action}

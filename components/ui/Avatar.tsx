@@ -51,7 +51,7 @@ export function Avatar({
     <div
       className={cn(
         "flex-shrink-0 rounded-full flex items-center justify-center",
-        "font-bold text-white font-syne select-none",
+        "font-bold text-white font-jakarta select-none",
         className
       )}
       style={{

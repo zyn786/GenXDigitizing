@@ -166,7 +166,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="font-syne font-extrabold text-[clamp(32px,7vw,64px)] leading-[1.08] mb-4 sm:mb-5"
+          className="font-jakarta font-extrabold text-[clamp(32px,7vw,64px)] leading-[1.08] mb-4 sm:mb-5"
         >
           Premium Embroidery
           <span className="block bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
@@ -214,7 +214,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
                     </div>
 
                     <h2
-                      className="font-syne font-extrabold text-xl sm:text-3xl md:text-4xl mb-1.5 sm:mb-2 leading-[1.15]"
+                      className="font-jakarta font-extrabold text-xl sm:text-3xl md:text-4xl mb-1.5 sm:mb-2 leading-[1.15]"
                       style={{ color: svc.color }}
                     >
                       {svc.title}
@@ -297,7 +297,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
                   <div>
                     <div className="flex items-center justify-between mb-4 sm:mb-5">
                       <div>
-                        <h3 className="font-syne font-bold text-base sm:text-xl text-[var(--txt)]">
+                        <h3 className="font-jakarta font-bold text-base sm:text-xl text-[var(--txt)]">
                           Recent {svc.title} Work
                         </h3>
                         <p className="text-xs sm:text-sm text-[var(--txt3)] mt-0.5 sm:mt-1">
@@ -342,7 +342,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
                   bg-white/15 text-white border border-white/20">
                   Always Included
                 </span>
-                <h2 className="font-syne font-extrabold text-2xl md:text-4xl text-white mb-2">
+                <h2 className="font-jakarta font-extrabold text-2xl md:text-4xl text-white mb-2">
                   Free With Every Order
                 </h2>
                 <p className="text-white/70 text-sm max-w-md mx-auto">
@@ -389,7 +389,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
             <GradientOrb color="#2563EB" size={260} className="-top-24 left-1/2 -translate-x-1/2 opacity-20" />
 
             <div className="relative z-10">
-              <h2 className="font-syne font-extrabold text-2xl sm:text-3xl md:text-4xl mb-4">
+              <h2 className="font-jakarta font-extrabold text-2xl sm:text-3xl md:text-4xl mb-4">
                 Ready to Start Your Project?
               </h2>
               <p className="text-base sm:text-lg text-[var(--txt2)] max-w-2xl mx-auto mb-6 sm:mb-8">

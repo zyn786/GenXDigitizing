@@ -183,7 +183,7 @@ export function ChatSidebar() {
       <div className="p-4 border-b border-[var(--border)]">
         <div className="flex items-center gap-2 mb-3">
           <MessageSquare size={16} className="text-[#7C3AED]" />
-          <h2 className="font-syne font-bold text-sm" style={{ color: "var(--txt)" }}>{currentUserRole === "admin" ? "Support Inbox" : "Messages"}</h2>
+          <h2 className="font-jakarta font-bold text-sm" style={{ color: "var(--txt)" }}>{currentUserRole === "admin" ? "Support Inbox" : "Messages"}</h2>
           <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full
             bg-[#7C3AED]/10 text-[#7C3AED] border border-[#7C3AED]/20">
             {filteredConversations.length}

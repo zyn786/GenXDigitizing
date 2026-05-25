@@ -93,7 +93,7 @@ function PreviewCard({ design, index }: { design: FreeDesign; index: number }) {
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-4 sm:p-5">
-        <h3 className="font-syne font-bold text-sm text-[var(--txt)] mb-3 leading-snug">
+        <h3 className="font-jakarta font-bold text-sm text-[var(--txt)] mb-3 leading-snug">
           {design.title}
         </h3>
 
@@ -151,7 +151,7 @@ function PreviewCard({ design, index }: { design: FreeDesign; index: number }) {
             "border-2 transition-all duration-300",
             !design.downloadUrl
               ? "border-[var(--border2)] bg-[var(--elevated)] text-[var(--txt3)] cursor-not-allowed"
-              : "border-[var(--border2)] text-[var(--txt)] hover:border-[#2563EB]/50 hover:bg-[#2563EB]/5 font-syne"
+              : "border-[var(--border2)] text-[var(--txt)] hover:border-[#2563EB]/50 hover:bg-[#2563EB]/5 font-jakarta"
           )}
         >
           <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -191,7 +191,7 @@ export function FreeDesignsPreview() {
             <Download className="w-3 h-3" />
             Free Downloads
           </span>
-          <h2 className="font-syne font-extrabold text-2xl sm:text-3xl md:text-4xl mb-3 leading-[1.15]">
+          <h2 className="font-jakarta font-extrabold text-2xl sm:text-3xl md:text-4xl mb-3 leading-[1.15]">
             Free Design{" "}
             <span className={`bg-gradient-to-r ${GRADIENT} bg-clip-text text-transparent`}>
               Downloads
@@ -222,7 +222,7 @@ export function FreeDesignsPreview() {
             href="/free-designs"
             className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl
               bg-gradient-to-r ${GRADIENT}
-              text-white font-syne font-bold text-sm
+              text-white font-jakarta font-bold text-sm
               shadow-[0_4px_16px_rgba(37,99,235,0.2)]
               hover:shadow-[0_6px_22px_rgba(37,99,235,0.3)]
               hover:-translate-y-0.5 active:scale-[0.98]

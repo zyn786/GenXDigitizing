@@ -39,7 +39,7 @@ function AnimatedStat({
         border border-white/15 flex items-center justify-center mx-auto mb-3">
         {icon}
       </div>
-      <div className="font-syne font-extrabold text-2xl md:text-3xl text-white">
+      <div className="font-jakarta font-extrabold text-2xl md:text-3xl text-white">
         <motion.span>{display}</motion.span>
         {suffix}
       </div>
@@ -111,7 +111,7 @@ export function PortfolioPreview() {
                   <Sparkles size={12} />
                   Trusted Worldwide
                 </span>
-                <h2 className="font-syne font-extrabold text-2xl md:text-4xl text-white mb-3">
+                <h2 className="font-jakarta font-extrabold text-2xl md:text-4xl text-white mb-3">
                   Numbers That Speak
                 </h2>
                 <p className="text-white/70 text-sm max-w-md mx-auto">

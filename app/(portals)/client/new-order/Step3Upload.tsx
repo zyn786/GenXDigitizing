@@ -11,7 +11,7 @@ export function Step3Upload({files,fileRef,setFiles,w,setW,h,setH,col,setCol,not
   const [showAdvanced,setShowAdvanced]=useState(false);
   return(
     <div className="rounded-2xl p-3.5 sm:p-5" style={{background:"var(--surface)",border:"1px solid var(--border)"}}>
-      <h3 className="font-syne font-bold text-[15px] sm:text-sm mb-1" style={{color:txt}}>Upload artwork & details</h3>
+      <h3 className="font-jakarta font-bold text-[15px] sm:text-sm mb-1" style={{color:txt}}>Upload artwork & details</h3>
       <p className="text-[12px] sm:text-[11px] mb-3" style={{color:txt3}}>PNG · JPG · Max 50 MB each — reference image required</p>
       <input ref={fileRef} type="file" accept=".png,.jpg,.jpeg" multiple className="hidden" onChange={e=>{const nf=Array.from(e.target.files||[]);if(nf.length){setFiles((p:any)=>[...p,...nf]);e.target.value="";}}}/>
       <div onClick={()=>fileRef.current?.click()} className="border-2 border-dashed rounded-xl py-8 text-center cursor-pointer mb-3 transition-all" style={{borderColor:files.length?GREEN.icon:"var(--border2)",background:files.length?GREEN.bgSoft:"transparent"}}>

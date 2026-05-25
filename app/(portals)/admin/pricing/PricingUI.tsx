@@ -93,7 +93,7 @@ export function AdminPricingUI({ tiers }: { tiers: any[] }) {
     <div className="portal-content" style={{ background: "var(--bg)" }}>
       {/* Header with gradient */}
       <div className="mb-5 sm:mb-6">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+        <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{ background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
           Pricing Settings
         </h2>
@@ -104,7 +104,7 @@ export function AdminPricingUI({ tiers }: { tiers: any[] }) {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
           <Gift size={16} style={{ color: clr[4].icon }} />
-          <h3 className="font-syne font-bold text-sm" style={{ color: txt }}>Always Included — Zero Extra Cost</h3>
+          <h3 className="font-jakarta font-bold text-sm" style={{ color: txt }}>Always Included — Zero Extra Cost</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {FREE_FEATURES.map(f => (
@@ -124,7 +124,7 @@ export function AdminPricingUI({ tiers }: { tiers: any[] }) {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
           <Zap size={16} style={{ color: clr[2].icon }} />
-          <h3 className="font-syne font-bold text-sm" style={{ color: txt }}>Turnaround Speeds</h3>
+          <h3 className="font-jakarta font-bold text-sm" style={{ color: txt }}>Turnaround Speeds</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {TURNAROUND.map(t => {
@@ -133,7 +133,7 @@ export function AdminPricingUI({ tiers }: { tiers: any[] }) {
               <div key={t.label} className="rounded-2xl p-4 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xl">{t.icon}</span>
-                  <span className="font-syne font-bold text-sm" style={{ color: txt }}>{t.label}</span>
+                  <span className="font-jakarta font-bold text-sm" style={{ color: txt }}>{t.label}</span>
                   <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold border"
                     style={{ background: clr[1].bgSoft, color: clr[1].text, borderColor: clr[1].border }}>FREE</span>
                 </div>
@@ -153,7 +153,7 @@ export function AdminPricingUI({ tiers }: { tiers: any[] }) {
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-lg">💰</span>
-          <h3 className="font-syne font-bold text-sm" style={{ color: txt }}>Base Prices</h3>
+          <h3 className="font-jakarta font-bold text-sm" style={{ color: txt }}>Base Prices</h3>
         </div>
         <p className="text-[11px] mb-4" style={{ color: txt3 }}>
           Edit prices inline — press Enter or click Save. Changes apply instantly across all portals.
@@ -172,7 +172,7 @@ export function AdminPricingUI({ tiers }: { tiers: any[] }) {
               <div className="flex items-center gap-2.5 px-4 sm:px-5 py-3"
                 style={{ background: mc.bgSoft, borderBottom: `1px solid var(--border)` }}>
                 <span className="text-lg">{meta.emoji}</span>
-                <h3 className="font-syne font-bold text-sm" style={{ color: mc.text }}>{meta.label}</h3>
+                <h3 className="font-jakarta font-bold text-sm" style={{ color: mc.text }}>{meta.label}</h3>
                 <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full"
                   style={{ background: mc.bgSoft, color: mc.text, border: `1px solid ${mc.border}` }}>
                   {catTiers.length} tier{catTiers.length !== 1 ? "s" : ""}
@@ -223,7 +223,7 @@ export function AdminPricingUI({ tiers }: { tiers: any[] }) {
                             value={prices[t.id] ?? t.price}
                             onChange={e => handleChange(t.id, e.target.value)}
                             onKeyDown={e => e.key === "Enter" && saveTier(t.id)}
-                            className="w-[60px] sm:w-[68px] bg-transparent text-center font-syne font-bold text-[16px] sm:text-[18px] outline-none border-none"
+                            className="w-[60px] sm:w-[68px] bg-transparent text-center font-jakarta font-bold text-[16px] sm:text-[18px] outline-none border-none"
                             style={{ color: mc.text }} />
                         </div>
 

@@ -197,7 +197,7 @@ export function PortfolioCard({ item, index, onClick }: PortfolioCardProps) {
         {/* Title & turnaround */}
         <div className="flex items-start justify-between gap-2">
           <h3
-            className="font-syne font-bold text-[15px] leading-snug bg-clip-text text-transparent"
+            className="font-jakarta font-bold text-[15px] leading-snug bg-clip-text text-transparent"
             style={{
               backgroundImage: isHovered
                 ? `linear-gradient(135deg, var(--txt), ${accent})`

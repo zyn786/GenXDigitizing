@@ -21,7 +21,7 @@ export function Step1Tier({grouped,sel,serviceName,setSel,designName,setDesignNa
         <input value={designName} onChange={e=>setDesignName(e.target.value)} placeholder="e.g. School Logo, Team Jersey…" style={inp}/>
       </div>
       <div className="border-t pt-4 mb-4" style={{borderColor:"var(--border)"}}>
-        <h3 className="font-syne font-bold text-[15px] sm:text-sm mb-1" style={{color:txt}}>Choose service & tier</h3>
+        <h3 className="font-jakarta font-bold text-[15px] sm:text-sm mb-1" style={{color:txt}}>Choose service & tier</h3>
         <p className="text-[12px] sm:text-[11px] mb-3" style={{color:txt3}}>Select a category and tier to continue</p>
         <div className="flex flex-col gap-2.5">
           {Object.entries(grouped).map(([cat,catTiers]:any)=>{
@@ -41,7 +41,7 @@ export function Step1Tier({grouped,sel,serviceName,setSel,designName,setDesignNa
                         {s&&<div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full flex items-center justify-center" style={{background:m.color}}><CheckCircle size={11} className="text-white"/></div>}
                         <div className="font-semibold text-[11px] sm:text-[13px] mb-0.5 pr-4 leading-tight" style={{color:s?m.text:txt}}>{t.label}</div>
                         <div className="text-[9px] sm:text-[10px] mb-1" style={{color:txt3}}>{t.size_desc}</div>
-                        <div className="font-syne font-extrabold text-base sm:text-lg" style={{color:m.text}}>${Number(t.price).toFixed(0)}</div>
+                        <div className="font-jakarta font-extrabold text-base sm:text-lg" style={{color:m.text}}>${Number(t.price).toFixed(0)}</div>
                         <div className="text-[9px] sm:text-[10px] mt-0.5 flex items-center gap-1" style={{color:txt3}}><span>{t.est_hours}</span>{t.is_big_design&&<span className="font-medium" style={{color:"#C2410C"}}>⚠️~12h</span>}</div>
                       </div>
                     );
@@ -65,7 +65,7 @@ export function Step1Tier({grouped,sel,serviceName,setSel,designName,setDesignNa
           </div>
         </div>
       </div>
-      {sel&&<div className="mt-3 p-3 rounded-xl flex items-center justify-between" style={{background:GREEN.bgSoft,border:"1px solid "+GREEN.border}}><span className="text-[13px] font-semibold" style={{color:txt}}>{serviceName||sel.label}{qty>1?" × "+qty:""}</span><span className="font-syne font-extrabold text-xl" style={{color:GREEN.text}}>${totalPrice.toFixed(0)}</span></div>}
+      {sel&&<div className="mt-3 p-3 rounded-xl flex items-center justify-between" style={{background:GREEN.bgSoft,border:"1px solid "+GREEN.border}}><span className="text-[13px] font-semibold" style={{color:txt}}>{serviceName||sel.label}{qty>1?" × "+qty:""}</span><span className="font-jakarta font-extrabold text-xl" style={{color:GREEN.text}}>${totalPrice.toFixed(0)}</span></div>}
       {(!designName.trim() || !sel) && <p className="text-[11px] text-center mt-3" style={{color:"#C2410C"}}>{!designName.trim()?"Enter a design name":!sel?"Select a service tier":""}</p>}
       <button disabled={!sel||!designName.trim()} onClick={()=>setStep(2)} className="w-full mt-1.5 py-3.5 rounded-xl text-[14px] sm:text-[13px] font-semibold border-none cursor-pointer text-white active:scale-[0.98] transition-all" style={{background:sel&&designName.trim()?"linear-gradient(135deg,"+PURPLE.bg+","+PURPLE.icon+")":"var(--border2)",cursor:sel&&designName.trim()?"pointer":"not-allowed"}}>Continue {sel&&designName.trim()?"— $"+totalPrice.toFixed(0):""} <ArrowRight size={15} className="inline ml-1"/></button>
     </div>

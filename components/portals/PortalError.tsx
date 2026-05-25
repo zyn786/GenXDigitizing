@@ -18,7 +18,7 @@ export function PortalError({
     <div className="portal-content flex items-center justify-center h-full">
       <div className="text-center max-w-[420px] p-8">
         <div className="text-[48px] mb-3">⚠️</div>
-        <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-2">
+        <h2 className="font-jakarta font-bold text-lg text-[var(--txt)] mb-2">
           Something went wrong
         </h2>
         <p className="text-[13px] text-[var(--txt2)] mb-5 leading-relaxed">

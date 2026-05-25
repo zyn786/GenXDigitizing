@@ -65,7 +65,7 @@ function MenuDrawer({ open, onClose, role, badgeCounts, userName, userEmail }: {
         style={{ transform: animating ? "translateX(0)" : "translateX(100%)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
         <div className="flex items-center justify-between px-4 pt-5 pb-3">
           <div>
-            <p className="font-syne font-bold text-sm" style={{ color: "var(--txt)" }}>Menu</p>
+            <p className="font-jakarta font-bold text-sm" style={{ color: "var(--txt)" }}>Menu</p>
             <p className="text-[10px]" style={{ color: "var(--txt3)" }}>{panelLabel}</p>
           </div>
           <button onClick={handleClose} className="p-2 rounded-lg hover:bg-[var(--elevated)]" style={{ color: "var(--txt2)" }}><X size={18} /></button>

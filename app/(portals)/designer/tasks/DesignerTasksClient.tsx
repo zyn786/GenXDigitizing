@@ -121,7 +121,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
               : designerName?.charAt(0)?.toUpperCase() || "D"}
           </div>
           <div className="flex-1 min-w-0">
-            <span className="font-syne font-bold text-[14px]" style={{ color:txt }}>{designerName}</span>
+            <span className="font-jakarta font-bold text-[14px]" style={{ color:txt }}>{designerName}</span>
             <span className="text-[11px] ml-2" style={{ color:txt3 }}>Designer</span>
           </div>
           {stats.avgRating > 0 && (
@@ -133,7 +133,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
       </div>
 
       {/* ── Title ── */}
-      <h2 className="font-syne font-bold text-xl sm:text-2xl leading-tight mb-1"
+      <h2 className="font-jakarta font-bold text-xl sm:text-2xl leading-tight mb-1"
         style={{ background:"linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>
         My Tasks
       </h2>
@@ -158,7 +158,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
                 </div>
                 <span className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold" style={{ color:txt3 }}>{s.label}</span>
               </div>
-              <div className="font-syne font-bold text-lg sm:text-xl" style={{ color:c.text }}>{s.val}</div>
+              <div className="font-jakarta font-bold text-lg sm:text-xl" style={{ color:c.text }}>{s.val}</div>
               {s.sub && <div className="text-[10px] mt-0.5" style={{ color:txt3 }}>{s.sub}</div>}
             </div>
           );
@@ -194,13 +194,13 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
       {tasks.length===0 ? (
         <div className="text-center py-14 rounded-2xl border mb-5" style={{ background:"var(--surface)", borderColor:"var(--border)" }}>
           <p className="text-4xl mb-3">📭</p>
-          <p className="font-syne font-bold text-lg" style={{ color:txt }}>No active tasks</p>
+          <p className="font-jakarta font-bold text-lg" style={{ color:txt }}>No active tasks</p>
           <p className="text-sm" style={{ color:txt2 }}>New assignments will appear here</p>
         </div>
       ) : filtered.length===0 ? (
         <div className="text-center py-14 rounded-2xl border mb-5" style={{ background:"var(--surface)", borderColor:"var(--border)" }}>
           <p className="text-4xl mb-3">📭</p>
-          <p className="font-syne font-bold text-lg" style={{ color:txt }}>No matching tasks</p>
+          <p className="font-jakarta font-bold text-lg" style={{ color:txt }}>No matching tasks</p>
           <p className="text-sm" style={{ color:txt2 }}>Try a different filter</p>
         </div>
       ) : (
@@ -398,7 +398,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
         <div className="mb-5">
           <div className="flex items-center gap-2.5 mb-3">
             <span className="text-lg">✅</span>
-            <span className="font-syne font-bold text-[14px]" style={{ color:txt }}>Completed Orders</span>
+            <span className="font-jakarta font-bold text-[14px]" style={{ color:txt }}>Completed Orders</span>
             <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold"
               style={{ background:"rgba(16,185,129,0.10)", color:"#047857", border:"1px solid rgba(16,185,129,0.25)" }}>
               {completedOrders.length}
@@ -582,7 +582,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
                       <Star key={i} size={18} fill={i <= (completedModal.reviews[0]?.stars || 0) ? "#D97706" : "none"}
                         style={{ color: i <= (completedModal.reviews[0]?.stars || 0) ? "#D97706" : "var(--border2)" }} />
                     ))}
-                    <span className="ml-2 font-syne font-bold text-lg" style={{ color:"#D97706" }}>
+                    <span className="ml-2 font-jakarta font-bold text-lg" style={{ color:"#D97706" }}>
                       {completedModal.reviews[0]?.stars}/5
                     </span>
                   </div>

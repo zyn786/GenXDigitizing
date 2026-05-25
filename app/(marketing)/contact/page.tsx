@@ -28,7 +28,7 @@ export default function ContactPage() {
               Get in Touch
             </span>
 
-            <h1 className="font-syne font-extrabold text-[clamp(32px,7vw,48px)] leading-[1.1]">
+            <h1 className="font-jakarta font-extrabold text-[clamp(32px,7vw,48px)] leading-[1.1]">
               We&apos;d Love to{" "}
               <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
                 Hear From You
@@ -58,7 +58,7 @@ export default function ContactPage() {
 
             {/* client box */}
             <div className="bg-[#16A34A]/5 border border-[#16A34A]/15 rounded-xl p-3 sm:p-4">
-              <div className="font-syne font-bold text-xs sm:text-sm text-[#16A34A] mb-1 sm:mb-1.5">
+              <div className="font-jakarta font-bold text-xs sm:text-sm text-[#16A34A] mb-1 sm:mb-1.5">
                 Already a client?
               </div>
               <p className="text-xs sm:text-sm text-[var(--txt2)] mb-2">

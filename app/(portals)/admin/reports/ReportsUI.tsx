@@ -56,7 +56,7 @@ export function AdminReportsUI({
     <div className="portal-content" style={{ background: "var(--bg)" }}>
       {/* Header with gradient */}
       <div className="mb-5 sm:mb-6">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+        <h2 className="font-jakarta font-bold text-xl sm:text-2xl"
           style={{ background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
           Reports & Analytics
         </h2>
@@ -83,7 +83,7 @@ export function AdminReportsUI({
                 </div>
                 <div className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold" style={{ color: txt2 }}>{s.label}</div>
               </div>
-              <div className="font-syne font-bold text-lg sm:text-xl" style={{ color: c.text }}>{s.val}</div>
+              <div className="font-jakarta font-bold text-lg sm:text-xl" style={{ color: c.text }}>{s.val}</div>
             </div>
           );
         })}
@@ -91,7 +91,7 @@ export function AdminReportsUI({
 
       {/* Monthly revenue bar chart */}
       <div className="rounded-2xl p-4 sm:p-5 mb-4" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-        <h3 className="font-syne font-bold text-sm mb-4" style={{ color: txt }}>
+        <h3 className="font-jakarta font-bold text-sm mb-4" style={{ color: txt }}>
           Monthly Revenue — {new Date().getFullYear()}
         </h3>
         {totalRevenue === 0 ? (
@@ -125,7 +125,7 @@ export function AdminReportsUI({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-4">
         {/* Bar breakdown */}
         <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-          <h3 className="font-syne font-bold text-sm mb-3" style={{ color: txt }}>Revenue by Service</h3>
+          <h3 className="font-jakarta font-bold text-sm mb-3" style={{ color: txt }}>Revenue by Service</h3>
           {breakdown.length === 0 ? (
             <p className="text-sm text-center py-5" style={{ color: txt3 }}>No orders yet</p>
           ) : breakdown.slice(0, 6).map((s, i) => (
@@ -134,7 +134,7 @@ export function AdminReportsUI({
                 <span className="text-xs" style={{ color: txt2 }}>{s.label}</span>
                 <div className="flex gap-2.5">
                   <span className="text-xs" style={{ color: txt3 }}>{s.count} orders</span>
-                  <span className="text-xs font-bold font-syne" style={{ color: PIE_COLORS[i % PIE_COLORS.length] }}>
+                  <span className="text-xs font-bold font-jakarta" style={{ color: PIE_COLORS[i % PIE_COLORS.length] }}>
                     {formatCurrency(s.revenue)}
                   </span>
                 </div>
@@ -148,7 +148,7 @@ export function AdminReportsUI({
 
         {/* Pie chart */}
         <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-          <h3 className="font-syne font-bold text-sm mb-3" style={{ color: txt }}>Order Mix</h3>
+          <h3 className="font-jakarta font-bold text-sm mb-3" style={{ color: txt }}>Order Mix</h3>
           {breakdown.length === 0 ? (
             <p className="text-sm text-center py-10" style={{ color: txt3 }}>No data yet</p>
           ) : (
@@ -171,7 +171,7 @@ export function AdminReportsUI({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         {/* Designers */}
         <div className="rounded-2xl p-4 sm:p-5 overflow-x-auto" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-          <h3 className="font-syne font-bold text-sm mb-3" style={{ color: txt }}>Designer Performance</h3>
+          <h3 className="font-jakarta font-bold text-sm mb-3" style={{ color: txt }}>Designer Performance</h3>
           {designers.length === 0 ? (
             <p className="text-sm text-center py-5" style={{ color: txt3 }}>No designers yet</p>
           ) : (
@@ -210,7 +210,7 @@ export function AdminReportsUI({
 
         {/* Top clients */}
         <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-          <h3 className="font-syne font-bold text-sm mb-3" style={{ color: txt }}>Top Clients by LTV</h3>
+          <h3 className="font-jakarta font-bold text-sm mb-3" style={{ color: txt }}>Top Clients by LTV</h3>
           {topClients.length === 0 ? (
             <p className="text-sm text-center py-5" style={{ color: txt3 }}>No clients yet</p>
           ) : topClients.map((c: any, i: number) => {
@@ -228,7 +228,7 @@ export function AdminReportsUI({
                     <span className="text-xs font-medium" style={{ color: txt }}>{c.company_name}</span>
                     {c.tier === "vip" && <span className="text-[10px]">👑</span>}
                   </div>
-                  <span className="text-[13px] font-bold font-syne" style={{ color: "#34D399" }}>{formatCurrency(c.ltv)}</span>
+                  <span className="text-[13px] font-bold font-jakarta" style={{ color: "#34D399" }}>{formatCurrency(c.ltv)}</span>
                 </div>
                 <div className="h-1 rounded-full overflow-hidden" style={{ background: "#E5E7EB" }}>
                   <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: i === 0 ? "linear-gradient(90deg,#F59E0B,#F97316)" : "linear-gradient(90deg,#7C3AED,#A855F7)" }} />
