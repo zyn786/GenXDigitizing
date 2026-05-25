@@ -25,16 +25,16 @@
   --border2: #CBD5E1;
   --border3: #94A3B8;
 
-  /* Brand — Deep navy engineering blue */
-  --blue:       #1E40AF;
+  /* Brand — Surgical Cobalt Blue */
+  --blue:       #2563EB;
   --blue-light: #EFF6FF;
-  --blue-text:  #1E3A8A;
-  --blue-dark:  #1E3A8A;
+  --blue-text:  #1D4ED8;
+  --blue-dark:  #1D4ED8;
 
-  /* CTA — Bold conversion orange */
-  --orange:       #EA580C;
-  --orange-light: #FFF7ED;
-  --orange-text:  #C2410C;
+  /* CTA — Energetic Mint Green */
+  --orange:       #10B981;
+  --orange-light: #ECFDF5;
+  --orange-text:  #059669;
 
   /* Semantic */
   --success:       #059669;

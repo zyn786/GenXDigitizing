@@ -21,20 +21,20 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default:  "GenX Digitizing — Premium Embroidery Digitizing from $7",
+    default:  "Commercial Embroidery Digitizing Services | Production-Ready Files | GenX Digitizing",
     template: "%s | GenX Digitizing",
   },
   description:
-    "Production-ready embroidery digitizing, vector art conversion, and custom patches from $7. Clean proofs, 12hr turnaround, free unlimited revisions.",
+    "Commercial embroidery digitizing services with production-ready accuracy. Machine-tested DST, PES, EMB files. 24-hour turnaround. Vector art conversion and bulk patch digitizing. Trusted by 10,000+ brands.",
   keywords: [
+    "commercial embroidery digitizing services",
     "embroidery digitizing",
     "DST files",
     "PES files",
-    "EMB files",
-    "cap logo digitizing",
-    "embroidery file conversion",
-    "vector art conversion",
+    "vector art conversion company",
+    "bulk patch digitizing",
     "custom patches",
+    "cap logo digitizing",
   ],
   authors: [{ name: "GenX Digitizing" }],
   creator: "GenX Digitizing",
@@ -45,12 +45,12 @@ export const metadata: Metadata = {
     type:        "website",
     locale:      "en_US",
     siteName:    "GenX Digitizing",
-    title:       "GenX Digitizing — Production-Ready Embroidery Files",
-    description: "Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. 1,200+ orders completed.",
+    title:       "Commercial Embroidery Digitizing Services — Production-Ready Files | GenX Digitizing",
+    description: "Production-ready embroidery files with surgical precision. Machine-tested, 24-hour turnaround, zero thread breaks guarantee. Trusted by 10,000+ brands.",
   },
   twitter: {
     card:  "summary_large_image",
-    title: "GenX Digitizing — Production-Ready Embroidery Files",
+    title: "Commercial Embroidery Digitizing Services | GenX Digitizing",
   },
   robots: {
     index:  true,
