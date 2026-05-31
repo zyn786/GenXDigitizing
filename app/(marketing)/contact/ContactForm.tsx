@@ -138,7 +138,7 @@ export function ContactForm() {
       <div className="absolute -top-20 -right-20 w-[220px] h-[220px] bg-[#2563EB]/20 blur-3xl rounded-full pointer-events-none" />
 
       <div className="mb-4 sm:mb-5">
-        <h3 className="font-syne font-extrabold text-lg sm:text-xl">
+        <h3 className="font-syne font-bold text-lg sm:text-xl">
           Send Your Request
         </h3>
 

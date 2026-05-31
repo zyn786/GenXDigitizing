@@ -179,7 +179,7 @@ export function PortfolioModal({ item, onClose }: PortfolioModalProps) {
                     )}
                   </div>
                   <h2
-                    className="font-syne font-extrabold text-lg sm:text-xl md:text-2xl mb-1.5 sm:mb-2 bg-clip-text text-transparent"
+                    className="font-syne font-bold text-lg sm:text-xl md:text-2xl mb-1.5 sm:mb-2 bg-clip-text text-transparent"
                     style={{
                       backgroundImage: `linear-gradient(135deg, var(--txt), ${accent})`,
                     }}

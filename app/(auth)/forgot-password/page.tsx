@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
           ✦
         </div>
         <span
-          className="font-syne font-extrabold text-[18px]"
+          className="font-syne font-bold text-[18px]"
           style={{ background: "linear-gradient(135deg,#2563EB,#F97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
         >
           GENX DIGITIZING

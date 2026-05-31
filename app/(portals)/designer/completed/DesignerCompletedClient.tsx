@@ -106,7 +106,7 @@ export function DesignerCompletedClient({ orders, profile, designerName, designe
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="font-mono text-sm font-extrabold tracking-tight"
+                        <span className="font-mono text-sm font-bold tracking-tight"
                           style={{ background: "linear-gradient(90deg, #10B981, #06B6D4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                           {o.order_number}
                         </span>

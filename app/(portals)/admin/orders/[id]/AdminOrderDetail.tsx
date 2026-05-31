@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Download, ExternalLink, CreditCard,
   FileText, Image as ImageIcon, Package, Clock, User, Building2,
-  Copy,
+  Copy, Trash2, Upload,
 } from "lucide-react";
 import {
   formatDate, formatDateTime, formatFileSize, formatStitchCount,
@@ -86,7 +86,7 @@ function SpecRow({ label, value, mono, highlight }: {
   );
 }
 
-function FileCard({ file, onPreview }: { file: any; onPreview?: (url: string) => void }) {
+function FileCard({ file, onPreview, onDelete }: { file: any; onPreview?: (url: string) => void; onDelete?: (id: string) => void }) {
   const isArtwork = file.file_type === "artwork";
   const url = file.signed_url || file.file_url;
   function download() {
@@ -138,6 +138,13 @@ function FileCard({ file, onPreview }: { file: any; onPreview?: (url: string) =>
           style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: "var(--txt2)" }}>
           <ExternalLink size={10} /> Preview
         </button>
+        {onDelete && (
+          <button onClick={() => onDelete(file.id)}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium cursor-pointer border transition-all active:scale-95"
+            style={{ background: "rgba(239,68,68,0.08)", borderColor: "rgba(239,68,68,0.20)", color: "#B91C1C" }}>
+            <Trash2 size={10} />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -176,6 +183,45 @@ export function AdminOrderDetail({
   const [qaRevisionNotes, setQaRevisionNotes] = useState("");
   const [qaSaving, setQaSaving] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [fileDeleting, setFileDeleting] = useState<string | null>(null);
+  const [reuploading, setReuploading] = useState(false);
+
+  async function handleDeleteFile(fileId: string) {
+    if (!confirm("Delete this file? This cannot be undone.")) return;
+    setFileDeleting(fileId);
+    try {
+      const res = await fetch(`/api/admin/files/${fileId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+      toast.success("File deleted");
+      router.refresh();
+    } catch {
+      toast.error("Failed to delete file");
+    } finally {
+      setFileDeleting(null);
+    }
+  }
+
+  async function handleReupload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files?.length) return;
+    setReuploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("orderId", order.id);
+      for (let i = 0; i < files.length; i++) {
+        fd.append("files", files[i]);
+        fd.append("formats", files[i].name.split(".").pop()?.toUpperCase() || "DST");
+      }
+      const res = await fetch("/api/upload/output", { method: "POST", body: fd });
+      if (!res.ok) throw new Error("Upload failed");
+      toast.success(`${files.length} file(s) uploaded`);
+      router.refresh();
+    } catch {
+      toast.error("Re-upload failed");
+    } finally {
+      setReuploading(false);
+    }
+  }
 
   const t = TURNAROUND_OPTIONS[order.turnaround] ?? TURNAROUND_OPTIONS.standard;
   const client = order.clients;
@@ -299,7 +345,7 @@ export function AdminOrderDetail({
             {/* Top row: order number + badges + price (mobile price inline) */}
             <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
               <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
-                <span className="font-mono text-base sm:text-lg font-extrabold" style={{ color: "var(--txt)" }}>
+                <span className="font-mono text-base sm:text-lg font-bold" style={{ color: "var(--txt)" }}>
                   {order.order_number}
                 </span>
                 <span className={STATUS_CLASS[order.status]}
@@ -315,7 +361,7 @@ export function AdminOrderDetail({
               </div>
               {/* Price visible on mobile next to badges */}
               <div className="sm:hidden text-right flex-shrink-0">
-                <div className="text-xl font-syne font-extrabold" style={{ color: CARD_COLORS[1].text }}>
+                <div className="text-xl font-syne font-bold" style={{ color: CARD_COLORS[1].text }}>
                   ${Number(order.price).toFixed(0)}
                 </div>
               </div>
@@ -344,7 +390,7 @@ export function AdminOrderDetail({
 
           {/* Desktop: price + invoice on the right */}
           <div className="hidden sm:block text-right flex-shrink-0">
-            <div className="text-xl sm:text-2xl font-syne font-extrabold" style={{ color: CARD_COLORS[1].text }}>
+            <div className="text-xl sm:text-2xl font-syne font-bold" style={{ color: CARD_COLORS[1].text }}>
               ${Number(order.price).toFixed(0)}
             </div>
             {invoice && (
@@ -513,7 +559,7 @@ export function AdminOrderDetail({
           {/* Artwork Files */}
           <Section title="Artwork Files" icon={<ImageIcon size={15} />} colorIdx={0}>
             {artworkFiles.length > 0 ? (
-              artworkFiles.map((f: any) => <FileCard key={f.id} file={f} onPreview={setPreviewImage} />)
+              artworkFiles.map((f: any) => <FileCard key={f.id} file={f} onPreview={setPreviewImage} onDelete={handleDeleteFile} />)
             ) : (
               <div className="text-center py-5">
                 <p className="text-xs" style={{ color: "var(--txt3)" }}>No artwork uploaded</p>
@@ -524,7 +570,7 @@ export function AdminOrderDetail({
           {/* Output Files */}
           <Section title="Output Files" icon={<FileText size={15} />} colorIdx={1}>
             {outputFiles.length > 0 ? (
-              outputFiles.map((f: any) => <FileCard key={f.id} file={f} onPreview={setPreviewImage} />)
+              outputFiles.map((f: any) => <FileCard key={f.id} file={f} onPreview={setPreviewImage} onDelete={handleDeleteFile} />)
             ) : (
               <div className="text-center py-5">
                 <p className="text-xs" style={{ color: "var(--txt3)" }}>
@@ -532,6 +578,25 @@ export function AdminOrderDetail({
                 </p>
               </div>
             )}
+            {/* Admin file actions */}
+            <div className="mt-3 pt-3 flex flex-wrap gap-2" style={{ borderTop: "1px solid var(--border)" }}>
+              <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-semibold cursor-pointer transition-all active:scale-95"
+                style={{ background: CARD_COLORS[2].bgSoft, border: `1px solid ${CARD_COLORS[2].border}`, color: CARD_COLORS[2].text }}>
+                <Upload size={12} /> {reuploading ? "Uploading..." : "Re-upload Files"}
+                <input type="file" multiple className="hidden" onChange={handleReupload} disabled={reuploading} />
+              </label>
+              {outputFiles.length > 0 && (
+                <button
+                  onClick={async () => {
+                    if (!confirm(`Delete all ${outputFiles.length} output file(s)? This cannot be undone.`)) return;
+                    for (const f of outputFiles) await handleDeleteFile(f.id);
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-semibold cursor-pointer transition-all active:scale-95 border"
+                  style={{ background: "rgba(239,68,68,0.06)", borderColor: "rgba(239,68,68,0.20)", color: "#B91C1C" }}>
+                  <Trash2 size={12} /> Delete All ({outputFiles.length})
+                </button>
+              )}
+            </div>
           </Section>
 
           {/* QA Review — Step 1: Designer submitted */}
@@ -596,15 +661,35 @@ export function AdminOrderDetail({
               style={{ background: "var(--surface)", border: `1px solid ${CARD_COLORS[5].border}` }}>
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🔄</span>
-                <h3 className="font-syne font-bold text-sm" style={{ color: "var(--txt)" }}>Revision Pending</h3>
+                <h3 className="font-syne font-bold text-sm" style={{ color: "var(--txt)" }}>Client Revision Requested</h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
                   style={{ background: CARD_COLORS[5].bgSoft, color: CARD_COLORS[5].text, border: `1px solid ${CARD_COLORS[5].border}` }}>
-                  Awaiting Designer
+                  Review First
                 </span>
               </div>
-              <p className="text-xs leading-relaxed" style={{ color: "var(--txt2)" }}>
-                Revision sent to designer. Waiting for corrected files to be uploaded. Action buttons will appear once designer submits revised work.
+              <p className="text-xs leading-relaxed mb-3" style={{ color: "var(--txt2)" }}>
+                Client requested changes. Review the revision notes below, then assign to the designer when ready.
               </p>
+              <button
+                onClick={async () => {
+                  if (!confirm("Assign this revision to the designer? They will be notified to start working on the changes.")) return;
+                  setDesignerLoading(true);
+                  try {
+                    const res = await fetch(`/api/admin/orders/${order.id}/assign-revision`, { method: "POST" });
+                    if (!res.ok) throw new Error();
+                    toast.success("Revision assigned to designer");
+                    router.refresh();
+                  } catch { toast.error("Failed to assign revision"); }
+                  finally { setDesignerLoading(false); }
+                }}
+                disabled={designerLoading}
+                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-semibold border-none cursor-pointer text-white transition-all active:scale-95"
+                style={{
+                  background: designerLoading ? "var(--border2)" : `linear-gradient(135deg, ${CARD_COLORS[5].bg}, ${CARD_COLORS[2].bg})`,
+                  cursor: designerLoading ? "not-allowed" : "pointer",
+                }}>
+                {designerLoading ? "Assigning…" : "↗ Assign to Designer"}
+              </button>
             </div>
           )}
 

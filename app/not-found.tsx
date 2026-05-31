@@ -9,7 +9,7 @@ export default function NotFound() {
       />
       <div className="text-center max-w-sm px-4">
         <div
-          className="text-[80px] font-syne font-extrabold leading-none mb-4
+          className="text-[80px] font-syne font-bold leading-none mb-4
             bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent"
         >
           404

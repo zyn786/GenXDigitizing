@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { Bell, X, LogOut, LayoutDashboard, FileText, Users, BarChart3, Settings, MessageSquare, UserCircle, TrendingUp, Receipt, Star, Tag, Image as ImageIcon, Download, PlusCircle, AlertCircle, CheckSquare, Upload } from "lucide-react";
+import { Bell, X, LogOut, LayoutDashboard, FileText, Users, BarChart3, Settings, MessageSquare, UserCircle, TrendingUp, Receipt, Star, Tag, Image as ImageIcon, Download, PlusCircle, AlertCircle, CheckSquare, Upload, Home } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useNotificationContext } from "@/hooks/NotificationProvider";
@@ -139,7 +139,7 @@ function MobileSidebarDrawer({ user }: { user: AuthUser }) {
             <div className="flex items-center justify-between px-4 pt-5 pb-3">
               <div className="flex items-center gap-2.5">
                 <img src="/images/black_logo.png" alt="GenX" className="h-7 w-auto" />
-                <span className="font-syne font-extrabold text-[13px]"
+                <span className="font-syne font-bold text-[13px]"
                   style={{ background: "linear-gradient(135deg,#2FA4D7,#E76F2E)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>GENX</span>
               </div>
               <button onClick={handleClose} className="p-2 rounded-lg hover:bg-[var(--elevated)]" style={{ color: "var(--txt2)" }}>
@@ -232,6 +232,18 @@ export function Topbar({ title, subtitle, user }: TopbarProps) {
 
       {/* Right controls */}
       <div className="flex items-center gap-2.5">
+        {/* Back to Homepage */}
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-[8px] cursor-pointer
+                     bg-[var(--elevated)] border border-[var(--border2)]
+                     hover:bg-[var(--elevated2)] hover:border-[var(--border3)] transition-colors no-underline"
+          style={{ color: "var(--txt2)" }}
+        >
+          <Home size={14} />
+          <span className="text-[12px] hidden sm:inline">Home</span>
+        </Link>
+
         {/* Logout */}
         <button
           onClick={handleSignOut}

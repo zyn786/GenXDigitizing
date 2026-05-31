@@ -1,8 +1,13 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { NotificationProvider } from "@/hooks/NotificationProvider";
 import { BadgeProvider } from "@/hooks/BadgeProvider";
-import { MobileBottomNav } from "./MobileBottomNav";
+
+const MobileBottomNav = dynamic(
+  () => import("./MobileBottomNav").then(m => ({ default: m.MobileBottomNav })),
+  { ssr: false }
+);
 
 export function PortalClientWrapper({ userId, children, role, userName, userEmail }: {
   userId: string; children: React.ReactNode; role?: string; userName?: string; userEmail?: string;

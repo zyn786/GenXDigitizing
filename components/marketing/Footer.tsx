@@ -1,5 +1,8 @@
 "use client";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { SITE_STATS, SITE_INFO, fmtPlus } from "@/lib/site-config";
+import { Button } from "@/components/ui/Button";
 
 const SERVICES = [
   "Embroidery Digitizing",
@@ -11,28 +14,83 @@ const SERVICES = [
 
 const COMPANY = [
   ["Contact Us", "/contact"],
-  ["Client Portal", "/login"],
   ["Privacy Policy", "/privacy-policy"],
   ["Terms & Conditions", "/terms-and-conditions"],
   ["Refund Policy", "/refund-policy"],
 ] as const;
 
-const TAGS = [
-  "🧵 DST · PES Ready",
-  "🌍 100+ Countries",
-  "⭐ 4.9/5 Rating",
-  "✅ 1,200+ Orders",
-];
-
 export function Footer() {
-  const year = new Date().getFullYear();
+  const currentYear = new Date().getFullYear();
+  const copyrightStart = SITE_INFO.founded;
 
   return (
-    <footer className="bg-[var(--surface)] border-t border-[var(--border)] pt-16 pb-10">
-      <div className="max-w-[1200px] mx-auto px-6">
-        <div className="grid grid-cols-2 md:grid-cols-[2fr_1fr_1fr] gap-8 lg:gap-12 mb-14">
+    <footer className="bg-[var(--surface)] border-t border-[var(--border)] pt-10 sm:pt-14 pb-6 sm:pb-8" role="contentinfo">
+      <div className="max-w-[1200px] mx-auto px-5 sm:px-6">
+        {/* MOBILE */}
+        <div className="md:hidden">
+          {/* Logo + tagline */}
+          <div className="text-center mb-6">
+            <img src="/images/black_logo.png" alt="GenX Digitizing" className="h-7 w-auto mx-auto mb-2" />
+            <p className="text-xs text-[var(--txt3)] leading-relaxed max-w-[260px] mx-auto">
+              Premium embroidery digitizing, vector art conversion, and custom patches.
+            </p>
+          </div>
+
+          {/* Auth buttons */}
+          <div className="flex gap-3 mb-7">
+            <Link href="/login" className="flex-1">
+              <Button variant="outline" size="md" className="rounded-full w-full">Sign In</Button>
+            </Link>
+            <Link href="/register" className="flex-1">
+              <Button variant="grad" size="md" className="rounded-full w-full" rightIcon={<ArrowRight size={15} />}>Register</Button>
+            </Link>
+          </div>
+
+          {/* Links */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3 mb-7">
+            <div>
+              <h4 className="font-syne font-bold text-xs uppercase tracking-wider text-[var(--txt)] mb-2">Services</h4>
+              {SERVICES.map((s) => (
+                <Link key={s} href={s === "Pricing" ? "/pricing" : s === "Portfolio" ? "/portfolio" : "/services"}
+                  className="block text-[13px] text-[var(--txt2)] hover:text-[var(--txt)] no-underline mb-0.5 leading-tight transition-colors">
+                  {s}
+                </Link>
+              ))}
+            </div>
+            <div>
+              <h4 className="font-syne font-bold text-xs uppercase tracking-wider text-[var(--txt)] mb-2">Company</h4>
+              {COMPANY.map(([label, href]) => (
+                <Link key={label} href={href}
+                  className="block text-[13px] text-[var(--txt2)] hover:text-[var(--txt)] no-underline mb-0.5 leading-tight transition-colors">
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Trust badges + security */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {[
+              `🌍 ${fmtPlus(SITE_STATS.countriesServed)}+ Countries`,
+              `⭐ ${SITE_STATS.avgRating}/5 Rating`,
+              `✅ ${fmtPlus(SITE_STATS.ordersCompleted)}+ Orders`,
+            ].map((t) => (
+              <span key={t} className="inline-flex px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--elevated)] text-[var(--txt2)] border border-[var(--border)]">
+                {t}
+              </span>
+            ))}
+          </div>
+
+          <div className="text-[11px] text-[var(--txt3)] mb-6 flex items-center gap-3">
+            <span>🔒 SSL Encrypted</span>
+            <span>💳 Secure Payments</span>
+          </div>
+        </div>
+
+        {/* Desktop: grid layout */}
+        <div className="hidden md:grid grid-cols-[2fr_1fr_1fr] gap-8 lg:gap-12 mb-10">
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
+          <div>
             <div className="flex items-center gap-2.5 mb-4">
               <img
                 src="/images/black_logo.png"
@@ -40,82 +98,66 @@ export function Footer() {
                 className="h-9 w-auto"
               />
             </div>
-            <p className="text-[13px] text-[var(--txt3)] leading-relaxed max-w-[280px] mb-5">
+            <p className="text-[13px] text-[var(--txt3)] leading-relaxed max-w-[280px] mb-4">
               Premium embroidery digitizing, vector art conversion, and custom patches — delivered production-ready.
             </p>
-            <div className="flex gap-1.5 flex-wrap">
-              {TAGS.map((t) => (
-                <span
-                  key={t}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full
-                    text-[11px] font-medium bg-[var(--border)] text-[var(--txt2)]
-                    border border-[var(--border2)]"
-                >
+            <div className="flex gap-1.5 flex-wrap mb-4">
+              {[
+                `🌍 ${fmtPlus(SITE_STATS.countriesServed)} Countries`,
+                `⭐ ${SITE_STATS.avgRating}/5 Rating`,
+                `✅ ${fmtPlus(SITE_STATS.ordersCompleted)} Orders`,
+              ].map((t) => (
+                <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--border)] text-[var(--txt2)] border border-[var(--border2)]">
                   {t}
                 </span>
               ))}
+            </div>
+            <div className="flex items-center gap-3 text-[11px] text-[var(--txt3)]">
+              <span>🔒 SSL Encrypted</span>
+              <span>💳 Secure Payments</span>
             </div>
           </div>
 
           {/* Services */}
           <div>
-            <h4 className="font-syne font-bold text-xs uppercase tracking-[0.08em] text-[var(--txt3)] mb-4">
-              Services
-            </h4>
+            <h4 className="font-syne font-bold text-xs uppercase tracking-[0.08em] text-[var(--txt3)] mb-4">Services</h4>
             {SERVICES.map((s) => (
-              <Link
-                key={s}
-                href={s === "Pricing" ? "/pricing" : s === "Portfolio" ? "/portfolio" : "/services"}
-                className="block text-[13px] text-[var(--txt2)] hover:text-[var(--txt)]
-                  no-underline mb-2.5 transition-colors duration-150"
-              >
+              <Link key={s} href={s === "Pricing" ? "/pricing" : s === "Portfolio" ? "/portfolio" : "/services"}
+                className="block text-[13px] text-[var(--txt2)] hover:text-[var(--txt)] no-underline mb-1.5 transition-colors">
                 {s}
               </Link>
             ))}
           </div>
 
-          {/* Company */}
+          {/* Company + Auth */}
           <div>
-            <h4 className="font-syne font-bold text-xs uppercase tracking-[0.08em] text-[var(--txt3)] mb-4">
-              Company
-            </h4>
+            <h4 className="font-syne font-bold text-xs uppercase tracking-[0.08em] text-[var(--txt3)] mb-4">Company</h4>
             {COMPANY.map(([label, href]) => (
-              <Link
-                key={label}
-                href={href}
-                className="block text-[13px] text-[var(--txt2)] hover:text-[var(--txt)]
-                  no-underline mb-2.5 transition-colors duration-150"
-              >
+              <Link key={label} href={href}
+                className="block text-[13px] text-[var(--txt2)] hover:text-[var(--txt)] no-underline mb-1.5 transition-colors">
                 {label}
               </Link>
             ))}
+            <div className="flex gap-2 mt-4 pt-4 border-t border-[var(--border)]">
+              <Link href="/login">
+                <Button variant="outline" size="sm" className="rounded-full">Sign In</Button>
+              </Link>
+              <Link href="/register">
+                <Button variant="grad" size="sm" className="rounded-full" rightIcon={<ArrowRight size={14} />}>Register</Button>
+              </Link>
+            </div>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-[var(--border)] pt-6 flex justify-between items-center flex-wrap gap-3">
-          <p className="text-xs text-[var(--txt3)]">
-            &copy; {year} GenX Digitizing. All rights reserved.
+        <div className="border-t border-[var(--border)] pt-4 sm:pt-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 text-center sm:text-left">
+          <p className="text-[11px] sm:text-xs text-[var(--txt3)]">
+            &copy; {copyrightStart === currentYear ? currentYear : `${copyrightStart}–${currentYear}`} GenX Digitizing. All rights reserved.
           </p>
-          <div className="flex gap-5">
-            {[
-              ["Privacy Policy", "/privacy-policy"],
-              ["Terms & Conditions", "/terms-and-conditions"],
-              ["Refund Policy", "/refund-policy"],
-            ].map(([label, href]) => (
-              <Link
-                key={label}
-                href={href}
-                className="text-xs text-[var(--txt3)] hover:text-[var(--txt2)] no-underline transition-colors"
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#16A34A] shadow-[0_0_6px_#16A34A]" />
-            <span className="text-xs text-[#16A34A]">All systems operational</span>
-          </div>
+          <p className="text-[11px] sm:text-xs text-[var(--txt3)] flex items-center justify-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A]" />
+            All systems operational
+          </p>
         </div>
       </div>
     </footer>

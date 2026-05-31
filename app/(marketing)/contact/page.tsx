@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_STATS } from "@/lib/site-config";
 import { ContactForm } from "./ContactForm";
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 
 const CONTACT_INFO = [
   { emoji: "⚡", title: "Fast Replies", desc: "We respond within 1 hour" },
-  { emoji: "🌍", title: "Worldwide Service", desc: "Clients in 100+ countries — no matter the timezone" },
+  { emoji: "🌍", title: "Worldwide Service", desc: `Clients in ${SITE_STATS.countriesServed}+ countries — no matter the timezone` },
   { emoji: "💬", title: "Live Chat Available", desc: "Already a client? Message us directly from your portal" },
   { emoji: "📧", title: "Email Support", desc: "support@genxdigitizing.com — detailed questions welcome" },
 ];
@@ -28,7 +29,7 @@ export default function ContactPage() {
               Get in Touch
             </span>
 
-            <h1 className="font-syne font-extrabold text-[clamp(32px,7vw,48px)] leading-[1.1]">
+            <h1 className="font-syne font-bold text-[clamp(32px,7vw,48px)] leading-[1.1]">
               We&apos;d Love to{" "}
               <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
                 Hear From You

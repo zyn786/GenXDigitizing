@@ -1,11 +1,15 @@
 // @ts-nocheck
 export const dynamic = "force-dynamic";
 
+import nextDynamic from "next/dynamic";
 import { createClient }    from "@/lib/supabase/server";
 import { getAdminStats }   from "@/lib/supabase/admin-queries";
 import { getAdminUser }    from "@/lib/supabase/get-user";
 import { Topbar }          from "@/components/portals/Topbar";
-import { AdminDashClient } from "./DashboardClient";
+
+const AdminDashClient = nextDynamic(() => import("./DashboardClient").then(m => ({ default: m.AdminDashClient })), {
+  loading: () => <div className="p-6"><div className="animate-pulse space-y-4"><div className="h-8 bg-[var(--elevated)] rounded w-48" /><div className="grid grid-cols-2 lg:grid-cols-4 gap-3"><div className="h-24 bg-[var(--elevated)] rounded-xl" /><div className="h-24 bg-[var(--elevated)] rounded-xl" /><div className="h-24 bg-[var(--elevated)] rounded-xl" /><div className="h-24 bg-[var(--elevated)] rounded-xl" /></div></div></div>,
+});
 
 export default async function AdminDashboard() {
   const [user, stats] = await Promise.all([getAdminUser(), getAdminStats()]);

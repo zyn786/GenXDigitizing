@@ -1,12 +1,13 @@
 // @ts-nocheck
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/server";
+import { SITE_STATS, fmtPlus } from "@/lib/site-config";
+import { FAQSchema, BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { LandingClient } from "./LandingClient";
 
 export const metadata: Metadata = {
   title: "GenX Digitizing — Premium Embroidery Digitizing from $7",
-  description:
-    "Production-ready embroidery digitizing, vector art, and custom patches. Clean proofs, fast turnaround, free revisions. Trusted by 1,200+ decorators worldwide.",
+  description: `Production-ready embroidery digitizing, vector art, and custom patches. Clean proofs, fast turnaround, free revisions. Trusted by ${fmtPlus(SITE_STATS.ordersCompleted)} decorators worldwide.`,
   keywords: [
     "embroidery digitizing service","DST file","PES file","EMB file",
     "embroidery digitizing online","cap logo digitizing","left chest digitizing",
@@ -14,43 +15,10 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "GenX Digitizing — Production-Ready Embroidery Files",
-    description: "Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. 1,200+ orders completed.",
+    description: `Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. ${fmtPlus(SITE_STATS.ordersCompleted)} orders completed.`,
     type: "website",
   },
 };
-
-const floatingCards = [
-  {
-    title: "Embroidery Digitizing",
-    label: "DST / PES Ready",
-    icon: "🧵",
-  },
-  {
-    title: "Vector Artwork",
-    label: "AI / EPS / SVG",
-    icon: "✦",
-  },
-  {
-    title: "Custom Patches",
-    label: "Merrow / PVC / Woven",
-    icon: "🏷️",
-  },
-  {
-    title: "3D Puff Caps",
-    label: "Raised Stitch Finish",
-    icon: "🧢",
-  },
-    {
-    title: "Jacket Back",
-    label: "Stitch Finish",
-    icon: "🧥",
-  },
-    {
-    title: "Left Chest",
-    label: "Small Logo Digitizing",
-    icon: "👕",
-  },
-];
 
 const SERVICE_META = {
   digitizing: { emoji: "🧵", title: "Embroidery Digitizing",
@@ -82,11 +50,6 @@ const TESTIMONIALS = [
   { name: "James Okafor",     company: "Victory Sportswear",    text: "Cap digitizing is tricky. GenX got it right first try. Structural underlay perfect for curved surfaces.", stars: 5, country: "Nigeria", date: "2024" },
   { name: "Priya Mehta",      company: "Monogram Collective",   text: "Fast, affordable, and the free format conversion saves me time. I get DST, PES, and JEF all in one order.", stars: 5, country: "India", date: "2025" },
 ];
-
-const BEFORE_AFTER = {
-  source: { url: "https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/Before-5_upqe91.webp", label: "Rough Logo.png" },
-  output: { url: "https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/After-5_hod7v0.webp", label: "DST · PES · PDF Proof" },
-};
 
 const FAQS = [
   { q: "What file formats do you deliver?", a: "DST, PES, EMB, JEF, XXX, VIP, HUS, EXP — we cover every major machine format. Extra formats are always free." },
@@ -123,5 +86,11 @@ export default async function HomePage() {
     };
   });
 
-  return <LandingClient services={services} process={PROCESS} testimonials={TESTIMONIALS} faqs={FAQS} floatingCards={floatingCards} beforeAfter={BEFORE_AFTER} />;
+  return (
+    <>
+      <FAQSchema faqs={FAQS} />
+      <BreadcrumbSchema items={[{ name: "Home", url: "/" }]} />
+      <LandingClient services={services} process={PROCESS} testimonials={TESTIMONIALS} faqs={FAQS} />
+    </>
+  );
 }

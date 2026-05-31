@@ -5,7 +5,7 @@ import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { Plus, X, DollarSign, Send, Image, Loader2, Mail, Globe, Calendar, Building2, FileText, ChevronRight, TrendingUp, Target, Trophy } from "lucide-react";
+import { Plus, X, DollarSign, Send, Image, Loader2, Mail, Globe, Calendar, Building2, FileText, ChevronRight, TrendingUp, Target, Trophy, Download } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/utils";
 
 const CARD_COLORS = [
@@ -286,11 +286,18 @@ function LeadDetailModal({ lead, onClose, onContact }: { lead: any; onClose: () 
                 <Image size={14} style={{ color: txt3 }} />
                 <span className="text-[11px] uppercase tracking-wider font-bold" style={{ color: txt3 }}>Artwork</span>
               </div>
-              <a href={artworkUrl} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-[12px] no-underline border transition-all"
-                style={{ background: clr[4].bgSoft, borderColor: clr[4].border, color: clr[4].text }}>
-                <Image size={16} /> View / Download Artwork ↗
-              </a>
+              <div className="flex items-center gap-2">
+                <a href={artworkUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-[12px] no-underline border transition-all hover:opacity-80"
+                  style={{ background: clr[4].bgSoft, borderColor: clr[4].border, color: clr[4].text }}>
+                  <Image size={16} /> View ↗
+                </a>
+                <a href={artworkUrl} download
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-[12px] no-underline border transition-all hover:opacity-80 cursor-pointer"
+                  style={{ background: clr[0].bgSoft, borderColor: clr[0].border, color: clr[0].text }}>
+                  <Download size={16} /> Download
+                </a>
+              </div>
             </div>
           )}
 

@@ -27,7 +27,7 @@ export function Step4Confirm({sel,serviceName,selTurn,fmt,extras,designName,file
       </div>
       <div className="rounded-xl p-3.5 mb-4 flex items-center justify-between" style={{background:GREEN.bgSoft,border:"1px solid "+GREEN.border}}>
         <div><span className="text-[13px] font-bold" style={{color:txt}}>Total{qty>1?" ("+qty+" items)":" "}</span><br/><span className="text-[10px]" style={{color:txt3}}>All turnaround speeds free · Unlimited revisions</span></div>
-        <span className="font-syne font-extrabold text-2xl" style={{color:GREEN.text}}>${totalPrice.toFixed(0)}</span>
+        <span className="font-syne font-bold text-2xl" style={{color:GREEN.text}}>${totalPrice.toFixed(0)}</span>
       </div>
       <div className="flex gap-2">
         <button onClick={()=>setStep(3)} className="flex-1 py-3 rounded-xl text-[14px] sm:text-[13px] font-medium cursor-pointer border flex items-center justify-center gap-1.5" style={{background:"var(--elevated)",color:txt2,borderColor:"var(--border2)"}}><ArrowLeft size={15}/> Back</button>

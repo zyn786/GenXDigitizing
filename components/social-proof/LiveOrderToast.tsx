@@ -3,19 +3,22 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
-import type { FakeNotification } from "./data";
+import { serviceEmoji, serviceAccent } from "./data";
+import type { LiveNotification } from "./data";
 
 const DISPLAY_MS = 7000;
 
 interface LiveOrderToastProps {
-  notification: FakeNotification;
+  notification: LiveNotification;
   onDismiss: () => void;
 }
 
 export function LiveOrderToast({ notification, onDismiss }: LiveOrderToastProps) {
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(100);
-  const { client, service } = notification;
+  const { clientName, serviceLabel } = notification;
+  const accent = serviceAccent(serviceLabel);
+  const emoji = serviceEmoji(serviceLabel);
 
   // Countdown progress bar
   useEffect(() => {
@@ -30,6 +33,9 @@ export function LiveOrderToast({ notification, onDismiss }: LiveOrderToastProps)
     }, 50);
     return () => clearInterval(interval);
   }, [isPaused]);
+
+  // Extract first name from full name
+  const firstName = clientName.split(" ")[0] || clientName;
 
   return (
     <motion.div
@@ -54,7 +60,7 @@ export function LiveOrderToast({ notification, onDismiss }: LiveOrderToastProps)
         <motion.div
           className="h-full rounded-r-full"
           style={{
-            background: `linear-gradient(90deg, ${service.accent}, ${service.accent}88)`,
+            background: `linear-gradient(90deg, ${accent}, ${accent}88)`,
             width: `${progress}%`,
           }}
         />
@@ -82,27 +88,25 @@ export function LiveOrderToast({ notification, onDismiss }: LiveOrderToastProps)
         <X size={13} />
       </button>
 
-      {/* Flag + service icon */}
+      {/* Service icon */}
       <div className="flex flex-col items-center gap-1 flex-shrink-0 pt-0.5">
-        <span className="text-lg sm:text-xl leading-none">{client.flag}</span>
-        <span className="text-xs sm:text-sm leading-none opacity-80">{service.emoji}</span>
+        <span className="text-lg sm:text-xl leading-none">{emoji}</span>
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0 pt-0.5">
         <p className="text-[12px] sm:text-[13px] leading-snug font-semibold" style={{ color: "var(--txt)" }}>
-          {client.firstName}{" "}
-          <span className="font-normal" style={{ color: "var(--txt2)" }}>from {client.country}</span>
+          {firstName}{" "}
+          <span className="font-normal" style={{ color: "var(--txt2)" }}>placed an order</span>
         </p>
         <p className="text-[11.5px] sm:text-[12px] mt-1 leading-snug" style={{ color: "var(--txt2)" }}>
-          placed{" "}
           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10.5px] sm:text-[11px] font-bold"
             style={{
-              background: `${service.accent}15`,
-              color: service.accent,
-              border: `1px solid ${service.accent}25`,
+              background: `${accent}15`,
+              color: accent,
+              border: `1px solid ${accent}25`,
             }}>
-            {service.emoji} {service.label}
+            {emoji} {serviceLabel}
           </span>
         </p>
         <p className="text-[10px] mt-1.5 font-medium" style={{ color: "var(--txt3)" }}>
@@ -113,7 +117,7 @@ export function LiveOrderToast({ notification, onDismiss }: LiveOrderToastProps)
       {/* Accent dot */}
       <div
         className="absolute bottom-3 right-3 w-1.5 h-1.5 rounded-full animate-pulse"
-        style={{ background: service.accent, opacity: 0.6 }}
+        style={{ background: accent, opacity: 0.6 }}
       />
 
       {/* Pause ring */}
@@ -123,8 +127,8 @@ export function LiveOrderToast({ notification, onDismiss }: LiveOrderToastProps)
           animate={{ opacity: 1 }}
           className="absolute inset-0 rounded-2xl pointer-events-none"
           style={{
-            border: `2px solid ${service.accent}30`,
-            boxShadow: `inset 0 0 24px ${service.accent}08`,
+            border: `2px solid ${accent}30`,
+            boxShadow: `inset 0 0 24px ${accent}08`,
           }}
         />
       )}

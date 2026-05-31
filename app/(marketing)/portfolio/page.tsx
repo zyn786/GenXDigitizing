@@ -1,5 +1,6 @@
 // @ts-nocheck
 import type { Metadata } from "next";
+import { SITE_STATS, fmtPlus } from "@/lib/site-config";
 import { PortfolioClient } from "./PortfolioClient";
 
 export const metadata: Metadata = {
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "Our Work — GenX Digitizing Portfolio",
-    description: "1,200+ orders completed. See the quality of our embroidery digitizing, vector art, and custom patches.",
+    description: `${fmtPlus(SITE_STATS.ordersCompleted)} orders completed. See the quality of our embroidery digitizing, vector art, and custom patches.`,
     type: "website",
   },
 };

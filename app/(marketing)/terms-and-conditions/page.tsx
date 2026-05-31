@@ -12,7 +12,7 @@ export default function TermsPage() {
         <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20 mb-4">
           Legal
         </span>
-        <h1 className="font-syne font-extrabold text-[clamp(28px,5vw,42px)] leading-[1.15] mb-3">
+        <h1 className="font-syne font-bold text-[clamp(28px,5vw,42px)] leading-[1.15] mb-3">
           Terms &amp; Conditions
         </h1>
         <p className="text-[var(--txt3)] text-sm mb-10">Last updated: May 23, 2026</p>

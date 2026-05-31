@@ -137,7 +137,7 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
           return (
             <div key={s.label} className="flex-1 min-w-[90px] sm:min-w-[130px] rounded-2xl p-3 sm:p-3.5 text-center transition-all duration-200 hover:translate-y-[-2px]"
               style={{ background: c.bgSoft, border: `1px solid ${c.border}` }}>
-              <div className="font-syne font-extrabold text-2xl sm:text-3xl mb-1 leading-tight" style={{ color: c.text }}>{s.val}</div>
+              <div className="font-syne font-bold text-2xl sm:text-3xl mb-1 leading-tight" style={{ color: c.text }}>{s.val}</div>
               <div className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold" style={{ color: txt2 }}>{s.label}</div>
             </div>
           );

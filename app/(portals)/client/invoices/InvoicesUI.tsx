@@ -117,7 +117,7 @@ export function ClientInvoicesUI({ invoices, paymentStatus, demoInvoiceId }) {
                 </div>
                 <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[12px] mb-2.5">
                   <span className="font-medium" style={{color:txt}}>{inv.orders?.service_tiers?.label||"—"}</span>
-                  <span className="font-syne font-extrabold text-right" style={{color:green.text}}>{formatCurrency(inv.amount)}</span>
+                  <span className="font-syne font-bold text-right" style={{color:green.text}}>{formatCurrency(inv.amount)}</span>
                   <span className="font-mono text-[11px]" style={{color:purple.text}}>{inv.orders?.order_number||"—"}</span>
                   <span className="text-right" style={{color:txt3}}>{formatDate(inv.created_at)}</span>
                 </div>

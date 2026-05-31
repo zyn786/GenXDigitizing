@@ -191,7 +191,7 @@ export function MyOrdersClient({ orders, userId }: any) {
                 <span className={STATUS_CLASS[o.status]} style={{padding:"3px 8px",borderRadius:20,fontSize:10,fontWeight:600,border:"1px solid"}}>{STATUS_LABEL[o.status]}</span>
                 <span style={{padding:"3px 8px",borderRadius:20,fontSize:10,fontWeight:500,background:`${t.color}18`,color:t.color,border:`1px solid ${t.color}35`}}>{t.icon} {t.label}</span>
               </div>
-              <span className="font-syne font-extrabold text-base sm:text-lg flex-shrink-0" style={{color:clr[1].text}}>${Number(o.price).toFixed(0)}</span>
+              <span className="font-syne font-bold text-base sm:text-lg flex-shrink-0" style={{color:clr[1].text}}>${Number(o.price).toFixed(0)}</span>
             </div>
             {/* Row 2: Service info */}
             <div className="flex items-center gap-1.5 flex-wrap mb-2.5">

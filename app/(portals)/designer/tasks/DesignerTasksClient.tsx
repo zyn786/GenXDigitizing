@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter }               from "next/navigation";
 import { toast }                   from "sonner";
 import { createClient }            from "@/lib/supabase/client";
-import { Download, ChevronDown, ChevronUp, Trash2, Clock, AlertTriangle, CheckCircle2, ClipboardList, Star, DollarSign, RotateCcw, ChevronRight } from "lucide-react";
+import { Download, ChevronDown, ChevronUp, Trash2, Clock, AlertTriangle, CheckCircle2, ClipboardList, Star, DollarSign, RotateCcw, ChevronRight, Upload, FileText, X } from "lucide-react";
 import { formatDate, formatCurrency, hoursUntilDeadline, TURNAROUND_OPTIONS } from "@/lib/utils";
 
 const PC = {
@@ -49,6 +49,41 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
   const [showCompleted, setShowCompleted] = useState(false);
   const [completedModal, setCompletedModal] = useState<any>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [uploadModal, setUploadModal] = useState<any>(null); // { orderId, orderNumber }
+  const [uploadFiles, setUploadFiles] = useState<{ id: string; file: File; format: string }[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  const OUTPUT_FORMATS = ["DST","PES","EMB","JEF","XXX","VIP","HUS","EXP","VP3","SEW","AI","SVG","EPS","PDF"];
+  const ALLOWED_ACCEPT = ".dst,.pes,.emb,.jef,.xxx,.vip,.hus,.exp,.vp3,.cnd,.tap,.png,.jpg,.jpeg,.webp,.pdf,.svg,.ai,.eps";
+
+  function addUploadFiles(files: FileList | File[]) {
+    const newFiles = Array.from(files).map(f => ({
+      id: crypto.randomUUID(),
+      file: f,
+      format: f.name.split(".").pop()?.toUpperCase() || "DST",
+    }));
+    setUploadFiles(prev => [...prev, ...newFiles]);
+  }
+
+  async function submitUpload() {
+    if (!uploadFiles.length || !uploadModal) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("orderId", uploadModal.orderId);
+      uploadFiles.forEach(f => {
+        fd.append("files", f.file);
+        fd.append("formats", f.format);
+      });
+      const res = await fetch("/api/upload/output", { method: "POST", body: fd });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Upload failed"); }
+      toast.success(`${uploadFiles.length} file(s) submitted for QA`);
+      setUploadModal(null);
+      setUploadFiles([]);
+      router.refresh();
+    } catch (e: any) { toast.error(e.message || "Upload failed"); }
+    finally { setUploading(false); }
+  }
 
   async function downloadFile(url: string, name: string) {
     try {
@@ -227,7 +262,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="font-mono text-[13px] sm:text-[14px] font-extrabold tracking-tight"
+                        <span className="font-mono text-[13px] sm:text-[14px] font-bold tracking-tight"
                           style={{ background:"linear-gradient(90deg, #7C3AED, #06B6D4)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
                           {o.order_number}
                         </span>
@@ -346,10 +381,9 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
                           style={{ background:"linear-gradient(135deg, #06B6D4, #10B981)", width:"fit-content" }}>▶ Start Working</button>
                       )}
                       {o.status==="in_progress" && (
-                        <a href={`/designer/upload?order=${o.id}`} className="no-underline">
-                          <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] sm:text-[13px] font-semibold text-white border-none cursor-pointer active:scale-[0.98] transition-all"
-                            style={{ background:"linear-gradient(135deg, #7C3AED, #D946EF)" }}>⬆ Upload Completed File</button>
-                        </a>
+                        <button onClick={() => { setUploadModal({ orderId: o.id, orderNumber: o.order_number }); setUploadFiles([]); }}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] sm:text-[13px] font-semibold text-white border-none cursor-pointer active:scale-[0.98] transition-all"
+                          style={{ background:"linear-gradient(135deg, #7C3AED, #D946EF)" }}>⬆ Upload Completed File</button>
                       )}
                       {o.status==="review" && (
                         <div className="p-3.5 rounded-xl flex items-start gap-3" style={{ background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.20)" }}>
@@ -372,10 +406,9 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
                               {o.admin_notes && <div className="text-[11px] p-2.5 rounded-lg mt-2" style={{ background:"rgba(220,38,38,0.06)", color:"#B91C1C", lineHeight:1.5 }}>📝 {o.admin_notes}</div>}
                             </div>
                           </div>
-                          <a href={`/designer/upload?order=${o.id}`} className="no-underline">
-                            <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-semibold text-white border-none cursor-pointer active:scale-[0.98] transition-all"
-                              style={{ background:"linear-gradient(135deg, #E76F2E, #EF4444)" }}>⬆ Re-upload Fixed File</button>
-                          </a>
+                          <button onClick={() => { setUploadModal({ orderId: o.id, orderNumber: o.order_number }); setUploadFiles([]); }}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-semibold text-white border-none cursor-pointer active:scale-[0.98] transition-all"
+                            style={{ background:"linear-gradient(135deg, #E76F2E, #EF4444)" }}>⬆ Re-upload Fixed File</button>
                         </div>
                       )}
                       {o.status==="delivered" && (
@@ -414,7 +447,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <span className="font-mono text-[13px] font-extrabold tracking-tight"
+                          <span className="font-mono text-[13px] font-bold tracking-tight"
                             style={{ background:"linear-gradient(90deg, #7C3AED, #06B6D4)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
                             {o.order_number}
                           </span>
@@ -465,7 +498,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
                 style={{ background:"var(--bg)", borderBottom:"1px solid var(--border)" }}>
                 <div className="flex items-start justify-between">
                   <div className="min-w-0 flex-1">
-                    <p className="font-mono text-lg sm:text-xl font-extrabold tracking-tight truncate"
+                    <p className="font-mono text-lg sm:text-xl font-bold tracking-tight truncate"
                       style={{ background:"linear-gradient(90deg, #7C3AED, #06B6D4)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
                       {completedModal.order_number}
                     </p>
@@ -615,6 +648,77 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
             style={{ background:"rgba(255,255,255,0.1)", border:"none", cursor:"pointer" }}>×</button>
           <img src={previewImage} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-xl"
             onClick={e => e.stopPropagation()}/>
+        </div>
+      )}
+
+      {/* ── Upload Modal ── */}
+      {uploadModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-4"
+          style={{ background:"rgba(0,0,0,0.6)", backdropFilter:"blur(4px)" }}
+          onClick={() => { if (!uploading) { setUploadModal(null); setUploadFiles([]); } }}>
+          <div className="w-full max-w-[520px] max-h-[85vh] overflow-y-auto rounded-2xl p-5 sm:p-6"
+            style={{ background:"var(--bg)", border:"1px solid var(--border2)" }}
+            onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-syne font-bold text-lg" style={{ color:txt }}>Upload Files</h3>
+                <p className="text-[11px] mt-0.5" style={{ color:txt3 }}>Order {uploadModal.orderNumber}</p>
+              </div>
+              <button onClick={() => { setUploadModal(null); setUploadFiles([]); }} disabled={uploading}
+                className="p-2 rounded-lg cursor-pointer border-none" style={{ background:"var(--elevated)", color:txt3 }}>
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Drop zone */}
+            <input type="file" multiple accept={ALLOWED_ACCEPT} id="task-upload-input" className="hidden"
+              onChange={e => { if (e.target.files?.length) addUploadFiles(e.target.files); }} />
+            <div
+              onClick={() => document.getElementById("task-upload-input")?.click()}
+              onDragOver={e => { e.preventDefault(); }}
+              onDrop={e => { e.preventDefault(); if (e.dataTransfer.files?.length) addUploadFiles(e.dataTransfer.files); }}
+              className="rounded-xl p-5 text-center cursor-pointer transition-all mb-4"
+              style={{ border:`2px dashed ${uploadFiles.length>0?"#10B981":"var(--border2)"}`, background:uploadFiles.length>0?"rgba(16,185,129,0.03)":"var(--elevated)" }}>
+              <Upload size={22} style={{ color:uploadFiles.length>0?"#10B981":"var(--txt3)", margin:"0 auto 6px" }} />
+              <p className="text-[13px] font-semibold mb-0.5" style={{ color:uploadFiles.length>0?"#10B981":txt2 }}>
+                {uploadFiles.length>0 ? `${uploadFiles.length} file(s) selected` : "Click or drag & drop"}
+              </p>
+              <p className="text-[11px]" style={{ color:txt3 }}>All image & digitizing formats</p>
+            </div>
+
+            {/* File list */}
+            {uploadFiles.length>0 && (
+              <div className="space-y-1.5 mb-4 max-h-[200px] overflow-y-auto">
+                {uploadFiles.map((f, i) => (
+                  <div key={f.id} className="flex items-center gap-2.5 rounded-lg p-2.5"
+                    style={{ background:"var(--elevated)", border:"1px solid var(--border)" }}>
+                    <FileText size={13} style={{ color:txt3, flexShrink:0 }} />
+                    <span className="text-[12px] font-medium flex-1 min-w-0 truncate" style={{ color:txt }}>{f.file.name}</span>
+                    <span className="text-[10px] flex-shrink-0" style={{ color:txt3 }}>{(f.file.size/1024).toFixed(0)}KB</span>
+                    <select value={f.format} onChange={e => {
+                      setUploadFiles(prev => prev.map(x => x.id===f.id ? {...x, format:e.target.value} : x));
+                    }} className="text-[11px] font-semibold rounded-lg px-2 py-1 flex-shrink-0"
+                      style={{ background:"var(--surface)", border:"1px solid var(--border2)", color:txt, cursor:"pointer", fontSize:11 }}>
+                      {OUTPUT_FORMATS.map(fmt => <option key={fmt}>{fmt}</option>)}
+                    </select>
+                    <button onClick={() => setUploadFiles(prev => prev.filter(x => x.id!==f.id))}
+                      className="p-1 rounded flex-shrink-0 border-none cursor-pointer" style={{ background:"transparent", color:txt3 }}>
+                      <X size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Submit */}
+            <button onClick={submitUpload}
+              disabled={uploading || uploadFiles.length===0}
+              className="w-full py-3 rounded-xl text-[13px] font-semibold border-none cursor-pointer active:scale-[0.98] transition-all text-white"
+              style={{ background:uploading||uploadFiles.length===0?"var(--border2)":"linear-gradient(135deg, #7C3AED, #D946EF)" }}>
+              {uploading ? "Uploading…" : `Submit ${uploadFiles.length>0 ? uploadFiles.length : ""} File(s) for QA`}
+            </button>
+          </div>
         </div>
       )}
     </div>

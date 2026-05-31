@@ -161,7 +161,7 @@ export default function RegisterPage() {
           ✦
         </div>
         <div>
-          <div className="font-syne font-extrabold text-lg tracking-wide
+          <div className="font-syne font-bold text-lg tracking-wide
             bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
             GENX DIGITIZING
           </div>

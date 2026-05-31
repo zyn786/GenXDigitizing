@@ -36,7 +36,7 @@ export function SectionHeading({
           {label}
         </span>
       )}
-      <h2 className="font-syne font-extrabold text-3xl md:text-5xl text-[var(--txt)] mb-4 leading-[1.15]">
+      <h2 className="font-syne font-bold text-3xl md:text-5xl text-[var(--txt)] mb-4 leading-[1.15]">
         {title}{" "}
         {gradientTitle && (
           <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">

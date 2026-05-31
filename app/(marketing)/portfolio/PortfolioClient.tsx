@@ -60,7 +60,7 @@ export function PortfolioClient() {
           Our Portfolio
         </span>
 
-        <h1 className="font-syne font-extrabold text-[clamp(32px,7vw,70px)] leading-[1.05] mb-3 sm:mb-4">
+        <h1 className="font-syne font-bold text-[clamp(32px,7vw,70px)] leading-[1.05] mb-3 sm:mb-4">
           Our{" "}
           <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
             Work
@@ -185,7 +185,7 @@ export function PortfolioClient() {
           <div className="relative overflow-hidden rounded-3xl sm:rounded-[36px] border border-[#2563EB]/20 bg-gradient-to-br from-[#2563EB]/10 via-white/40 to-[#F97316]/10 p-8 sm:p-12 md:p-16 text-center shadow-[0_0_60px_rgba(37,99,235,0.1)]">
             <div className="relative z-10">
               <div className="text-[56px] mb-4">🧵</div>
-              <h2 className="font-syne font-extrabold text-2xl sm:text-3xl md:text-4xl mb-4">Ready to get started?</h2>
+              <h2 className="font-syne font-bold text-2xl sm:text-3xl md:text-4xl mb-4">Ready to get started?</h2>
               <p className="text-base sm:text-lg text-[var(--txt2)] mb-8 max-w-[480px] mx-auto">
                 From <strong className="text-[#F97316]">$7</strong> per design. Free revisions. Free formats. Delivered in hours.
               </p>

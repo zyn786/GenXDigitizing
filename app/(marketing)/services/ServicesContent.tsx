@@ -166,7 +166,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="font-syne font-extrabold text-[clamp(32px,7vw,64px)] leading-[1.08] mb-4 sm:mb-5"
+          className="font-syne font-bold text-[clamp(32px,7vw,64px)] leading-[1.08] mb-4 sm:mb-5"
         >
           Premium Embroidery
           <span className="block bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
@@ -214,7 +214,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
                     </div>
 
                     <h2
-                      className="font-syne font-extrabold text-xl sm:text-3xl md:text-4xl mb-1.5 sm:mb-2 leading-[1.15]"
+                      className="font-syne font-bold text-xl sm:text-3xl md:text-4xl mb-1.5 sm:mb-2 leading-[1.15]"
                       style={{ color: svc.color }}
                     >
                       {svc.title}
@@ -342,7 +342,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
                   bg-white/15 text-white border border-white/20">
                   Always Included
                 </span>
-                <h2 className="font-syne font-extrabold text-2xl md:text-4xl text-white mb-2">
+                <h2 className="font-syne font-bold text-2xl md:text-4xl text-white mb-2">
                   Free With Every Order
                 </h2>
                 <p className="text-white/70 text-sm max-w-md mx-auto">
@@ -357,12 +357,8 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
                   ["⚡", "Rush 6h Delivery", "Always FREE"],
                   ["🔥", "Urgent 3h Delivery", "Always FREE"],
                 ].map(([emoji, label, status], i) => (
-                  <motion.div
+                  <div
                     key={label}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                     className="flex flex-col items-center text-center bg-white rounded-2xl p-5 md:p-6 shadow-lg
                       hover:-translate-y-2 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
                   >
@@ -371,10 +367,10 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
                       {emoji}
                     </div>
                     <div className="text-sm font-bold text-[var(--txt)] mb-1">{label}</div>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/20">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/20">
                       {status}
                     </span>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -389,7 +385,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
             <GradientOrb color="#2563EB" size={260} className="-top-24 left-1/2 -translate-x-1/2 opacity-20" />
 
             <div className="relative z-10">
-              <h2 className="font-syne font-extrabold text-2xl sm:text-3xl md:text-4xl mb-4">
+              <h2 className="font-syne font-bold text-2xl sm:text-3xl md:text-4xl mb-4">
                 Ready to Start Your Project?
               </h2>
               <p className="text-base sm:text-lg text-[var(--txt2)] max-w-2xl mx-auto mb-6 sm:mb-8">

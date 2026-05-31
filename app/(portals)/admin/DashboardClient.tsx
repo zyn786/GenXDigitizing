@@ -90,7 +90,7 @@ export function AdminDashClient({ stats, recentOrders, breakdown }: Props) {
                 </p>
               </div>
               <p
-                className="font-syne font-extrabold text-[22px] sm:text-[26px] mb-1.5 leading-tight"
+                className="font-syne font-bold text-[22px] sm:text-[26px] mb-1.5 leading-tight"
                 style={{ color: clr.text }}
               >
                 {s.value}

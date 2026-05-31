@@ -22,7 +22,7 @@ function Logo() {
         ✦
       </div>
       <div>
-        <div className="font-syne font-extrabold text-lg
+        <div className="font-syne font-bold text-lg
           bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
           GENX DIGITIZING
         </div>

@@ -572,7 +572,7 @@ export function FreeDesignsClient() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className="font-syne font-extrabold text-[clamp(30px,6vw,60px)] leading-[1.08] mb-3 sm:mb-4"
+            className="font-syne font-bold text-[clamp(30px,6vw,60px)] leading-[1.08] mb-3 sm:mb-4"
           >
             Free Embroidery{" "}
             <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">

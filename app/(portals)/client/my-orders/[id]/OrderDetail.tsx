@@ -176,7 +176,7 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
             <span className={STATUS_CLASS[order.status]} style={{padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:600,border:"1px solid"}}>{STATUS_LABEL[order.status]}</span>
             <span style={{padding:"4px 10px",borderRadius:20,fontSize:11,fontWeight:600,background:`${t.color}18`,color:t.color,border:`1px solid ${t.color}35`}}>{t.icon} {t.label}</span>
           </div>
-          <span className="font-syne font-extrabold text-xl sm:text-2xl" style={{color:CLR.green.text}}>${Number(order.price).toFixed(0)}</span>
+          <span className="font-syne font-bold text-xl sm:text-2xl" style={{color:CLR.green.text}}>${Number(order.price).toFixed(0)}</span>
         </div>
         {/* Row 2: Info chips */}
         <div className="flex flex-wrap gap-1.5">

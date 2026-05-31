@@ -165,19 +165,27 @@ function PreviewCard({ design, index }: { design: FreeDesign; index: number }) {
 export function FreeDesignsPreview() {
   const [designs, setDesigns] = useState<FreeDesign[]>([]);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
-  useEffect(() => {
+  const loadDesigns = () => {
+    setLoading(true);
+    setFailed(false);
     fetch("/api/free-designs?featured=true")
       .then(async (r) => {
         if (!r.ok) throw new Error("Failed to load");
         return r.json();
       })
       .then((data) => setDesigns((data.designs || []).slice(0, 3)))
-      .catch(() => {})
+      .catch(() => setFailed(true))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadDesigns();
   }, []);
 
-  if (!loading && designs.length === 0) return null;
+  // Don't render anything if no data and no error (prevents flash)
+  if (!loading && !failed && designs.length === 0) return null;
 
   return (
     <section className="py-16 md:py-20 lg:py-24">
@@ -191,7 +199,7 @@ export function FreeDesignsPreview() {
             <Download className="w-3 h-3" />
             Free Downloads
           </span>
-          <h2 className="font-syne font-extrabold text-2xl sm:text-3xl md:text-4xl mb-3 leading-[1.15]">
+          <h2 className="font-syne font-bold text-2xl sm:text-3xl md:text-4xl mb-3 leading-[1.15]">
             Free Design{" "}
             <span className={`bg-gradient-to-r ${GRADIENT} bg-clip-text text-transparent`}>
               Downloads
@@ -207,6 +215,16 @@ export function FreeDesignsPreview() {
           <div className="flex flex-col items-center justify-center py-12 gap-2">
             <Loader2 className="w-6 h-6 animate-spin text-[#2563EB]" />
             <p className="text-xs text-[var(--txt3)]">Loading designs...</p>
+          </div>
+        ) : failed ? (
+          <div className="text-center py-8">
+            <p className="text-sm text-[var(--txt2)] mb-3">Could not load free designs.</p>
+            <button
+              onClick={loadDesigns}
+              className="text-sm text-[#2563EB] hover:underline font-medium"
+            >
+              Try again
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-8">

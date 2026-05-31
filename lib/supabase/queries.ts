@@ -134,6 +134,21 @@ export async function getOrdersForClient(supabase: DB, clientId: string) {
   return { data, error };
 }
 
+export async function getRecentOrdersForLiveToast(supabase: DB, since: string) {
+  const { data } = await supabase
+    .from("orders")
+    .select(`
+      id, created_at, status,
+      clients ( users ( full_name ) ),
+      service_tiers ( label )
+    `)
+    .not("status", "in", '("pending","draft","cancelled")')
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(10);
+  return data ?? [];
+}
+
 export async function getOrdersForDesigner(supabase: DB, designerId: string) {
   const { data, error } = await supabase
     .from("orders")

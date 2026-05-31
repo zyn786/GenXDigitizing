@@ -37,7 +37,7 @@ export function Sidebar({ user, badgeCounts = {} }: SidebarProps) {
         <Link href={`/${user.role}`} className="flex items-center gap-2.5 mb-3.5">
           <img src="/images/black_logo.png" alt="GenXdigitizing" className="h-8 w-auto" />
           <div>
-            <div className="font-syne font-extrabold text-[14px] tracking-wide"
+            <div className="font-syne font-bold text-[14px] tracking-wide"
               style={{ background: "linear-gradient(135deg,#2FA4D7,#E76F2E)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               GENX
             </div>

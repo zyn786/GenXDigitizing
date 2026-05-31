@@ -68,7 +68,7 @@ export default function ResetPasswordPage() {
               bg-gradient-to-br from-[#2563EB] to-[#F97316] text-white">
               🧵
             </div>
-            <span className="font-syne font-extrabold text-xl
+            <span className="font-syne font-bold text-xl
               bg-gradient-to-r from-[var(--txt)] to-[var(--txt2)] bg-clip-text text-transparent">
               GenXdigitizing
             </span>

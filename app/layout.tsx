@@ -1,13 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { Syne, Inter } from "next/font/google";
+import { SITE_STATS } from "@/lib/site-config";
 import { Toaster } from "sonner";
 import { LiveOrderProvider } from "@/components/social-proof/LiveOrderProvider";
 import { PageTransition } from "@/components/shared/PageTransition";
+import { OrganizationSchema } from "@/components/shared/StructuredData";
 import "./globals.css";
 
 const syne = Syne({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: ["700"],
   variable: "--font-syne",
   display: "swap",
 });
@@ -46,7 +48,7 @@ export const metadata: Metadata = {
     locale:      "en_US",
     siteName:    "GenX Digitizing",
     title:       "GenX Digitizing — Production-Ready Embroidery Files",
-    description: "Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. 1,200+ orders completed.",
+    description: `Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. ${SITE_STATS.ordersCompleted.toLocaleString()}+ orders completed.`,
   },
   twitter: {
     card:  "summary_large_image",
@@ -75,9 +77,25 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${syne.variable} ${inter.variable}`}
     >
+      <head>
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+      </head>
       <body className="antialiased">
+        <OrganizationSchema />
+        {/* Skip to content — accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[9999]
+            focus:px-4 focus:py-2 focus:bg-[#2563EB] focus:text-white focus:rounded-lg focus:text-sm focus:font-semibold
+            focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"
+        >
+          Skip to content
+        </a>
         <PageTransition />
-        {children}
+        <main id="main-content" role="main">
+          {children}
+        </main>
         <Toaster
           position="bottom-right"
           richColors

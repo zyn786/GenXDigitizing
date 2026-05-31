@@ -4,9 +4,11 @@ import { useState, useRef, useTransition } from "react";
 import { useRouter }    from "next/navigation";
 import { toast }        from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { Upload, FileText, CheckCircle, Plus, X, Clock, AlertTriangle, ClipboardList } from "lucide-react";
+import { Upload, FileText, CheckCircle, X, ClipboardList } from "lucide-react";
 
-const OUTPUT_FORMATS = ["DST","PES","EMB","JEF","XXX","VIP","HUS"];
+const OUTPUT_FORMATS = ["DST","PES","EMB","JEF","XXX","VIP","HUS","EXP","VP3","SEW","AI","SVG","EPS","PDF"];
+
+const ALLOWED_ACCEPT = ".dst,.pes,.emb,.jef,.xxx,.vip,.hus,.exp,.vp3,.cnd,.tap,.png,.jpg,.jpeg,.webp,.pdf,.svg,.ai,.eps,.zip";
 
 const txt  = "var(--txt)";
 const txt2 = "var(--txt2)";
@@ -33,9 +35,8 @@ const inpBase: React.CSSProperties = {
 
 type FileEntry = {
   id: string;
-  file: File | null;
+  file: File;
   format: string;
-  stitchCount: string;
 };
 
 export function DesignerUploadUI({ tasks, userId, designerId, designerName, designerAvatar }: {
@@ -56,20 +57,22 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
 
   const fileRefs = useRef<Map<string, HTMLInputElement>>(new Map());
 
-  const [entries, setEntries] = useState<FileEntry[]>([
-    { id: crypto.randomUUID(), file: null, format: "DST", stitchCount: "" },
-  ]);
+  const [entries, setEntries] = useState<FileEntry[]>([]);
 
   const selTask = tasks.find((t: any) => t.id === selOrder);
 
-  function addEntry() {
-    if (entries.length >= 3) return;
-    setEntries(prev => [...prev, {
+  function addFiles(files: FileList | File[]) {
+    const newEntries: FileEntry[] = Array.from(files).map(f => ({
       id: crypto.randomUUID(),
-      file: null,
-      format: prev[prev.length - 1]?.format ?? "DST",
-      stitchCount: "",
-    }]);
+      file: f,
+      format: getFormatFromName(f.name),
+    }));
+    setEntries(prev => [...prev, ...newEntries]);
+  }
+
+  function getFormatFromName(name: string): string {
+    const ext = name.split(".").pop()?.toUpperCase();
+    return ext && OUTPUT_FORMATS.includes(ext) ? ext : "DST";
   }
 
   function removeEntry(id: string) {
@@ -82,9 +85,8 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
   }
 
   async function submit() {
-    const validEntries = entries.filter(e => e.file && e.stitchCount);
-    if (validEntries.length === 0) {
-      toast.error("Add at least one file with stitch count");
+    if (entries.length === 0) {
+      toast.error("Add at least one file");
       return;
     }
     if (!selOrder) { toast.error("Select an order"); return; }
@@ -93,8 +95,10 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
     try {
       const fd = new FormData();
       fd.append("orderId", selOrder);
-      for (const entry of validEntries) {
-        fd.append("files", entry.file!);
+      fd.append("notes", notes);
+      for (let i = 0; i < entries.length; i++) {
+        fd.append("files", entries[i].file);
+        fd.append("formats", entries[i].format);
       }
       const res = await fetch("/api/upload/output", { method: "POST", body: fd });
       if (!res.ok) {
@@ -103,7 +107,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
         return;
       }
 
-      toast.success(`${validEntries.length} file(s) uploaded — submitted for QA review`);
+      toast.success(`${entries.length} file(s) uploaded — submitted for QA review`);
       startTx(() => { router.push("/designer/tasks"); router.refresh(); });
 
       const supabase = createClient();
@@ -169,7 +173,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
               style={{ background: "linear-gradient(135deg, #7C3AED, #D946EF)" }}>
               Back to Tasks
             </button>
-            <button onClick={() => { setDone(false); setEntries([{ id: crypto.randomUUID(), file: null, format: "DST", stitchCount: "" }]); setNotes(""); }}
+            <button onClick={() => { setDone(false); setEntries([]); setNotes(""); }}
               className="flex-1 py-2.5 rounded-xl text-[13px] font-semibold cursor-pointer active:scale-[0.98] transition-all"
               style={{ background: "var(--elevated)", color: txt2, border: "1px solid var(--border2)" }}>
               Upload Another
@@ -285,7 +289,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
                     boxShadow: isActive ? "0 0 0 3px rgba(124,58,237,0.10)" : "none",
                   }}>
                   <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                    <span className="font-mono text-[12px] font-extrabold tracking-tight"
+                    <span className="font-mono text-[12px] font-bold tracking-tight"
                       style={{ background: isActive ? "linear-gradient(90deg, #7C3AED, #D946EF)" : "linear-gradient(90deg, var(--txt2), var(--txt3))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                       {t.order_number}
                     </span>
@@ -341,90 +345,72 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
           </div>
         )}
 
-        {/* ── File entries ── */}
-        {entries.map((entry, idx) => (
-          <div key={entry.id} className="rounded-xl p-4 mb-3"
-            style={{ background: "var(--elevated)", border: "1px solid var(--border)" }}>
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-[12px] font-semibold flex items-center gap-1.5" style={{ color: txt2 }}>
+        {/* ── Main drop zone ── */}
+        <input
+          type="file"
+          multiple
+          accept={ALLOWED_ACCEPT}
+          style={{ display: "none" }}
+          ref={el => { if (el) fileRefs.current.set("batch", el); }}
+          onChange={e => { if (e.target.files?.length) addFiles(e.target.files); }}
+        />
+        <div
+          onClick={() => fileRefs.current.get("batch")?.click()}
+          onDragOver={e => { e.preventDefault(); e.stopPropagation(); }}
+          onDragEnter={e => { e.preventDefault(); e.stopPropagation(); }}
+          onDragLeave={e => { e.preventDefault(); e.stopPropagation(); }}
+          onDrop={e => {
+            e.preventDefault(); e.stopPropagation();
+            if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files);
+          }}
+          className="rounded-xl p-6 sm:p-8 text-center cursor-pointer transition-all mb-4"
+          style={{
+            border: `2px dashed ${entries.length > 0 ? "#10B981" : "var(--border2)"}`,
+            background: entries.length > 0 ? "rgba(16,185,129,0.03)" : "var(--surface)",
+          }}>
+          <Upload size={24} style={{ color: entries.length > 0 ? "#10B981" : "var(--txt3)", margin: "0 auto 8px" }} />
+          <p className="text-[13px] font-semibold mb-1" style={{ color: entries.length > 0 ? "#10B981" : txt2 }}>
+            {entries.length > 0 ? `${entries.length} file(s) added` : "Click or drag & drop files here"}
+          </p>
+          <p className="text-[11px]" style={{ color: txt3 }}>
+            All image & digitizing formats · drop multiple files at once
+          </p>
+        </div>
+
+        {/* ── File list ── */}
+        {entries.length > 0 && (
+          <div className="space-y-2 mb-4 max-h-[300px] overflow-y-auto">
+            {entries.map((entry, idx) => (
+              <div key={entry.id} className="flex items-center gap-3 rounded-xl p-3"
+                style={{ background: "var(--elevated)", border: "1px solid var(--border)" }}>
                 <span className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
                   style={{ background: "linear-gradient(135deg, #7C3AED, #D946EF)" }}>{idx + 1}</span>
-                File {idx + 1}
-              </span>
-              {entries.length > 1 && (
-                <button onClick={() => removeEntry(entry.id)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium cursor-pointer active:scale-95 transition-all"
-                  style={{ background: "rgba(239,68,68,0.08)", color: "#B91C1C", border: "1px solid rgba(239,68,68,0.20)" }}>
-                  <X size={10} /> Remove
-                </button>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div>
-                <label className="block text-[9px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: txt3 }}>
-                  Format
-                </label>
+                <FileText size={14} style={{ color: txt3, flexShrink: 0 }} />
+                <span className="text-[12px] font-medium flex-1 min-w-0 truncate" style={{ color: txt }}>{entry.file.name}</span>
+                <span className="text-[10px] flex-shrink-0" style={{ color: txt3 }}>{(entry.file.size / 1024).toFixed(0)} KB</span>
                 <select
                   value={entry.format}
                   onChange={e => updateEntry(entry.id, { format: e.target.value })}
-                  style={{ ...inpBase, cursor: "pointer", background: "var(--surface)" }}>
+                  className="text-[11px] font-semibold rounded-lg px-2 py-1 flex-shrink-0"
+                  style={{ ...inpBase, width: "auto", cursor: "pointer", padding: "4px 8px", background: "var(--surface)" }}>
                   {OUTPUT_FORMATS.map(f => <option key={f}>{f}</option>)}
                 </select>
+                <button onClick={() => removeEntry(entry.id)}
+                  className="p-1 rounded-lg flex-shrink-0 cursor-pointer border-none"
+                  style={{ background: "transparent", color: txt3 }}>
+                  <X size={14} />
+                </button>
               </div>
-              <div>
-                <label className="block text-[9px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: txt3 }}>
-                  Stitch count <span style={{ color: "#EF4444" }}>*</span>
-                </label>
-                <input
-                  value={entry.stitchCount}
-                  onChange={e => updateEntry(entry.id, { stitchCount: e.target.value })}
-                  placeholder="e.g. 14,200"
-                  style={{ ...inpBase, background: "var(--surface)" }}
-                />
-              </div>
-            </div>
-
-            {/* File input */}
-            <input
-              type="file"
-              accept=".dst,.pes,.emb,.jef,.xxx,.vip,.hus,.exp,.vp3"
-              style={{ display: "none" }}
-              ref={el => { if (el) fileRefs.current.set(entry.id, el); else fileRefs.current.delete(entry.id); }}
-              onChange={e => updateEntry(entry.id, { file: e.target.files?.[0] ?? null })}
-            />
-            <div
-              onClick={() => fileRefs.current.get(entry.id)?.click()}
-              className="rounded-xl p-5 text-center cursor-pointer transition-all"
-              style={{
-                border: `2px dashed ${entry.file ? "#10B981" : "var(--border2)"}`,
-                background: entry.file ? "rgba(16,185,129,0.04)" : "var(--surface)",
-              }}>
-              {entry.file ? (
-                <>
-                  <FileText size={20} color="#10B981" style={{ margin: "0 auto 6px" }} />
-                  <p className="text-[12px] font-semibold mb-0.5" style={{ color: "#10B981" }}>{entry.file.name}</p>
-                  <p className="text-[10px]" style={{ color: txt3 }}>
-                    {(entry.file.size / 1024).toFixed(0)} KB · click to replace
-                  </p>
-                </>
-              ) : (
-                <>
-                  <Upload size={20} style={{ color: txt3, margin: "0 auto 6px" }} />
-                  <p className="text-[12px] font-medium mb-0.5" style={{ color: txt2 }}>Click to browse</p>
-                  <p className="text-[10px]" style={{ color: txt3 }}>DST, PES, EMB, JEF, XXX, VIP, HUS</p>
-                </>
-              )}
-            </div>
+            ))}
           </div>
-        ))}
+        )}
 
-        {/* Add file button */}
-        {entries.length < 3 && (
-          <button onClick={addEntry}
-            className="w-full py-2.5 mb-4 rounded-xl text-[12px] font-semibold cursor-pointer active:scale-[0.99] transition-all inline-flex items-center justify-center gap-1.5"
-            style={{ background: "var(--elevated)", color: txt2, border: "1px dashed var(--border2)" }}>
-            <Plus size={12} /> Add another file ({entries.length}/3)
+        {/* Clear all */}
+        {entries.length > 0 && (
+          <button onClick={() => setEntries([])}
+            className="w-full py-2 mb-4 rounded-xl text-[11px] font-medium cursor-pointer transition-all inline-flex items-center justify-center gap-1"
+            style={{ background: "rgba(239,68,68,0.06)", color: "#B91C1C", border: "1px solid rgba(239,68,68,0.15)" }}>
+            <X size={12} /> Remove all files
           </button>
         )}
 
@@ -444,14 +430,14 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
 
         {/* Submit button */}
         <button onClick={submit}
-          disabled={uploading || entries.every(e => !e.file || !e.stitchCount)}
+          disabled={uploading || entries.length === 0}
           className="w-full py-3 rounded-xl text-[13px] font-semibold border-none cursor-pointer active:scale-[0.98] transition-all"
           style={{
-            background: uploading || entries.every(e => !e.file || !e.stitchCount)
+            background: uploading || entries.length === 0
               ? "var(--elevated)"
               : "linear-gradient(135deg, #7C3AED, #D946EF)",
-            color: entries.every(e => !e.file || !e.stitchCount) ? txt3 : "#fff",
-            cursor: entries.every(e => !e.file || !e.stitchCount) ? "not-allowed" : "pointer",
+            color: entries.length === 0 ? txt3 : "#fff",
+            cursor: entries.length === 0 ? "not-allowed" : "pointer",
           }}>
           {uploading ? "Uploading…" : "Submit for QA Review ⬆"}
         </button>

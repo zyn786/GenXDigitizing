@@ -89,7 +89,6 @@ export const NAV_SECTIONS: Record<UserRole, NavSection[]> = {
     { title: "Work", items: [
       { label: "My Tasks", href: "/designer/tasks", iconName: "ClipboardList" },
       { label: "Completed", href: "/designer/completed", iconName: "CheckCircle2" },
-      { label: "Upload Files", href: "/designer/upload", iconName: "Upload" },
     ]},
     { title: "Account", items: [
       { label: "Messages", href: "/designer/messages", iconName: "MessageSquare" },

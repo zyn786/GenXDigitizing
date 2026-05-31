@@ -138,20 +138,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 10. Notify designer
-    if (designerUser?.id) {
-      await admin.from("notifications").insert({
-        user_id: designerUser.id,
-        type: "order_update",
-        title: `Revision requested — ${orderNumber}`,
-        body: `${clientFullName} requested changes. Check task for details.`,
-        action_url: `/designer/tasks`,
-      });
-    }
+    // 10. NOTIFY ADMINS ONLY — designer notified after admin review
+    // Designer notification happens via separate admin action
 
-    // 11. Email
+    // 11. Email — admins only
     const recipients: string[] = [];
-    if (designerUser?.email) recipients.push(designerUser.email);
     if (allAdmins?.length) {
       for (const a of allAdmins as any[]) {
         const { data: u } = await admin.from("users").select("email").eq("id", a.id).single();
