@@ -109,34 +109,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
 
       toast.success(`${entries.length} file(s) uploaded — submitted for QA review`);
       startTx(() => { router.push("/designer/tasks"); router.refresh(); });
-
-      const supabase = createClient();
-      const { data: admins } = await supabase.from("users").select("id").eq("role", "admin");
-      if (admins?.length) {
-        await supabase.from("notifications").insert(
-          admins.map((a: any) => ({
-            user_id: a.id, type: "order_update",
-            title: `Files submitted — ${selTask?.order_number}`,
-            body: `${validEntries.length} file(s) · ready for QA`,
-            action_url: "/admin/orders",
-          }))
-        );
-      }
-
-      const { data: orderInfo } = await supabase.from("orders")
-        .select("clients ( user_id )")
-        .eq("id", selOrder).single();
-      const clientUserId = (orderInfo as any)?.clients?.user_id;
-      if (clientUserId) {
-        await supabase.from("notifications").insert({
-          user_id: clientUserId,
-          type: "order_update",
-          title: `Revision ready — ${selTask?.order_number}`,
-          body: "Your revision is ready and under review. You'll be notified once it's approved.",
-          action_url: `/client/my-orders/${selOrder}`,
-        });
-      }
-
+      // Notifications handled server-side by /api/upload/output
       setDone(true);
     } finally { setUploading(false); }
   }

@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { uploadToS3 } from "@/lib/s3";
+import { sendPushToAdmins } from "@/lib/push-notifications-server";
 
 const VALID_FORMATS = new Set(["DST","PES","EMB","JEF","XXX","VIP","HUS","EXP","VP3","SEW","AI","SVG","EPS","PDF"]);
 
@@ -118,6 +119,13 @@ export async function POST(req: NextRequest) {
             action_url: `/admin/orders/${orderId}`,
           }))
         );
+
+        // Push notifications to admin phones
+        sendPushToAdmins({
+          title: `QA Submission — ${orderNumber}`,
+          body: `${user.email || "Designer"} submitted files for ${companyName}. Ready for review.`,
+          url: `/admin/orders/${orderId}`,
+        }).catch(() => {});
       }
     }
 

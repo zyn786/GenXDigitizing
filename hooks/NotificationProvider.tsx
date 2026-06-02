@@ -88,6 +88,11 @@ export function NotificationProvider({ userId, children }: { userId: string | un
       .subscribe((status: string) => {
         if (status === "CLOSED" || status === "CHANNEL_ERROR") {
           subscribedRef.current = false;
+          // Reconnect after 3 seconds and refetch
+          setTimeout(() => {
+            subscribedRef.current = false;
+            fetchNotifications();
+          }, 3000);
         }
       });
 
@@ -99,6 +104,14 @@ export function NotificationProvider({ userId, children }: { userId: string | un
       }
     };
   }, [userId, fetchNotifications]);
+
+  // Fallback poll every 60s in case realtime disconnects
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!subscribedRef.current) fetchNotifications();
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
 
   return (
     <Ctx.Provider value={{ notifications, unreadCount, loading, markAllRead, markRead, refetch: fetchNotifications }}>

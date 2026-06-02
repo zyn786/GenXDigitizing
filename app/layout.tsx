@@ -9,7 +9,7 @@ import "./globals.css";
 
 const syne = Syne({
   subsets: ["latin"],
-  weight: ["700"],
+  weight: ["700", "800"],
   variable: "--font-syne",
   display: "swap",
 });
@@ -83,6 +83,16 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <OrganizationSchema />
+        {/* Register Service Worker for push notifications */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(function(){});
+              }
+            `,
+          }}
+        />
         {/* Skip to content — accessibility */}
         <a
           href="#main-content"

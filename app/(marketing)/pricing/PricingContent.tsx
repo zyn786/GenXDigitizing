@@ -98,17 +98,17 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
         </p>
 
         {/* Social proof strip */}
-        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-8">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-3 mt-8 px-4 sm:px-0">
           {[
             { emoji: "⭐", label: `${SITE_STATS.avgRating} / 5 Rating`, sub: `${fmtPlus(SITE_STATS.verifiedReviews)} reviews` },
             { emoji: "📦", label: `${fmtPlus(SITE_STATS.ordersCompleted)} Orders`, sub: "Delivered worldwide" },
             { emoji: "⚡", label: "3–24h Average", sub: "Turnaround time" },
             { emoji: "💳", label: "Pay When Satisfied", sub: "No risk to you" },
           ].map((s) => (
-            <div key={s.label} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
-              <span className="text-lg">{s.emoji}</span>
-              <div>
-                <p className="text-xs font-semibold text-[var(--txt)]">{s.label}</p>
+            <div key={s.label} className="flex items-center gap-2.5 px-3 sm:px-4 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
+              <span className="text-lg sm:text-xl flex-shrink-0">{s.emoji}</span>
+              <div className="min-w-0">
+                <p className="text-[11px] sm:text-xs font-semibold text-[var(--txt)] truncate">{s.label}</p>
                 <p className="text-[10px] text-[var(--txt3)]">{s.sub}</p>
               </div>
             </div>
@@ -116,14 +116,14 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
         </div>
 
         {/* Testimonial quote */}
-        <div className="mt-6 max-w-[600px] mx-auto text-center">
-          <div className="inline-flex items-start gap-3 px-5 py-4 rounded-2xl bg-[#2563EB]/5 border border-[#2563EB]/10">
-            <span className="text-2xl flex-shrink-0">💬</span>
-            <div className="text-left">
-              <p className="text-sm text-[var(--txt2)] italic leading-relaxed">
-                &ldquo;GenX digitized 200+ designs for our streetwear brand. Zero errors, always on time, and the free format conversion saves us hours every week. We won&apos;t use anyone else.&rdquo;
+        <div className="mt-5 max-w-[600px] mx-auto px-4 sm:px-0">
+          <div className="flex items-start gap-3 p-4 sm:p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
+            <span className="text-xl sm:text-2xl flex-shrink-0 mt-0.5">💬</span>
+            <div>
+              <p className="text-[13px] sm:text-sm text-[var(--txt2)] italic leading-relaxed">
+                &ldquo;GenX digitized 200+ designs for our streetwear brand. Zero errors, always on time, and the free format conversion saves us hours every week.&rdquo;
               </p>
-              <p className="text-xs text-[var(--txt3)] mt-2">
+              <p className="text-[11px] sm:text-xs text-[var(--txt3)] mt-2">
                 — <strong className="text-[var(--txt)]">Marcus R.</strong>, Streetwear Brand Owner, USA
               </p>
             </div>
@@ -167,43 +167,45 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
                   </div>
                 </div>
 
-                {/* Mobile: horizontal scroll row */}
-                <div className="flex sm:hidden gap-2 overflow-x-auto scrollbar-none snap-x snap-mandatory px-4 py-3">
+                {/* Mobile: tier cards */}
+                <div className="sm:hidden px-4 py-4 space-y-3">
                   {tiersList.map((tier, i) => (
                     <div
                       key={tier.id}
-                      className="flex-shrink-0 w-[72vw] snap-start rounded-xl border border-[var(--border2)] bg-[var(--bg)] p-3"
+                      className="relative rounded-2xl bg-[var(--bg)] border border-[var(--border2)] overflow-hidden shadow-sm"
                     >
-                      <Badge className={`mb-2 px-2 py-1 rounded-full text-[10px] ${theme.badge}`}>
-                        {tier.label}
-                      </Badge>
-                      <div className="flex items-end gap-1.5 mb-1">
-                        <div className="font-syne font-bold text-2xl leading-none">${tier.price}</div>
-                        <span className="text-[10px] text-[var(--txt3)] mb-0.5">USD</span>
-                      </div>
-                      <div className="text-xs font-medium">{tier.size_desc}</div>
-                      <div className="text-[10px] text-[var(--txt3)] mb-2">
-                        {tier.is_big_design ? "Complex design — ~12h" : "Standard turnaround"}
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/15">⚡ Rush FREE</span>
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--border)] border border-[var(--border2)] text-[var(--txt2)]">🕐 {tier.est_hours}</span>
+                      {/* Colored left accent */}
+                      <div className={`absolute left-0 top-3 bottom-3 w-[3px] rounded-full bg-gradient-to-b ${theme.gradient}`} />
+                      <div className="flex items-center justify-between p-4 pl-5">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-[13px] font-bold text-[var(--txt)]">{tier.size_desc}</span>
+                            <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${theme.badge}`}>{tier.label}</span>
+                          </div>
+                          <div className="text-[11px] text-[var(--txt3)]">
+                            {tier.is_big_design ? "Complex design" : "Standard turnaround"} · {tier.est_hours}
+                          </div>
+                          <div className="flex gap-1.5 mt-2">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#16A34A]/10 text-[#16A34A] font-medium border border-[#16A34A]/15">⚡ Rush FREE</span>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-4">
+                          <div className="font-syne font-bold text-2xl leading-none text-[var(--txt)]">${tier.price}</div>
+                          <div className="text-[10px] text-[var(--txt3)] mt-0.5">USD</div>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
-                <p className="sm:hidden text-center text-[10px] text-[var(--txt3)] -mt-0.5 mb-1">
-                  {tiersList.length} sizes available — swipe to see all
-                </p>
-                {/* Mobile: badges + button */}
-                <div className="flex sm:hidden items-center justify-between px-4 py-2 border-t border-white/5 bg-black/[0.02]">
-                  <div className="flex flex-wrap gap-1">
+                {/* Mobile: badges + CTA */}
+                <div className="sm:hidden mx-4 mb-4 p-4 rounded-2xl bg-[var(--elevated)] border border-[var(--border)]">
+                  <div className="flex flex-wrap gap-1.5 mb-3">
                     {["♾️ Free Revisions", "🔄 Format Conversion", "⚡ Rush Delivery"].map((item) => (
-                      <span key={item} className={`px-1.5 py-0.5 rounded-full text-[9px] border ${theme.badge}`}>{item}</span>
+                      <span key={item} className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-[var(--bg)] text-[var(--txt2)] border border-[var(--border)]">{item}</span>
                     ))}
                   </div>
-                  <Link href="/register">
-                    <Button variant="grad" size="sm" className="text-xs whitespace-nowrap">Order Now →</Button>
+                  <Link href="/register" className="block">
+                    <Button variant="grad" size="md" className="w-full rounded-full">Order Now →</Button>
                   </Link>
                 </div>
 
@@ -353,12 +355,22 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
             </div>
 
             {/* Guarantees */}
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-6 text-xs text-[var(--txt3)]">
-              {`<span>🛡️ ${SITE_STATS.satisfactionRate}% satisfaction guarantee</span>`}
-              <span>♾️ Free unlimited revisions</span>
-              <span>⚡ Late delivery = free rush upgrade</span>
-              <span>💳 Pay only when satisfied</span>
-              <span>📞 1-hour support response</span>
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5 mt-6">
+              <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-[var(--txt2)]">
+                <span className="text-xs">🛡️</span> {SITE_STATS.satisfactionRate}% satisfaction guarantee
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-[var(--txt2)]">
+                <span className="text-xs">♾️</span> Free unlimited revisions
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-[var(--txt2)]">
+                <span className="text-xs">⚡</span> Late delivery = free upgrade
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-[var(--txt2)]">
+                <span className="text-xs">💳</span> Pay only when satisfied
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-[var(--txt2)]">
+                <span className="text-xs">📞</span> 1-hour support response
+              </span>
             </div>
           </div>
         </div>

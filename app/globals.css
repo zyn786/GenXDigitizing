@@ -220,10 +220,10 @@ a, button, input, select, textarea,
   }
   .portal-main    {
     @apply flex-1 flex flex-col overflow-hidden min-w-0;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   .portal-topbar  {
     @apply flex-shrink-0 flex items-center justify-between px-3 sm:px-6;
+    @apply sticky top-0 z-30;
     min-height: 48px;
     padding-top: 8px;
     padding-bottom: 8px;
@@ -246,7 +246,14 @@ a, button, input, select, textarea,
   /* Mobile portal optimizations */
   @media (max-width: 1023px) {
     .portal-content { -webkit-overflow-scrolling: touch; }
-    .portal-main { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+    .portal-main {
+      padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+      height: 100dvh;
+      overflow-y: auto;
+    }
+    .portal-layout {
+      height: 100dvh;
+    }
   }
 
   /* Responsive tables in portals */

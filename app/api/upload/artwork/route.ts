@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { uploadToS3, S3_BUCKET } from "@/lib/s3";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { uploadToS3 } from "@/lib/s3";
 
 export async function POST(req: NextRequest) {
   const supabase = createClient();
@@ -24,10 +24,13 @@ export async function POST(req: NextRequest) {
     if (!orderId) return NextResponse.json({ error: "orderId required" }, { status: 400 });
     if (!files.length) return NextResponse.json({ error: "No files provided" }, { status: 400 });
 
-    // Verify user has access to this order (client owns it, or admin)
+    // Use admin client for all DB operations to bypass RLS
+    const db = createAdminClient();
+
+    // Verify user has access to this order
     if (profile.role === "client") {
-      const { data: clientData } = await supabase.from("clients").select("id").eq("user_id", user.id).single();
-      const { data: order } = await supabase.from("orders").select("client_id").eq("id", orderId).single();
+      const { data: clientData } = await db.from("clients").select("id").eq("user_id", user.id).single();
+      const { data: order } = await db.from("orders").select("client_id").eq("id", orderId).single();
       if (!order || order.client_id !== clientData?.id) {
         return NextResponse.json({ error: "You don't have access to this order" }, { status: 403 });
       }
@@ -46,8 +49,7 @@ export async function POST(req: NextRequest) {
 
       const fileUrl = await uploadToS3(buffer, key, file.type || "image/png");
 
-      // Create order_files record
-      const { data: fileRecord, error } = await supabase
+      const { data: fileRecord, error } = await db
         .from("order_files")
         .insert({
           order_id: orderId,
@@ -61,7 +63,6 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (error) {
-        console.error("[artwork upload] DB insert error:", error.message);
         return NextResponse.json({ error: "Failed to save file record" }, { status: 500 });
       }
 
@@ -70,7 +71,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ files: results });
   } catch (err: any) {
-    console.error("[artwork upload]", err);
-    return NextResponse.json({ error: err.message || "Upload failed" }, { status: 500 });
+    return NextResponse.json({ error: err?.message || "Upload failed" }, { status: 500 });
   }
 }

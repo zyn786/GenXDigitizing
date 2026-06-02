@@ -29,10 +29,16 @@ export async function DELETE(
 
     // Delete from S3
     try {
-      const key = new URL(file.file_url).pathname.slice(1); // remove leading /
+      const { extractS3Key, S3_PREFIX } = await import("@/lib/s3");
+      let key: string;
+      if (file.file_url.startsWith(S3_PREFIX)) {
+        key = extractS3Key(file.file_url);
+      } else {
+        key = new URL(file.file_url).pathname.slice(1);
+      }
       await deleteFromS3(key);
     } catch {
-      // S3 delete failure is non-fatal — file may already be gone
+      // S3 delete failure is non-fatal
     }
 
     // Delete DB record

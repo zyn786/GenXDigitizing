@@ -178,7 +178,7 @@ function BeforeAfterSlider({
   return (
     <div
       ref={containerRef}
-      className="relative aspect-[3/2] sm:aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden select-none cursor-col-resize bg-[var(--elevated)] border border-[var(--border)] shadow-sm"
+      className="relative aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden select-none cursor-col-resize bg-[var(--elevated)] border border-[var(--border)] shadow-sm"
       onMouseDown={startDrag}
       onTouchStart={startDrag}
     >
@@ -230,7 +230,7 @@ function BeforeAfterSlider({
       </span>
 
       {/* Bottom hint */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm border border-[var(--border)] rounded-full px-4 py-1.5 text-xs font-semibold text-[var(--txt)] shadow-sm z-10 pointer-events-none whitespace-nowrap">
+      <div className="hidden sm:block absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm border border-[var(--border)] rounded-full px-4 py-1.5 text-xs font-semibold text-[var(--txt)] shadow-sm z-10 pointer-events-none whitespace-nowrap">
         ← Drag to compare →
       </div>
     </div>
@@ -241,7 +241,34 @@ function BeforeAfterSlider({
 // SECTION: HERO
 // ═══════════════════════════════════════════════════════════════
 
+const BEFORE_AFTER_SETS = [
+  {
+    label: "Digitizing",
+    beforeUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/Before-5_upqe91.webp",
+    afterUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/After-5_hod7v0.webp",
+    beforeAlt: "Original logo artwork before digitizing",
+    afterAlt: "Production-ready digitized embroidery file with stitch paths",
+  },
+  {
+    label: "Vector Art",
+    beforeUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1780366590/Artboard_1_ag0ycx.webp",
+    afterUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1780366590/Artboard_1_2_uhntgw.webp",
+    beforeAlt: "Original raster image before vector conversion",
+    afterAlt: "Clean scalable vector art output",
+  },
+  {
+    label: "Patch Design",
+    beforeUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1780368066/Untitled-1_ua0tor.webp",
+    afterUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1780368068/Untitleduu-1_s7qc6c.webp",
+    beforeAlt: "Original patch concept sketch",
+    afterAlt: "Production-ready patch digitizing file",
+  },
+];
+
 function HeroSection() {
+  const [activeSet, setActiveSet] = useState(0);
+  const current = BEFORE_AFTER_SETS[activeSet];
+
   return (
     <section className="relative pt-4 sm:pt-6 pb-12 sm:pb-16 md:pb-20 overflow-hidden" aria-labelledby="hero-heading">
       {/* Service cards slider — below nav */}
@@ -270,10 +297,12 @@ function HeroSection() {
             </div>
 
             {/* Headline */}
-            <h1 id="hero-heading" className="font-syne font-bold text-[clamp(32px,7vw,64px)] leading-[1.08] mb-4 sm:mb-5 text-[var(--txt)] tracking-[-0.02em]">
-              Your Logo,<br />
-              <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
-                Machine-Ready in 12 Hours
+            <h1 id="hero-heading" className="mb-4 sm:mb-5">
+              <span className="block font-syne font-bold text-[clamp(28px,6vw,48px)] sm:text-[clamp(36px,7vw,64px)] leading-[1.05] text-[var(--txt)] tracking-[-0.03em] mb-1 sm:mb-0">
+                Your Logo,
+              </span>
+              <span className="block font-syne font-extrabold text-[clamp(36px,9vw,72px)] sm:text-[clamp(48px,8vw,80px)] leading-[1.02] tracking-[-0.04em] bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
+                Machine-Ready<br className="sm:hidden" /> in 12 Hours
               </span>
             </h1>
 
@@ -311,16 +340,33 @@ function HeroSection() {
 
           </div>
 
-          {/* Right: Before/After Slider */}
+          {/* Right: Before/After Slider + Tabs */}
           <div className="relative">
             <BeforeAfterSlider
-              beforeUrl="https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/Before-5_upqe91.webp"
-              afterUrl="https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/After-5_hod7v0.webp"
-              beforeAlt="Original logo artwork before digitizing"
-              afterAlt="Production-ready digitized embroidery file with stitch paths"
+              beforeUrl={current.beforeUrl}
+              afterUrl={current.afterUrl}
+              beforeAlt={current.beforeAlt}
+              afterAlt={current.afterAlt}
             />
-            <p className="text-center text-[10px] sm:text-xs text-[var(--txt3)] mt-3">
-              Real sew-out comparison — drag the handle to compare
+
+            {/* Tab buttons */}
+            <div className="flex justify-center gap-1.5 mt-3">
+              {BEFORE_AFTER_SETS.map((set, i) => (
+                <button
+                  key={set.label}
+                  onClick={() => setActiveSet(i)}
+                  className={`px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold transition-all border-none cursor-pointer ${
+                    activeSet === i
+                      ? "bg-[#2563EB] text-white shadow-sm"
+                      : "bg-[var(--elevated)] text-[var(--txt2)] hover:bg-[var(--border)]"
+                  }`}
+                >
+                  {set.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-center text-[10px] sm:text-xs text-[var(--txt3)] mt-2">
+              Drag the handle to compare — before vs after
             </p>
           </div>
         </div>
@@ -362,20 +408,31 @@ function ManualVsAutoSection() {
           </p>
         </div>
 
-        {/* Mobile: stacked cards */}
-        <div className="lg:hidden space-y-3">
+        {/* Mobile: compact side-by-side cards */}
+        <div className="lg:hidden space-y-2">
           {COMPARISON_ROWS.map((row) => (
-            <div key={row.feature} className="bg-white rounded-xl p-4 border border-[var(--border)]">
-              <p className="font-syne font-bold text-sm text-[var(--txt)] mb-3">{row.feature}</p>
-              <div className="space-y-2">
-                <div className="flex items-start gap-2 text-xs">
-                  <Check size={14} className="text-[#16A34A] mt-0.5 flex-shrink-0" />
-                  <span className="text-[var(--txt2)]">{row.manual}</span>
+            <div key={row.feature} className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
+              <div className="grid grid-cols-2 divide-x divide-[var(--border)]">
+                {/* Manual column */}
+                <div className="p-3 bg-[#F0FDF4]">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Check size={12} className="text-[#16A34A] flex-shrink-0" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#16A34A]">GenX</span>
+                  </div>
+                  <p className="text-[11px] text-[var(--txt2)] leading-snug font-medium">{row.manual}</p>
                 </div>
-                <div className="flex items-start gap-2 text-xs">
-                  <span className="text-red-400 mt-0.5 flex-shrink-0 font-bold">✕</span>
-                  <span className="text-[var(--txt3)]">{row.auto}</span>
+                {/* Auto column */}
+                <div className="p-3 bg-[#FEF2F2]">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-red-400 font-bold text-xs">✕</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-400">Auto</span>
+                  </div>
+                  <p className="text-[11px] text-[var(--txt3)] leading-snug">{row.auto}</p>
                 </div>
+              </div>
+              {/* Feature label between columns */}
+              <div className="px-3 py-1.5 bg-[var(--elevated)] border-t border-[var(--border)]">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--txt2)]">{row.feature}</span>
               </div>
             </div>
           ))}
@@ -406,6 +463,45 @@ function ManualVsAutoSection() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION: VIDEO SHOWCASE
+// ═══════════════════════════════════════════════════════════════
+
+function VideoShowcaseSection() {
+  return (
+    <section className="py-0" aria-label="Process video">
+      <div className="max-w-[1400px] mx-auto px-0 sm:px-6 md:px-12">
+        <div className="relative rounded-none sm:rounded-3xl overflow-hidden bg-black shadow-xl">
+          {/* Mobile video */}
+          <video
+            className="sm:hidden w-full"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/video-poster.webp"
+            preload="metadata"
+          >
+            <source src="https://res.cloudinary.com/djoixgojj/video/upload/v1779318275/hero-bg-mobile_bjkamz.mp4" type="video/mp4" />
+          </video>
+          {/* Desktop video */}
+          <video
+            className="hidden sm:block w-full aspect-[16/9] object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/video-poster.webp"
+            preload="metadata"
+          >
+            <source src="https://res.cloudinary.com/djoixgojj/video/upload/v1779318274/hero-bg-desktop_pfrafs.mp4" type="video/mp4" />
+          </video>
         </div>
       </div>
     </section>
@@ -604,7 +700,7 @@ function PricingSection({ tiers }: { tiers: Record<string, { size: string; price
                 )}
               </div>
 
-              <Link href="/client/new-order" className="mt-auto">
+              <Link href="/register" className="mt-auto">
                 <Button variant="grad" size="sm" className="w-full">
                   Order Now
                 </Button>
@@ -804,7 +900,7 @@ function FinalCTASection() {
                 </Button>
               </Link>
               <Link href="/register">
-                <Button variant="ghost" size="lg" className="w-full sm:w-auto rounded-full">
+                <Button variant="grad" size="lg" className="w-full sm:w-auto rounded-full bg-white !text-[#2563EB] hover:bg-[#EFF6FF]">
                   Register Now
                 </Button>
               </Link>
@@ -918,6 +1014,9 @@ export function LandingClient({ services, process, testimonials, faqs }: Props) 
     <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden">
       {/* ── HERO ─────────────────────────────────── */}
       <HeroSection />
+
+      {/* ── VIDEO SHOWCASE ───────────────────────── */}
+      <VideoShowcaseSection />
 
       {/* ── TRUST & STATS ──────────────────────────── */}
       <TrustStatsSection />
