@@ -188,7 +188,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Email with PDF attachment
-      await emailPaymentConfirmed({
+      emailPaymentConfirmed({
         to:            clientEmail,
         clientName,
         orderNumber:   order?.order_number ?? order_id,
@@ -201,7 +201,7 @@ export async function POST(req: NextRequest) {
           filename: `invoice-${invoice.invoice_number}.pdf`,
           content: pdfBuffer,
         } : undefined,
-      });
+      }).catch(console.error);
     }
 
     // Notify admins
@@ -222,14 +222,14 @@ export async function POST(req: NextRequest) {
         }))
       );
 
-      await emailNewOrderAlert({
+      emailNewOrderAlert({
         to:          admins.map((a) => a.email),
         orderNumber: order?.order_number ?? order_id,
         clientName:  order?.clients?.company_name ?? "Client",
         serviceName: order?.service_tier_id ?? "Order",
         price:       amount,
         turnaround:  order?.turnaround ?? "standard",
-      });
+      }).catch(console.error);
     }
 
     return NextResponse.json({ received: true, event: event_type, order_id });
@@ -262,7 +262,7 @@ export async function POST(req: NextRequest) {
           title:      "Payment refunded",
           body:       `Your payment of $${amount} ${currency} for order ${(refundInvoice.orders as any)?.order_number ?? order_id} has been refunded.`,
           action_url: "/client/invoices",
-        });
+        }).catch(console.error);
       }
     }
 
@@ -279,5 +279,5 @@ export async function GET() {
     status:  "ok",
     service: "genxdigitizing-payoneer-webhook",
     env:     process.env.PAYONEER_ENVIRONMENT ?? "sandbox",
-  });
+  }).catch(console.error);
 }

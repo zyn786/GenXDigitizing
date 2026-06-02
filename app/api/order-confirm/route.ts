@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       : turnaround === "rush" ? "6 hours"
       : "12–24 hours";
 
-    await emailOrderSubmitted({
+    emailOrderSubmitted({
       to:                email,
       clientName:        name ?? "there",
       orderNumber,
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       price:             Number(price),
       turnaround:        TURNAROUND_LABEL[turnaround] ?? turnaround,
       estimatedDelivery: estimated,
-    });
+    }).catch(console.error);
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

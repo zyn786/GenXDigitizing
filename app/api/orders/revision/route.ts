@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
       }
     }
     if (recipients.length > 0) {
-      await emailRevisionRequested({
+      emailRevisionRequested({
         to: recipients,
         clientName: clientFullName,
         orderNumber,
@@ -165,7 +165,7 @@ export async function POST(req: NextRequest) {
       entity_id: orderId,
       user_id: user.id,
       new_data: { orderNumber, revisionNotes: revisionNotes.slice(0, 500), previousStatus: orderData.status },
-    });
+    }).catch(console.error);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

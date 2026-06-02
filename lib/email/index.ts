@@ -11,9 +11,9 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY ?? "placeholder");
 }
 
-const FROM    = `${process.env.RESEND_FROM_NAME ?? "GenXdigitizing"} <${process.env.RESEND_FROM_EMAIL!}>`;
-const REPLY   = process.env.RESEND_REPLY_TO!;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL!;
+const FROM    = `${process.env.RESEND_FROM_NAME ?? "GenX Digitizing"} <${process.env.RESEND_FROM_EMAIL || "support@genxdigitizing.com"}>`;
+const REPLY   = process.env.RESEND_REPLY_TO || "support@genxdigitizing.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.genxdigitizing.com";
 const LOGO_URL = `${APP_URL}/images/black_logo.png`;
 
 // ── Types ──────────────────────────────────────────────────────

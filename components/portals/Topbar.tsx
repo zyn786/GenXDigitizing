@@ -234,7 +234,7 @@ export function Topbar({ title, subtitle, user }: TopbarProps) {
       <div className="flex items-center gap-2.5">
         {/* Back to Homepage */}
         <Link
-          href="/"
+          href="/home"
           className="flex items-center gap-1.5 px-3 py-2 rounded-[8px] cursor-pointer
                      bg-[var(--elevated)] border border-[var(--border2)]
                      hover:bg-[var(--elevated2)] hover:border-[var(--border3)] transition-colors no-underline"

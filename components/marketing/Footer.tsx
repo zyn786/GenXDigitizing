@@ -33,9 +33,9 @@ export function Footer() {
         <div className="md:hidden">
           {/* Logo */}
           <div className="text-center mb-5">
-            <div className="inline-flex items-center gap-2 mb-2">
+            <Link href="/home" className="inline-flex items-center gap-2 mb-2 no-underline">
               <img src="/images/black_logo.png" alt="GenX Digitizing" className="h-7 w-auto" />
-            </div>
+            </Link>
             <p className="text-xs text-[var(--txt3)] leading-relaxed max-w-[240px] mx-auto">
               Premium embroidery digitizing, vector art, and custom patches — delivered production-ready.
             </p>
@@ -93,7 +93,7 @@ export function Footer() {
         <div className="hidden md:grid grid-cols-[1.5fr_1fr_1fr] gap-8 lg:gap-12 mb-8">
           {/* Brand */}
           <div>
-            <img src="/images/black_logo.png" alt="GenX Digitizing" className="h-8 w-auto mb-3" />
+            <Link href="/home"><img src="/images/black_logo.png" alt="GenX Digitizing" className="h-8 w-auto mb-3" /></Link>
             <p className="text-[13px] text-[var(--txt3)] leading-relaxed max-w-[260px] mb-4">
               Premium embroidery digitizing, vector art conversion, and custom patches — delivered production-ready.
             </p>

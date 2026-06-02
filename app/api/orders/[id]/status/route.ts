@@ -174,7 +174,7 @@ export async function PATCH(
         });
 
         // Email designer
-        await emailDesignerTaskAssigned({
+        emailDesignerTaskAssigned({
           to:            designerUserNew.email,
           designerName:  designerUserNew.full_name ?? "Designer",
           orderNumber:   order.order_number,
@@ -187,7 +187,7 @@ export async function PATCH(
         if (clientUser?.email) {
           const designerName = designerUserNew.full_name ?? "a digitizing artist";
           const { emailDesignerAssigned } = await import("@/lib/email");
-          await emailDesignerAssigned({
+          emailDesignerAssigned({
             to: clientUser.email,
             clientName: (clientUser.full_name as string) ?? "there",
             orderNumber: order.order_number,
@@ -207,7 +207,7 @@ export async function PATCH(
           title:      `Order cancelled — ${order.order_number}`,
           body:       `Your ${serviceName} order has been cancelled. Contact support if you have questions.`,
           action_url: `/client/my-orders`,
-        });
+        }).catch(console.error);
       }
       // Notify designer
       if (designerUser) {
@@ -217,7 +217,7 @@ export async function PATCH(
           title:      `Order cancelled — ${order.order_number}`,
           body:       `The ${serviceName} order assigned to you has been cancelled.`,
           action_url: `/designer/tasks`,
-        });
+        }).catch(console.error);
       }
     }
 
@@ -290,11 +290,11 @@ export async function PATCH(
           ? `Your requested changes are complete! Revised files available for download.`
           : `Your ${serviceName} is ready! Payment required before download.`,
         action_url: `/client/my-orders`,
-      });
+      }).catch(console.error);
 
       // Send payment-required email if invoice is unpaid
       if (invoiceForEmail && invoiceForEmail.status !== "paid") {
-        await emailPaymentRequired({
+        emailPaymentRequired({
           to:          clientUser.email,
           clientName:  clientUser.full_name ?? "there",
           orderNumber: order.order_number,
@@ -305,7 +305,7 @@ export async function PATCH(
       }
 
       // Also send delivery email with payment note
-      await emailOrderDelivered({
+      emailOrderDelivered({
         to:          clientUser.email,
         clientName:  clientUser.full_name ?? "there",
         orderNumber: order.order_number,
@@ -314,7 +314,7 @@ export async function PATCH(
       }).catch(console.error);
 
       // Send review request
-      await emailReviewRequest({
+      emailReviewRequest({
         to:          clientUser.email,
         clientName:  clientUser.full_name ?? "there",
         orderNumber: order.order_number,
@@ -331,7 +331,7 @@ export async function PATCH(
           title:      `Design approved — ${order.order_number}`,
           body:       "Your work has been approved by admin. Pending client release.",
           action_url: `/designer/tasks`,
-        });
+        }).catch(console.error);
       }
       // Notify admins that order is ready for client release
       const { data: admins } = await supabase
@@ -366,9 +366,9 @@ export async function PATCH(
           title:      `Revision requested — ${order.order_number}`,
           body:       revisionBody,
           action_url: `/designer/tasks`,
-        });
+        }).catch(console.error);
 
-        await emailRevisionRequested({
+        emailRevisionRequested({
           to:            designerUser.email,
           clientName:    (order.clients as any)?.company_name ?? "Client",
           orderNumber:   order.order_number,

@@ -11,22 +11,25 @@ const IMG_EXTENSIONS = /\.(png|jpe?g|webp|gif|svg|avif)$/i;
 // Strip reply and attachment markers from display text
 function cleanContent(raw: string): string {
   if (!raw) return "";
-  let text = raw;
-  // Remove --reply-- block (handle variations: \n, space, missing trailing marker)
-  const replyStart = text.indexOf("--reply--");
-  if (replyStart >= 0 && replyStart <= 2) {
-    const afterMarker = text.slice(replyStart + 9); // skip "--reply--"
-    // Try: \n{json}\n--reply--\n
-    const endMarker = afterMarker.indexOf("\n--reply--");
-    if (endMarker >= 0) {
-      // Skip past the end marker + newline
-      const afterEnd = afterMarker.indexOf("\n", endMarker + 11);
-      text = afterEnd >= 0 ? afterMarker.slice(afterEnd + 1) : afterMarker.slice(endMarker + 11);
-    } else {
-      // Fallback: just strip the first line if it looks like JSON
-      const newlineIdx = afterMarker.indexOf("\n");
-      if (newlineIdx >= 0 && (afterMarker.startsWith("{") || afterMarker.startsWith(" "))) {
-        text = afterMarker.slice(newlineIdx + 1);
+  let text = raw.trim();
+  // Remove --reply-- block: "--reply--\n{json}\n--reply--\n" or "--reply-- {json}"
+  const replyMarker = "--reply--";
+  const replyStart = text.indexOf(replyMarker);
+  if (replyStart !== -1 && replyStart <= 5) {
+    const afterMarker = text.slice(replyStart + replyMarker.length); // after "--reply--"
+    const trimmedAfter = afterMarker.trimStart(); // skip \n or space
+    // Check if it starts with JSON
+    if (trimmedAfter.startsWith("{")) {
+      const endMarker = trimmedAfter.indexOf(replyMarker);
+      if (endMarker !== -1) {
+        // Found closing --reply--, strip everything before and including it
+        const afterEnd = trimmedAfter.slice(endMarker + replyMarker.length);
+        text = afterEnd.trimStart();
+      } else {
+        // No closing marker — strip to first newline after JSON
+        const jsonEnd = trimmedAfter.indexOf("\n");
+        if (jsonEnd !== -1) text = trimmedAfter.slice(jsonEnd + 1).trim();
+        else text = ""; // entire message is just the reply marker + JSON, hide it
       }
     }
   }

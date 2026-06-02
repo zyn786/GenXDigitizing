@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
 
     // Email designer
     if (designer?.email) {
-      await emailSLAWarning({
+      emailSLAWarning({
         to:           designer.email,
         designerName: designer.full_name ?? "Designer",
         orderNumber:  order.order_number,
@@ -101,5 +101,5 @@ export async function GET(req: NextRequest) {
     checked:   atRisk?.length ?? 0,
     warned,
     timestamp: now.toISOString(),
-  });
+  }).catch(console.error);
 }

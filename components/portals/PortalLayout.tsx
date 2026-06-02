@@ -1,8 +1,24 @@
 // @ts-nocheck
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/portals/Sidebar";
 import { PortalClientWrapper, PortalProviders } from "@/components/portals/PortalClientWrapper";
+
+function PortalSkeleton() {
+  return (
+    <div className="flex-1 overflow-hidden flex flex-col">
+      <div className="h-12 sm:h-14 bg-[var(--surface)] border-b border-[var(--border)] animate-pulse" />
+      <div className="flex-1 p-4 sm:p-6 space-y-4 overflow-hidden">
+        <div className="h-8 bg-[var(--elevated)] rounded-lg w-48 animate-pulse" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[1,2,3,4].map(i => <div key={i} className="h-24 bg-[var(--elevated)] rounded-xl animate-pulse" />)}
+        </div>
+        <div className="h-64 bg-[var(--elevated)] rounded-xl animate-pulse" />
+      </div>
+    </div>
+  );
+}
 
 type Role = "admin" | "crm" | "client" | "designer";
 
@@ -89,7 +105,9 @@ export async function PortalLayout({ children, requiredRole }: PortalLayoutProps
       <div className="portal-layout">
         <div className="hidden lg:block"><Sidebar user={user} badgeCounts={badgeCounts} /></div>
         <main className="portal-main lg:pb-0 pb-14">
-          {children}
+          <Suspense fallback={<PortalSkeleton />}>
+            {children}
+          </Suspense>
         </main>
       </div>
     </PortalProviders>

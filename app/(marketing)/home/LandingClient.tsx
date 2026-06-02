@@ -297,12 +297,10 @@ function HeroSection() {
             </div>
 
             {/* Headline */}
-            <h1 id="hero-heading" className="mb-4 sm:mb-5">
-              <span className="block font-syne font-bold text-[clamp(28px,6vw,48px)] sm:text-[clamp(36px,7vw,64px)] leading-[1.05] text-[var(--txt)] tracking-[-0.03em] mb-1 sm:mb-0">
-                Your Logo,
-              </span>
-              <span className="block font-syne font-extrabold text-[clamp(36px,9vw,72px)] sm:text-[clamp(48px,8vw,80px)] leading-[1.02] tracking-[-0.04em] bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
-                Machine-Ready<br className="sm:hidden" /> in 12 Hours
+            <h1 id="hero-heading" className="font-syne font-bold text-[clamp(32px,7vw,64px)] leading-[1.08] mb-4 sm:mb-5 text-[var(--txt)] tracking-[-0.02em]">
+              Your Logo,<br />
+              <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
+                Machine-Ready in 12 Hours
               </span>
             </h1>
 

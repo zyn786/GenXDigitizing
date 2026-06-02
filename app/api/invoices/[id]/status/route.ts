@@ -196,7 +196,7 @@ export async function PATCH(
             } catch { /* non-fatal */ }
 
             // Send payment confirmation with PDF attached
-            await emailPaymentConfirmed({
+            emailPaymentConfirmed({
               to: clientEmail,
               clientName: clientUser?.full_name ?? "Client",
               orderNumber: o?.order_number ?? invoice.order_id,
@@ -209,19 +209,19 @@ export async function PATCH(
                 filename: `invoice-${invoice.invoice_number}.pdf`,
                 content: pdfBuffer,
               },
-            });
+            }).catch(console.error);
 
             // Notify admins via email
             const adminEmails = admins?.map((a: any) => a.email).filter(Boolean) ?? [];
             if (adminEmails.length > 0) {
-              await emailNewOrderAlert({
+              emailNewOrderAlert({
                 to: adminEmails,
                 orderNumber: o?.order_number ?? invoice.order_id,
                 clientName: o?.clients?.company_name ?? clientUser?.full_name ?? "Client",
                 serviceName: o?.service_tiers?.label ?? "Order",
                 price: Number(invoice.amount),
                 turnaround: o?.turnaround ?? "standard",
-              });
+              }).catch(console.error);
             }
           }
         } catch (emailErr) {
