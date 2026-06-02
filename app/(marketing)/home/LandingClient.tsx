@@ -483,10 +483,11 @@ function VideoShowcaseSection() {
             muted
             loop
             playsInline
-            poster="https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/video-poster.webp"
-            preload="metadata"
+            disableRemotePlayback
+            preload="auto"
+            ref={el => { if (el) el.play().catch(() => {}); }}
           >
-            <source src="https://res.cloudinary.com/djoixgojj/video/upload/v1779318275/hero-bg-mobile_bjkamz.mp4" type="video/mp4" />
+            <source src="https://player.cloudinary.com/embed/?cloud_name=djoixgojj&public_id=hero-bg-mobile_bjkamz&profile=cld-looping" type="video/mp4" />
           </video>
           {/* Desktop video */}
           <video
@@ -495,10 +496,11 @@ function VideoShowcaseSection() {
             muted
             loop
             playsInline
-            poster="https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/video-poster.webp"
-            preload="metadata"
+            disableRemotePlayback
+            preload="auto"
+            ref={el => { if (el) el.play().catch(() => {}); }}
           >
-            <source src="https://res.cloudinary.com/djoixgojj/video/upload/v1779318274/hero-bg-desktop_pfrafs.mp4" type="video/mp4" />
+            <source src="https://player.cloudinary.com/embed/?cloud_name=djoixgojj&public_id=hero-bg-desktop_pfrafs&profile=cld-looping" type="video/mp4" />
           </video>
         </div>
       </div>
