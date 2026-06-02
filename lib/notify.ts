@@ -49,7 +49,7 @@ export function playNotificationSound() {
 
 let permissionRequested = false;
 
-export async function requestNotificationPermission(): Promise<boolean> {
+export async function requestNotificationPermission(userId?: string): Promise<boolean> {
   if (!("Notification" in window)) return false;
 
   // Warm up AudioContext from user gesture (required by browsers)
@@ -60,12 +60,23 @@ export async function requestNotificationPermission(): Promise<boolean> {
     }
   } catch { /* audio not critical */ }
 
-  if (Notification.permission === "granted") return true;
+  if (Notification.permission === "granted") {
+    // Also subscribe to push if userId provided
+    if (userId) {
+      const { subscribeToPush } = await import("@/lib/push-notifications");
+      subscribeToPush(userId).catch(() => {});
+    }
+    return true;
+  }
   if (Notification.permission === "denied") return false;
 
   if (!permissionRequested) {
     permissionRequested = true;
     const result = await Notification.requestPermission();
+    if (result === "granted" && userId) {
+      const { subscribeToPush } = await import("@/lib/push-notifications");
+      subscribeToPush(userId).catch(() => {});
+    }
     return result === "granted";
   }
 

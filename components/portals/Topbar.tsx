@@ -259,7 +259,7 @@ export function Topbar({ title, subtitle, user }: TopbarProps) {
         {/* Notifications */}
         <div className="relative">
           <button
-            onClick={() => { setShowNotifs((v) => !v); requestNotificationPermission(); }}
+            onClick={() => { setShowNotifs((v) => !v); requestNotificationPermission(user?.id); }}
             className={cn(
               "relative p-2 rounded-[8px] transition-colors",
               "text-[var(--txt2)] hover:text-[var(--txt)] hover:bg-[var(--border)]",

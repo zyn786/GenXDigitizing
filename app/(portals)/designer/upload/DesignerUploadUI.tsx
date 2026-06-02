@@ -3,7 +3,6 @@
 import { useState, useRef, useTransition } from "react";
 import { useRouter }    from "next/navigation";
 import { toast }        from "sonner";
-import { createClient } from "@/lib/supabase/client";
 import { Upload, FileText, CheckCircle, X, ClipboardList } from "lucide-react";
 
 const OUTPUT_FORMATS = ["DST","PES","EMB","JEF","XXX","VIP","HUS","EXP","VP3","SEW","AI","SVG","EPS","PDF"];
@@ -47,7 +46,6 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
   designerAvatar?: string;
 }) {
   const router     = useRouter();
-  const supabase   = createClient();
   const [,startTx] = useTransition();
 
   const [selOrder,  setSelOrder]  = useState(tasks[0]?.id ?? "");
