@@ -17,6 +17,7 @@ const LINKS = [
   { href: "/services",     label: "Services"       },
   { href: "/portfolio",    label: "Portfolio"      },
   { href: "/pricing",      label: "Pricing"        },
+  { href: "/blog",         label: "Blog"           },
   { href: "/free-designs", label: "Free Designs"   },
   { href: "/contact",      label: "Contact"        },
 ];
@@ -170,6 +171,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
           <img
             src="/images/black_logo.png"
             alt="GenX Digitizing — home"
+            fetchPriority="high"
             className="h-7 sm:h-8 w-auto"
           />
         </Link>

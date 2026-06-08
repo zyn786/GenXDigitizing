@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_STATS } from "@/lib/site-config";
+import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { ContactForm } from "./ContactForm";
 
 export const metadata: Metadata = {
@@ -17,7 +18,9 @@ const CONTACT_INFO = [
 
 export default function ContactPage() {
   return (
-    <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden">
+    <>
+      <BreadcrumbSchema items={[{ name: "Home", url: "/" }, { name: "Contact", url: "/contact" }]} />
+      <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden">
       {/* main container */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 py-10 sm:py-14 md:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-16 items-start">
@@ -78,5 +81,6 @@ export default function ContactPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

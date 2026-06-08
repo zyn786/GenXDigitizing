@@ -4,7 +4,6 @@ import { SITE_STATS } from "@/lib/site-config";
 import { Toaster } from "sonner";
 import Script from "next/script";
 import { LiveOrderProvider } from "@/components/social-proof/LiveOrderProvider";
-import { PageTransition } from "@/components/shared/PageTransition";
 import { OrganizationSchema } from "@/components/shared/StructuredData";
 import "./globals.css";
 
@@ -116,7 +115,6 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <PageTransition />
         <main id="main-content" role="main">
           {children}
         </main>

@@ -84,11 +84,11 @@ function FilterChip({
       className="relative inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 border cursor-pointer"
       style={{
         background: isActive
-          ? `linear-gradient(135deg, ${color}18, ${color}0C)`
+          ? `linear-gradient(135deg, ${color}, ${color}DD)`
           : "var(--surface)",
         color: isActive ? "#fff" : "var(--txt2)",
-        borderColor: isActive ? `${color}50` : "var(--border2)",
-        boxShadow: isActive ? `0 0 24px ${color}18` : "none",
+        borderColor: isActive ? "transparent" : "var(--border2)",
+        boxShadow: isActive ? `0 0 24px ${color}30` : "none",
       }}
     >
       <span>{emoji}</span>

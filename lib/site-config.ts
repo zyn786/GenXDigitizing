@@ -16,8 +16,8 @@ export const SITE_STATS = {
 export const SITE_INFO = {
   name: "GenX Digitizing",
   tagline: "Premium Embroidery Digitizing",
-  phone: null, // set to "+1XXXXXXXXXX" when real number available
-  whatsapp: null, // set to "1XXXXXXXXXX" (digits only, no +) when real number available
+  phone: "+18302102135",
+  whatsapp: "18302102135",
   email: "hello@genxdigitizing.com",
   address: null, // set when physical address available
   founded: 2024,

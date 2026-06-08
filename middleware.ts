@@ -39,7 +39,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // ── Build response first, then client ────────────────────
+  // ── Auth check only for portal + auth routes ───────────────
+  const isPortalRoute = PORTAL_PREFIXES.some(p => pathname.startsWith(p));
+  const isAuthPage    = AUTH_PAGES.some(p => pathname.startsWith(p));
+
+  // Public page — skip auth entirely, respond immediately
+  if (!isPortalRoute && !isAuthPage) {
+    return NextResponse.next();
+  }
+
+  // ── Build response + Supabase client for protected routes ──
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -49,7 +58,6 @@ export async function middleware(request: NextRequest) {
       cookies: {
         getAll() { return request.cookies.getAll(); },
         setAll(cookiesToSet) {
-          // Must set on both request and response
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
@@ -62,9 +70,6 @@ export async function middleware(request: NextRequest) {
 
   // Refresh session — MUST call getUser() not getSession()
   const { data: { user } } = await supabase.auth.getUser();
-
-  const isPortalRoute = PORTAL_PREFIXES.some(p => pathname.startsWith(p));
-  const isAuthPage    = AUTH_PAGES.some(p => pathname.startsWith(p));
 
   // ── Not logged in → protect portal routes ────────────────
   if (!user && isPortalRoute) {

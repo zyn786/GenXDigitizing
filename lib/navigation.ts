@@ -44,6 +44,7 @@ export const NAV_SECTIONS: Record<UserRole, NavSection[]> = {
       { label: "Invoices", href: "/admin/invoices", iconName: "Receipt", badgeKey: "invoices" },
     ]},
     { title: "Content", items: [
+      { label: "Blog", href: "/admin/blog", iconName: "FileText" },
       { label: "Portfolio", href: "/admin/portfolio", iconName: "ImageIcon" },
       { label: "Free Designs", href: "/admin/free-designs", iconName: "Download" },
       { label: "Pricing", href: "/admin/pricing", iconName: "Tag" },

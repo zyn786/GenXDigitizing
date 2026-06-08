@@ -1,6 +1,7 @@
 // @ts-nocheck
 import type { Metadata } from "next";
 import { SITE_STATS, fmtPlus } from "@/lib/site-config";
+import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { PortfolioClient } from "./PortfolioClient";
 
 export const metadata: Metadata = {
@@ -20,5 +21,10 @@ export const metadata: Metadata = {
 };
 
 export default function PortfolioPage() {
-  return <PortfolioClient />;
+  return (
+    <>
+      <BreadcrumbSchema items={[{ name: "Home", url: "/" }, { name: "Portfolio", url: "/portfolio" }]} />
+      <PortfolioClient />
+    </>
+  );
 }

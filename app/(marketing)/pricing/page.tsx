@@ -1,6 +1,7 @@
 // @ts-nocheck
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/server";
+import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { PricingContent } from "./PricingContent";
 
 export const metadata: Metadata = {
@@ -16,5 +17,10 @@ export default async function PricingPage() {
     .eq("is_active", true)
     .order("sort_order");
 
-  return <PricingContent tiers={tiers || []} />;
+  return (
+    <>
+      <BreadcrumbSchema items={[{ name: "Home", url: "/" }, { name: "Pricing", url: "/pricing" }]} />
+      <PricingContent tiers={tiers || []} />
+    </>
+  );
 }
