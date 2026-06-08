@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Syne, Inter } from "next/font/google";
 import { SITE_STATS } from "@/lib/site-config";
 import { Toaster } from "sonner";
+import Script from "next/script";
 import { LiveOrderProvider } from "@/components/social-proof/LiveOrderProvider";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { OrganizationSchema } from "@/components/shared/StructuredData";
@@ -80,6 +81,19 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-GMTE7KLBJH"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-GMTE7KLBJH');
+          `}
+        </Script>
       </head>
       <body className="antialiased">
         <OrganizationSchema />

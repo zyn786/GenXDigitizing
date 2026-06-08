@@ -13,10 +13,11 @@ import { Download, Bell, LayoutDashboard } from "lucide-react";
 
 const LINKS = [
   { href: "/home",         label: "Home"           },
+  { href: "/about",        label: "About"          },
   { href: "/services",     label: "Services"       },
   { href: "/portfolio",    label: "Portfolio"      },
-  { href: "/free-designs", label: "Free Designs"   },
   { href: "/pricing",      label: "Pricing"        },
+  { href: "/free-designs", label: "Free Designs"   },
   { href: "/contact",      label: "Contact"        },
 ];
 
@@ -147,15 +148,8 @@ function AuthButtons() {
 }
 
 export function Nav({ topOffset }: { topOffset?: string }) {
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -167,12 +161,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
 
   return (
     <nav
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-        scrolled
-          ? "bg-[var(--bg)]/90 backdrop-blur-2xl border-b border-[var(--border)] shadow-[0_1px_4px_rgba(0,0,0,0.04)]"
-          : "bg-transparent"
-      )}
+      className="fixed inset-x-0 top-0 z-50 bg-[var(--bg)] border-b border-[var(--border)] shadow-[0_1px_4px_rgba(0,0,0,0.04)]"
       style={topOffset ? { top: topOffset } : undefined}
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 flex items-center justify-between h-16 lg:h-[68px]">
