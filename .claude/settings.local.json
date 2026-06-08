@@ -12,7 +12,8 @@
       "Bash(New-Item *)",
       "Bash(npx vitest *)",
       "Bash(curl *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "WebFetch(domain:genxdigitizing.com)"
     ]
   }
 }
