@@ -458,7 +458,7 @@ function HeroSection() {
       </div>
 
       {/* Service cards slider */}
-      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 mb-6 sm:mb-8">
+      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 mb-14 sm:mb-20">
         <div className="relative overflow-hidden py-2" aria-label="Our services">
           <div className="flex gap-2 sm:gap-3 animate-marquee w-max">
             {[...SERVICE_CARDS, ...SERVICE_CARDS].map((card, i) => (
