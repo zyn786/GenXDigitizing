@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
           outputFormat:  order?.output_format ?? "",
           amount:        amount,
           currency:      currency,
-          companyName:   "GenXdigitizing",
+          companyName:   "genxdigitizing",
           companyEmail:  "support@genxdigitizing.com",
           companyWebsite: "genxdigitizing.com",
         };

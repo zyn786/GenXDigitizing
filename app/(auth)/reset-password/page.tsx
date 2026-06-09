@@ -63,15 +63,8 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-[420px] relative z-10">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="no-underline inline-flex items-center gap-2.5 justify-center">
-            <div className="w-9 h-9 rounded-[10px] flex items-center justify-center text-lg
-              bg-gradient-to-br from-[#2563EB] to-[#F97316] text-white">
-              🧵
-            </div>
-            <span className="font-syne font-bold text-xl
-              bg-gradient-to-r from-[var(--txt)] to-[var(--txt2)] bg-clip-text text-transparent">
-              GenXdigitizing
-            </span>
+          <Link href="/" className="no-underline">
+            <img src="/images/black_logo.png" alt="GENX DIGITIZING" className="h-10 w-auto mx-auto" />
           </Link>
         </div>
 

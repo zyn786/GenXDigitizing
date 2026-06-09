@@ -58,7 +58,7 @@ function PostContent({ post }: { post: BlogPost }) {
             headline: post.title,
             description: post.description,
             datePublished: post.date,
-            author: { "@type": "Organization", name: "GenX Digitizing" },
+            author: { "@type": "Organization", name: "genxdigitizing" },
           }),
         }}
       />
@@ -90,7 +90,7 @@ function PostContent({ post }: { post: BlogPost }) {
           </div>
           {post.hero.image && (
             <div className="max-w-[760px] mx-auto rounded-2xl overflow-hidden aspect-[16/9] border border-[var(--border)]">
-              <img src={post.hero.image} alt={post.title} className="w-full h-full object-cover" />
+              <img src={post.hero.image} alt={post.title} className="w-full h-full object-cover" loading="lazy" />
             </div>
           )}
         </section>

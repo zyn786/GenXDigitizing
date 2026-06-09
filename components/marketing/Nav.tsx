@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { SITE_INFO } from "@/lib/site-config";
 import { createClient } from "@/lib/supabase/client";
-import { Download, Bell, LayoutDashboard } from "lucide-react";
+import { Download, Bell, LayoutDashboard, BellRing } from "lucide-react";
+import { requestNotificationPermission } from "@/lib/notify";
 
 const LINKS = [
   { href: "/home",         label: "Home"           },
@@ -31,6 +32,47 @@ function NotifIcon({ name }: { name: string }) {
     order_update: "📦", message: "💬", payment: "💳", system: "⚙️", sla_warning: "⚠️", review: "⭐",
   };
   return <span>{icons[name] ?? "🔔"}</span>;
+}
+
+function SubscribeBell() {
+  const [permState, setPermState] = useState<string>("default");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if ("Notification" in window) setPermState(Notification.permission);
+  }, []);
+
+  async function handleSubscribe() {
+    if (busy) return;
+    setBusy(true);
+    // Get userId if user is logged in, so push subscription happens too
+    let userId: string | undefined;
+    try {
+      const supabase = createClient();
+      const { data } = await supabase.auth.getUser();
+      userId = data.user?.id;
+    } catch { /* not logged in — just request browser permission */ }
+    const granted = await requestNotificationPermission(userId);
+    setPermState(granted ? "granted" : "denied");
+    setBusy(false);
+  }
+
+  if (permState === "granted") return null;
+
+  return (
+    <button onClick={handleSubscribe} disabled={busy}
+      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-transparent border-none cursor-pointer transition-all duration-200"
+      style={{
+        color: permState === "denied" ? "var(--txt3)" : "#F97316",
+        background: permState === "denied" ? "transparent" : "rgba(249,115,22,0.08)",
+        border: `1px solid ${permState === "denied" ? "var(--border2)" : "rgba(249,115,22,0.2)"}`,
+      }}
+      aria-label="Enable notifications"
+    >
+      {busy ? <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <BellRing size={15} />}
+      <span className="hidden sm:inline">Notify Me</span>
+    </button>
+  );
 }
 
 function AuthButtons() {
@@ -112,7 +154,7 @@ function AuthButtons() {
         {showNotifs && (
           <>
             <div className="fixed inset-0 z-[65]" onClick={() => setShowNotifs(false)} />
-            <div className="absolute right-0 top-11 w-80 z-[70] bg-[var(--surface)] border border-[var(--border2)] rounded-[14px] shadow-2xl overflow-hidden animate-fade-in-up">
+            <div className="absolute right-0 top-11 w-[calc(100vw-32px)] max-w-[320px] z-[70] bg-[var(--surface)] border border-[var(--border2)] rounded-[14px] shadow-2xl overflow-hidden animate-fade-in-up">
               <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
                 <span className="font-syne font-bold text-[13px] text-[var(--txt)]">Notifications</span>
                 {unread > 0 && (
@@ -227,8 +269,9 @@ export function Nav({ topOffset }: { topOffset?: string }) {
             <span>WhatsApp</span>
           </a>
           )}
+          <SubscribeBell />
           <AuthButtons />
-          <Link href="/contact">
+          <Link href="/upload">
             <Button variant="grad" size="sm">Get a Quote</Button>
           </Link>
         </div>
@@ -256,20 +299,22 @@ export function Nav({ topOffset }: { topOffset?: string }) {
 
         {/* Tablet CTAs */}
         <div className="hidden md:flex lg:hidden items-center gap-1.5">
+          <SubscribeBell />
           <AuthButtons />
-          <Link href="/contact">
+          <Link href="/upload">
             <Button variant="grad" size="sm" className="text-[11px] px-3">Quote</Button>
           </Link>
         </div>
 
         {/* Mobile header */}
         <div className="flex md:hidden items-center gap-1">
+          <SubscribeBell />
           {SITE_INFO.whatsapp && (
           <a
             href={`https://wa.me/${SITE_INFO.whatsapp}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 rounded-lg text-[#25D366] hover:bg-[#25D366]/10 transition-all duration-150"
+            className="p-2 rounded-lg text-[#25D366] hover:bg-[#25D366]/10 transition-all duration-150 flex items-center justify-center"
             aria-label="Chat on WhatsApp"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
@@ -351,6 +396,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
                 );
               })}
               <div className="flex gap-2.5 mt-3 pt-3 border-t border-[var(--border)]">
+                <SubscribeBell />
                 <AuthButtons />
                 <Link href="/free-designs" className="flex-1" onClick={() => setOpen(false)}>
                   <Button variant="grad" size="md" className="w-full justify-center">

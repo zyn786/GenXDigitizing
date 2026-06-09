@@ -24,13 +24,14 @@ const DATA: ServicePageData = {
     { q: "Do you handle 3D puff foam digitizing for caps?", a: "Yes — we specialize in 3D puff cap digitizing with proper foam underlay, satin stitch settings, and density adjustments for raised embroidery effects." },
   ],
   testimonials: [
-    { name: "James Okafor", company: "Victory Sportswear, Nigeria", text: "Cap digitizing is tricky. GenX got it right first try. Structural underlay perfect for curved surfaces. Every file runs clean on my Tajima." },
-    { name: "Sarah Kim", company: "Branded Threads Co., UK", text: "High-volume cap orders needed consistent 3D puff handling. GenX delivered proper underlay and height on every file with under 12-hour turnaround." },
+    { name: "James Okafor", company: "Victory Sportswear, Nigeria", text: "Cap digitizing is tricky. genxdigitizing got it right first try. Structural underlay perfect for curved surfaces. Every file runs clean on my Tajima." },
+    { name: "Sarah Kim", company: "Branded Threads Co., UK", text: "High-volume cap orders needed consistent 3D puff handling. genxdigitizing delivered proper underlay and height on every file with under 12-hour turnaround." },
   ],
+  portfolioSlug: "digitizing",
   cta: { text: "Get Professional Cap Digitizing — Free Quote", href: "/contact" },
 };
 
-export const metadata: Metadata = { title: `${DATA.title} — GenX Digitizing`, description: DATA.description, keywords: DATA.keywords };
+export const metadata: Metadata = { title: `${DATA.title} — genxdigitizing`, description: DATA.description, keywords: DATA.keywords };
 
 export default function Page() {
   return (

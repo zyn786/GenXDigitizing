@@ -5,7 +5,7 @@ import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { PricingContent } from "./PricingContent";
 
 export const metadata: Metadata = {
-  title: "Pricing — Embroidery Digitizing from $7 | GenX Digitizing",
+  title: "Pricing — Embroidery Digitizing from $7 | genxdigitizing",
   description: "Simple, transparent pricing. Embroidery digitizing from $7, vector redraw from $8, patch design from $5. Free revisions, free format conversions, free rush delivery.",
 };
 

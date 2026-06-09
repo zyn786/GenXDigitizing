@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
       emailWelcome({
         to:          user.email,
         clientName:  user.user_metadata?.full_name ?? "there",
-        companyName: process.env.COMPANY_NAME ?? "GenXdigitizing",
+        companyName: process.env.COMPANY_NAME ?? "genxdigitizing",
       }).catch(console.error);
     }
   }

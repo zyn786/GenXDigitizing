@@ -5,9 +5,13 @@ import { SITE_STATS, SITE_INFO, fmtPlus } from "@/lib/site-config";
 import { Button } from "@/components/ui/Button";
 
 const SERVICES = [
-  { label: "Embroidery Digitizing", href: "/services" },
-  { label: "Vector Art Conversion", href: "/services" },
-  { label: "Custom Patches", href: "/services" },
+  { label: "Embroidery Digitizing", href: "/services/embroidery-digitizing" },
+  { label: "Vector Art Conversion", href: "/services/vector-art-conversion" },
+  { label: "Custom Patches", href: "/services/custom-patches" },
+  { label: "Cap Digitizing", href: "/services/cap-digitizing" },
+  { label: "Left Chest Digitizing", href: "/services/left-chest-digitizing" },
+  { label: "3D Puff Digitizing", href: "/services/3d-puff-digitizing" },
+  { label: "Jacket Back Digitizing", href: "/services/jacket-back-digitizing" },
   { label: "Pricing", href: "/pricing" },
   { label: "Portfolio", href: "/portfolio" },
 ];
@@ -34,7 +38,7 @@ export function Footer() {
           {/* Logo */}
           <div className="text-center mb-5">
             <Link href="/home" className="inline-flex items-center gap-2 mb-2 no-underline">
-              <img src="/images/black_logo.png" alt="GenX Digitizing" className="h-7 w-auto" />
+              <img src="/images/black_logo.png" alt="genxdigitizing" className="h-7 w-auto" />
             </Link>
             <p className="text-xs text-[var(--txt3)] leading-relaxed max-w-[240px] mx-auto">
               Premium embroidery digitizing, vector art, and custom patches — delivered production-ready.
@@ -93,7 +97,7 @@ export function Footer() {
         <div className="hidden md:grid grid-cols-[1.5fr_1fr_1fr] gap-8 lg:gap-12 mb-8">
           {/* Brand */}
           <div>
-            <Link href="/home"><img src="/images/black_logo.png" alt="GenX Digitizing" className="h-8 w-auto mb-3" /></Link>
+            <Link href="/home"><img src="/images/black_logo.png" alt="genxdigitizing" className="h-8 w-auto mb-3" /></Link>
             <p className="text-[13px] text-[var(--txt3)] leading-relaxed max-w-[260px] mb-4">
               Premium embroidery digitizing, vector art conversion, and custom patches — delivered production-ready.
             </p>
@@ -132,7 +136,7 @@ export function Footer() {
         {/* ── BOTTOM BAR ── */}
         <div className="border-t border-[var(--border)] pt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5 text-center sm:text-left">
           <p className="text-[11px] text-[var(--txt3)]">
-            &copy; {copyrightStart === currentYear ? currentYear : `${copyrightStart}–${currentYear}`} GenX Digitizing. All rights reserved.
+            &copy; {copyrightStart === currentYear ? currentYear : `${copyrightStart}–${currentYear}`} genxdigitizing. All rights reserved.
           </p>
           <p className="text-[11px] text-[var(--txt3)] flex items-center justify-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] shadow-[0_0_6px_#16A34A]" />

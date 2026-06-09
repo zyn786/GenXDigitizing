@@ -6,7 +6,7 @@ import { FAQSchema, BreadcrumbSchema } from "@/components/shared/StructuredData"
 import { LandingClient } from "./LandingClient";
 
 export const metadata: Metadata = {
-  title: "GenX Digitizing — Premium Embroidery Digitizing from $7",
+  title: "genxdigitizing — Premium Embroidery Digitizing from $7",
   description: `Production-ready embroidery digitizing, vector art, and custom patches. Clean proofs, fast turnaround, free revisions. Trusted by ${fmtPlus(SITE_STATS.ordersCompleted)} decorators worldwide.`,
   keywords: [
     "embroidery digitizing service","DST file","PES file","EMB file",
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     "vector art conversion","custom patches","3D puff digitizing",
   ],
   openGraph: {
-    title: "GenX Digitizing — Production-Ready Embroidery Files",
+    title: "genxdigitizing — Production-Ready Embroidery Files",
     description: `Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. ${fmtPlus(SITE_STATS.ordersCompleted)} orders completed.`,
     type: "website",
   },
@@ -43,11 +43,11 @@ const PROCESS = [
 ];
 
 const TESTIMONIALS = [
-  { name: "Marcus Rivera",   company: "ProStitch Apparel",    text: "Files run clean on first load. Tight stitch paths and correct density for my Brother machine. Will use GenX for all future orders.", stars: 5, country: "USA", date: "2025" },
-  { name: "Sarah Kim",        company: "Branded Threads Co.",   text: "High-volume cap orders needed consistent 3D puff handling. GenX delivered proper underlay and height on every file with under 12-hour turnaround.", stars: 5, country: "UK", date: "2025" },
+  { name: "Marcus Rivera",   company: "ProStitch Apparel",    text: "Files run clean on first load. Tight stitch paths and correct density for my Brother machine. Will use genxdigitizing for all future orders.", stars: 5, country: "USA", date: "2025" },
+  { name: "Sarah Kim",        company: "Branded Threads Co.",   text: "High-volume cap orders needed consistent 3D puff handling. genxdigitizing delivered proper underlay and height on every file with under 12-hour turnaround.", stars: 5, country: "UK", date: "2025" },
   { name: "David Chen",       company: "The Embroidery House",  text: "Proof approval step caught a color merge issue before production. Fast communication and friction-free revisions.", stars: 5, country: "Canada", date: "2025" },
   { name: "Linda Martinez",   company: "ThreadWorks Studio",    text: "Switched from my previous service. Better stitch quality. Underlay and density handled properly here.", stars: 5, country: "USA", date: "2025" },
-  { name: "James Okafor",     company: "Victory Sportswear",    text: "Cap digitizing is tricky. GenX got it right first try. Structural underlay perfect for curved surfaces.", stars: 5, country: "Nigeria", date: "2024" },
+  { name: "James Okafor",     company: "Victory Sportswear",    text: "Cap digitizing is tricky. genxdigitizing got it right first try. Structural underlay perfect for curved surfaces.", stars: 5, country: "Nigeria", date: "2024" },
   { name: "Priya Mehta",      company: "Monogram Collective",   text: "Fast, affordable, and the free format conversion saves me time. I get DST, PES, and JEF all in one order.", stars: 5, country: "India", date: "2025" },
 ];
 

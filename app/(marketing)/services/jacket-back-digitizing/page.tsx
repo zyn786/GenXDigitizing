@@ -22,13 +22,14 @@ const DATA: ServicePageData = {
     { q: "What file format should I use for jacket back digitizing?", a: "DST is the standard for large-format commercial machines. We also deliver PES, EMB, and any other format you need." },
   ],
   testimonials: [
-    { name: "James Okafor", company: "Victory Sportswear, Nigeria", text: "Our jacket backs are 14″ wide with complex team logos. GenX handles them perfectly — clean stitch paths, minimal trims, flawless registration." },
-    { name: "David Chen", company: "The Embroidery House, Canada", text: "Large format digitizing is hard to get right. GenX nails it every time. Density is perfect — no puckering, no distortion." },
+    { name: "James Okafor", company: "Victory Sportswear, Nigeria", text: "Our jacket backs are 14″ wide with complex team logos. genxdigitizing handles them perfectly — clean stitch paths, minimal trims, flawless registration." },
+    { name: "David Chen", company: "The Embroidery House, Canada", text: "Large format digitizing is hard to get right. genxdigitizing nails it every time. Density is perfect — no puckering, no distortion." },
   ],
+  portfolioSlug: "digitizing",
   cta: { text: "Digitize Your Jacket Back — Free Quote", href: "/contact" },
 };
 
-export const metadata: Metadata = { title: `${DATA.title} — GenX Digitizing`, description: DATA.description, keywords: DATA.keywords };
+export const metadata: Metadata = { title: `${DATA.title} — genxdigitizing`, description: DATA.description, keywords: DATA.keywords };
 
 export default function Page() {
   return (

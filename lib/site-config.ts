@@ -14,11 +14,12 @@ export const SITE_STATS = {
 } as const;
 
 export const SITE_INFO = {
-  name: "GenX Digitizing",
+  name: "genxdigitizing",
   tagline: "Premium Embroidery Digitizing",
   phone: "+18302102135",
   whatsapp: "18302102135",
   email: "hello@genxdigitizing.com",
+  trustpilotEmail: "genxdigitizing.com+a5c28d839b@invite.trustpilot.com",
   address: null, // set when physical address available
   founded: 2024,
 } as const;

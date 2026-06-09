@@ -23,8 +23,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default:  "GenX Digitizing — Premium Embroidery Digitizing from $7",
-    template: "%s | GenX Digitizing",
+    default:  "genxdigitizing — Premium Embroidery Digitizing from $7",
+    template: "%s | genxdigitizing",
   },
   description:
     "Production-ready embroidery digitizing, vector art conversion, and custom patches from $7. Clean proofs, 12hr turnaround, free unlimited revisions.",
@@ -38,21 +38,30 @@ export const metadata: Metadata = {
     "vector art conversion",
     "custom patches",
   ],
-  authors: [{ name: "GenX Digitizing" }],
-  creator: "GenX Digitizing",
+  authors: [{ name: "genxdigitizing" }],
+  creator: "genxdigitizing",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com"
   ),
   openGraph: {
     type:        "website",
     locale:      "en_US",
-    siteName:    "GenX Digitizing",
-    title:       "GenX Digitizing — Production-Ready Embroidery Files",
+    siteName:    "genxdigitizing",
+    title:       "genxdigitizing — Production-Ready Embroidery Files",
     description: `Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. ${SITE_STATS.ordersCompleted.toLocaleString()}+ orders completed.`,
+    images: [
+      {
+        url:    "/images/black_logo.png",
+        width:  1280,
+        height: 1280,
+        alt:    "genxdigitizing — Professional Embroidery Digitizing",
+      },
+    ],
   },
   twitter: {
-    card:  "summary_large_image",
-    title: "GenX Digitizing — Production-Ready Embroidery Files",
+    card:     "summary_large_image",
+    title:    "genxdigitizing — Production-Ready Embroidery Files",
+    images:   ["/images/black_logo.png"],
   },
   robots: {
     index:  true,
@@ -78,6 +87,8 @@ export default function RootLayout({
       className={`${syne.variable} ${inter.variable}`}
     >
       <head>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         {/* Google Analytics */}

@@ -24,13 +24,14 @@ const DATA: ServicePageData = {
     { q: "Do I need special foam for 3D puff?", a: "Standard embroidery foam (2-3mm) works for most applications. We can recommend specific foam types based on your design and fabric." },
   ],
   testimonials: [
-    { name: "Sarah Kim", company: "Branded Threads Co., UK", text: "High-volume cap orders needed consistent 3D puff handling. GenX delivered proper underlay and height on every file with under 12-hour turnaround." },
+    { name: "Sarah Kim", company: "Branded Threads Co., UK", text: "High-volume cap orders needed consistent 3D puff handling. genxdigitizing delivered proper underlay and height on every file with under 12-hour turnaround." },
     { name: "David Chen", company: "The Embroidery House, Canada", text: "Their puff digitizing is exceptional. Every cap comes out with perfect height and clean edges. No foam showing through anywhere." },
   ],
+  portfolioSlug: "digitizing",
   cta: { text: "Get 3D Puff Digitizing — Free Quote", href: "/contact" },
 };
 
-export const metadata: Metadata = { title: `${DATA.title} — GenX Digitizing`, description: DATA.description, keywords: DATA.keywords };
+export const metadata: Metadata = { title: `${DATA.title} — genxdigitizing`, description: DATA.description, keywords: DATA.keywords };
 
 export default function Page() {
   return (

@@ -34,7 +34,7 @@ export function PageTransition() {
           {/* Logo */}
           <motion.img
             src="/images/black_logo.png"
-            alt="GenX Digitizing"
+            alt="genxdigitizing"
             className="w-24 sm:w-32 h-auto"
             initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}

@@ -87,9 +87,9 @@ function ToggleRow({ label, value, onChange }: { label: string; value: boolean; 
 export function AdminSettingsUI({ user }: { user: any }) {
   const [tab, setTab] = useState("company");
   const [showSecret, setShowSecret] = useState(false);
-  const [company, setCompany] = useState({ name: "GenXdigitizing", email: "support@genxdigitizing.com", whatsapp: "", timezone: "Asia/Karachi (UTC+5)", country: "Pakistan" });
+  const [company, setCompany] = useState({ name: "genxdigitizing", email: "support@genxdigitizing.com", whatsapp: "", timezone: "Asia/Karachi (UTC+5)", country: "Pakistan" });
   const [payoneer, setPayoneer] = useState({ client_id: "", secret_key: "", program_id: "", env: "sandbox" });
-  const [resend, setResend] = useState({ api_key: "", from_email: "orders@genxdigitizing.com", from_name: "GenXdigitizing", reply_to: "support@genxdigitizing.com" });
+  const [resend, setResend] = useState({ api_key: "", from_email: "orders@genxdigitizing.com", from_name: "genxdigitizing", reply_to: "support@genxdigitizing.com" });
   const [sla, setSla] = useState({ standard_h: 24, rush_h: 6, urgent_h: 3, big_design_h: 12 });
   const [account, setAccount] = useState({ full_name: user.full_name ?? "", email: user.email ?? "" });
 

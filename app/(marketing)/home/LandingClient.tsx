@@ -195,7 +195,7 @@ const CASE_STUDIES = [
     client: "ProStitch Apparel",
     industry: "Promotional Products — USA",
     problem: "Previous digitizer produced files with inconsistent density. Cap designs had thread breaks on curved sections, and small text registered poorly on left-chest logos.",
-    solution: "GenX manually digitized 200+ cap designs with structural underlay, adjusted stitch angles for curved surfaces, and provided sew-out photos with every proof.",
+    solution: "genxdigitizing manually digitized 200+ cap designs with structural underlay, adjusted stitch angles for curved surfaces, and provided sew-out photos with every proof.",
     results: [
       { metric: "98%", label: "First-run approval" },
       { metric: "40%", label: "Fewer thread breaks" },
@@ -419,44 +419,74 @@ function SewoutGifShowcase({
 }
 
 function HeroSection() {
-  const headline = HEADLINES.primary; // swap for A/B testing
+  const headline = HEADLINES.primary;
 
   return (
-    <section className="relative flex flex-col items-center justify-start pt-2 pb-6 sm:pt-4 sm:h-[85vh] overflow-hidden" aria-labelledby="hero-heading">
-      {/* Full-screen background video */}
+    <section className="relative flex flex-col items-center justify-start pt-2 pb-6 sm:pt-4 h-[90vh] sm:h-[85vh] overflow-hidden" aria-labelledby="hero-heading">
       <div className="absolute inset-0 z-0">
-        {/* Mobile video */}
-        <video
-          className="sm:hidden absolute inset-0 w-full h-full object-cover object-center"
-          autoPlay
-          muted
-          loop
-          playsInline
-          disableRemotePlayback
-          preload="metadata"
-          poster="https://res.cloudinary.com/djoixgojj/video/upload/q_auto,so_0/v1779318275/hero-bg-mobile_bjkamz.jpg"
-          ref={(el) => { if (el) el.play().catch(() => {}); }}
-        >
-          <source src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto,f_auto/v1779318275/hero-bg-mobile_bjkamz.mp4" type="video/mp4" />
-        </video>
         {/* Desktop video */}
         <video
-          className="hidden sm:block absolute inset-0 w-full h-full object-cover object-center"
-          autoPlay
-          muted
-          loop
-          playsInline
-          disableRemotePlayback
-          preload="metadata"
-          poster="https://res.cloudinary.com/djoixgojj/video/upload/q_auto,so_0/v1779318274/hero-bg-desktop_pfrafs.jpg"
-          ref={(el) => { if (el) el.play().catch(() => {}); }}
+          className="hidden sm:block absolute inset-0 w-full h-full object-cover"
+          autoPlay muted loop playsInline preload="auto"
+          width={1920} height={1080}
+          poster="https://res.cloudinary.com/djoixgojj/video/upload/q_auto,so_0/v1781040748/hero-bg-desktop_ogydtd.jpg"
         >
-          <source src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto,f_auto/v1779318274/hero-bg-desktop_pfrafs.mp4" type="video/mp4" />
+          <source src="https://res.cloudinary.com/djoixgojj/video/upload/v1781040748/hero-bg-desktop_ogydtd.webm" type="video/webm" />
+          <source src="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264/v1781040748/hero-bg-desktop_ogydtd.mp4" type="video/mp4" />
         </video>
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/50 to-black/75 sm:from-black/55 sm:via-black/50 sm:to-black/70" />
+        {/* Mobile video */}
+        <video
+          className="sm:hidden absolute inset-0 w-full h-full object-cover"
+          autoPlay muted loop playsInline preload="auto"
+          width={1920} height={1080}
+          poster="https://res.cloudinary.com/djoixgojj/video/upload/q_auto,so_0/v1781040746/hero-bg-mobile_yz4bkh.jpg"
+        >
+          <source src="https://res.cloudinary.com/djoixgojj/video/upload/v1781040746/hero-bg-mobile_yz4bkh.webm" type="video/webm" />
+          <source src="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264/v1781040746/hero-bg-mobile_yz4bkh.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/50 to-black/75 sm:from-black/55 sm:via-black/50 sm:to-black/70 pointer-events-none" />
       </div>
 
+{/* Mobile bottom bar */}
+<div
+  className="sm:hidden fixed bottom-0 inset-x-0 z-[99999] pb-5 safe-area-bottom"
+  style={{ isolation: "isolate" }}
+>
+  {/* Buttons */}
+  <div className="px-3 pt-3 pb-3 flex items-center gap-2 bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] shadow-[0_1px_8px_rgba(37,99,235,0.2)]">
+    <a
+      href={`https://wa.me/${SITE_INFO.whatsapp}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center w-11 h-11 rounded-2xl bg-[#25D366] text-white active:scale-95 transition-all flex-shrink-0 shadow-md"
+      aria-label="WhatsApp"
+    >
+      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+    </a>
+
+    <Link href="/register" className="flex-1">
+      <Button
+        variant="outline"
+        size="md"
+        className="w-full !h-11 !py-0 !text-[13px] !font-semibold !rounded-2xl !border !border-solid !border-white !text-white hover:!bg-white/10"
+      >
+        Register
+      </Button>
+    </Link>
+
+    <Link href="/upload" className="flex-[2]">
+      <Button
+        variant="grad"
+        size="md"
+        className="w-full !h-11 !py-0 !text-[13px] !font-bold !rounded-2xl !shadow-md"
+        rightIcon={<Upload size={14} />}
+      >
+        Upload Design
+      </Button>
+    </Link>
+  </div>
+</div>
+        
       {/* Service cards slider */}
       <div className="relative z-10 max-w-[1400px] mx-auto px-0 sm:px-6 md:px-12 mb-6 sm:mb-8">
         <div className="relative overflow-hidden py-2" aria-label="Our services">
@@ -510,7 +540,7 @@ function HeroSection() {
           <span className={`block whitespace-nowrap ${headline.line1Weight || "font-light"} ${headline.line1Tracking || "tracking-wide"}`}>
             {headline.line1}
           </span>
-          <span className={`block whitespace-nowrap bg-gradient-to-r from-[#60A5FA] via-[#A78BFA] to-[#FB923C] bg-clip-text text-transparent ${headline.gradientWeight || "font-bold"} ${headline.gradientTracking || "tracking-tight"} group-hover:from-[#FB923C] group-hover:via-[#60A5FA] group-hover:to-[#A78BFA] transition-all duration-700`}>
+          <span className={`block whitespace-nowrap bg-gradient-to-r from-[#38BDF8] via-[#C084FC] to-[#FBBF24] bg-clip-text text-transparent ${headline.gradientWeight || "font-bold"} ${headline.gradientTracking || "tracking-tight"} group-hover:from-[#FBBF24] group-hover:via-[#38BDF8] group-hover:to-[#C084FC] transition-all duration-700`}>
             {headline.gradient}
           </span>
         </motion.h1>
@@ -520,56 +550,41 @@ function HeroSection() {
         </p>
 
         {/* Primary CTAs — side by side on all screens */}
-        <div className="flex flex-row gap-2 sm:gap-4 justify-center mb-4 sm:mb-6">
-          <Link href="/contact" className="flex-1 sm:flex-none">
+        <div className="flex flex-row gap-2 sm:gap-4 justify-center mb-3 sm:mb-4">
+          <Link href="/upload" className="flex-1 sm:flex-none">
             <Button
               variant="grad"
               size="xl"
-              className="w-full sm:w-auto !px-3 sm:!px-8 !py-3 sm:!py-4 !text-[12px] sm:!text-base !rounded-2xl !font-bold shadow-[0_8px_32px_rgba(37,99,235,0.45)] hover:shadow-[0_12px_40px_rgba(37,99,235,0.55)] hover:-translate-y-0.5 transition-all duration-300"
-              rightIcon={<Upload size={14} className="sm:size-[18px]" />}
+              className="w-full sm:w-auto !px-5 sm:!px-10 !py-3.5 sm:!py-4 !text-sm sm:!text-lg !rounded-2xl !font-bold !shadow-[0_8px_32px_rgba(37,99,235,0.45)] hover:!shadow-[0_12px_40px_rgba(37,99,235,0.55)] hover:-translate-y-0.5 transition-all duration-300"
+              rightIcon={<Upload size={15} className="sm:size-[20px]" />}
             >
-              Upload Design
+              Upload — Free Quote
             </Button>
           </Link>
           <Link href="/portfolio" className="flex-1 sm:flex-none">
             <Button
               variant="grad"
               size="xl"
-              className="w-full sm:w-auto !px-3 sm:!px-8 !py-3 sm:!py-4 !text-[12px] sm:!text-base !rounded-2xl !font-semibold !border-0 !bg-white/10 !text-white hover:!bg-white/20 hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-sm"
-              rightIcon={<ArrowRight size={14} className="sm:size-[17px]" />}
+              className="w-full sm:w-auto !px-5 sm:!px-10 !py-3.5 sm:!py-4 !text-sm sm:!text-lg !rounded-2xl !font-semibold !bg-white/10 hover:!bg-white/20 !border !border-white/20 !shadow-none hover:-translate-y-0.5 transition-all duration-300"
+              rightIcon={<ArrowRight size={15} className="sm:size-[20px]" />}
             >
               Our Work
             </Button>
           </Link>
         </div>
 
-        {/* Fixed mobile CTA bar */}
-        <div className="sm:hidden fixed bottom-0 left-0 right-0 z-[100] bg-[var(--bg)]/95 backdrop-blur-xl border-t border-[var(--border)] px-3 py-2 flex gap-2">
-          <a
-            href={`https://wa.me/${SITE_INFO.whatsapp}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-[12px] font-semibold bg-[#25D366] text-white active:scale-[0.97] transition-all duration-200 no-underline shadow-sm"
-          >
-            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current flex-shrink-0">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
-            </svg>
-            Get Quote
-          </a>
-          <Link href="/client/new-order" className="flex-1">
-            <Button variant="cyan" size="sm" className="w-full !py-2.5 !text-[12px] shadow-sm">
-              <ShoppingCart size={14} />
-              Order Now
-            </Button>
-          </Link>
-        </div>
+        {/* Reassurance strip — hesitation removal */}
+        <p className="text-center text-[11px] sm:text-xs text-white/50 mb-3 sm:mb-4">
+          ✓ Free quote · ✓ No payment required · ✓ Pay only after preview approval
+        </p>
 
         {/* Trust checks */}
         <div className="flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-6 gap-y-1 sm:gap-y-2">
           {[
-            { text: "Free revisions forever", sub: "Until perfect" },
-            { text: "All machine formats", sub: "8+ formats" },
+            { text: "Free revisions", sub: "Forever" },
+            { text: "All file formats", sub: "8+ formats" },
             { text: "Pay when satisfied", sub: "No risk" },
+            { text: "12h delivery", sub: "Guaranteed" },
           ].map((item) => (
             <span key={item.text} className="inline-flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-sm text-white/60">
               <Check size={12} className="sm:size-[13px] text-[#4ADE80] flex-shrink-0" />
@@ -581,27 +596,25 @@ function HeroSection() {
           ))}
         </div>
 
-        {/* Hero stats row — 2-col mobile, 6-col desktop */}
-        <div className="mt-5 sm:mt-6 w-full bg-white/5 backdrop-blur-md border border-white/8 rounded-2xl p-4 sm:p-5">
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-x-3 gap-y-4 sm:gap-4">
-            {[
-              { value: `${SITE_STATS.avgRating}/5`, sub: `${fmtPlus(SITE_STATS.verifiedReviews)} verified reviews`, icon: Star },
-              { value: fmtPlus(SITE_STATS.ordersCompleted), sub: "Orders completed", icon: FileCheck },
-              { value: `${SITE_STATS.avgDeliveryHours}h`, sub: "Avg. delivery time", icon: Clock },
-              { value: fmtPlus(SITE_STATS.countriesServed), sub: "Countries served", icon: Globe },
-              { value: "100%", sub: "Satisfaction guaranteed", icon: Shield },
-              { value: "Unlimited", sub: "Free revisions", icon: RefreshCw },
-            ].map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <div key={stat.sub} className="flex flex-col items-center text-center">
-                  <Icon size={14} className="text-white/60 mb-1 sm:size-4 sm:text-white/70" />
-                  <span className="font-syne font-bold text-xs sm:text-base text-white">{stat.value}</span>
-                  <span className="text-[9px] sm:text-[11px] text-white/40 mt-0.5 leading-tight">{stat.sub}</span>
-                </div>
-              );
-            })}
-          </div>
+        {/* Hero stats — 6 separate cards */}
+        <div className="mt-5 sm:mt-6 w-full grid grid-cols-2 md:grid-cols-6 gap-3 sm:gap-4">
+          {[
+            { value: `${SITE_STATS.avgRating}/5`, sub: `${fmtPlus(SITE_STATS.verifiedReviews)} verified reviews`, icon: Star },
+            { value: fmtPlus(SITE_STATS.ordersCompleted), sub: "Orders completed", icon: FileCheck },
+            { value: `${SITE_STATS.avgDeliveryHours}h`, sub: "Avg. delivery time", icon: Clock },
+            { value: fmtPlus(SITE_STATS.countriesServed), sub: "Countries served", icon: Globe },
+            { value: "100%", sub: "Satisfaction guaranteed", icon: Shield },
+            { value: "Unlimited", sub: "Free revisions", icon: RefreshCw },
+          ].map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <div key={stat.sub} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-3 sm:p-4 flex flex-col items-center text-center hover:bg-white/10 transition-all">
+                <Icon size={16} className="text-white/50 mb-1.5" />
+                <span className="font-syne font-bold text-sm sm:text-lg text-white">{stat.value}</span>
+                <span className="text-[10px] sm:text-[11px] text-white/40 mt-0.5">{stat.sub}</span>
+              </div>
+            );
+          })}
         </div>
 
       </div>
@@ -621,7 +634,7 @@ function ClientLogosSection() {
           <div className="text-center mb-6">
             <SectionBadge color="#7C3AED">Trusted Worldwide</SectionBadge>
             <p className="text-sm text-[var(--txt2)] mt-3 max-w-lg mx-auto">
-              Join {fmtPlus(SITE_STATS.clientsServed)} embroidery businesses in {fmtPlus(SITE_STATS.countriesServed)} countries who trust GenX for production-ready digitizing.
+              Join {fmtPlus(SITE_STATS.clientsServed)} embroidery businesses in {fmtPlus(SITE_STATS.countriesServed)} countries who trust genxdigitizing for production-ready digitizing.
             </p>
           </div>
 
@@ -712,7 +725,7 @@ function BeforeAfterShowcaseSection() {
             {/* Benefits — compact icon grid */}
             <div>
               <h3 className="font-syne font-bold text-lg text-center mb-3 text-[var(--txt)]">
-                Why Hand-Digitizing Wins
+                Why Digitizing Wins
               </h3>
               <div className="grid grid-cols-2 gap-2">
                 {BENEFITS.map((b) => (
@@ -850,7 +863,7 @@ function WhyChooseUsSection() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
         <AnimatedSection>
           <div className="text-center mb-10 sm:mb-12">
-            <SectionBadge color="#16A34A">Why Choose GenX</SectionBadge>
+            <SectionBadge color="#16A34A">Why Choose genxdigitizing</SectionBadge>
             <h2 id="why-us-heading" className="font-syne font-bold text-3xl md:text-5xl mt-3 mb-3 leading-[1.15] text-[var(--txt)]">
               Built for{" "}
               <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">Professional Results</span>
@@ -965,7 +978,7 @@ function CaseStudiesSection() {
               <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">Real Businesses</span>
             </h2>
             <p className="text-sm sm:text-base text-[var(--txt2)] max-w-xl mx-auto">
-              Not hypotheticals. These are actual production outcomes from clients who switched to GenX.
+              Not hypotheticals. These are actual production outcomes from clients who switched to genxdigitizing.
             </p>
           </div>
 
@@ -985,7 +998,7 @@ function CaseStudiesSection() {
                 <div className="bg-white rounded-2xl p-6 sm:p-7 border border-blue-200 shadow-sm relative">
                   <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center mb-4 text-lg">🔧</div>
                   <span className="absolute top-5 right-5 text-[10px] font-bold uppercase tracking-wider text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">The Solution</span>
-                  <h3 className="font-syne font-bold text-lg text-[var(--txt)] mb-2">GenX Approach</h3>
+                  <h3 className="font-syne font-bold text-lg text-[var(--txt)] mb-2">genxdigitizing Approach</h3>
                   <p className="text-sm text-[var(--txt2)] leading-relaxed">{cs.solution}</p>
                 </div>
 
@@ -1173,7 +1186,7 @@ function ManualVsAutoSection() {
                 <div className="p-3 bg-[#F0FDF4]">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Check size={12} className="text-[#16A34A] flex-shrink-0" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#16A34A]">GenX</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#16A34A]">genxdigitizing</span>
                   </div>
                   <p className="text-[11px] text-[var(--txt2)] leading-snug font-medium">{row.manual}</p>
                 </div>
@@ -1196,7 +1209,7 @@ function ManualVsAutoSection() {
         <div className="hidden lg:block overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm">
           <div className="grid grid-cols-[1.5fr_1fr_1fr] bg-[var(--elevated)] border-b border-[var(--border)]">
             <div className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--txt2)]">Feature</div>
-            <div className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#16A34A] flex items-center gap-1.5"><Check size={14} /> GenX Manual</div>
+            <div className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#16A34A] flex items-center gap-1.5"><Check size={14} /> genxdigitizing Manual</div>
             <div className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[var(--txt3)]">Auto-Trace Software</div>
           </div>
           {COMPARISON_ROWS.map((row, i) => (
@@ -1299,7 +1312,7 @@ function FinalCTASection() {
               <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
                 <Link href="/contact">
                   <Button variant="grad" size="lg" className="w-full sm:w-auto !px-8 !py-4 !text-base !rounded-full" rightIcon={<Upload size={16} />}>
-                    Upload Design — Free Quote
+                    Upload — Free Quote
                   </Button>
                 </Link>
                 <Link href="/register">
@@ -1341,7 +1354,7 @@ export function LandingClient({ services, process, testimonials, faqs }: Props) 
   }
 
   return (
-    <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden pb-20 sm:pb-0">
+    <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden pb-28 sm:pb-0">
       {/* 1. HERO */}
       <HeroSection />
 

@@ -12,9 +12,36 @@ const ALLOWED_TYPES = [
   "application/illustrator",
 ];
 
+// Simple in-memory rate limiter: 5 requests per IP per 15 minutes
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_MAX) return false;
+  entry.count++;
+  return true;
+}
+
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+  }
+
   try {
     const formData = await req.formData();
+
+    // Honeypot check — bots fill hidden fields
+    if (formData.get("website")) {
+      return NextResponse.json({ success: true }); // silently accept, don't reveal detection
+    }
 
     const name    = formData.get("name") as string;
     const email   = formData.get("email") as string;

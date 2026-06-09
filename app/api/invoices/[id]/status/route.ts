@@ -165,7 +165,7 @@ export async function PATCH(
               outputFormat:  o?.output_format ?? "",
               amount:        Number(invoice.amount),
               currency:      "USD",
-              companyName:   "GenXdigitizing",
+              companyName:   "genxdigitizing",
               companyEmail:  "support@genxdigitizing.com",
               companyWebsite: "genxdigitizing.com",
             };

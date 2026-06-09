@@ -16,18 +16,9 @@ const PORTAL_HOME: Record<string, string> = {
 
 function Logo() {
   return (
-    <div className="flex items-center gap-3 mb-7 justify-center">
-      <div className="w-10 h-10 rounded-[10px] flex items-center justify-center
-        bg-gradient-to-br from-[#2563EB] to-[#F97316] text-white font-syne font-bold text-xl">
-        ✦
-      </div>
-      <div>
-        <div className="font-syne font-bold text-lg
-          bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
-          GENX DIGITIZING
-        </div>
-        <div className="text-[11px] text-[var(--txt3)]">Sign in to your portal</div>
-      </div>
+    <div className="flex flex-col items-center gap-3 mb-7">
+      <img src="/images/black_logo.png" alt="GENX DIGITIZING" className="h-10 w-auto" />
+      <div className="text-[11px] text-[var(--txt3)]">Sign in to your portal</div>
     </div>
   );
 }

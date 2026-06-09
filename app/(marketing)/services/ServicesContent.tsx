@@ -149,7 +149,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
   return (
     <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden">
       {/* ── HERO ──────────────────────────────────────────── */}
-      <section className="relative text-center py-12 sm:py-16 md:py-20 px-4 sm:px-6">
+      <section className="relative text-center pt-12 sm:pt-16 md:pt-20 pb-4 sm:pb-6 px-4 sm:px-6">
         <GradientOrb color="#2563EB" size={400} className="top-[-120px] left-1/2 -translate-x-1/2 opacity-20" />
         <GradientOrb color="#F97316" size={280} className="top-[10%] right-[5%] opacity-10" />
 
@@ -182,6 +182,48 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
         >
           Professional digitizing, vector redraws, and custom patch design — built for serious embroidery businesses.
         </motion.p>
+      </section>
+
+      {/* ── BROWSE BY SERVICE ──────────────────────────── */}
+      <section className="pt-6 sm:pt-8 pb-8 sm:pb-10">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
+          <AnimatedSection>
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="font-syne font-bold text-xl sm:text-2xl md:text-3xl mb-2">Browse Services by Category</h2>
+              <p className="text-sm text-[var(--txt2)] max-w-lg mx-auto">Specialized digitizing for every garment type, material, and application.</p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+              {[
+                { emoji: "🧵", label: "Embroidery Digitizing", href: "/services/embroidery-digitizing", color: "#2563EB" },
+                { emoji: "🧢", label: "Cap Digitizing", href: "/services/cap-digitizing", color: "#F97316" },
+                { emoji: "👕", label: "Left Chest", href: "/services/left-chest-digitizing", color: "#06B6D4" },
+                { emoji: "🧥", label: "Jacket Back", href: "/services/jacket-back-digitizing", color: "#DC2626" },
+                { emoji: "🎩", label: "3D Puff", href: "/services/3d-puff-digitizing", color: "#7C3AED" },
+                { emoji: "✨", label: "Logo Digitizing", href: "/services/logo-digitizing", color: "#2563EB" },
+                { emoji: "✏️", label: "Vector Conversion", href: "/services/vector-art-conversion", color: "#F97316" },
+                { emoji: "🏷️", label: "Custom Patches", href: "/services/custom-patches", color: "#16A34A" },
+                { emoji: "🧣", label: "Beanies", href: "/services/beanies-digitizing", color: "#DC2626" },
+                { emoji: "🪣", label: "Towels", href: "/services/towels-digitizing", color: "#06B6D4" },
+                { emoji: "🎒", label: "Bags", href: "/services/bags-digitizing", color: "#8B5CF6" },
+                { emoji: "👔", label: "Uniforms", href: "/services/uniforms-digitizing", color: "#2563EB" },
+                { emoji: "⚽", label: "Sportswear", href: "/services/sportswear-digitizing", color: "#F97316" },
+                { emoji: "🏢", label: "Corporate Apparel", href: "/services/corporate-apparel-digitizing", color: "#1E3A5F" },
+              ].map((svc) => (
+                <Link
+                  key={svc.href}
+                  href={svc.href}
+                  className="group flex flex-col items-center gap-2 p-3 sm:p-4 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--border3)] hover:-translate-y-1 hover:shadow-lg transition-all duration-200"
+                >
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xl sm:text-2xl" style={{ background: `${svc.color}12`, border: `2px solid ${svc.color}25` }}>
+                    {svc.emoji}
+                  </div>
+                  <span className="text-[11px] sm:text-xs font-semibold text-[var(--txt)] text-center leading-tight group-hover:text-[var(--txt)]">{svc.label}</span>
+                </Link>
+              ))}
+            </div>
+          </AnimatedSection>
+        </div>
       </section>
 
       {/* ── SERVICE SECTIONS (alternating layout) ──────────── */}

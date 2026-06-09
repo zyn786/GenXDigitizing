@@ -5,7 +5,7 @@ import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { PortfolioClient } from "./PortfolioClient";
 
 export const metadata: Metadata = {
-  title: "Portfolio — GenX Digitizing Embroidery Work Samples",
+  title: "Portfolio — genxdigitizing Embroidery Work Samples",
   description:
     "Real stitch quality and clean vector artwork. Browse embroidery digitizing, vector art, and custom patch samples from our production workflow.",
   keywords: [
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     "puff embroidery samples","jacket back digitizing","vector art examples","custom patch samples",
   ],
   openGraph: {
-    title: "Our Work — GenX Digitizing Portfolio",
+    title: "Our Work — genxdigitizing Portfolio",
     description: `${fmtPlus(SITE_STATS.ordersCompleted)} orders completed. See the quality of our embroidery digitizing, vector art, and custom patches.`,
     type: "website",
   },

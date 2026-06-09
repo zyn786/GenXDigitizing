@@ -6,7 +6,7 @@ import { OrganizationSchema, BreadcrumbSchema } from "@/components/shared/Struct
 import { AboutContent } from "./AboutContent";
 
 export const metadata: Metadata = {
-  title: "About GenX Digitizing — Our Story, Mission & Team",
+  title: "About genxdigitizing — Our Story, Mission & Team",
   description: `Professional embroidery digitizing team delivering production-ready files since ${SITE_INFO.founded}. ${fmtPlus(SITE_STATS.ordersCompleted)} orders, ${SITE_STATS.satisfactionRate}% satisfaction. Meet the team behind your embroidery.`,
   keywords: [
     "about genx digitizing",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     "digitizing services about us",
   ],
   openGraph: {
-    title: "About GenX Digitizing — Professional Embroidery Digitizing Team",
+    title: "About genxdigitizing — Professional Embroidery Digitizing Team",
     description: `Meet the digitzers behind ${fmtPlus(SITE_STATS.ordersCompleted)} production-ready embroidery files. Manual digitizing, free revisions, global delivery.`,
     type: "website",
   },

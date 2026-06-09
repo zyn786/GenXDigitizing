@@ -1,5 +1,5 @@
 /**
- * Centralized Design Token System — GenX Digitizing
+ * Centralized Design Token System — genxdigitizing
  *
  * Single source of truth for all visual primitives.
  * Import from here in tailwind.config.ts, components, and anywhere styling lives.

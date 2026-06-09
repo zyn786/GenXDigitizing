@@ -5,7 +5,7 @@ import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { Plus, X, DollarSign, Send, Image, Loader2, Mail, Globe, Calendar, Building2, FileText, ChevronRight, TrendingUp, Target, Trophy, Download } from "lucide-react";
+import { Plus, X, DollarSign, Send, Image, Loader2, Mail, Globe, Calendar, Building2, FileText, ChevronRight, TrendingUp, Target, Trophy, Download, ShoppingCart } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/utils";
 
 const CARD_COLORS = [
@@ -132,12 +132,16 @@ function AddLeadModal({ onClose, onAdd }: { onClose: () => void; onAdd: (data: a
   );
 }
 
-function LeadDetailModal({ lead, onClose, onContact }: { lead: any; onClose: () => void; onContact: () => void }) {
+function LeadDetailModal({ lead, onClose, onContact, onConvertToOrder }: { lead: any; onClose: () => void; onContact: () => void; onConvertToOrder: () => void }) {
   const artworkUrl = getArtworkUrl(lead.notes);
+  const artworkInfo = parseLeadArtworkInfo(lead.notes);
+  const leadService = parseLeadService(lead.notes);
+  const leadMessage = parseLeadMessage(lead.notes);
   const stage = STAGES.find(s => s.id === lead.stage);
   const sc = clr[stage?.ci ?? 4];
   const [orders, setOrders] = useState<any[]>([]);
   const [ordersLoaded, setOrdersLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     if (!lead.email) return;
@@ -215,14 +219,69 @@ function LeadDetailModal({ lead, onClose, onContact }: { lead: any; onClose: () 
             </div>
           )}
 
-          {cleanNotes && (
+          {/* Service & Artwork info parsed from lead */}
+          {(leadService || artworkInfo) && (
+            <div className="mb-4 rounded-xl p-3.5 border" style={{ background: "var(--elevated)", borderColor: "var(--border)" }}>
+              <div className="flex items-center gap-1.5 mb-2">
+                <FileText size={14} style={{ color: txt3 }} />
+                <span className="text-[11px] uppercase tracking-wider font-bold" style={{ color: txt3 }}>Request Details</span>
+              </div>
+              <div className="space-y-1.5 text-[13px]">
+                {leadService && (
+                  <div className="flex gap-2">
+                    <span style={{ color: txt3 }}>Service:</span>
+                    <span className="font-semibold" style={{ color: clr[0].text }}>{leadService}</span>
+                  </div>
+                )}
+                {artworkInfo && (
+                  <div className="flex gap-2">
+                    <span style={{ color: txt3 }}>Artwork:</span>
+                    <span style={{ color: txt }}>{artworkInfo.name} <span style={{ color: txt3 }}>({artworkInfo.size})</span></span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Artwork image preview */}
+          {artworkUrl && !imgError && (
+            <div className="mb-5">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Image size={14} style={{ color: txt3 }} />
+                <span className="text-[11px] uppercase tracking-wider font-bold" style={{ color: txt3 }}>Artwork Preview</span>
+              </div>
+              <a href={artworkUrl} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
+                <img
+                  src={artworkUrl}
+                  alt={artworkInfo?.name || "Artwork"}
+                  className="w-full h-auto max-h-[300px] object-contain"
+                  style={{ background: "var(--elevated)" }}
+                  onError={() => setImgError(true)}
+                />
+              </a>
+              <div className="flex items-center gap-2 mt-2">
+                <a href={artworkUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-[12px] no-underline border transition-all hover:opacity-80"
+                  style={{ background: clr[4].bgSoft, borderColor: clr[4].border, color: clr[4].text }}>
+                  <Image size={16} /> View Full ↗
+                </a>
+                <a href={artworkUrl} download
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-[12px] no-underline border transition-all hover:opacity-80 cursor-pointer"
+                  style={{ background: clr[0].bgSoft, borderColor: clr[0].border, color: clr[0].text }}>
+                  <Download size={16} /> Download
+                </a>
+              </div>
+            </div>
+          )}
+
+          {leadMessage && (
             <div className="mb-4">
               <div className="flex items-center gap-1.5 mb-2">
                 <FileText size={14} style={{ color: txt3 }} />
-                <span className="text-[11px] uppercase tracking-wider font-bold" style={{ color: txt3 }}>Notes</span>
+                <span className="text-[11px] uppercase tracking-wider font-bold" style={{ color: txt3 }}>Message</span>
               </div>
               <div className="rounded-xl p-3.5 text-[13px] leading-relaxed whitespace-pre-wrap border"
-                style={{ background: "var(--elevated)", color: txt2, borderColor: "var(--border)" }}>{cleanNotes}</div>
+                style={{ background: "var(--elevated)", color: txt2, borderColor: "var(--border)" }}>{leadMessage}</div>
             </div>
           )}
 
@@ -280,30 +339,14 @@ function LeadDetailModal({ lead, onClose, onContact }: { lead: any; onClose: () 
             </div>
           )}
 
-          {artworkUrl && (
-            <div className="mb-5">
-              <div className="flex items-center gap-1.5 mb-2">
-                <Image size={14} style={{ color: txt3 }} />
-                <span className="text-[11px] uppercase tracking-wider font-bold" style={{ color: txt3 }}>Artwork</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <a href={artworkUrl} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-[12px] no-underline border transition-all hover:opacity-80"
-                  style={{ background: clr[4].bgSoft, borderColor: clr[4].border, color: clr[4].text }}>
-                  <Image size={16} /> View ↗
-                </a>
-                <a href={artworkUrl} download
-                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-[12px] no-underline border transition-all hover:opacity-80 cursor-pointer"
-                  style={{ background: clr[0].bgSoft, borderColor: clr[0].border, color: clr[0].text }}>
-                  <Download size={16} /> Download
-                </a>
-              </div>
-            </div>
-          )}
-
-          <div className="flex gap-2.5 pt-4" style={{ borderTop: "1px solid var(--border)" }}>
-            <button onClick={onContact}
+          <div className="flex gap-2.5 pt-4 flex-wrap" style={{ borderTop: "1px solid var(--border)" }}>
+            <button onClick={onConvertToOrder}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-semibold border-none cursor-pointer text-white transition-all active:scale-95"
+              style={{ background: `linear-gradient(135deg,${clr[1].bg},${clr[1].icon})` }}>
+              <ShoppingCart size={15} /> Convert to Order
+            </button>
+            <button onClick={onContact}
+              className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-[13px] font-semibold border-none cursor-pointer text-white transition-all active:scale-95"
               style={{ background: `linear-gradient(135deg,${clr[0].bg},${clr[4].bg})` }}>
               <Send size={15} /> Contact via Email
             </button>
@@ -319,13 +362,183 @@ function LeadDetailModal({ lead, onClose, onContact }: { lead: any; onClose: () 
 
 function getArtworkUrl(notes: string) {
   if (!notes) return null;
-  const match = notes.match(/Download:\s*(https?:\/\/[^\s]+)/);
-  return match?.[1] || null;
+  // Match absolute URL or relative /api/chat/upload path
+  const match = notes.match(/Download:\s*(\/api\/chat\/upload\?key=[^\s]+)/);
+  if (match) return match[1];
+  const absMatch = notes.match(/Download:\s*(https?:\/\/[^\s]+)/);
+  return absMatch?.[1] || null;
+}
+
+function parseLeadService(notes: string): string {
+  if (!notes) return "";
+  const match = notes.match(/Service:\s*(.+)/);
+  return match?.[1] || "";
+}
+
+function parseLeadArtworkInfo(notes: string): { name: string; size: string } | null {
+  if (!notes) return null;
+  const match = notes.match(/Artwork:\s*(.+?)\s*\(([^)]+)\)/);
+  return match ? { name: match[1], size: match[2] } : null;
+}
+
+function parseLeadMessage(notes: string): string {
+  if (!notes) return "";
+  // Remove metadata lines: Service:, Artwork:, Download:, and activity log lines
+  return notes
+    .split("\n")
+    .filter((l: string) => !l.startsWith("Service:") && !l.startsWith("Artwork:") && !l.startsWith("Download:") && !l.startsWith("["))
+    .join("\n")
+    .trim();
+}
+
+function ConvertToOrderModal({ lead, onClose }: { lead: any; onClose: (order?: any) => void }) {
+  const parsedService = parseLeadService(lead.notes);
+  const [tiers, setTiers] = useState<any[]>([]);
+  const [tiersLoaded, setTiersLoaded] = useState(false);
+  const [form, setForm] = useState({
+    service_tier_id: "",
+    design_name: lead.company ? `${lead.company} Logo` : "",
+    price: lead.deal_value || "",
+    turnaround: "standard",
+    output_format: "DST",
+    width_inches: "4",
+    height_inches: "4",
+    color_count: "",
+  });
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/orders/tiers")
+      .then(r => r.json())
+      .then(d => { setTiers(d.tiers || []); })
+      .catch(() => {})
+      .finally(() => setTiersLoaded(true));
+  }, []);
+
+  const upd = (k: string) => (e: any) => setForm(f => ({ ...f, [k]: e.target.value }));
+  const selectedTier = tiers.find(t => t.id === form.service_tier_id);
+
+  async function handleConvert() {
+    if (!form.service_tier_id || !form.design_name.trim() || !form.price) {
+      toast.error("Service tier, design name, and price are required");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await fetch("/api/crm/convert-to-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lead_id: lead.id, ...form }),
+      });
+      const data = await res.json();
+      if (!res.ok) { toast.error(data.error || "Failed"); return; }
+      toast.success(`Order ${data.order.order_number} created!`);
+      onClose(data.order);
+    } catch {
+      toast.error("Network error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+      onClick={() => onClose()}>
+      <div className="w-full max-w-[480px] max-h-[90vh] overflow-y-auto rounded-2xl border p-6"
+        style={{ background: "var(--bg)", borderColor: "var(--border2)" }} onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="font-syne font-bold text-lg" style={{ color: txt }}>Convert Lead to Order</h3>
+          <button onClick={() => onClose()} className="bg-transparent border-none cursor-pointer" style={{ color: txt3 }}><X size={16} /></button>
+        </div>
+
+        <div className="rounded-xl p-3 mb-4" style={{ background: clr[1].bgSoft, border: `1px solid ${clr[1].border}` }}>
+          <div className="text-[11px] font-semibold" style={{ color: clr[1].text }}>{lead.contact_name}</div>
+          <div className="text-[11px]" style={{ color: txt2 }}>{lead.email} {lead.company ? `· ${lead.company}` : ""}</div>
+          {parsedService && <div className="text-[11px] mt-0.5" style={{ color: txt3 }}>Requested: {parsedService}</div>}
+        </div>
+
+        {!tiersLoaded ? (
+          <div className="flex items-center justify-center py-8"><Loader2 size={20} className="animate-spin" style={{ color: txt3 }} /></div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: txt2 }}>Service Tier *</label>
+              <select value={form.service_tier_id} onChange={upd("service_tier_id")}
+                className="w-full rounded-xl px-3 py-2.5 text-[13px] outline-none border" style={{ background: "var(--surface)", color: txt, borderColor: "var(--border2)" }}>
+                <option value="">Select tier…</option>
+                {tiers.map((t: any) => (
+                  <option key={t.id} value={t.id}>{t.category === "digitizing" ? "🧵" : t.category === "vector" ? "✏️" : "🏷️"} {t.label} — ${t.price}</option>
+                ))}
+              </select>
+              {selectedTier && (
+                <div className="text-[10px] mt-1" style={{ color: txt3 }}>{selectedTier.size_desc} · {selectedTier.est_hours} est.</div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: txt2 }}>Design Name *</label>
+              <input type="text" value={form.design_name} onChange={upd("design_name")} placeholder="e.g. Company Logo" className="w-full rounded-xl px-3 py-2.5 text-[13px] outline-none border" style={{ background: "var(--surface)", color: txt, borderColor: "var(--border2)" }} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: txt2 }}>Price ($) *</label>
+                <input type="number" value={form.price} onChange={upd("price")} placeholder="e.g. 15" min="1" className="w-full rounded-xl px-3 py-2.5 text-[13px] outline-none border" style={{ background: "var(--surface)", color: txt, borderColor: "var(--border2)" }} />
+              </div>
+              <div>
+                <label className="block text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: txt2 }}>Turnaround</label>
+                <select value={form.turnaround} onChange={upd("turnaround")}
+                  className="w-full rounded-xl px-3 py-2.5 text-[13px] outline-none border" style={{ background: "var(--surface)", color: txt, borderColor: "var(--border2)" }}>
+                  <option value="standard">🕐 Standard (12-24h)</option>
+                  <option value="rush">⚡ Rush (6h)</option>
+                  <option value="urgent">🔥 Urgent (3h)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: txt2 }}>Width (in)</label>
+                <input type="number" step="0.1" value={form.width_inches} onChange={upd("width_inches")} placeholder='4"' className="w-full rounded-xl px-3 py-2.5 text-[13px] outline-none border" style={{ background: "var(--surface)", color: txt, borderColor: "var(--border2)" }} />
+              </div>
+              <div>
+                <label className="block text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: txt2 }}>Height (in)</label>
+                <input type="number" step="0.1" value={form.height_inches} onChange={upd("height_inches")} placeholder='4"' className="w-full rounded-xl px-3 py-2.5 text-[13px] outline-none border" style={{ background: "var(--surface)", color: txt, borderColor: "var(--border2)" }} />
+              </div>
+              <div>
+                <label className="block text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: txt2 }}>Colors</label>
+                <input type="number" value={form.color_count} onChange={upd("color_count")} placeholder="e.g. 4" className="w-full rounded-xl px-3 py-2.5 text-[13px] outline-none border" style={{ background: "var(--surface)", color: txt, borderColor: "var(--border2)" }} />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: txt2 }}>Output Format</label>
+              <select value={form.output_format} onChange={upd("output_format")}
+                className="w-full rounded-xl px-3 py-2.5 text-[13px] outline-none border" style={{ background: "var(--surface)", color: txt, borderColor: "var(--border2)" }}>
+                {["DST","PES","EMB","JEF","EXP","XXX","VIP","HUS"].map(f => <option key={f} value={f}>{f}</option>)}
+              </select>
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-2.5 pt-4 mt-4" style={{ borderTop: "1px solid var(--border)" }}>
+          <button onClick={() => onClose()}
+            className="flex-1 py-2.5 rounded-xl text-[13px] font-medium border cursor-pointer transition-all active:scale-95"
+            style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: txt2 }}>Cancel</button>
+          <button onClick={handleConvert} disabled={busy || !tiersLoaded}
+            className="flex-[2] py-2.5 rounded-xl text-[13px] font-semibold border-none cursor-pointer text-white transition-all active:scale-95 flex items-center justify-center gap-2"
+            style={{ background: busy ? "var(--border2)" : `linear-gradient(135deg,${clr[1].bg},${clr[1].icon})`, cursor: busy ? "not-allowed" : "pointer" }}>
+            <ShoppingCart size={15} /> {busy ? "Converting…" : "Create Order"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function ContactLeadModal({ lead, onClose }: { lead: any; onClose: () => void }) {
-  const [subject, setSubject] = useState(`Re: Your inquiry with GenXdigitizing`);
-  const [message, setMessage] = useState(`Hi ${lead.contact_name},\n\nThank you for reaching out! We'd love to help with your embroidery project.\n\nCould you share more details about what you need? We can provide a quote and turnaround time.\n\nBest regards,\nGenXdigitizing Team`);
+  const [subject, setSubject] = useState(`Re: Your inquiry with genxdigitizing`);
+  const [message, setMessage] = useState(`Hi ${lead.contact_name},\n\nThank you for reaching out! We'd love to help with your embroidery project.\n\nCould you share more details about what you need? We can provide a quote and turnaround time.\n\nBest regards,\ngenxdigitizing Team`);
   const [sending, setSending] = useState(false);
 
   async function handleSend() {
@@ -382,6 +595,7 @@ export function CRMLeadsUI({ leads: initial, userId, fetchError }: { leads: any[
   const [leads, setLeads] = useState(initial);
   const [showAdd, setShowAdd] = useState(false);
   const [contactLead, setContactLead] = useState<any>(null);
+  const [convertToOrderLead, setConvertToOrderLead] = useState<any>(null);
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [stageFilter, setStageFilter] = useState<string>("all");
 
@@ -556,10 +770,20 @@ export function CRMLeadsUI({ leads: initial, userId, fetchError }: { leads: any[
       </div>
 
       {showAdd && <AddLeadModal onClose={() => setShowAdd(false)} onAdd={addLead} />}
-      {selectedLead && !contactLead && (
-        <LeadDetailModal lead={selectedLead} onClose={() => setSelectedLead(null)} onContact={() => { setContactLead(selectedLead); }} />
+      {selectedLead && !contactLead && !convertToOrderLead && (
+        <LeadDetailModal lead={selectedLead} onClose={() => setSelectedLead(null)} onContact={() => { setContactLead(selectedLead); }} onConvertToOrder={() => { setConvertToOrderLead(selectedLead); }} />
       )}
       {contactLead && <ContactLeadModal lead={contactLead} onClose={() => setContactLead(null)} />}
+      {convertToOrderLead && (
+        <ConvertToOrderModal lead={convertToOrderLead} onClose={(order) => {
+          setConvertToOrderLead(null);
+          setSelectedLead(null);
+          if (order) {
+            setLeads(l => l.map(l => l.id === convertToOrderLead.id ? { ...l, stage: "won" } : l));
+            startTx(() => router.refresh());
+          }
+        }} />
+      )}
     </div>
   );
 }

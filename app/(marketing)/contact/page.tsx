@@ -4,9 +4,9 @@ import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { ContactForm } from "./ContactForm";
 
 export const metadata: Metadata = {
-  title: "Contact — GenX Digitizing | Get a Quote",
+  title: "Contact — genxdigitizing | Get a Quote",
   description:
-    "Get in touch with GenX Digitizing. Questions about embroidery digitizing, pricing, or your order — we reply fast.",
+    "Get in touch with genxdigitizing. Questions about embroidery digitizing, pricing, or your order — we reply fast.",
 };
 
 const CONTACT_INFO = [

@@ -17,7 +17,7 @@ export const SAVED_RESPONSES: SavedResponse[] = [
   {
     id: "sr-1",
     title: "Welcome Message",
-    content: "Welcome to GenXdigitizing! 👋 I'm here to help with your embroidery digitizing needs. Feel free to ask any questions about your order, turnaround times, or file requirements.",
+    content: "Welcome to genxdigitizing! 👋 I'm here to help with your embroidery digitizing needs. Feel free to ask any questions about your order, turnaround times, or file requirements.",
   },
   {
     id: "sr-2",

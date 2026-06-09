@@ -122,7 +122,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
             <span className="text-xl sm:text-2xl flex-shrink-0 mt-0.5">💬</span>
             <div>
               <p className="text-[13px] sm:text-sm text-[var(--txt2)] italic leading-relaxed">
-                &ldquo;GenX digitized 200+ designs for our streetwear brand. Zero errors, always on time, and the free format conversion saves us hours every week.&rdquo;
+                &ldquo;genxdigitizing digitized 200+ designs for our streetwear brand. Zero errors, always on time, and the free format conversion saves us hours every week.&rdquo;
               </p>
               <p className="text-[11px] sm:text-xs text-[var(--txt3)] mt-2">
                 — <strong className="text-[var(--txt)]">Marcus R.</strong>, Streetwear Brand Owner, USA
@@ -288,7 +288,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
                 stars: 5,
               },
               {
-                quote: "We switched from a $25/design service to GenX at $7. Better quality, faster delivery, and free revisions. Best vendor decision we've made.",
+                quote: "We switched from a $25/design service to genxdigitizing at $7. Better quality, faster delivery, and free revisions. Best vendor decision we've made.",
                 name: "Sarah M.",
                 role: "Corporate Apparel Brand, UK",
                 stars: 5,

@@ -28,10 +28,11 @@ const DATA: ServicePageData = {
     { name: "Marcus Rivera", company: "ProStitch Apparel, USA", text: "Ordered 500 patches for a corporate event. Quality was exceptional, colors matched perfectly, and the free shipping saved us $40. Will order again." },
     { name: "Priya Mehta", company: "Monogram Collective, India", text: "The patch digitizing service is fantastic. Clean borders, perfect thread colors, and the digital preview gave us confidence before production." },
   ],
+  portfolioSlug: "patches",
   cta: { text: "Design Your Custom Patches — Free Quote", href: "/contact" },
 };
 
-export const metadata: Metadata = { title: `${DATA.title} — GenX Digitizing`, description: DATA.description, keywords: DATA.keywords };
+export const metadata: Metadata = { title: `${DATA.title} — genxdigitizing`, description: DATA.description, keywords: DATA.keywords };
 
 export default function Page() {
   return (

@@ -79,6 +79,42 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority:        0.85,
     },
     {
+      url:             `${base}/services/beanies-digitizing`,
+      lastModified:    now,
+      changeFrequency: "monthly",
+      priority:        0.8,
+    },
+    {
+      url:             `${base}/services/towels-digitizing`,
+      lastModified:    now,
+      changeFrequency: "monthly",
+      priority:        0.8,
+    },
+    {
+      url:             `${base}/services/bags-digitizing`,
+      lastModified:    now,
+      changeFrequency: "monthly",
+      priority:        0.8,
+    },
+    {
+      url:             `${base}/services/uniforms-digitizing`,
+      lastModified:    now,
+      changeFrequency: "monthly",
+      priority:        0.85,
+    },
+    {
+      url:             `${base}/services/sportswear-digitizing`,
+      lastModified:    now,
+      changeFrequency: "monthly",
+      priority:        0.85,
+    },
+    {
+      url:             `${base}/services/corporate-apparel-digitizing`,
+      lastModified:    now,
+      changeFrequency: "monthly",
+      priority:        0.85,
+    },
+    {
       url:             `${base}/portfolio`,
       lastModified:    now,
       changeFrequency: "weekly",
@@ -125,6 +161,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified:    now,
       changeFrequency: "weekly",
       priority:        0.85,
+    },
+    {
+      url:             `${base}/upload`,
+      lastModified:    now,
+      changeFrequency: "monthly",
+      priority:        0.9,
     },
     {
       url:             `${base}/contact`,

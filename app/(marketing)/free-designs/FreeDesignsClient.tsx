@@ -76,7 +76,7 @@ function ImageCarousel({
         >
           {loaded.has(current) ? (
             <img
-              src={images[current].thumbnailUrl || images[current].url}
+              src={images[current].url}
               alt={images[current].alt || "Design preview"}
               className="w-full h-full object-cover"
               loading="lazy"
@@ -84,7 +84,7 @@ function ImageCarousel({
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <img
-                src={images[current].blurhash || images[current].thumbnailUrl || images[current].url}
+                src={images[current].thumbnailUrl || images[current].url}
                 alt=""
                 className="w-full h-full object-cover blur-lg scale-105"
                 onLoad={() => setLoaded((prev) => new Set([...prev, current]))}
@@ -533,7 +533,7 @@ export function FreeDesignsClient() {
             className="absolute left-[18%] top-[28%] w-[220px] xl:w-[250px]"
           >
             <img
-              src="/showcase/cap-embroidery.webp"
+              src="https://res.cloudinary.com/djoixgojj/image/upload/v1779204050/cap-embroidery_sjxoep.webp"
               alt="Cap embroidery"
               className="w-full h-auto rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.05)] border border-white/20"
             />
@@ -544,7 +544,7 @@ export function FreeDesignsClient() {
             className="absolute right-[18%] top-[26%] w-[220px] xl:w-[250px]"
           >
             <img
-              src="/showcase/jacket-embroidery.webp"
+              src="https://res.cloudinary.com/djoixgojj/image/upload/v1779207170/jacket-embroidery_ycfnqh.webp"
               alt="Jacket embroidery"
               className="w-full h-auto rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.05)] border border-white/20"
             />

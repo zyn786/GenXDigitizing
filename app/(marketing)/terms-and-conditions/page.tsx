@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions — GenX Digitizing",
-  description: "Terms of service for using GenX Digitizing embroidery digitizing services.",
+  title: "Terms & Conditions — genxdigitizing",
+  description: "Terms of service for using genxdigitizing embroidery digitizing services.",
 };
 
 export default function TermsPage() {
@@ -21,7 +21,7 @@ export default function TermsPage() {
           <section>
             <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">1. Acceptance of Terms</h2>
             <p>
-              By accessing or using GenX Digitizing services (&quot;Services&quot;), you agree to be bound
+              By accessing or using genxdigitizing services (&quot;Services&quot;), you agree to be bound
               by these Terms &amp; Conditions. If you do not agree, please do not use our Services. We
               reserve the right to update these terms at any time. Continued use after changes constitutes
               acceptance.
@@ -30,7 +30,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">2. Services Provided</h2>
-            <p>GenX Digitizing provides professional embroidery digitizing services including:</p>
+            <p>genxdigitizing provides professional embroidery digitizing services including:</p>
             <ul className="list-disc pl-5 space-y-2">
               <li>Embroidery digitizing — converting artwork to machine-ready stitch files (DST, PES, EMB, JEF, XXX, VIP, HUS)</li>
               <li>Vector art conversion — raster to vector conversion for logos and designs</li>
@@ -99,7 +99,7 @@ export default function TermsPage() {
           <section>
             <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">8. Limitation of Liability</h2>
             <p>
-              GenX Digitizing is not liable for indirect, incidental, or consequential damages arising from
+              genxdigitizing is not liable for indirect, incidental, or consequential damages arising from
               use of our Services. Our total liability for any claim related to our Services is limited to
               the amount paid for the specific order in question. We are not responsible for production
               issues caused by incorrect file format selection, machine compatibility problems not disclosed

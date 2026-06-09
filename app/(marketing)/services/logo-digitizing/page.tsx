@@ -25,10 +25,11 @@ const DATA: ServicePageData = {
     { name: "Linda Martinez", company: "ThreadWorks Studio, USA", text: "Switched from my previous service. Better stitch quality. Underlay and density handled properly here. Our corporate client logos look flawless." },
     { name: "Priya Mehta", company: "Monogram Collective, India", text: "Fast, affordable, and the free format conversion saves me time. I get DST, PES, and JEF all in one order for every client logo." },
   ],
+  portfolioSlug: "digitizing",
   cta: { text: "Digitize Your Logo — Free Quote", href: "/contact" },
 };
 
-export const metadata: Metadata = { title: `${DATA.title} — GenX Digitizing`, description: DATA.description, keywords: DATA.keywords };
+export const metadata: Metadata = { title: `${DATA.title} — genxdigitizing`, description: DATA.description, keywords: DATA.keywords };
 
 export default function Page() {
   return (

@@ -109,7 +109,8 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
       if(!upRes.ok){ const e = await upRes.json().catch(()=>({})); toast.error(e.error||"Upload failed"); setBusy(false);return; }
       fetch("/api/order-confirm",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({userId,orderNumber:order.order_number,service:sel.label,price:totalPrice,turnaround:turn})}).catch(()=>{});
-      setDone(order); toast.success("Order placed!");
+      toast.success("Order placed! Redirecting...");
+      router.push(`/client/my-orders/${order.id}`);
     }catch(err:any){toast.error(err?.message||"Error");}
     finally{setBusy(false);}
   }

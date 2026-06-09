@@ -155,20 +155,9 @@ export default function RegisterPage() {
   return (
     <div className="animate-fade-in">
       {/* Logo */}
-      <div className="flex items-center gap-3 mb-6 justify-center">
-        <div className="w-10 h-10 rounded-[10px] flex items-center justify-center
-          bg-gradient-to-br from-[#2563EB] to-[#F97316] text-white font-syne font-bold text-xl">
-          ✦
-        </div>
-        <div>
-          <div className="font-syne font-bold text-lg tracking-wide
-            bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
-            GENX DIGITIZING
-          </div>
-          <div className="text-[11px] text-[var(--txt3)]">
-            Create your client account
-          </div>
-        </div>
+      <div className="flex flex-col items-center gap-3 mb-6">
+        <img src="/images/black_logo.png" alt="GENX DIGITIZING" className="h-10 w-auto" />
+        <div className="text-[11px] text-[var(--txt3)]">Create your client account</div>
       </div>
 
       {/* Pricing teaser */}

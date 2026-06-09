@@ -28,10 +28,11 @@ const DATA: ServicePageData = {
     { name: "James T.", company: "Screen Printing Shop, Australia", text: "Their vector redraw service is incredible. We send hand-drawn sketches and get back production-ready vectors. Saves our design team days of work." },
     { name: "Linda Martinez", company: "ThreadWorks Studio, USA", text: "Clean vectors every time. We use them for both embroidery digitizing and screen printing. Consistent quality across the board." },
   ],
+  portfolioSlug: "vector",
   cta: { text: "Convert Your Artwork — Free Quote", href: "/contact" },
 };
 
-export const metadata: Metadata = { title: `${DATA.title} — GenX Digitizing`, description: DATA.description, keywords: DATA.keywords };
+export const metadata: Metadata = { title: `${DATA.title} — genxdigitizing`, description: DATA.description, keywords: DATA.keywords };
 
 export default function Page() {
   return (

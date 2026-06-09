@@ -138,7 +138,7 @@ function MobileSidebarDrawer({ user }: { user: AuthUser }) {
             {/* Logo + close */}
             <div className="flex items-center justify-between px-4 pt-5 pb-3">
               <div className="flex items-center gap-2.5">
-                <img src="/images/black_logo.png" alt="GenX" className="h-7 w-auto" />
+                <img src="/images/black_logo.png" alt="genxdigitizing" className="h-7 w-auto" />
                 <span className="font-syne font-bold text-[13px]"
                   style={{ background: "linear-gradient(135deg,#2FA4D7,#E76F2E)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>GENX</span>
               </div>
@@ -212,7 +212,7 @@ export function Topbar({ title, subtitle, user }: TopbarProps) {
       {/* Left: logo + mobile drawer + title */}
       <div className="flex items-center gap-2 sm:gap-3">
         <MobileSidebarDrawer user={user} />
-        <img src="/images/black_logo.png" alt="GenX" className="h-6 sm:h-7 w-auto flex-shrink-0 lg:hidden mr-2" />
+        <img src="/images/black_logo.png" alt="genxdigitizing" className="h-6 sm:h-7 w-auto flex-shrink-0 lg:hidden mr-2" />
         <div>
           <h1
             className="font-syne font-bold text-sm sm:text-[15px]"

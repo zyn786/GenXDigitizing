@@ -252,7 +252,7 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
   return (
     <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden">
       {/* ════════════════════════════════════════════════════════
-          HERO — Founder story, why GenX exists
+          HERO — Founder story, why genxdigitizing exists
           ════════════════════════════════════════════════════════ */}
       <section className="relative text-center pt-12 pb-8 sm:pt-16 sm:pb-10 md:pt-20 md:pb-14 px-4 sm:px-6">
         <GradientOrb color="#2563EB" size={500} className="top-[-150px] left-1/2 -translate-x-1/2 opacity-20" />
@@ -265,7 +265,7 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
           className="inline-flex px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider
             bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20 mb-5"
         >
-          About GenX
+          About genxdigitizing
         </motion.span>
 
         <motion.h1
@@ -286,7 +286,7 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
           transition={{ delay: 0.1 }}
           className="text-base sm:text-lg text-[var(--txt2)] max-w-3xl mx-auto leading-relaxed"
         >
-          Founded in {SITE_INFO.founded}, GenX Digitizing was born from a simple frustration: embroidery shops were paying
+          Founded in {SITE_INFO.founded}, genxdigitizing was born from a simple frustration: embroidery shops were paying
           premium prices for digitized files that still broke threads, misregistered, and wasted production hours.
           We knew there was a better way.
         </motion.p>
@@ -315,7 +315,7 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
                     digitizing services prioritized speed and volume over machine-floor reality.
                   </p>
                   <p>
-                    <strong className="text-[var(--txt)]">GenX was built to fix that.</strong> We combined deep
+                    <strong className="text-[var(--txt)]">genxdigitizing was built to fix that.</strong> We combined deep
                     production experience with professional digitizing talent to create a service that delivers
                     files optimized for actual embroidery — not just digital previews. Every stitch path is
                     hand-placed. Every density is fabric-aware. Every file is machine-tested.
@@ -449,7 +449,7 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
         <div className="max-w-[1400px] mx-auto px-5 sm:px-6 md:px-12">
           <AnimatedSection>
             <div className="text-center mb-8 sm:mb-10">
-              <SectionBadge color="#2563EB">Why Choose GenX</SectionBadge>
+              <SectionBadge color="#2563EB">Why Choose genxdigitizing</SectionBadge>
               <h2 className="font-syne font-bold text-2xl sm:text-3xl md:text-4xl mb-3">
                 Built for Embroidery Professionals
               </h2>
@@ -538,7 +538,7 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
             {/* Team note */}
             <p className="text-center text-xs sm:text-sm text-[var(--txt3)] mt-6 max-w-xl mx-auto">
               This is our core leadership team. Behind them: a network of vetted digitzers and artists who
-              share GenX quality standards. Every file passes through senior review before delivery.
+              share genxdigitizing quality standards. Every file passes through senior review before delivery.
             </p>
           </AnimatedSection>
         </div>

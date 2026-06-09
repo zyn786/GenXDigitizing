@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Refund Policy — GenX Digitizing",
+  title: "Refund Policy — genxdigitizing",
   description: "Our refund and satisfaction guarantee policy for embroidery digitizing services.",
 };
 

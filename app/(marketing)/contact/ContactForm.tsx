@@ -160,6 +160,10 @@ export function ContactForm() {
       </div>
 
       <form onSubmit={submit} className="flex flex-col gap-3 sm:gap-4">
+        {/* Honeypot — hidden from humans, filled by bots */}
+        <div className="absolute opacity-0 pointer-events-none" style={{ top: -9999, left: -9999 }} aria-hidden="true">
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input

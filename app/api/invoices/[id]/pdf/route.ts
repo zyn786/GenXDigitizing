@@ -78,7 +78,7 @@ export async function GET(
       amount:         Number(inv.amount),
       currency:       inv.currency ?? "USD",
 
-      companyName:    process.env.COMPANY_NAME    ?? "GenXdigitizing",
+      companyName:    process.env.COMPANY_NAME    ?? "genxdigitizing",
       companyEmail:   process.env.COMPANY_EMAIL   ?? "support@genxdigitizing.com",
       companyWebsite: process.env.COMPANY_WEBSITE ?? "genxdigitizing.com",
     });

@@ -24,13 +24,14 @@ const DATA: ServicePageData = {
     { q: "What format do you deliver for left chest designs?", a: "DST is standard. We also provide PES, EMB, JEF, and any other format you need — all included at no extra charge." },
   ],
   testimonials: [
-    { name: "Linda Martinez", company: "ThreadWorks Studio, USA", text: "We run hundreds of left chest logos weekly for corporate clients. GenX files consistently run clean — zero thread breaks, perfect registration." },
+    { name: "Linda Martinez", company: "ThreadWorks Studio, USA", text: "We run hundreds of left chest logos weekly for corporate clients. genxdigitizing files consistently run clean — zero thread breaks, perfect registration." },
     { name: "Priya Mehta", company: "Monogram Collective, India", text: "Fast, affordable, and the free format conversion saves me time. I get DST, PES, and JEF all in one order for every logo." },
   ],
+  portfolioSlug: "digitizing",
   cta: { text: "Digitize Your Left Chest Logo — Free Quote", href: "/contact" },
 };
 
-export const metadata: Metadata = { title: `${DATA.title} — GenX Digitizing`, description: DATA.description, keywords: DATA.keywords };
+export const metadata: Metadata = { title: `${DATA.title} — genxdigitizing`, description: DATA.description, keywords: DATA.keywords };
 
 export default function Page() {
   return (

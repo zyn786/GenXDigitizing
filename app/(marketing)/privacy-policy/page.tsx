@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — GenX Digitizing",
-  description: "How GenX Digitizing collects, uses, and protects your personal information.",
+  title: "Privacy Policy — genxdigitizing",
+  description: "How genxdigitizing collects, uses, and protects your personal information.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -21,7 +21,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">1. Information We Collect</h2>
             <p>
-              When you use GenX Digitizing (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;), we collect information
+              When you use genxdigitizing (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;), we collect information
               you provide directly: your name, email address, company name, phone number, and design files
               you upload for digitizing. We also collect order details including service type, turnaround
               preference, and output format requirements.

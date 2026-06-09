@@ -1,11 +1,15 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, Upload, Check, Star, Clock, Shield, Zap, Layers, Download } from "lucide-react";
+import { ArrowRight, Upload, Check, Star, Clock, Shield, Zap, Layers, Download, Eye, Palette, Ruler, ImageOff } from "lucide-react";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { GradientOrb } from "@/components/shared/GradientOrb";
 import { Button } from "@/components/ui/Button";
 import { SITE_STATS, fmtPlus } from "@/lib/site-config";
+import { fetchPortfolio } from "@/components/portfolio/data";
+import type { PortfolioItem } from "@/components/portfolio/data";
+import { ContactForm } from "@/app/(marketing)/contact/ContactForm";
 
 export interface ServicePageData {
   title: string;
@@ -20,10 +24,22 @@ export interface ServicePageData {
   benefits: { icon: string; title: string; desc: string }[];
   faqs: { q: string; a: string }[];
   testimonials: { name: string; company: string; text: string }[];
+  portfolioSlug?: string; // category slug for portfolio filtering
   cta: { text: string; href: string };
 }
 
 export function ServicePageTemplate({ data }: { data: ServicePageData }) {
+  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
+  const [portfolioLoading, setPortfolioLoading] = useState(true);
+
+  useEffect(() => {
+    if (!data.portfolioSlug) { setPortfolioLoading(false); return; }
+    fetchPortfolio(data.portfolioSlug)
+      .then((res) => setPortfolioItems(res.items.slice(0, 6)))
+      .catch(() => {})
+      .finally(() => setPortfolioLoading(false));
+  }, [data.portfolioSlug]);
+
   return (
     <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden">
       {/* ── HERO ────────────────────────────────────── */}
@@ -73,6 +89,56 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
           </AnimatedSection>
         </div>
       </section>
+
+      {/* ── PORTFOLIO ─────────────────────────────── */}
+      {data.portfolioSlug && (
+        <section className="py-10 sm:py-14 bg-[var(--surface)]">
+          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-12">
+            <AnimatedSection>
+              <div className="text-center mb-8">
+                <h2 className="font-syne font-bold text-2xl sm:text-3xl mb-2">Our {data.title} Work</h2>
+                <p className="text-sm text-[var(--txt2)] max-w-lg mx-auto">Real projects from our production workflow — stitch-perfect results, every time.</p>
+              </div>
+              {portfolioLoading ? (
+                <div className="flex items-center justify-center py-10">
+                  <div className="w-6 h-6 border-2 border-[var(--border3)] border-t-[var(--txt3)] rounded-full animate-spin" />
+                </div>
+              ) : portfolioItems.length === 0 ? (
+                <p className="text-center text-sm text-[var(--txt3)] py-10">Portfolio samples coming soon. <Link href="/portfolio" className="underline" style={{ color: data.color }}>View full portfolio →</Link></p>
+              ) : (
+                <>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {portfolioItems.map((item) => {
+                      const img = item.images?.find((i: any) => i.isThumbnail || i.sortOrder === -1) || item.images?.[0];
+                      return (
+                        <Link key={item.id} href={`/portfolio?item=${item.slug}`} className="group rounded-2xl overflow-hidden bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border3)] transition-all duration-300 hover:shadow-lg">
+                          <div className="relative aspect-[4/3] overflow-hidden" style={{ background: `linear-gradient(135deg, ${data.color}10, ${data.color}05)` }}>
+                            {img ? (
+                              <img src={img.url} alt={img.alt || item.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            ) : (
+                              <div className="flex items-center justify-center h-full text-3xl opacity-30">{data.emoji}</div>
+                            )}
+                            <span className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full z-10" style={{ background: `${data.color}20`, color: data.color, border: `1px solid ${data.color}30` }}>{item.category?.name || "Work"}</span>
+                          </div>
+                          <div className="p-4">
+                            <h3 className="font-syne font-bold text-sm mb-1 group-hover:text-[var(--txt)] text-[var(--txt2)] transition-colors">{item.title}</h3>
+                            <p className="text-xs text-[var(--txt3)] line-clamp-2">{item.description}</p>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                  <div className="flex justify-center mt-8">
+                    <Link href="/portfolio">
+                      <Button variant="outline" size="md" rightIcon={<ArrowRight size={14} />}>View Full Portfolio</Button>
+                    </Link>
+                  </div>
+                </>
+              )}
+            </AnimatedSection>
+          </div>
+        </section>
+      )}
 
       {/* ── PRICING ─────────────────────────────────── */}
       <section className="py-10 sm:py-14 bg-[var(--surface)]">
@@ -147,19 +213,16 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
         </div>
       </section>
 
-      {/* ── CTA ─────────────────────────────────────── */}
+      {/* ── ORDER FORM ────────────────────────────── */}
       <section className="py-12 sm:py-16">
-        <div className="max-w-[800px] mx-auto px-4 sm:px-6 text-center">
-          <div className="relative overflow-hidden rounded-3xl border border-[#2563EB]/20 bg-gradient-to-br from-[#2563EB]/10 via-white/40 to-[#F97316]/10 p-8 sm:p-12 shadow-[0_0_60px_rgba(37,99,235,0.1)]">
-            <h2 className="font-syne font-bold text-2xl sm:text-3xl mb-3">{data.cta.text}</h2>
-            <p className="text-sm sm:text-base text-[var(--txt2)] mb-6 max-w-md mx-auto">
-              Professional service. Free revisions. Fast turnaround. Pay when satisfied.
-            </p>
-            <Link href={data.cta.href}>
-              <Button variant="grad" size="lg" rightIcon={<Upload size={16} />}>Upload Design — Free Quote</Button>
-            </Link>
-            <p className="text-[11px] text-[var(--txt3)] mt-4">♾️ Free revisions · 🔄 All formats · ⚡ 3–24h delivery · 💳 Pay when satisfied</p>
-          </div>
+        <div className="max-w-[700px] mx-auto px-4 sm:px-6">
+          <AnimatedSection>
+            <div className="text-center mb-8">
+              <h2 className="font-syne font-bold text-2xl sm:text-3xl mb-2">Start Your {data.title} Today</h2>
+              <p className="text-sm text-[var(--txt2)]">Upload your design. Get a free quote. Pay when satisfied.</p>
+            </div>
+            <ContactForm />
+          </AnimatedSection>
         </div>
       </section>
     </div>
