@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { notifyUsers } from "@/lib/notify";
 
 export async function POST(req: NextRequest) {
   try {

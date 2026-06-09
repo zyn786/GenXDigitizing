@@ -4,6 +4,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { uploadToS3 } from "@/lib/s3";
+import { notifyUsers } from "@/lib/notify";
 
 export async function POST(req: NextRequest) {
   try {
@@ -73,15 +74,12 @@ export async function POST(req: NextRequest) {
     // Notify admins
     const { data: admins } = await admin.from("users").select("id").eq("role", "admin");
     if (admins?.length) {
-      await admin.from("notifications").insert(
-        admins.map((a: any) => ({
-          user_id: a.id,
-          type: "system",
-          title: `New upload from ${name}`,
-          body: `${email} · ${designName} · ${placement} · ${files.length} file(s)`,
-          action_url: "/admin/leads",
-        }))
-      );
+      await notifyUsers(admins.map((a: any) => a.id), {
+        type: "system",
+        title: `New upload from ${name}`,
+        body: `${email} · ${designName} · ${placement} · ${files.length} file(s)`,
+        action_url: "/admin/leads",
+      });
     }
 
     return NextResponse.json({ success: true });

@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
-import { sendPushToUsers } from "@/lib/push-notifications-server";
+import { notifyUsers } from "@/lib/notify";
 
 function getServiceClient() {
   return createServiceClient(
@@ -56,21 +56,13 @@ export async function POST(
       || orderData.clients?.company_name
       || "Client";
 
-    // Notify designer
-    await admin.from("notifications").insert({
-      user_id: designerUser.id,
+    // Notify designer (in-app + push)
+    await notifyUsers([designerUser.id], {
       type: "order_update",
       title: `Revision assigned — ${orderData.order_number}`,
       body: `${clientName} requested changes. Check your tasks for details.`,
       action_url: "/designer/tasks",
     });
-
-    // Push notification to designer's phone
-    sendPushToUsers([designerUser.id], {
-      title: `Revision assigned — ${orderData.order_number}`,
-      body: `${clientName} requested changes. Check your tasks for details.`,
-      url: "/designer/tasks",
-    }).catch(() => {});
 
     // Send message to designer
     await admin.from("messages").insert({

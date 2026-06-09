@@ -4,6 +4,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { uploadToS3 } from "@/lib/s3";
+import { notifyUsers } from "@/lib/notify";
 
 const ALLOWED_TYPES = [
   "image/png", "image/jpeg", "image/webp",
@@ -105,15 +106,12 @@ export async function POST(req: NextRequest) {
       .from("users").select("id").eq("role", "admin");
 
     if (admins?.length) {
-      await supabase.from("notifications").insert(
-        admins.map((a: any) => ({
-          user_id: a.id,
-          type: "system",
-          title: `New request from ${name}`,
-          body: `${email} · ${company} · ${service} · Artwork attached`,
-          action_url: "/admin/leads",
-        }))
-      );
+      await notifyUsers(admins.map((a: any) => a.id), {
+        type: "system",
+        title: `New request from ${name}`,
+        body: `${email} · ${company} · ${service} · Artwork attached`,
+        action_url: "/admin/leads",
+      });
     }
 
     return NextResponse.json({ success: true });

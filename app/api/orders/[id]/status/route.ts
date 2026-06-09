@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse }         from "next/server";
 import { createAdminClient }                 from "@/lib/supabase/server";
-import { sendPushToUsers }                   from "@/lib/push-notifications-server";
+import { notifyUsers }                       from "@/lib/notify";
 import { getAdminUser }                      from "@/lib/supabase/get-user";
 import {
   emailOrderDelivered,
@@ -202,26 +202,19 @@ export async function PATCH(
     if (newStatus === "cancelled") {
       // Notify client
       if (clientUser) {
-        await supabase.from("notifications").insert({
-          user_id:    clientUser.id,
-          type:       "order_update",
-          title:      `Order cancelled — ${order.order_number}`,
-          body:       `Your ${serviceName} order has been cancelled. Contact support if you have questions.`,
-          action_url: `/client/my-orders`,
-        }).catch(console.error);
-        sendPushToUsers([clientUser.id], {
+        await notifyUsers([clientUser.id], {
+          type: "order_update",
           title: `Order cancelled — ${order.order_number}`,
-          body: `Your ${serviceName} order has been cancelled.`,
-          url: `/client/my-orders`,
+          body: `Your ${serviceName} order has been cancelled. Contact support if you have questions.`,
+          action_url: `/client/my-orders`,
         }).catch(console.error);
       }
       // Notify designer
       if (designerUser) {
-        await supabase.from("notifications").insert({
-          user_id:    designerUser.id,
-          type:       "order_update",
-          title:      `Order cancelled — ${order.order_number}`,
-          body:       `The ${serviceName} order assigned to you has been cancelled.`,
+        await notifyUsers([designerUser.id], {
+          type: "order_update",
+          title: `Order cancelled — ${order.order_number}`,
+          body: `The ${serviceName} order assigned to you has been cancelled.`,
           action_url: `/designer/tasks`,
         }).catch(console.error);
       }
@@ -288,23 +281,13 @@ export async function PATCH(
       const isRevisionDelivery = maxVersion > 1;
 
       // Notify client
-      await supabase.from("notifications").insert({
-        user_id:    clientUser.id,
-        type:       "order_update",
-        title:      isRevisionDelivery ? `Revision files ready — ${order.order_number}` : `Order ready — ${order.order_number}`,
-        body:       isRevisionDelivery
-          ? `Your requested changes are complete! Revised files available for download.`
-          : `Your ${serviceName} is ready! Payment required before download.`,
-        action_url: `/client/my-orders`,
-      }).catch(console.error);
-
-      // Push notification to client
-      sendPushToUsers([clientUser.id], {
+      await notifyUsers([clientUser.id], {
+        type: "order_update",
         title: isRevisionDelivery ? `Revision files ready — ${order.order_number}` : `Order ready — ${order.order_number}`,
         body: isRevisionDelivery
           ? `Your requested changes are complete! Tap to download.`
           : `Your ${serviceName} is ready! Tap to review and pay.`,
-        url: `/client/my-orders`,
+        action_url: `/client/my-orders`,
       }).catch(console.error);
 
       // Send payment-required email if invoice is unpaid

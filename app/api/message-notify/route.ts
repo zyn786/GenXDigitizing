@@ -3,9 +3,10 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { notifyUsers } from "@/lib/notify";
 
 // Called after a client/user sends a message to admin/support
-// Creates notification for the recipient
+// Creates notification + push for the recipient
 export async function POST(req: NextRequest) {
   try {
     const { to_user, body } = await req.json();
@@ -14,8 +15,7 @@ export async function POST(req: NextRequest) {
     const supabase = createAdminClient();
     const snippet = (body || "").slice(0, 80);
 
-    await supabase.from("notifications").insert({
-      user_id: to_user,
+    await notifyUsers([to_user], {
       type: "message",
       title: "New message",
       body: snippet || "You have a new message",

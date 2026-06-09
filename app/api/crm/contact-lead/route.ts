@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { notifyUsers } from "@/lib/notify";
 
 const FROM = "genxdigitizing <support@genxdigitizing.com>";
 const REPLY = "support@genxdigitizing.com";

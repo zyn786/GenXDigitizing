@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient }   from "@/lib/supabase/server";
 import { getAdminUser }        from "@/lib/supabase/get-user";
 import { emailOrderSubmitted } from "@/lib/email";
+import { notifyUsers }         from "@/lib/notify";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,15 +32,12 @@ export async function POST(req: NextRequest) {
       .eq("is_active", true);
 
     if (admins?.length) {
-      await supabase.from("notifications").insert(
-        admins.map((a: any) => ({
-          user_id: a.id,
-          type: "order_update",
-          title: `New order — ${orderNumber}`,
-          body: `${service} · $${Number(price).toFixed(0)} · ${turnaround}`,
-          action_url: "/admin/orders",
-        }))
-      );
+      await notifyUsers(admins.map((a: any) => a.id), {
+        type: "order_update",
+        title: `New order — ${orderNumber}`,
+        body: `${service} · $${Number(price).toFixed(0)} · ${turnaround}`,
+        action_url: "/admin/orders",
+      });
     }
 
     const TURNAROUND_LABEL: Record<string, string> = {

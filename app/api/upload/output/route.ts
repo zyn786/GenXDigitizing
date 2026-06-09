@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { uploadToS3 } from "@/lib/s3";
-import { sendPushToAdmins } from "@/lib/push-notifications-server";
+import { notifyUsers } from "@/lib/notify";
 
 const VALID_FORMATS = new Set(["DST","PES","EMB","JEF","XXX","VIP","HUS","EXP","VP3","SEW","AI","SVG","EPS","PDF"]);
 
@@ -110,22 +110,12 @@ export async function POST(req: NextRequest) {
 
       const { data: admins } = await db.from("users").select("id").eq("role", "admin").eq("is_active", true);
       if (admins?.length) {
-        await db.from("notifications").insert(
-          admins.map((a: any) => ({
-            user_id: a.id,
-            type: "order_update",
-            title: `QA Submission — ${orderNumber}`,
-            body: `${user.email || "Designer"} submitted files for ${companyName}. Ready for review.`,
-            action_url: `/admin/orders/${orderId}`,
-          }))
-        );
-
-        // Push notifications to admin phones
-        sendPushToAdmins({
+        await notifyUsers(admins.map((a: any) => a.id), {
+          type: "order_update",
           title: `QA Submission — ${orderNumber}`,
           body: `${user.email || "Designer"} submitted files for ${companyName}. Ready for review.`,
-          url: `/admin/orders/${orderId}`,
-        }).catch(() => {});
+          action_url: `/admin/orders/${orderId}`,
+        });
       }
     }
 
