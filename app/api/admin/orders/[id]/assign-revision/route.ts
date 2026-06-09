@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
-import { notifyUsers } from "@/lib/notify";
+import { notifyUsers } from "@/lib/notify-server";
 
 function getServiceClient() {
   return createServiceClient(

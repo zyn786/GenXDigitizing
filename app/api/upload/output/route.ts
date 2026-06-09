@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { uploadToS3 } from "@/lib/s3";
-import { notifyUsers } from "@/lib/notify";
+import { notifyUsers } from "@/lib/notify-server";
 
 const VALID_FORMATS = new Set(["DST","PES","EMB","JEF","XXX","VIP","HUS","EXP","VP3","SEW","AI","SVG","EPS","PDF"]);
 

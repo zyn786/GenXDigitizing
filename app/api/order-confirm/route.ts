@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient }   from "@/lib/supabase/server";
 import { getAdminUser }        from "@/lib/supabase/get-user";
 import { emailOrderSubmitted } from "@/lib/email";
-import { notifyUsers }         from "@/lib/notify";
+import { notifyUsers }         from "@/lib/notify-server";
 
 export async function POST(req: NextRequest) {
   try {

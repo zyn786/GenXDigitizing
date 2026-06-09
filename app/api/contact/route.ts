@@ -4,7 +4,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { uploadToS3 } from "@/lib/s3";
-import { notifyUsers } from "@/lib/notify";
+import { notifyUsers } from "@/lib/notify-server";
 
 const ALLOWED_TYPES = [
   "image/png", "image/jpeg", "image/webp",

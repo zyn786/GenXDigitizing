@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { notifyUsers } from "@/lib/notify";
+import { notifyUsers } from "@/lib/notify-server";
 
 // Called after a client/user sends a message to admin/support
 // Creates notification + push for the recipient

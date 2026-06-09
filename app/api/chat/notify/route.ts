@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
-import { notifyUsers } from "@/lib/notify";
+import { notifyUsers } from "@/lib/notify-server";
 
 // POST /api/chat/notify — create notification + push for chat message recipient
 export async function POST(req: NextRequest) {
