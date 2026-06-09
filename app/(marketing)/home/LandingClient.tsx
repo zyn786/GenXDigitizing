@@ -65,18 +65,18 @@ const SERVICE_CARDS = [
 ];
 
 const SERVICES_GRID = [
-  { emoji: "🧢", label: "Cap Digitizing", href: "/services" },
-  { emoji: "👕", label: "Left Chest", href: "/services" },
-  { emoji: "🧥", label: "Jacket Back", href: "/services" },
-  { emoji: "🎩", label: "3D Puff", href: "/services" },
-  { emoji: "🏷️", label: "Patches", href: "/services" },
-  { emoji: "✏️", label: "Vector Conversion", href: "/services" },
-  { emoji: "🧣", label: "Beanies", href: "/services" },
-  { emoji: "🪣", label: "Towels", href: "/services" },
-  { emoji: "🎒", label: "Bags", href: "/services" },
-  { emoji: "👔", label: "Uniforms", href: "/services" },
-  { emoji: "⚽", label: "Sportswear", href: "/services" },
-  { emoji: "🏢", label: "Corporate Apparel", href: "/services" },
+  { emoji: "🧢", label: "Cap Digitizing", href: "/services/cap-digitizing" },
+  { emoji: "👕", label: "Left Chest", href: "/services/left-chest-digitizing" },
+  { emoji: "🧥", label: "Jacket Back", href: "/services/jacket-back-digitizing" },
+  { emoji: "🎩", label: "3D Puff", href: "/services/3d-puff-digitizing" },
+  { emoji: "🏷️", label: "Patches", href: "/services/custom-patches" },
+  { emoji: "✏️", label: "Vector Conversion", href: "/services/vector-art-conversion" },
+  { emoji: "🧣", label: "Beanies", href: "/services/beanies-digitizing" },
+  { emoji: "🪣", label: "Towels", href: "/services/towels-digitizing" },
+  { emoji: "🎒", label: "Bags", href: "/services/bags-digitizing" },
+  { emoji: "👔", label: "Uniforms", href: "/services/uniforms-digitizing" },
+  { emoji: "⚽", label: "Sportswear", href: "/services/sportswear-digitizing" },
+  { emoji: "🏢", label: "Corporate Apparel", href: "/services/corporate-apparel-digitizing" },
 ];
 
 const WHY_CHOOSE_US = [
