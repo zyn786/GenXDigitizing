@@ -362,9 +362,15 @@ function LeadDetailModal({ lead, onClose, onContact, onConvertToOrder }: { lead:
 
 function getArtworkUrl(notes: string) {
   if (!notes) return null;
-  // Match absolute URL or relative /api/chat/upload path
+  // Match "Download:" prefix (contact form)
   const match = notes.match(/Download:\s*(\/api\/chat\/upload\?key=[^\s]+)/);
   if (match) return match[1];
+  // Match " — URL" separator (guest upload wizard)
+  const dashMatch = notes.match(/\s—\s(\/api\/chat\/upload\?key=[^\s]+)/);
+  if (dashMatch) return dashMatch[1];
+  // Match any standalone /api/chat/upload?key= URL in notes
+  const anyMatch = notes.match(/(\/api\/chat\/upload\?key=[^\s]+)/);
+  if (anyMatch) return anyMatch[1];
   const absMatch = notes.match(/Download:\s*(https?:\/\/[^\s]+)/);
   return absMatch?.[1] || null;
 }
