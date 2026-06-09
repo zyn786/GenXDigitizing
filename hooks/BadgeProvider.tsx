@@ -74,7 +74,9 @@ export function BadgeProvider({ userId, children }: { userId: string | undefined
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `to_user=eq.${userId}` }, refetch)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "invoices" }, refetch)
       .subscribe((status: string) => {
+        console.log("[BadgeProvider] Realtime status:", status);
         if (status === "CLOSED" || status === "CHANNEL_ERROR") {
+          console.warn("[BadgeProvider] Realtime disconnected");
           subscribedRef.current = false;
         }
       });

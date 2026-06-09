@@ -86,7 +86,9 @@ export function NotificationProvider({ userId, children }: { userId: string | un
         }
       )
       .subscribe((status: string) => {
+        console.log("[NotificationProvider] Realtime status:", status);
         if (status === "CLOSED" || status === "CHANNEL_ERROR") {
+          console.warn("[NotificationProvider] Realtime disconnected — will retry in 3s");
           subscribedRef.current = false;
           // Reconnect after 3 seconds and refetch
           setTimeout(() => {

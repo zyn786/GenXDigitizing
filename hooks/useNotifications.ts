@@ -104,7 +104,9 @@ export function useNotifications(userId: string | undefined, opts?: { skipRealti
         }
       )
       .subscribe((status) => {
+        console.log("[useNotifications] Realtime status:", status);
         if (status === "CLOSED" || status === "CHANNEL_ERROR") {
+          console.warn("[useNotifications] Realtime disconnected");
           channelRef.current = null;
         }
       });

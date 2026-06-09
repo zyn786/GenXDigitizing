@@ -14,7 +14,7 @@ async function sendToSubscription(
   payload: { title: string; body: string; url?: string }
 ) {
   const keys = getVapidKeys();
-  if (!keys) return;
+  if (!keys) { console.warn("[sendToSubscription] VAPID keys not configured."); return; }
 
   webpush.setVapidDetails(
     "mailto:hello@genxdigitizing.com",
@@ -32,6 +32,7 @@ async function sendToSubscription(
     if (err?.statusCode === 410 || err?.statusCode === 404) {
       return "expired";
     }
+    console.error("[sendToSubscription] web-push failed:", err?.statusCode, err?.body || err?.message || err);
   }
 }
 
@@ -41,7 +42,7 @@ export async function sendPushToUsers(
   payload: { title: string; body: string; url?: string }
 ) {
   const keys = getVapidKeys();
-  if (!keys) return;
+  if (!keys) { console.warn("[sendPushToUsers] VAPID keys not configured."); return; }
 
   const { createAdminClient } = await import("@/lib/supabase/server");
   const db = createAdminClient();
@@ -68,7 +69,7 @@ export async function sendPushToUsers(
 /** Send push notification to all active admins */
 export async function sendPushToAdmins(payload: { title: string; body: string; url?: string }) {
   const keys = getVapidKeys();
-  if (!keys) return;
+  if (!keys) { console.warn("[sendPushToAdmins] VAPID keys not configured."); return; }
 
   const { createAdminClient } = await import("@/lib/supabase/server");
   const db = createAdminClient();

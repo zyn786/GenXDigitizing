@@ -19,12 +19,24 @@ export function isPushSupported(): boolean {
   return "serviceWorker" in navigator && "PushManager" in window && !!VAPID_PUBLIC_KEY;
 }
 
+/** Get SW registration with timeout — avoids hanging when SW registration fails */
+async function getSWRegistration(timeoutMs = 10000): Promise<ServiceWorkerRegistration> {
+  if (!("serviceWorker" in navigator)) {
+    throw new Error("Service Worker not supported");
+  }
+  const ready = navigator.serviceWorker.ready;
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("SW registration timeout")), timeoutMs)
+  );
+  return Promise.race([ready, timeout]);
+}
+
 /** Subscribe user to push notifications */
 export async function subscribeToPush(userId: string): Promise<boolean> {
   if (!isPushSupported()) return false;
 
   try {
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await getSWRegistration();
 
     // Check existing subscription
     let subscription = await registration.pushManager.getSubscription();
@@ -53,7 +65,8 @@ export async function subscribeToPush(userId: string): Promise<boolean> {
     });
 
     return true;
-  } catch {
+  } catch (err) {
+    console.error("[subscribeToPush] Failed:", err);
     return false;
   }
 }
@@ -61,7 +74,7 @@ export async function subscribeToPush(userId: string): Promise<boolean> {
 /** Unsubscribe user from push notifications */
 export async function unsubscribeFromPush(userId: string): Promise<void> {
   try {
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await getSWRegistration();
     const subscription = await registration.pushManager.getSubscription();
     if (subscription) {
       await subscription.unsubscribe();
@@ -71,5 +84,7 @@ export async function unsubscribeFromPush(userId: string): Promise<void> {
         body: JSON.stringify({ userId, endpoint: subscription.endpoint }),
       });
     }
-  } catch {}
+  } catch (err) {
+    console.error("[unsubscribeFromPush] Failed:", err);
+  }
 }

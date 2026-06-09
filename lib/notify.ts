@@ -2,6 +2,7 @@
 /**
  * Browser notification + sound utility.
  * Uses Web Audio API for a chime — no external audio files needed.
+ * Falls back to sonner toast on mobile / when Notification API unavailable.
  */
 
 let audioCtx: AudioContext | null = null;
@@ -42,8 +43,8 @@ export function playNotificationSound() {
     osc1.stop(now + 0.35);
     osc2.start(now + 0.08);
     osc2.stop(now + 0.4);
-  } catch {
-    // Audio not available — silent fail
+  } catch (err) {
+    console.warn("[playNotificationSound] Audio unavailable:", err);
   }
 }
 
@@ -58,7 +59,7 @@ export async function requestNotificationPermission(userId?: string): Promise<bo
     if (ctx.state === "suspended") {
       await ctx.resume();
     }
-  } catch { /* audio not critical */ }
+  } catch (err) { console.warn("[requestNotificationPermission] Audio resume failed:", err); }
 
   if (Notification.permission === "granted") {
     // Also subscribe to push if userId provided
@@ -83,9 +84,25 @@ export async function requestNotificationPermission(userId?: string): Promise<bo
   return false;
 }
 
+let _Toast: any = null;
+async function getToast() {
+  if (!_Toast) {
+    try {
+      _Toast = (await import("sonner")).toast;
+    } catch { /* sonner not available */ }
+  }
+  return _Toast;
+}
+
 export function showBrowserNotification(title: string, body: string, actionUrl?: string | null) {
-  if (!("Notification" in window)) return;
-  if (Notification.permission !== "granted") return;
+  if (!("Notification" in window)) {
+    console.warn("[showBrowserNotification] Notification API not available (mobile Safari / unsupported browser).");
+    return false;
+  }
+  if (Notification.permission !== "granted") {
+    console.warn("[showBrowserNotification] Notification permission not granted.");
+    return false;
+  }
 
   try {
     const notif = new Notification(title, {
@@ -104,13 +121,21 @@ export function showBrowserNotification(title: string, body: string, actionUrl?:
 
     // Auto-close after 5 seconds
     setTimeout(() => notif.close(), 5000);
-  } catch {
-    // Notification API failed — silent
+    return true;
+  } catch (err) {
+    console.error("[showBrowserNotification] Failed:", err);
+    return false;
   }
 }
 
 export function notify(title: string, body: string, actionUrl?: string | null) {
   playNotificationSound();
-  showBrowserNotification(title, body, actionUrl);
+  const shown = showBrowserNotification(title, body, actionUrl);
+  // Fallback: show sonner toast when browser notification unavailable
+  if (!shown) {
+    getToast().then((t) => {
+      if (t) t(title, { description: body });
+    });
+  }
 }
 

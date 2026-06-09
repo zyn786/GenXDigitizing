@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { requestNotificationPermission } from "@/lib/notify";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
@@ -87,6 +88,8 @@ function LoginForm() {
       const role = (profile as any)?.role ?? "client";
       const dest = redirectTo || PORTAL_HOME[role] || "/client";
       toast.success("Signed in!");
+      // Request notification permission while we have user gesture from form submit
+      requestNotificationPermission(data.user.id).catch(() => {});
       router.push(dest);
       router.refresh();
     } catch {
