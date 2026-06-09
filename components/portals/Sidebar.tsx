@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils";
@@ -35,7 +36,7 @@ export function Sidebar({ user, badgeCounts = {} }: SidebarProps) {
       {/* Logo */}
       <div className="px-4 pt-5 pb-4">
         <Link href={`/${user.role}`} className="flex items-center gap-2.5 mb-3.5">
-          <img src="/images/black_logo.png" alt="genxdigitizing" className="h-8 w-auto" />
+          <Image src="/images/black_logo.png" alt="genxdigitizing" width={2000} height={1000} className="h-8 w-auto" />
           <div>
             <div className="font-syne font-bold text-[14px] tracking-wide"
               style={{ background: "linear-gradient(135deg,#2FA4D7,#E76F2E)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>

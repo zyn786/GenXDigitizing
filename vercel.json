@@ -6,7 +6,6 @@
   "regions": ["iad1"],
   "functions": {
     "app/api/invoices/[id]/pdf/route.ts": {
-      "memory": 512,
       "maxDuration": 30
     },
     "app/api/webhooks/payoneer/route.ts": {

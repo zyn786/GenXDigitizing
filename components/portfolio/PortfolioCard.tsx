@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Eye, Clock, Palette, Ruler, ImageOff, ArrowRight } from "lucide-react";
 import type { PortfolioItem } from "./data";
 import { generateBlurPlaceholder } from "./data";
@@ -102,6 +103,7 @@ export function PortfolioCard({ item, index, onClick }: PortfolioCardProps) {
           !imgError ? (
             <>
               {/* Blur placeholder */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={blurData}
                 alt=""
@@ -110,12 +112,13 @@ export function PortfolioCard({ item, index, onClick }: PortfolioCardProps) {
                 aria-hidden="true"
               />
               {/* Actual image with fallback handling */}
-              <img
+              <Image
                 src={firstImage.url}
                 alt={firstImage.alt || item.title}
-                loading="lazy"
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 onError={() => setImgError(true)}
-                className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
+                className="object-cover transition-all duration-500"
                 style={{
                   opacity: isHovered ? 1 : 0.9,
                   transform: isHovered ? "scale(1.08)" : "scale(1)",

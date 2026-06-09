@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Upload, Check, Star, Clock, Shield, Zap, Layers, Download, Eye, Palette, Ruler, ImageOff } from "lucide-react";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { GradientOrb } from "@/components/shared/GradientOrb";
@@ -114,7 +115,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
                         <Link key={item.id} href={`/portfolio?item=${item.slug}`} className="group rounded-2xl overflow-hidden bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border3)] transition-all duration-300 hover:shadow-lg">
                           <div className="relative aspect-[4/3] overflow-hidden" style={{ background: `linear-gradient(135deg, ${data.color}10, ${data.color}05)` }}>
                             {img ? (
-                              <img src={img.url} alt={img.alt || item.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                              <Image src={img.url} alt={img.alt || item.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
                             ) : (
                               <div className="flex items-center justify-center h-full text-3xl opacity-30">{data.emoji}</div>
                             )}

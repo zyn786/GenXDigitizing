@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useNotificationContext } from "@/hooks/NotificationProvider";
 import { formatRelative } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -84,10 +85,10 @@ export function NotificationsPage({
         <div className="px-4 py-3 rounded-2xl mb-5"
           style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+            <div className="relative w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
               style={{ background: roleGradient }}>
               {userAvatar
-                ? <img src={userAvatar} alt={userName} className="w-full h-full rounded-full object-cover" />
+                ? <Image src={userAvatar} alt={userName} fill sizes="36px" className="rounded-full object-cover" />
                 : userName?.charAt(0)?.toUpperCase() || "U"}
             </div>
             <div className="flex-1 min-w-0">
