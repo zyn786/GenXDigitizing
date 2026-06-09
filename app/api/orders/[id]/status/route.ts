@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse }         from "next/server";
 import { createAdminClient }                 from "@/lib/supabase/server";
+import { sendPushToUsers }                   from "@/lib/push-notifications-server";
 import { getAdminUser }                      from "@/lib/supabase/get-user";
 import {
   emailOrderDelivered,
@@ -208,6 +209,11 @@ export async function PATCH(
           body:       `Your ${serviceName} order has been cancelled. Contact support if you have questions.`,
           action_url: `/client/my-orders`,
         }).catch(console.error);
+        sendPushToUsers([clientUser.id], {
+          title: `Order cancelled — ${order.order_number}`,
+          body: `Your ${serviceName} order has been cancelled.`,
+          url: `/client/my-orders`,
+        }).catch(console.error);
       }
       // Notify designer
       if (designerUser) {
@@ -290,6 +296,15 @@ export async function PATCH(
           ? `Your requested changes are complete! Revised files available for download.`
           : `Your ${serviceName} is ready! Payment required before download.`,
         action_url: `/client/my-orders`,
+      }).catch(console.error);
+
+      // Push notification to client
+      sendPushToUsers([clientUser.id], {
+        title: isRevisionDelivery ? `Revision files ready — ${order.order_number}` : `Order ready — ${order.order_number}`,
+        body: isRevisionDelivery
+          ? `Your requested changes are complete! Tap to download.`
+          : `Your ${serviceName} is ready! Tap to review and pay.`,
+        url: `/client/my-orders`,
       }).catch(console.error);
 
       // Send payment-required email if invoice is unpaid

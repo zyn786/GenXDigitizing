@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { sendPushToUsers } from "@/lib/push-notifications-server";
 
 // POST /api/chat/notify — create notification for chat message recipient
 export async function POST(req: NextRequest) {
@@ -16,6 +17,13 @@ export async function POST(req: NextRequest) {
       body: (body || "You have a new message").slice(0, 120),
       action_url: `/client/messages`,
     });
+
+    // Push notification
+    sendPushToUsers([toUserId], {
+      title: `New message from ${fromName || "Support Team"}`,
+      body: (body || "You have a new message").slice(0, 120),
+      url: `/client/messages`,
+    }).catch(console.error);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
