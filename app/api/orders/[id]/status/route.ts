@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse }         from "next/server";
 import { createAdminClient }                 from "@/lib/supabase/server";
-import { notifyUsers }                       from "@/lib/notify";
+import { notifyUsers }                       from "@/lib/notify-server";
 import { getAdminUser }                      from "@/lib/supabase/get-user";
 import {
   emailOrderDelivered,
