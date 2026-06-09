@@ -55,6 +55,7 @@ export function UploadWizard() {
   const [liveIdx, setLiveIdx] = useState(0);
   const [showPostSubmit, setShowPostSubmit] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const referenceRef = useRef(`GX-${Date.now().toString(36).toUpperCase()}`);
 
   // B2B detection
   const isB2B = company.trim() !== "" || files.length >= 3 || (email && !/@(gmail|yahoo|hotmail|outlook)\./i.test(email));
@@ -147,6 +148,7 @@ export function UploadWizard() {
 
       const res = await fetch("/api/upload/guest-order", { method: "POST", body: fd });
       if (!res.ok) { const e = await res.json().catch(() => ({})); toast.error(e.error || "Upload failed"); return; }
+      referenceRef.current = `GX-${Date.now().toString(36).toUpperCase()}`;
       setDone(true);
       toast.success("Quote request submitted! We reply within 1 hour.");
     } catch {
@@ -158,7 +160,7 @@ export function UploadWizard() {
 
   /* ── Done screen ─────────────────────────────────── */
   if (done) {
-    const ref = `GX-${Date.now().toString(36).toUpperCase()}`;
+    const ref = referenceRef.current;
     return (
       <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center px-4 py-12">
         <div className="max-w-[440px] w-full text-center">
