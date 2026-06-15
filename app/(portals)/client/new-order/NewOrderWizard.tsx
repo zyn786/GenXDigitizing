@@ -112,9 +112,7 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
     if(!sel){toast.error("Select a tier");return;}
     if(!designName.trim()){toast.error("Enter a design name");return;}
     if(files.length===0){toast.error("Upload at least one reference image");return;}
-    if(!w||parseFloat(w)<=0){toast.error("Enter a valid width");return;}
-    if(!h||parseFloat(h)<=0){toast.error("Enter a valid height");return;}
-    if(!notes.trim()){toast.error("Enter placement notes");return;}
+    if((w&&!h)||(!w&&h)){toast.error("Enter both width and height, or leave both empty");return;}
 
     // Subscription credit check
     const needed = creditCost * qty;

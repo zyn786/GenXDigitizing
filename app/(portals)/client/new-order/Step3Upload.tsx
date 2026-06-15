@@ -21,10 +21,10 @@ export function Step3Upload({files,fileRef,setFiles,w,setW,h,setH,col,setCol,not
       {files.length>0&&<div className="mb-3">{files.map((f:any,i:number)=>(<div key={i} className="flex justify-between items-center px-3 py-2.5 mb-1 rounded-lg border" style={{background:"var(--elevated)",borderColor:"var(--border)"}}><span className="text-xs truncate flex-1 mr-2" style={{color:txt2}}>{f.name}</span><button onClick={()=>setFiles((p:any)=>p.filter((_:any,j:number)=>j!==i))} className="text-[11px] font-semibold cursor-pointer border-none bg-transparent flex-shrink-0" style={{color:"#BE185D"}}>Remove</button></div>))}</div>}
       <div className="border-t pt-3 mt-2" style={{borderColor:"var(--border)"}}>
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <div><label className="block text-[12px] sm:text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{color:txt3}}>Width (in) *</label><input type="number" step="0.1" value={w} onChange={e=>setW(e.target.value)} placeholder="3.5" style={inp}/></div>
-          <div><label className="block text-[12px] sm:text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{color:txt3}}>Height (in) *</label><input type="number" step="0.1" value={h} onChange={e=>setH(e.target.value)} placeholder="3.5" style={inp}/></div>
+          <div><label className="block text-[12px] sm:text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{color:txt3}}>Width (in)</label><input type="number" step="0.1" value={w} onChange={e=>setW(e.target.value)} placeholder="3.5" style={inp}/></div>
+          <div><label className="block text-[12px] sm:text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{color:txt3}}>Height (in)</label><input type="number" step="0.1" value={h} onChange={e=>setH(e.target.value)} placeholder="3.5" style={inp}/></div>
         </div>
-        <div className="mb-3"><label className="block text-[12px] sm:text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{color:txt3}}>Placement / Notes *</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={2} placeholder="e.g. Left chest, center back…" style={{...inp,resize:"none"}}/></div>
+        <div className="mb-3"><label className="block text-[12px] sm:text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{color:txt3}}>Placement / Notes</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={2} placeholder="e.g. Left chest, center back…" style={{...inp,resize:"none"}}/></div>
       </div>
       <div className="rounded-xl border overflow-hidden" style={{borderColor:"var(--border)"}}>
         <button onClick={()=>setShowAdvanced(!showAdvanced)} className="w-full flex items-center justify-between px-3.5 py-3 bg-transparent border-none cursor-pointer transition-colors text-left" style={{color:txt2}}><span className="flex items-center gap-2 text-[13px] font-semibold"><Settings size={14} style={{color:txt3}}/> Advanced Options</span><ChevronDown size={15} style={{color:txt3,transform:showAdvanced?"rotate(180deg)":"rotate(0)",transition:"transform 0.2s"}}/></button>
@@ -33,12 +33,9 @@ export function Step3Upload({files,fileRef,setFiles,w,setW,h,setH,col,setCol,not
       {(()=>{
         const missing:string[]=[];
         if(files.length===0)missing.push("Upload artwork");
-        if(!w||parseFloat(w)<=0)missing.push("Enter width");
-        if(!h||parseFloat(h)<=0)missing.push("Enter height");
-        if(!notes.trim())missing.push("Enter placement notes");
         const canGo=missing.length===0;
         return(<>
-          {!canGo&&<p className="text-[11px] text-center mt-3" style={{color:"#C2410C"}}>Required: {missing.join(" · ")}</p>}
+          {!canGo&&<p className="text-[11px] text-center mt-3" style={{color:"#C2410C"}}>{missing.join(" · ")} required</p>}
           <div className="flex gap-2 mt-1.5">
             <button onClick={()=>setStep(2)} className="flex-1 py-3 rounded-xl text-[14px] sm:text-[13px] font-medium cursor-pointer border flex items-center justify-center gap-1.5" style={{background:"var(--elevated)",color:txt2,borderColor:"var(--border2)"}}><ArrowLeft size={15}/> Back</button>
             <button disabled={!canGo} onClick={()=>setStep(4)} className="flex-[2] py-3 rounded-xl text-[14px] sm:text-[13px] font-semibold border-none cursor-pointer text-white flex items-center justify-center gap-1.5" style={{background:canGo?"linear-gradient(135deg,"+PURPLE.bg+","+PURPLE.icon+")":"var(--border2)",cursor:canGo?"pointer":"not-allowed"}}>Continue <ArrowRight size={15}/></button>
