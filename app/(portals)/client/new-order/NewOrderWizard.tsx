@@ -160,6 +160,9 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
         }).catch(()=>{});
       }
 
+      // Send confirmation email
+      fetch("/api/order-confirm",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({userId,orderNumber:order.order_number,service:sel.label,price:totalPrice,turnaround:turn})}).catch(()=>{});
       toast.success("Order placed! Redirecting...");
       router.push(`/client/my-orders/${order.id}`);
     }catch(err:any){toast.error(err?.message||"Error");}
