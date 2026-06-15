@@ -216,6 +216,10 @@ export function UploadWizard() {
             ))}
           </div>
 
+          <Link href="/register" className="w-full mb-3 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white font-bold text-[13px] sm:text-[14px] flex items-center justify-center gap-2 no-underline shadow-[0_4px_14px_rgba(37,99,235,0.25)] active:scale-[0.98] transition-all">
+            📋 Create Account to Track Order
+          </Link>
+
           <a href={`https://wa.me/${SITE_INFO.whatsapp}`} target="_blank" rel="noopener noreferrer"
             className="w-full mb-3 py-3 sm:py-3.5 rounded-2xl bg-[#25D366] text-white font-bold text-[13px] sm:text-[14px] flex items-center justify-center gap-2 no-underline shadow-[0_4px_14px_rgba(37,211,102,0.25)] active:scale-[0.98] transition-all">
             <WhatsAppIcon className="w-[16px] h-[16px] sm:w-[18px] sm:h-[18px] fill-current" /> Chat on WhatsApp

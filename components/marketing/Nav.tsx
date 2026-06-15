@@ -277,7 +277,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
           <SubscribeBell />
           <AuthButtons />
           <Link href="/upload">
-            <Button variant="grad" size="sm">Get a Quote</Button>
+            <Button variant="grad" size="sm">Start Order</Button>
           </Link>
         </div>
 
@@ -307,7 +307,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
           <SubscribeBell />
           <AuthButtons />
           <Link href="/upload">
-            <Button variant="grad" size="sm" className="text-[11px] px-3">Quote</Button>
+            <Button variant="grad" size="sm" className="text-[11px] px-3">Order</Button>
           </Link>
         </div>
 
