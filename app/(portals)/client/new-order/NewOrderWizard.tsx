@@ -232,12 +232,12 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
           {/* Design name + Upload */}
           <div className="mb-3">
             <p className="text-[10px] uppercase tracking-wider font-bold mb-2" style={{color:txt3}}>2. Name & artwork</p>
-            <input value={designName} onChange={e=>setDesignName(e.target.value)} placeholder="Design name * e.g. School Logo, Team Jersey" className="w-full rounded-lg px-3 py-2.5 text-sm border mb-2" style={{background:"var(--elevated)",borderColor:"var(--border2)",color:txt,outline:"none"}}/>
-            <input ref={fileRef} type="file" accept="image/*,.pdf,.ai,.eps,.svg,.dst" multiple className="hidden" onChange={e=>{const nf=Array.from(e.target.files||[]);if(nf.length){setFiles((p:any)=>[...p,...nf]);e.target.value="";}}}/>
+            <input value={designName} onChange={e=>setDesignName(e.target.value)} placeholder="Design name (auto-filled from file)" className="w-full rounded-lg px-3 py-2.5 text-sm border mb-2" style={{background:"var(--elevated)",borderColor:"var(--border2)",color:txt,outline:"none"}}/>
+            <input ref={fileRef} type="file" accept="image/*,.pdf,.ai,.eps,.svg,.dst" multiple className="hidden" onChange={e=>{const nf=Array.from(e.target.files||[]);if(nf.length){setFiles((p:any)=>[...p,...nf]);if(!designName.trim()){const name=nf[0].name.replace(/\.[^.]+$/,'').replace(/[_\-]/g,' ').replace(/\s+/g,' ').trim();setDesignName(name.slice(0,50));}e.target.value="";}}}/>
             <div onClick={()=>fileRef.current?.click()}
               onDragOver={e=>{e.preventDefault();setDragOver(true)}}
               onDragLeave={()=>setDragOver(false)}
-              onDrop={e=>{e.preventDefault();setDragOver(false);const nf=Array.from(e.dataTransfer.files||[]).filter((f:any)=>f.size<=25*1024*1024);if(nf.length){setFiles((p:any)=>[...p,...nf]);}}}
+              onDrop={e=>{e.preventDefault();setDragOver(false);const nf=Array.from(e.dataTransfer.files||[]).filter((f:any)=>f.size<=25*1024*1024);if(nf.length){setFiles((p:any)=>[...p,...nf]);if(!designName.trim()){const name=nf[0].name.replace(/\.[^.]+$/,'').replace(/[_\-]/g,' ').replace(/\s+/g,' ').trim();setDesignName(name.slice(0,50));}}}}
               className="border-2 border-dashed rounded-xl py-3 text-center cursor-pointer transition-all"
               style={{borderColor: dragOver?"#2563EB":files.length?GREEN.icon:"var(--border2)",background: dragOver?"rgba(37,99,235,0.04)":files.length?GREEN.bgSoft:"transparent"}}>
               {files.length>0
@@ -252,11 +252,12 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
           {/* Details */}
           <div className="mb-3">
             <p className="text-[10px] uppercase tracking-wider font-bold mb-2" style={{color:txt3}}>3. Details</p>
-            <div className="grid grid-cols-3 gap-2 mb-2">
+            <div className="grid grid-cols-3 gap-2 mb-1.5">
               <div><input value={quantity} onChange={e=>setQuantity(e.target.value)} placeholder="Qty: 1" type="number" min="1" className="w-full rounded-lg px-2.5 py-2 text-[12px] border" style={{background:"var(--elevated)",borderColor:"var(--border2)",color:txt,outline:"none"}}/></div>
               <div><input value={w} onChange={e=>setW(e.target.value)} placeholder='Width (in)' type="number" step="0.1" className="w-full rounded-lg px-2.5 py-2 text-[12px] border" style={{background:"var(--elevated)",borderColor:"var(--border2)",color:txt,outline:"none"}}/></div>
               <div><input value={h} onChange={e=>setH(e.target.value)} placeholder='Height (in)' type="number" step="0.1" className="w-full rounded-lg px-2.5 py-2 text-[12px] border" style={{background:"var(--elevated)",borderColor:"var(--border2)",color:txt,outline:"none"}}/></div>
             </div>
+            <div className="flex gap-1 mb-2 overflow-x-auto scrollbar-none flex-nowrap">{[{l:"Left Chest",w:"4",h:"4"},{l:"Jacket Back",w:"12",h:"8"},{l:"Cap Front",w:"2.5",h:"2"},{l:"Full Back",w:"14",h:"10"}].map(p=>(<button key={p.l} onClick={()=>{setW(p.w);setH(p.h);if(!notes.trim())setNotes(p.l)}} className="px-2 py-1 rounded-md text-[9px] font-medium border cursor-pointer whitespace-nowrap flex-shrink-0 transition-all" style={{background:(w===p.w&&h===p.h)?"rgba(139,92,246,0.08)":"var(--elevated)",borderColor:(w===p.w&&h===p.h)?PURPLE.icon+"44":"var(--border2)",color:(w===p.w&&h===p.h)?PURPLE.text:txt3}}>{p.l} {p.w}×{p.h}"</button>)))}</div>
             <div className="flex gap-1 mb-2 overflow-x-auto scrollbar-none flex-nowrap">{["Left Chest","Right Chest","Center","Full Front","Full Back","Sleeve","Cap"].map(p=>(<button key={p} onClick={()=>setNotes(p)} className="px-2 py-1 rounded-md text-[10px] font-semibold border cursor-pointer transition-all whitespace-nowrap flex-shrink-0" style={{background:notes===p?PURPLE.bgSoft:"var(--elevated)",borderColor:notes===p?PURPLE.icon+"44":"var(--border2)",color:notes===p?PURPLE.text:txt3}}>{p}</button>))}</div>
             <input value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Placement / Notes" className="w-full rounded-lg px-2.5 py-2 text-[11px] border mb-2" style={{background:"var(--elevated)",borderColor:"var(--border2)",color:txt,outline:"none"}}/>
             <textarea value={instructions} onChange={e=>setInstructions(e.target.value)} rows={2} placeholder="Special instructions (optional)" className="w-full rounded-lg px-2.5 py-2 text-[11px] border resize-none mb-2" style={{background:"var(--elevated)",borderColor:"var(--border2)",color:txt,outline:"none"}}/>
