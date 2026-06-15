@@ -41,6 +41,10 @@ function DoneScreen({done,totalPrice,qty,sel,serviceName,selTurn,router,setDone,
           <Row k="Revisions" v="♾️ FREE"/>
           <Row k="Conversions" v="🔄 FREE"/>
         </div>
+        <div className="rounded-xl p-3 mb-4 text-left" style={{background:"var(--elevated)",border:"1px solid var(--border)"}}>
+          <p className="text-[10px] uppercase tracking-wider font-bold mb-2" style={{color:txt3}}>What happens next</p>
+          {["📤 Files received & reviewed","✏️ Assigned to digitizer","👀 Preview sent for approval","📥 Download final files"].map((s,i)=><p key={i} className="text-[11px] py-1" style={{color:txt2,borderBottom:i<3?"1px solid var(--border2)":"none"}}>{s}</p>)}
+        </div>
         <div className="flex gap-2">
           <button onClick={()=>router.push("/client/my-orders")} className="flex-1 py-2.5 rounded-xl text-[13px] font-semibold border-none cursor-pointer text-white"
             style={{background:"linear-gradient(135deg,"+PURPLE.bg+","+PURPLE.icon+")"}}>My Orders</button>
@@ -275,6 +279,16 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
               :files.length===0?"👆 Upload artwork"
               :`Place Order · ${displayCredits} credit${displayCredits!==1?"s":""}${displayExtra>0?" + "+displayExtra+" extra":""}`}
           </button>
+
+          {/* Trust + delivery estimate */}
+          <div className="text-center mt-2 space-y-1">
+            {sel && <p className="text-[10px]" style={{color:txt3}}>⏱ Estimated delivery: <strong style={{color:txt}}>{selTurn?.time || "12–24h"}</strong> · Pay only when satisfied</p>}
+            <div className="flex items-center justify-center gap-3 text-[10px]" style={{color:txt3}}>
+              <span>🛡️ Free revisions</span><span>·</span>
+              <span>♾️ Free formats</span><span>·</span>
+              <span>⭐ 4.9/5 quality</span>
+            </div>
+          </div>
         </div>
       </div>
     );
