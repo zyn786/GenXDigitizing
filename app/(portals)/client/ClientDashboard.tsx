@@ -101,7 +101,7 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
             <p className="text-[12px] sm:text-[13px] mt-1" style={{ color: txt2 }}>
               {stats.total > 0
                 ? `${stats.total} orders · ${stats.active} active · ${formatCurrency(stats.totalSpent, "USD", true)} spent`
-                : "Ready to place your first order?"}
+                : "Ready to place your first order? You'll get free revisions, free formats, and your design back in 12–24h."}
             </p>
           </div>
         </div>
