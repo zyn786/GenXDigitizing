@@ -30,7 +30,7 @@ export async function GET(
         ),
         clients (
           id, company_name, country,
-          users ( full_name, email )
+          users ( id, full_name, email )
         )
       `)
       .eq("id", invoiceId)

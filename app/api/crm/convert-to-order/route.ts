@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to create order: " + (orderErr?.message || "unknown") }, { status: 500 });
     }
 
-    const orderNumber = order.order_number || `GX-${Date.now().toString(36).toUpperCase()}`;
+    const orderNumber = order.order_number || `OD-GX${String(Date.now() % 100000).padStart(5, '0')}`;
 
     // 6. Copy artwork from lead's S3 upload to order_files table
     const artworkMatch = (lead.notes || "").match(/Artwork:\s*(.+?)\s*\(([^)]+)\)/);

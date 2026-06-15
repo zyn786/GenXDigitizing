@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { CheckCircle, ArrowRight } from "lucide-react";
+import { getCreditCost } from "@/lib/plans";
 
 const txt = "var(--txt)", txt2 = "var(--txt2)", txt3 = "var(--txt3)";
 const GREEN = {bgSoft:"rgba(16,185,129,0.08)",border:"rgba(16,185,129,0.25)",text:"#047857"};
@@ -13,7 +14,7 @@ const CATS = {
 };
 const inp = {width:"100%",background:"var(--elevated)",border:"1px solid var(--border2)",borderRadius:10,padding:"12px 14px",color:txt,fontSize:16,outline:"none",fontFamily:"Inter,sans-serif",boxSizing:"border-box"};
 
-export function Step1Tier({grouped,sel,serviceName,setSel,designName,setDesignName,fmt,setFmt,extras,setExtras,qty,totalPrice,setStep}:any){
+export function Step1Tier({grouped,sel,serviceName,setSel,designName,setDesignName,fmt,setFmt,extras,setExtras,qty,totalPrice,setStep,isSub,subPlan}:any){
   return(
     <div className="rounded-2xl p-3.5 sm:p-5" style={{background:"var(--surface)",border:"1px solid var(--border)"}}>
       <div className="mb-4">
@@ -32,17 +33,17 @@ export function Step1Tier({grouped,sel,serviceName,setSel,designName,setDesignNa
                   <span className="text-sm">{m.emoji}</span>
                   <span className="text-xs font-bold uppercase tracking-wider" style={{color:m.text}}>{m.label}</span>
                 </div>
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+                <div className="grid grid-cols-3 gap-1.5">
                   {catTiers.map((t:any)=>{
                     const s=sel?.id===t.id;
                     return(
-                      <div key={t.id} onClick={()=>setSel(t)} className="rounded-lg p-2.5 sm:p-3 cursor-pointer transition-all active:scale-[0.97] relative"
-                        style={{background:s?m.bg:"var(--elevated)",border:"1.5px solid "+(s?m.color:"var(--border2)"),boxShadow:s?"0 0 0 1px "+m.color+"22":""}}>
-                        {s&&<div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full flex items-center justify-center" style={{background:m.color}}><CheckCircle size={11} className="text-white"/></div>}
-                        <div className="font-semibold text-[11px] sm:text-[13px] mb-0.5 pr-4 leading-tight" style={{color:s?m.text:txt}}>{t.label}</div>
-                        <div className="text-[9px] sm:text-[10px] mb-1" style={{color:txt3}}>{t.size_desc}</div>
-                        <div className="font-syne font-bold text-base sm:text-lg" style={{color:m.text}}>${Number(t.price).toFixed(0)}</div>
-                        <div className="text-[9px] sm:text-[10px] mt-0.5 flex items-center gap-1" style={{color:txt3}}><span>{t.est_hours}</span>{t.is_big_design&&<span className="font-medium" style={{color:"#C2410C"}}>⚠️~12h</span>}</div>
+                      <div key={t.id} onClick={()=>setSel(t)} className="rounded-lg p-2 cursor-pointer transition-all active:scale-[0.97] text-center"
+                        style={{background:s?m.bg:"var(--elevated)",border:"1.5px solid "+(s?m.color:"var(--border2)")}}>
+                        <div className="font-bold text-[11px] leading-tight mb-0.5" style={{color:s?m.text:txt}}>{t.label}</div>
+                        {isSub
+                          ? <div className="font-bold text-xs" style={{color:(t.credit_cost||getCreditCost(subPlan||"starter",!!t.is_big_design))>1?"#F97316":GREEN.text}}>{t.credit_cost||getCreditCost(subPlan||"starter",!!t.is_big_design)} credit{getCreditCost(subPlan||"starter",!!t.is_big_design,t.credit_cost)!==1?"s":""}</div>
+                          : <div className="font-syne font-bold text-base" style={{color:m.text}}>${Number(t.price).toFixed(0)}</div>}
+                        <div className="text-[9px]" style={{color:txt3}}>{t.size_desc} · {t.est_hours}</div>
                       </div>
                     );
                   })}

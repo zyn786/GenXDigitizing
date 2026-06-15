@@ -136,19 +136,19 @@ const CLIENT_LOGOS = [
 const SEWOUT_SHOWCASE = [
   {
     label: "Cap Embroidery",
-    webpUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1779204050/cap-embroidery_sjxoep.webp",
-    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1779204050/cap-embroidery_sjxoep.gif",
+    webpUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_600/v1779204050/cap-embroidery_sjxoep.webp",
+    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_600/v1779204050/cap-embroidery_sjxoep.gif",
     alt: "Professional cap embroidery digitizing result — clean stitch-out on curved cap surface",
   },
   {
     label: "Jacket Back",
-    webpUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1779207170/jacket-embroidery_ycfnqh.webp",
-    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1779207170/jacket-embroidery_ycfnqh.gif",
+    webpUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_600/v1779207170/jacket-embroidery_ycfnqh.webp",
+    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_600/v1779207170/jacket-embroidery_ycfnqh.gif",
     alt: "Large-format jacket back embroidery — crisp detail on complex design",
   },
   {
     label: "Left Chest",
-    webpUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1779204050/shirt-embroidery_bisqry.webp",
+    webpUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_600/v1779204050/shirt-embroidery_bisqry.webp",
     gifUrl: null, // no GIF version available
     alt: "Clean left chest logo embroidery on professional shirt",
   },
@@ -157,25 +157,25 @@ const SEWOUT_SHOWCASE = [
 const BEFORE_AFTER_SETS = [
   {
     label: "Digitizing",
-    beforeUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/Before-5_upqe91.webp",
-    afterUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/After-5_hod7v0.webp",
-    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1779288234/After-5_hod7v0.gif",
+    beforeUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1779288234/Before-5_upqe91.webp",
+    afterUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1779288234/After-5_hod7v0.webp",
+    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1779288234/After-5_hod7v0.gif",
     beforeAlt: "Original artwork before digitizing",
     afterAlt: "Digitized embroidery file with stitch paths",
   },
   {
     label: "Vector Art",
-    beforeUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1780366590/Artboard_1_ag0ycx.webp",
-    afterUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1780366590/Artboard_1_2_uhntgw.webp",
-    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1780366590/Artboard_1_2_uhntgw.gif",
+    beforeUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1780366590/Artboard_1_ag0ycx.webp",
+    afterUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1780366590/Artboard_1_2_uhntgw.webp",
+    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1780366590/Artboard_1_2_uhntgw.gif",
     beforeAlt: "Raster image before vector conversion",
     afterAlt: "Clean vector art output",
   },
   {
     label: "Patch Design",
-    beforeUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1780368066/Untitled-1_ua0tor.webp",
-    afterUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1780368068/Untitleduu-1_s7qc6c.webp",
-    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/v1780368068/Untitleduu-1_s7qc6c.gif",
+    beforeUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1780368066/Untitled-1_ua0tor.webp",
+    afterUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1780368068/Untitleduu-1_s7qc6c.webp",
+    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1780368068/Untitleduu-1_s7qc6c.gif",
     beforeAlt: "Patch concept before digitizing",
     afterAlt: "Production-ready patch file",
   },
@@ -424,25 +424,33 @@ function HeroSection() {
   return (
     <section className="relative flex flex-col items-center justify-start pt-2 pb-6 sm:pt-4 h-[90vh] sm:h-[85vh] overflow-hidden" aria-labelledby="hero-heading">
       <div className="absolute inset-0 z-0">
-        {/* Desktop video */}
+        {/* Single video element — browser picks source by media query. Only loads ONE video. */}
         <video
-          className="hidden sm:block absolute inset-0 w-full h-full object-cover"
-          autoPlay muted loop playsInline preload="auto"
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay muted loop playsInline preload="none"
           width={1920} height={1080}
-          poster="https://res.cloudinary.com/djoixgojj/video/upload/q_auto,so_0/v1781040748/hero-bg-desktop_ogydtd.jpg"
+          poster="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:low,so_0,w_1200/v1781040748/hero-bg-desktop_ogydtd.jpg"
         >
-          <source src="https://res.cloudinary.com/djoixgojj/video/upload/v1781040748/hero-bg-desktop_ogydtd.webm" type="video/webm" />
-          <source src="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264/v1781040748/hero-bg-desktop_ogydtd.mp4" type="video/mp4" />
-        </video>
-        {/* Mobile video */}
-        <video
-          className="sm:hidden absolute inset-0 w-full h-full object-cover"
-          autoPlay muted loop playsInline preload="auto"
-          width={1920} height={1080}
-          poster="https://res.cloudinary.com/djoixgojj/video/upload/q_auto,so_0/v1781040746/hero-bg-mobile_yz4bkh.jpg"
-        >
-          <source src="https://res.cloudinary.com/djoixgojj/video/upload/v1781040746/hero-bg-mobile_yz4bkh.webm" type="video/webm" />
-          <source src="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264/v1781040746/hero-bg-mobile_yz4bkh.mp4" type="video/mp4" />
+          {/* Desktop (sm+): smaller compressed version */}
+          <source
+            src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:good,w_1200/v1781040748/hero-bg-desktop_ogydtd.webm"
+            type="video/webm"
+            media="(min-width: 640px)"
+          />
+          <source
+            src="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264,q_auto:good,w_1200/v1781040748/hero-bg-desktop_ogydtd.mp4"
+            type="video/mp4"
+            media="(min-width: 640px)"
+          />
+          {/* Mobile (below sm): vertical crop */}
+          <source
+            src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:good,w_750/v1781040746/hero-bg-mobile_yz4bkh.webm"
+            type="video/webm"
+          />
+          <source
+            src="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264,q_auto:good,w_750/v1781040746/hero-bg-mobile_yz4bkh.mp4"
+            type="video/mp4"
+          />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/50 to-black/75 sm:from-black/55 sm:via-black/50 sm:to-black/70 pointer-events-none" />
       </div>

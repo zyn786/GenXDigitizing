@@ -32,14 +32,22 @@ export function ClientInvoicesUI({ invoices, paymentStatus, demoInvoiceId }) {
     }
   }, [paymentStatus]);
 
-  async function getCheckoutLink(invoiceId) {
+  async function getCheckoutLink(invoiceId: string) {
     setLoading(invoiceId);
-    try { var res = await fetch("/api/invoices/"+invoiceId+"/checkout", { method: "POST" }); var data = await res.json(); if (!res.ok) { toast.error(data.error || "Failed"); return; } window.open(data.checkout_url, "_blank"); }
-    catch { toast.error("Network error"); }
+    try {
+      // Client-facing: only works if admin already set a checkout_url on the invoice.
+      // The admin-only POST endpoint is not available to clients.
+      const inv = invoices.find((i: any) => i.id === invoiceId);
+      if (inv?.payoneer_checkout_url) {
+        window.open(inv.payoneer_checkout_url, "_blank");
+      } else {
+        toast.error("Payment link not ready yet. Admin will provide it shortly.");
+      }
+    } catch { toast.error("Network error"); }
     finally { setLoading(null); }
   }
 
-  function downloadPDF(invoiceId) { window.open("/api/invoices/"+invoiceId+"/pdf", "_blank"); }
+  function downloadPDF(invoiceId) { const a=document.createElement("a"); a.href="/api/invoices/"+invoiceId+"/pdf"; a.download="invoice-"+invoiceId+".pdf"; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
 
   var totalPaid = invoices.filter(function(i){ return i.status === "paid"; }).reduce(function(s,i){ return s + Number(i.amount); }, 0);
   var totalPending = invoices.filter(function(i){ return i.status === "pending"; }).reduce(function(s,i){ return s + Number(i.amount); }, 0);
@@ -116,9 +124,13 @@ export function ClientInvoicesUI({ invoices, paymentStatus, demoInvoiceId }) {
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold border" style={{background:s.bg,color:s.color,borderColor:s.border}}>{inv.status}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[12px] mb-2.5">
-                  <span className="font-medium" style={{color:txt}}>{inv.orders?.service_tiers?.label||"—"}</span>
+                  <span className="font-medium" style={{color:txt}}>
+                    {inv.orders?.service_tiers?.label || (() => { const n = inv.notes || ""; if (n.toLowerCase().includes("subscription")) return n.split("—")[0]?.replace("Subscription:", "").trim() || "Plan"; if (n.toLowerCase().includes("extra credits")) { const m = n.match(/Extra credits:\s*(\d+)\s*design/i); return m ? `+${m[1]} Credits` : "Credits"; } return "—"; })()}
+                  </span>
                   <span className="font-syne font-bold text-right" style={{color:green.text}}>{formatCurrency(inv.amount)}</span>
-                  <span className="font-mono text-[11px]" style={{color:purple.text}}>{inv.orders?.order_number||"—"}</span>
+                  <span className="font-mono text-[11px]" style={{color:purple.text}}>
+                    {inv.orders?.order_number || ((inv.notes || "").toLowerCase().includes("subscription") ? "Subscription" : (inv.notes || "").toLowerCase().includes("extra credits") ? "Credits" : "—")}
+                  </span>
                   <span className="text-right" style={{color:txt3}}>{formatDate(inv.created_at)}</span>
                 </div>
                 <div className="flex gap-2 pt-2" style={{borderTop:"1px solid var(--border)"}}>
@@ -151,8 +163,12 @@ export function ClientInvoicesUI({ invoices, paymentStatus, demoInvoiceId }) {
                     onMouseEnter={function(e){ e.currentTarget.style.background="var(--elevated)"; }}
                     onMouseLeave={function(e){ e.currentTarget.style.background="transparent"; }}>
                     <td className="p-3 font-mono text-xs font-bold" style={{color:cyan.text}}>{inv.invoice_number}</td>
-                    <td className="p-3 font-mono text-[11px] font-bold" style={{color:purple.text}}>{inv.orders?.order_number||"—"}</td>
-                    <td className="p-3 text-xs" style={{color:txt2}}>{inv.orders?.service_tiers?.label||"—"}</td>
+                    <td className="p-3 font-mono text-[11px] font-bold" style={{color:purple.text}}>
+                      {inv.orders?.order_number || ((inv.notes || "").toLowerCase().includes("subscription") ? "Subscription" : (inv.notes || "").toLowerCase().includes("extra credits") ? "Credits" : "—")}
+                    </td>
+                    <td className="p-3 text-xs" style={{color:txt2}}>
+                      {inv.orders?.service_tiers?.label || (() => { const n = inv.notes || ""; if (n.toLowerCase().includes("subscription")) return n.split("—")[0]?.replace("Subscription:", "").trim() || "Plan"; if (n.toLowerCase().includes("extra credits")) { const m = n.match(/Extra credits:\s*(\d+)\s*design/i); return m ? `+${m[1]} Credits` : "Credits"; } return "—"; })()}
+                    </td>
                     <td className="p-3 font-syne font-bold text-sm" style={{color:green.text}}>{formatCurrency(inv.amount)}</td>
                     <td className="p-3"><span className="px-2.5 py-1 rounded-full text-[10px] font-semibold border" style={{background:s.bg,color:s.color,borderColor:s.border}}>{inv.status}</span></td>
                     <td className="p-3 text-[11px]" style={{color:txt3}}>{formatDate(inv.created_at)}</td>

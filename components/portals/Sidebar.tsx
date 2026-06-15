@@ -15,9 +15,9 @@ function NavIcon({ name, size = 16 }: { name: string; size?: number }) {
   return Icon ? <Icon size={size} /> : null;
 }
 
-interface SidebarProps { user: AuthUser; badgeCounts?: Record<string, number>; }
+interface SidebarProps { user: AuthUser; badgeCounts?: Record<string, number>; subscriptionStatus?: string | null; }
 
-export function Sidebar({ user, badgeCounts = {} }: SidebarProps) {
+export function Sidebar({ user, badgeCounts = {}, subscriptionStatus }: SidebarProps) {
   const pathname = usePathname();
   const sections = NAV_SECTIONS[user.role] ?? [];
   const portal = PORTAL_COLORS[user.role];
@@ -75,8 +75,14 @@ export function Sidebar({ user, badgeCounts = {} }: SidebarProps) {
                       background: active ? portal.light : "transparent",
                       borderLeft: active ? `2px solid ${portal.color}` : "2px solid transparent",
                     }}>
-                    <span className="flex-shrink-0 transition-colors" style={{ color: active ? portal.color : "var(--txt3)" }}>
+                    <span className="flex-shrink-0 transition-colors relative" style={{ color: active ? portal.color : "var(--txt3)" }}>
                       <NavIcon name={item.iconName} />
+                      {/* Subscription status indicator on Plans & Billing */}
+                      {item.href === "/client/subscribe" && subscriptionStatus && (
+                        <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full border border-[var(--bg)]"
+                          style={{ background: subscriptionStatus === "active" ? "#16A34A" : subscriptionStatus === "pending" ? "#F59E0B" : subscriptionStatus === "cancellation_requested" ? "#F97316" : "var(--txt3)" }}
+                          title={subscriptionStatus === "active" ? "Active plan" : subscriptionStatus === "pending" ? "Pending approval" : subscriptionStatus === "cancellation_requested" ? "Cancellation under review" : ""} />
+                      )}
                     </span>
                     <span className="flex-1 min-w-0 truncate">{item.label}</span>
                     {(() => {

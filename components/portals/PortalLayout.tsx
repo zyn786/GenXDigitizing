@@ -65,8 +65,9 @@ export async function PortalLayout({ children, requiredRole }: PortalLayoutProps
     designerId = data?.id;
   }
 
-  // 5. Fetch badge counts for admin
+  // 5. Fetch badge counts for admin, subscription status for client
   let badgeCounts: Record<string, number> = {};
+  let subscriptionStatus: string | null = null;
   if (profile.role === "admin") {
     const [
       { count: pendingOrders },
@@ -89,6 +90,12 @@ export async function PortalLayout({ children, requiredRole }: PortalLayoutProps
       leads: 0,
     };
   }
+  if (profile.role === "client" && clientId) {
+    const { data: sub } = await supabase.from("client_subscriptions")
+      .select("status").eq("client_id", clientId)
+      .in("status", ["active", "pending", "cancellation_requested"]).maybeSingle();
+    subscriptionStatus = sub?.status || null;
+  }
 
   const user = {
     id: profile.id,
@@ -103,7 +110,7 @@ export async function PortalLayout({ children, requiredRole }: PortalLayoutProps
   return (
     <PortalProviders userId={user.id} role={user.role} userName={user.full_name} userEmail={user.email}>
       <div className="portal-layout">
-        <div className="hidden lg:block"><Sidebar user={user} badgeCounts={badgeCounts} /></div>
+        <div className="hidden lg:block"><Sidebar user={user} badgeCounts={badgeCounts} subscriptionStatus={subscriptionStatus} /></div>
         <main className="portal-main lg:pb-0 pb-14">
           <Suspense fallback={<PortalSkeleton />}>
             {children}

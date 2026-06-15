@@ -14,13 +14,14 @@ import { requestNotificationPermission } from "@/lib/notify";
 
 const LINKS = [
   { href: "/home",         label: "Home"           },
-  { href: "/about",        label: "About"          },
   { href: "/services",     label: "Services"       },
   { href: "/portfolio",    label: "Portfolio"      },
   { href: "/pricing",      label: "Pricing"        },
-  { href: "/blog",         label: "Blog"           },
+  { href: "/subscribe",    label: "B2B"            },
   { href: "/free-designs", label: "Free Designs"   },
-  { href: "/contact",      label: "Contact"        },
+  { href: "/blog",         label: "Blog"           },
+  { href: "/about",        label: "About",         mobileOnly: true },
+  { href: "/contact",      label: "Contact",       mobileOnly: true },
 ];
 
 const PORTAL_HOME: Record<string, string> = {
@@ -214,13 +215,14 @@ export function Nav({ topOffset }: { topOffset?: string }) {
             src="/images/black_logo.png"
             alt="GenX Digitizing — home"
             fetchPriority="high"
+            width={200} height={100}
             className="h-7 sm:h-8 w-auto"
           />
         </Link>
 
         {/* Desktop links */}
         <div className="hidden lg:flex items-center gap-0.5">
-          {LINKS.map((l) => {
+          {LINKS.filter(l => !l.mobileOnly).map((l) => {
             const isActive = l.href === "/home"
               ? (pathname === "/" || pathname === "/home" || pathname.startsWith("/home/"))
               : (pathname === l.href || pathname.startsWith(l.href + "/"));
@@ -229,7 +231,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
                 key={l.href}
                 href={l.href}
                 className={cn(
-                  "relative px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-200 no-underline",
+                  "relative px-3 xl:px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-200 no-underline",
                   l.href === "/free-designs"
                     ? isActive
                       ? "bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white shadow-[0_2px_12px_rgba(37,99,235,0.3)]"
@@ -253,7 +255,10 @@ export function Nav({ topOffset }: { topOffset?: string }) {
         </div>
 
         {/* Desktop CTAs */}
-        <div className="hidden lg:flex items-center gap-2">
+        <div className="hidden lg:flex items-center gap-1.5">
+          <Link href="/contact" className="inline-flex items-center px-3 py-2 rounded-xl text-xs font-semibold text-[var(--txt2)] hover:text-[var(--txt)] hover:bg-[var(--elevated)]/60 transition-all duration-200 no-underline">
+            Contact
+          </Link>
           {SITE_INFO.whatsapp && (
           <a
             href={`https://wa.me/${SITE_INFO.whatsapp}`}

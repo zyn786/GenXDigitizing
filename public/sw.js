@@ -1,4 +1,8 @@
 // Service Worker for Web Push Notifications
+// Immediately activate — don't wait for all windows to close
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
+
 self.addEventListener("push", (event) => {
   if (!event.data) return;
   try {

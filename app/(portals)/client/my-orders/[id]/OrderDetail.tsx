@@ -144,10 +144,7 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
     const editLogRows=changed.filter(f=>f!=="artwork_file").map((field)=>({order_id:order.id,field_name:field,old_value:field==="output_format"?order.output_format:field==="additional_formats"?JSON.stringify(order.additional_formats??[]):field==="width_inches"?String(order.width_inches??""):field==="height_inches"?String(order.height_inches??""):field==="color_count"?String(order.color_count??""):field==="placement_notes"?(order.placement_notes??""):"",new_value:field==="output_format"?editFmt:field==="additional_formats"?JSON.stringify(editExtras):field==="width_inches"?editW:field==="height_inches"?editH:field==="color_count"?editCol:field==="placement_notes"?editNotes:"",changed_by:userId,reviewed_by_admin:false}));
     if(editFile){editLogRows.push({order_id:order.id,field_name:"artwork_file",old_value:"",new_value:editFile.name,changed_by:userId,reviewed_by_admin:false});}
     await supabase.from("order_edit_log").insert(editLogRows);
-    // Notify admins
-    const {data:admins}=await supabase.from("users").select("id").eq("role","admin");if(admins?.length){await supabase.from("notifications").insert(admins.map((a:any)=>({user_id:a.id,type:"order_update",title:"⚠️ Order edited — "+order.order_number,body:"Client updated: "+changed.join(", "),action_url:"/admin/orders/"+order.id})));}
-    // Notify designer if assigned
-    if(order.designers?.users?.id){await supabase.from("notifications").insert({user_id:order.designers.users.id,type:"order_update",title:"Order updated — "+order.order_number,body:"Client made changes: "+changed.join(", "),action_url:"/designer/tasks"});}
+    // Note: admin/designer notifications for edits are handled server-side via order_edit_log
     toast.success("Changes saved — team notified");setEditOpen(false);startTx(()=>router.refresh());}
     catch(err:any){toast.error(err?.message??"Save failed");}
     finally{setEditSaving(false);}

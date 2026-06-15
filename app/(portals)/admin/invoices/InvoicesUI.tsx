@@ -82,7 +82,7 @@ export function AdminInvoicesUI({ invoices }: { invoices: any[] }) {
     finally{setLoading(null);}
   }
 
-  function downloadPDF(invoiceId: string){window.open(`/api/invoices/${invoiceId}/pdf`,"_blank");}
+  function downloadPDF(invoiceId: string){const a=document.createElement("a");a.href=`/api/invoices/${invoiceId}/pdf`;a.download=`invoice-${invoiceId}.pdf`;document.body.appendChild(a);a.click();document.body.removeChild(a);}
   function copyLink(url: string){navigator.clipboard.writeText(url);toast.success("Link copied!");}
 
   return (
@@ -171,9 +171,9 @@ export function AdminInvoicesUI({ invoices }: { invoices: any[] }) {
                   </div>
                   <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[13px] mb-3">
                     <span className="font-medium" style={{ color: txt }}>{inv.clients?.company_name??"—"}</span>
-                    <span className="text-right font-mono font-semibold" style={{ color: clr[4].text }}>{inv.orders?.order_number??"—"}</span>
+                    <span className="text-right font-mono font-semibold" style={{ color: clr[4].text }}>{inv.orders?.order_number || ((inv.notes||"").toLowerCase().includes("subscription")?"Subscription":(inv.notes||"").toLowerCase().includes("extra credits")?"Credits":"—")}</span>
                     <span style={{ color: txt3 }}>{formatDate(inv.created_at,{month:"short",day:"numeric"})}</span>
-                    <span className="text-right" style={{ color: txt2 }}>{inv.orders?.service_tiers?.label??"—"}</span>
+                    <span className="text-right" style={{ color: txt2 }}>{inv.orders?.service_tiers?.label || ((n=>{if(n.toLowerCase().includes("subscription"))return n.split("—")[0]?.replace("Subscription:","").trim()||"Plan";if(n.toLowerCase().includes("extra credits")){const m=n.match(/Extra credits:\s*(\d+)\s*design/i);return m?`+${m[1]} Credits`:"Credits"}return"—"})(inv.notes||""))}</span>
                   </div>
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-syne font-bold text-base" style={{ color: clr[1].text }}>{formatCurrency(inv.amount)}</span>
@@ -230,11 +230,11 @@ export function AdminInvoicesUI({ invoices }: { invoices: any[] }) {
                         <div className="text-[10px] mt-0.5" style={{ color: txt3 }}>{formatDate(inv.created_at,{month:"short",day:"numeric"})}</div>
                       </td>
                       <td className="p-3">
-                        <div className="font-mono text-xs font-bold" style={{ color: clr[4].text }}>{inv.orders?.order_number??"—"}</div>
+                        <div className="font-mono text-xs font-bold" style={{ color: clr[4].text }}>{inv.orders?.order_number || ((inv.notes||"").toLowerCase().includes("subscription")?"Subscription":(inv.notes||"").toLowerCase().includes("extra credits")?"Credits":"—")}</div>
                         <span className="text-[10px]" style={{color:t.color}}>{t.icon} {t.label}</span>
                       </td>
                       <td className="p-3 text-sm font-medium" style={{ color: txt }}>{inv.clients?.company_name??"—"}</td>
-                      <td className="p-3 text-xs" style={{ color: txt2 }}>{inv.orders?.service_tiers?.label??"—"}</td>
+                      <td className="p-3 text-xs" style={{ color: txt2 }}>{inv.orders?.service_tiers?.label || ((n=>{if(n.toLowerCase().includes("subscription"))return n.split("—")[0]?.replace("Subscription:","").trim()||"Plan";if(n.toLowerCase().includes("extra credits")){const m=n.match(/Extra credits:\s*(\d+)\s*design/i);return m?`+${m[1]} Credits`:"Credits"}return"—"})(inv.notes||""))}</td>
                       <td className="p-3 font-syne font-bold text-sm" style={{ color: clr[1].text }}>{formatCurrency(inv.amount)}</td>
                       <td className="p-3">
                         <span style={{padding:"3px 10px",borderRadius:20,fontSize:10,fontWeight:600,background:s.bg,color:s.color,border:`1px solid ${s.border}`}}>{inv.status}</span>

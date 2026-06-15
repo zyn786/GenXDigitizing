@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Browser notification + sound utility.
  * Uses Web Audio API for a chime — no external audio files needed.

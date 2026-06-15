@@ -60,18 +60,14 @@ export function createClient() {
  */
 export function createAdminClient() {
   const { url, serviceKey } = getEnv();
-  const cookieStore = cookies();
 
+  // Service-role client bypasses RLS entirely.
+  // Must NOT attach user auth cookies — if a user JWT is present,
+  // RLS evaluates against that user instead of the service role.
   return createServerClient<Database>(url, serviceKey, {
     cookies: {
-      getAll() { return cookieStore.getAll(); },
-      setAll(cookiesToSet) {
-        try {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
-        } catch {}
-      },
+      getAll() { return []; },
+      setAll() {},
     },
     auth: {
       autoRefreshToken: false,

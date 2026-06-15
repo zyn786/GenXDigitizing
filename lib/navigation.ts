@@ -42,6 +42,8 @@ export const NAV_SECTIONS: Record<UserRole, NavSection[]> = {
       { label: "Clients", href: "/admin/clients", iconName: "Users" },
       { label: "Designers", href: "/admin/designers", iconName: "UserCircle" },
       { label: "Invoices", href: "/admin/invoices", iconName: "Receipt", badgeKey: "invoices" },
+      { label: "Subscriptions", href: "/admin/subscriptions", iconName: "Crown" },
+      { label: "Coupons", href: "/admin/coupons", iconName: "Ticket" },
     ]},
     { title: "Content", items: [
       { label: "Blog", href: "/admin/blog", iconName: "FileText" },
@@ -74,6 +76,9 @@ export const NAV_SECTIONS: Record<UserRole, NavSection[]> = {
     ]},
   ],
   client: [
+    { title: "Subscription", items: [
+      { label: "Plans & Billing", href: "/client/subscribe", iconName: "Crown" },
+    ]},
     { title: "Orders", items: [
       { label: "Dashboard", href: "/client", iconName: "LayoutDashboard" },
       { label: "New Order", href: "/client/new-order", iconName: "PlusCircle" },

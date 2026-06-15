@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Clock, Calendar, ArrowLeft, Share2 } from "lucide-react";
-import { BLOG_POSTS, type BlogPost } from "@/lib/blog-data";
+import { fetchBlogPosts, type BlogPost } from "@/lib/blog-data";
 import { BreadcrumbSchema, FAQSchema } from "@/components/shared/StructuredData";
 import { GradientOrb } from "@/components/shared/GradientOrb";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
@@ -13,12 +13,14 @@ interface Props {
   params: { slug: string };
 }
 
-export function generateStaticParams() {
-  return BLOG_POSTS.map((post) => ({ slug: post.slug }));
+export async function generateStaticParams() {
+  const posts = await fetchBlogPosts(true);
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const post = BLOG_POSTS.find((p) => p.slug === params.slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const posts = await fetchBlogPosts(true);
+  const post = posts.find((p) => p.slug === params.slug);
   if (!post) return { title: "Post Not Found" };
   return {
     title: post.title,
@@ -246,8 +248,9 @@ function PostContent({ post }: { post: BlogPost }) {
   );
 }
 
-export default function BlogPostPage({ params }: Props) {
-  const post = BLOG_POSTS.find((p) => p.slug === params.slug);
+export default async function BlogPostPage({ params }: Props) {
+  const posts = await fetchBlogPosts(true);
+  const post = posts.find((p) => p.slug === params.slug);
   if (!post) notFound();
   return <PostContent post={post} />;
 }

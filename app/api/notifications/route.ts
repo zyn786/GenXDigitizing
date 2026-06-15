@@ -19,13 +19,13 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false })
       .limit(30);
 
-    if (error) { return NextResponse.json({ error: error.message }, { status: 500 }); }
+    if (error) { console.error("[notifications] error:", error); return NextResponse.json({ error: "Request failed" }, { status: 500 }); }
 
     const unread = (data ?? []).filter((n: any) => !n.is_read).length;
 
     return NextResponse.json({ notifications: data ?? [], unread });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "Request failed" }, { status: 500 });
   }
 }
 
@@ -48,10 +48,31 @@ export async function PATCH(req: NextRequest) {
     if (ids?.length) { query = query.in("id", ids); }
 
     const { error } = await query;
-    if (error) { return NextResponse.json({ error: error.message }, { status: 500 }); }
+    if (error) { console.error("[notifications] error:", error); return NextResponse.json({ error: "Request failed" }, { status: 500 }); }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "Request failed" }, { status: 500 });
+  }
+}
+
+// POST /api/notifications — admin sends push notification to a user (with web push)
+export async function POST(req: NextRequest) {
+  try {
+    const user = await getAdminUser().catch(() => null);
+    if (!user || !["admin", "crm"].includes(user.role)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const body = await req.json();
+    const { notifyUser } = await import("@/lib/notify-helpers");
+    await notifyUser(body.userId, {
+      type: body.type || "system",
+      title: body.title,
+      body: body.body,
+      action_url: body.action_url || undefined,
+    });
+    return NextResponse.json({ ok: true });
+  } catch (err: any) {
+    return NextResponse.json({ error: "Request failed" }, { status: 500 });
   }
 }

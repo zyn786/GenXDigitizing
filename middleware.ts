@@ -39,12 +39,35 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
+  // ── API route protection ──────────────────────────────────
+  const isApiRoute = pathname.startsWith("/api/");
+  const isAdminApiRoute = pathname.startsWith("/api/admin/");
+  const isCrmApiRoute = pathname.startsWith("/api/crm/");
+  // Auth/chat endpoints that need at minimum authentication
+  const isProtectedApi = pathname.startsWith("/api/auth/auto-confirm") ||
+                         pathname.startsWith("/api/chat/upload") ||
+                         pathname.startsWith("/api/review-notify") ||
+                         pathname.startsWith("/api/message-notify") ||
+                         pathname.startsWith("/api/chat/notify");
+
   // ── Auth check only for portal + auth routes ───────────────
   const isPortalRoute = PORTAL_PREFIXES.some(p => pathname.startsWith(p));
   const isAuthPage    = AUTH_PAGES.some(p => pathname.startsWith(p));
 
+  // Root page: rewrite to /home for anonymous users (saves one redirect round-trip).
+  // Logged-in users still hit app/page.tsx for role-based portal redirect.
+  if (pathname === "/") {
+    const hasSession = request.cookies.getAll().some(c => c.name.startsWith("sb-"));
+    if (!hasSession) {
+      return NextResponse.rewrite(new URL("/home", request.url));
+    }
+    // Let app/page.tsx handle the role-based redirect for logged-in users
+    return NextResponse.next();
+  }
+
   // Public page — skip auth entirely, respond immediately
-  if (!isPortalRoute && !isAuthPage) {
+  // BUT: admin/crm API routes and protected endpoints still need auth
+  if (!isPortalRoute && !isAuthPage && !isAdminApiRoute && !isCrmApiRoute && !isProtectedApi) {
     return NextResponse.next();
   }
 
@@ -71,18 +94,24 @@ export async function middleware(request: NextRequest) {
   // Refresh session — MUST call getUser() not getSession()
   const { data: { user } } = await supabase.auth.getUser();
 
-  // ── Not logged in → protect portal routes ────────────────
-  if (!user && isPortalRoute) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+  // ── Not logged in → protect portal routes and API routes ──
+  if (!user) {
+    if (isPortalRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(url);
+    }
+    if (isAdminApiRoute || isCrmApiRoute || isProtectedApi) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return response;
   }
 
   // ── Logged in ────────────────────────────────────────────
   if (user) {
-    // Fetch role (only when needed)
-    if (isPortalRoute || isAuthPage) {
+    // Fetch role when needed (portal, auth, or protected API routes)
+    if (isPortalRoute || isAuthPage || isAdminApiRoute || isCrmApiRoute || isProtectedApi) {
       const { data: profile } = await supabase
         .from("users")
         .select("role, is_active")
@@ -91,12 +120,40 @@ export async function middleware(request: NextRequest) {
 
       const role = profile?.role as string | undefined;
 
-      // Deactivated account → boot to login
-      if (profile && !profile.is_active && isPortalRoute) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/login";
-        url.searchParams.set("error", "account_disabled");
-        return NextResponse.redirect(url);
+      // Deactivated account → boot to login (portals) or 403 (API)
+      if (profile && !profile.is_active) {
+        if (isPortalRoute) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/login";
+          url.searchParams.set("error", "account_disabled");
+          return NextResponse.redirect(url);
+        }
+        if (isAdminApiRoute || isCrmApiRoute || isProtectedApi) {
+          return NextResponse.json({ error: "Account disabled" }, { status: 403 });
+        }
+      }
+
+      // ── API route role enforcement ──────────────────────
+      if (isAdminApiRoute) {
+        if (role !== "admin") {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+        return response; // admin authorized, let route handler run
+      }
+
+      if (isCrmApiRoute) {
+        if (role !== "admin" && role !== "crm") {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+        return response; // crm/admin authorized
+      }
+
+      if (isProtectedApi) {
+        // Any authenticated user with a valid role is allowed
+        if (!role) {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+        return response;
       }
 
       // On auth page while logged in → redirect to portal

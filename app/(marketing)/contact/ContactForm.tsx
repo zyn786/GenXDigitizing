@@ -71,11 +71,6 @@ export function ContactForm() {
       return;
     }
 
-    if (!file) {
-      toast.error("Please upload your artwork file.");
-      return;
-    }
-
     setSending(true);
 
     try {
@@ -85,7 +80,7 @@ export function ContactForm() {
       fd.append("company", form.company);
       fd.append("service", form.service);
       fd.append("message", form.message);
-      fd.append("artwork", file);
+      if (file) fd.append("artwork", file);
 
       const res = await fetch("/api/contact", {
         method: "POST",

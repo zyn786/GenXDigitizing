@@ -25,7 +25,7 @@ create sequence if not exists invoice_number_seq start 1000;
 
 create table if not exists public.invoices (
   id                    uuid       primary key default uuid_generate_v4(),
-  invoice_number        text       not null unique default ('INV-' || lpad(nextval('invoice_number_seq')::text, 4, '0')),
+  invoice_number        text       not null unique default ('INV-GX' || lpad(nextval('invoice_number_seq')::text, 5, '0')),
   order_id              uuid       not null unique references public.orders(id) on delete restrict,
   client_id             uuid       not null references public.clients(id) on delete restrict,
   amount                numeric(10,2) not null,
@@ -66,8 +66,10 @@ create table if not exists public.reviews (
 );
 
 -- TABLE: crm_leads
+create sequence if not exists quote_number_seq start 1000;
 create table if not exists public.crm_leads (
   id            uuid       primary key default uuid_generate_v4(),
+  quote_number  text       unique default ('QT-GX' || lpad(nextval('quote_number_seq')::text, 5, '0')),
   contact_name  text       not null,
   email         text       not null,
   company       text,

@@ -210,7 +210,7 @@ export async function getClientInvoices(clientId: string) {
   const { data } = await supabase
     .from("invoices")
     .select(`
-      id, invoice_number, amount, currency, status,
+      id, invoice_number, amount, currency, status, notes,
       payoneer_ref, payoneer_checkout_url, pdf_url, paid_at, created_at,
       orders ( id, order_number, service_tiers ( label ) )
     `)

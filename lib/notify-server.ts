@@ -1,4 +1,3 @@
-// @ts-nocheck
 /** Server-only: insert in-app notification AND send push to users (all roles).
  *  Import ONLY from API routes / server components — NOT from client components.
  */
@@ -22,7 +21,7 @@ export async function notifyUsers(
         title: payload.title,
         body: payload.body,
         action_url: payload.action_url || null,
-      }))
+      })) as any
     );
 
     // Web push notification

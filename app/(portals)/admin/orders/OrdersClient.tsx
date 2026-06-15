@@ -245,7 +245,7 @@ export function AdminOrdersClient({ orders, designers, unreviewedEdits = {} as R
           <div className="sm:hidden flex flex-col gap-2.5">
             {filtered.map(o=>{
               const t = TURNAROUND_OPTIONS[o.turnaround]??TURNAROUND_OPTIONS.standard;
-              const inv = o.invoices;
+              const inv = Array.isArray(o.invoices) ? o.invoices[0] : o.invoices;
               const isLoading = loading===o.id||loading===o.id+"-d"||loading===o.id+"-pay";
               return (
                 <Link key={o.id} href={`/admin/orders/${o.id}`} className="no-underline">
@@ -307,7 +307,7 @@ export function AdminOrdersClient({ orders, designers, unreviewedEdits = {} as R
               <tbody>
                 {filtered.map(o=>{
                   const t = TURNAROUND_OPTIONS[o.turnaround]??TURNAROUND_OPTIONS.standard;
-                  const inv = o.invoices;
+                  const inv = Array.isArray(o.invoices) ? o.invoices[0] : o.invoices;
                   const isLoading = loading===o.id||loading===o.id+"-d"||loading===o.id+"-pay";
                   return (
                     <tr key={o.id} onClick={()=>router.push(`/admin/orders/${o.id}`)}

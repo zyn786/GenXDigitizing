@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   if (publishedOnly) query = query.eq("published", true);
 
   const { data, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error("[admin/blog] error:", error); return NextResponse.json({ error: "Request failed" }, { status: 500 }); }
   return NextResponse.json({ posts: data || [] });
 }
 
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) { console.error("[admin/blog] error:", error); return NextResponse.json({ error: "Invalid request" }, { status: 400 }); }
   return NextResponse.json({ post: data }, { status: 201 });
 }
 
@@ -66,7 +66,7 @@ export async function PUT(req: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) { console.error("[admin/blog] error:", error); return NextResponse.json({ error: "Invalid request" }, { status: 400 }); }
   return NextResponse.json({ post: data });
 }
 
@@ -78,6 +78,6 @@ export async function DELETE(req: NextRequest) {
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
   const { error } = await supabase.from("blog_posts").delete().eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error("[admin/blog] error:", error); return NextResponse.json({ error: "Request failed" }, { status: 500 }); }
   return NextResponse.json({ success: true });
 }

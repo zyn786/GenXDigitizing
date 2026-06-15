@@ -15,11 +15,13 @@ export async function POST(req: NextRequest) {
 
     const db = createAdminClient();
 
-    // Upsert to avoid duplicates
-    const { data: existing } = await db.from("user_push_subscriptions").select("id").eq("endpoint", endpoint).maybeSingle();
-    if (existing) return NextResponse.json({ ok: true });
-
-    await db.from("user_push_subscriptions").insert({ user_id: userId, endpoint, p256dh, auth });
+    // Upsert: update if endpoint exists, insert if not (race-condition safe)
+    const { error: upsertErr } = await db.from("user_push_subscriptions")
+      .upsert({ user_id: userId, endpoint, p256dh, auth }, { onConflict: "endpoint" });
+    if (upsertErr) {
+      console.error("[push-subscribe] Upsert error:", upsertErr);
+      return NextResponse.json({ error: "Failed to save subscription" }, { status: 500 });
+    }
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || "Failed" }, { status: 500 });
@@ -37,7 +39,8 @@ export async function DELETE(req: NextRequest) {
     if (!endpoint) return NextResponse.json({ error: "Missing endpoint" }, { status: 400 });
 
     const db = createAdminClient();
-    await db.from("user_push_subscriptions").delete().eq("endpoint", endpoint);
+    // Only delete if user owns this subscription
+    await db.from("user_push_subscriptions").delete().eq("endpoint", endpoint).eq("user_id", userId);
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || "Failed" }, { status: 500 });

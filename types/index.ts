@@ -399,3 +399,57 @@ export type Json =
   | null
   | { [key: string]: Json | undefined }
   | Json[];
+
+// ── Coupons ──────────────────────────────────────────────────
+export type {
+  DiscountType,
+  CouponStatus,
+  Coupon,
+  CouponRedemption,
+  CouponContext,
+  CouponValidationResult,
+  CouponOffer,
+  CouponSubmitData,
+} from "@/types/coupon";
+
+// ── Subscriptions ────────────────────────────────────────────
+
+export type SubscriptionStatus = "active" | "pending" | "paused" | "cancelled" | "expired" | "cancellation_requested";
+export type SubscriptionPlan = "starter" | "business" | "pro" | "pro_max";
+
+export type CancellationReason =
+  | "too_expensive"
+  | "not_enough_designs"
+  | "found_alternative"
+  | "not_using_enough"
+  | "poor_quality"
+  | "other"
+  | "plan_change"
+  | "cancelled_by_admin"
+  | "rejected_by_admin"
+  | "request_denied";
+
+export const CANCELLATION_REASONS: { value: CancellationReason; label: string }[] = [
+  { value: "too_expensive", label: "Too expensive" },
+  { value: "not_enough_designs", label: "Not enough designs" },
+  { value: "found_alternative", label: "Found an alternative" },
+  { value: "not_using_enough", label: "Not using it enough" },
+  { value: "poor_quality", label: "Quality concerns" },
+  { value: "other", label: "Other" },
+];
+
+export interface ClientSubscription {
+  id: string;
+  client_id: string;
+  plan: SubscriptionPlan;
+  designs_total: number;
+  designs_used: number;
+  designs_rolled_over: number;
+  status: SubscriptionStatus;
+  current_period_start: string;
+  current_period_end: string;
+  created_at: string;
+  updated_at: string;
+  cancellation_reason?: CancellationReason | null;
+  cancellation_notes?: string | null;
+}

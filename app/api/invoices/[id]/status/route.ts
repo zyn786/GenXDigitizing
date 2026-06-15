@@ -33,7 +33,7 @@ export async function PATCH(
     const { data: invoice, error: invErr } = await supabase
       .from("invoices")
       .select(`
-        id, invoice_number, amount, status,
+        id, invoice_number, amount, status, notes,
         order_id, client_id,
         orders ( id, order_number, status ),
         clients ( id, users ( id, full_name ) )
@@ -83,51 +83,51 @@ export async function PATCH(
       if (invoice.client_id) {
         const { data: clientRow } = await supabase
           .from("clients")
-          .select("ltv")
+          .select("ltv, credit_balance")
           .eq("id", invoice.client_id)
           .single();
 
         if (clientRow) {
           const newLtv = (clientRow.ltv ?? 0) + Number(invoice.amount);
+          const updates: Record<string, unknown> = {
+            ltv: newLtv,
+            tier: (newLtv >= 500 ? "vip" : newLtv >= 50 ? "active" : "new") as any,
+          };
+
+          // Extra credits: add to credit_balance
+          const notes = (invoice as any)?.notes || "";
+          const creditMatch = notes.match(/Extra credits:\s*(\d+)\s*design credits/i);
+          if (creditMatch) {
+            const creditCount = parseInt(creditMatch[1], 10);
+            updates.credit_balance = (clientRow.credit_balance ?? 0) + creditCount;
+          }
+
           await supabase
             .from("clients")
-            .update({
-              ltv:  newLtv,
-              tier: newLtv >= 500 ? "vip" : newLtv >= 50 ? "active" : "new",
-            })
+            .update(updates)
             .eq("id", invoice.client_id);
         }
       }
 
-      // Notify client
+      // Notify client with web push
       if (clientUser?.id) {
-        await supabase.from("notifications").insert({
-          user_id:    clientUser.id,
+        const { notifyUser } = await import("@/lib/notify-helpers");
+        notifyUser(clientUser.id, {
           type:       "payment",
           title:      "Payment confirmed",
-          body:       `Your payment for ${order?.order_number ?? invoice.order_id} has been received. Work will begin shortly.`,
+          body:       `Your payment for ${order?.order_number || invoice.invoice_number || "Invoice #" + invoice.id.slice(0, 8)} has been received. Work will begin shortly.`,
           action_url: "/client/invoices",
-        });
+        }).catch(console.error);
       }
 
-      // Notify admins
-      const { data: admins } = await supabase
-        .from("users")
-        .select("id, email")
-        .eq("role", "admin")
-        .eq("is_active", true);
-
-      if (admins?.length) {
-        await supabase.from("notifications").insert(
-          admins.map((a: any) => ({
-            user_id:    a.id,
-            type:       "payment",
-            title:      `Payment received — ${order?.order_number ?? invoice.order_id}`,
-            body:       `$${Number(invoice.amount).toFixed(0)} — order ready for assignment.`,
-            action_url: `/admin/orders`,
-          }))
-        );
-      }
+      // Notify admins with web push
+      const { notifyRole } = await import("@/lib/notify-helpers");
+      notifyRole("admin", {
+        type:       "payment",
+        title:      `Payment received — ${order?.order_number || invoice.invoice_number || "Invoice #" + invoice.id.slice(0, 8)}`,
+        body:       `$${Number(invoice.amount).toFixed(0)} — order ready for assignment.`,
+        action_url: `/admin/orders`,
+      }).catch(console.error);
 
       // Generate PDF and send email
       if (clientUser?.id || client?.user_id) {

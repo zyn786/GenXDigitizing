@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { uploadToS3 } from "@/lib/s3";
 import { notifyUsers } from "@/lib/notify-server";
+import { recordRedemption } from "@/lib/coupons";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,6 +21,10 @@ export async function POST(req: NextRequest) {
     const name = fd.get("name") as string;
     const email = fd.get("email") as string;
     const company = fd.get("company") as string;
+    const couponCode = fd.get("coupon_code") as string;
+    const couponId = fd.get("coupon_id") as string;
+    const discountAmount = fd.get("discount_amount") as string;
+    const visitorId = fd.get("visitor_id") as string;
     const files = fd.getAll("files") as File[];
 
     if (!designName || !placement || !name || !email || files.length === 0) {
@@ -51,6 +56,8 @@ export async function POST(req: NextRequest) {
       width && `Size: ${width}" × ${height}"`,
       colors && `Colors: ${colors}`,
       notes && `Notes: ${notes}`,
+      couponCode && `Coupon: ${couponCode} (${discountAmount ? `-$${discountAmount}` : "applied"})`,
+      visitorId && `Visitor: ${visitorId}`,
       "",
       "Uploaded Files:",
       fileList,
@@ -69,6 +76,22 @@ export async function POST(req: NextRequest) {
     if (leadErr) {
       console.error("[guest-order] Lead insert error:", leadErr);
       return NextResponse.json({ error: "Failed to save request" }, { status: 500 });
+    }
+
+    // Record coupon redemption (non-blocking)
+    if (couponId && visitorId) {
+      try {
+        await recordRedemption(
+          couponId,
+          visitorId,
+          email || null,
+          null,
+          discountAmount ? Number(discountAmount) : 0,
+        );
+      } catch (err) {
+        console.error("[guest-order] Coupon redemption error:", err);
+        // Don't fail the upload if coupon recording fails
+      }
     }
 
     // Notify admins

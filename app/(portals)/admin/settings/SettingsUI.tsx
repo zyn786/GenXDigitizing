@@ -3,7 +3,10 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { createClient } from "@/lib/supabase/client";
 import { Save, Eye, EyeOff, Settings, CreditCard, Mail, Clock, Shield, User, Palette } from "lucide-react";
+
+const supabase = createClient();
 
 const CARD_COLORS = [
   { bg: "#3B82F6", bgSoft: "rgba(59,130,246,0.08)", border: "rgba(59,130,246,0.25)", icon: "#2563EB", text: "#1D4ED8" },
@@ -99,7 +102,21 @@ export function AdminSettingsUI({ user }: { user: any }) {
   const [clientAccess, setClientAccess] = useState({ place_orders: true, upload_artwork: true, view_invoices: true, download_files: true, request_revisions: true });
   const [platformToggles, setPlatformToggles] = useState({ accept_new_orders: true, client_registrations: true, maintenance_mode: false });
 
-  function save(s: string) { toast.success(`${s} settings saved`); }
+  async function save(section: string) {
+    try {
+      // Persist key settings to platform_settings
+      const settings: Record<string, string> = {};
+      if (section === "Company") { settings["company_name"] = companyName; settings["company_email"] = companyEmail; settings["company_phone"] = companyPhone; }
+      if (section === "Payoneer") { settings["payoneer_api_key"] = payoneerKey; settings["payoneer_merchant_id"] = payoneerMerchant; }
+      if (section === "Email") { settings["resend_api_key"] = resendKey; }
+      if (section === "SLA") { settings["sla_standard_hours"] = String(slaStandard); settings["sla_rush_hours"] = String(slaRush); settings["sla_urgent_hours"] = String(slaUrgent); }
+      if (section === "Account") { /* account handled by auth */ }
+      for (const [key, value] of Object.entries(settings)) {
+        await supabase.from("platform_settings").upsert({ key, value }, { onConflict: "key" });
+      }
+      toast.success(`${section} settings saved`);
+    } catch { toast.error("Failed to save settings"); }
+  }
 
   return (
     <div className="portal-content" style={{ background: "var(--bg)" }}>

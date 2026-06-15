@@ -126,7 +126,7 @@ function MobileBottomNavInner({ role, userName, userEmail }: { role: keyof typeo
   return (
     <>
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 safe-area-bottom">
-        <div className="absolute inset-0 bg-[var(--bg)]/85 backdrop-blur-2xl border-t border-[var(--border)] shadow-[0_-4px_20px_rgba(0,0,0,0.04)]" />
+        <div className="absolute inset-0 bg-[var(--bg)] border-t border-[var(--border)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]" />
         <div className="relative flex items-center justify-around h-16 max-w-[500px] mx-auto px-2">
           {tabs.map((tab) => {
             const isActive = tab.href

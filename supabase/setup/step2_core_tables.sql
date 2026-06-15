@@ -79,7 +79,7 @@ create sequence if not exists order_number_seq start 1000;
 
 create table if not exists public.orders (
   id                 uuid           primary key default uuid_generate_v4(),
-  order_number       text           not null unique default ('ORD-' || lpad(nextval('order_number_seq')::text, 4, '0')),
+  order_number       text           not null unique default ('OD-GX' || lpad(nextval('order_number_seq')::text, 5, '0')),
   client_id          uuid           not null references public.clients(id) on delete restrict,
   designer_id        uuid           references public.designers(id) on delete set null,
   service_tier_id    text           not null references public.service_tiers(id),

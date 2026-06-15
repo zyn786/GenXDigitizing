@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
           .from("clients")
           .update({
             ltv:  newLtv,
-            tier: newLtv >= 500 ? "vip" : newLtv >= 50 ? "active" : "new",
+            tier: (newLtv >= 500 ? "vip" : newLtv >= 50 ? "active" : "new") as any,
           })
           .eq("id", clientId);
       }

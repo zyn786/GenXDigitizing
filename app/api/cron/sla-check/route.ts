@@ -58,30 +58,25 @@ export async function GET(req: NextRequest) {
     const designer   = (order.designers as any)?.users;
     const clientName = (order.clients as any)?.company_name ?? "Client";
 
-    // In-app: notify designer
+    // Notify designer with web push
     if (designer?.id) {
-      await supabase.from("notifications").insert({
-        user_id:    designer.id,
+      const { notifyUser } = await import("@/lib/notify-helpers");
+      notifyUser(designer.id, {
         type:       "sla_warning",
         title:      `SLA Warning — ${order.order_number}`,
         body:       `${hoursLeft}h until deadline · ${clientName}`,
         action_url: "/designer/tasks",
-      });
+      }).catch(console.error);
     }
 
-    // In-app: notify admins
-    const { data: admins } = await supabase.from("users").select("id").eq("role","admin");
-    if (admins?.length) {
-      await supabase.from("notifications").insert(
-        admins.map((a: any) => ({
-          user_id:    a.id,
-          type:       "sla_warning",
-          title:      `SLA at risk — ${order.order_number}`,
-          body:       `${hoursLeft}h left · ${clientName} · ${order.turnaround}`,
-          action_url: "/admin/orders",
-        }))
-      );
-    }
+    // Notify admins with web push
+    const { notifyRole } = await import("@/lib/notify-helpers");
+    notifyRole("admin", {
+      type:       "sla_warning",
+      title:      `SLA at risk — ${order.order_number}`,
+      body:       `${hoursLeft}h left · ${clientName} · ${order.turnaround}`,
+      action_url: "/admin/orders",
+    }).catch(console.error);
 
     // Email designer
     if (designer?.email) {

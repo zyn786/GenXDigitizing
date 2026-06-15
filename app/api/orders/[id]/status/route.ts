@@ -135,15 +135,13 @@ export async function PATCH(
             .eq("is_active", true);
 
           if (admins?.length) {
-            await supabase.from("notifications").insert(
-              admins.map((a: any) => ({
-                user_id: a.id,
-                type: "payment",
-                title: `Invoice ready — ${order.order_number}`,
-                body: `Order reached QA Review. Paste the Payoneer payment link in the invoice panel.`,
-                action_url: `/admin/orders/${orderId}`,
-              }))
-            );
+            const { notifyRole } = await import("@/lib/notify-helpers");
+            notifyRole("admin", {
+              type: "payment",
+              title: `Invoice ready — ${order.order_number}`,
+              body: `Order reached QA Review. Paste the Payoneer payment link in the invoice panel.`,
+              action_url: `/admin/orders/${orderId}`,
+            }).catch(console.error);
           }
         }
       }
@@ -165,14 +163,13 @@ export async function PATCH(
 
       const designerUserNew = (newDesigner as any)?.users;
       if (designerUserNew) {
-        // Notify designer
-        await supabase.from("notifications").insert({
-          user_id:    designerUserNew.id,
+        const { notifyUser } = await import("@/lib/notify-helpers");
+        notifyUser(designerUserNew.id, {
           type:       "order_update",
           title:      `New assignment — ${order.order_number}`,
           body:       `${serviceName} · ${order.turnaround} turnaround`,
           action_url: `/designer/tasks`,
-        });
+        }).catch(console.error);
 
         // Email designer
         emailDesignerTaskAssigned({
@@ -256,15 +253,13 @@ export async function PATCH(
             .eq("is_active", true);
 
           if (admins?.length) {
-            await supabase.from("notifications").insert(
-              admins.map((a: any) => ({
-                user_id: a.id,
-                type: "payment",
-                title: `Payment link needed — ${order.order_number}`,
-                body: `Order delivered. Paste the Payoneer payment link before client can download files.`,
-                action_url: `/admin/orders/${orderId}`,
-              }))
-            );
+            const { notifyRole } = await import("@/lib/notify-helpers");
+            notifyRole("admin", {
+              type: "payment",
+              title: `Payment link needed — ${order.order_number}`,
+              body: `Order delivered. Paste the Payoneer payment link before client can download files.`,
+              action_url: `/admin/orders/${orderId}`,
+            }).catch(console.error);
           }
         }
       } else {

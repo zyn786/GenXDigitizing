@@ -12,7 +12,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <TopBar />
       <Nav topOffset="36px" />
       <ExitIntent />
-      <main className="pt-[100px] pb-4 sm:pb-6">{children}</main>
+      <div className="pt-[100px] pb-4 sm:pb-6">{children}</div>
       <Footer />
       <BackToTop />
     </>

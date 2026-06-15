@@ -58,6 +58,21 @@
     "web-push": "^3.6.7",
     "zod": "^3.23.8"
   },
+  "browserslist": {
+    "production": [
+      "chrome >= 96",
+      "firefox >= 90",
+      "safari >= 15.4",
+      "edge >= 96",
+      "ios_saf >= 15.4",
+      "not dead"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "devDependencies": {
     "@types/node": "^22.5.5",
     "@types/pg": "^8.20.0",

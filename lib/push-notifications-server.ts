@@ -1,4 +1,3 @@
-// @ts-nocheck
 import webpush from "web-push";
 
 function getVapidKeys() {

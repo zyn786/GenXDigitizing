@@ -89,7 +89,8 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (error) {
-        return NextResponse.json({ error: "Failed to save file record", detail: String(error) }, { status: 500 });
+        console.error("[upload/output] DB error:", error);
+        return NextResponse.json({ error: "Failed to save file record" }, { status: 500 });
       }
 
       results.push(fileRecord);

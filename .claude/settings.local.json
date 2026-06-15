@@ -13,7 +13,14 @@
       "Bash(npx vitest *)",
       "Bash(curl *)",
       "Bash(node *)",
-      "WebFetch(domain:genxdigitizing.com)"
+      "WebFetch(domain:genxdigitizing.com)",
+      "WebFetch(domain:pagespeed.web.dev)",
+      "WebFetch(domain:www.googleapis.com)",
+      "mcp__ide__getDiagnostics",
+      "mcp__plugin_supabase_supabase__list_projects",
+      "mcp__plugin_supabase_supabase__apply_migration",
+      "Skill(run)",
+      "Bash(npx playwright *)"
     ]
   }
 }

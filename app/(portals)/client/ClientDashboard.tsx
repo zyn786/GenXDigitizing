@@ -4,9 +4,10 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Plus, Star, Package, Camera, Loader2, ChevronRight, ClipboardList } from "lucide-react";
+import { ArrowUpRight, Plus, Star, Package, Camera, Loader2, ChevronRight, ClipboardList, Crown, Clock, Sparkles } from "lucide-react";
 import { formatCurrency, formatDate, STATUS_CLASS, STATUS_LABEL } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { getCreditCost } from "@/lib/plans";
 import { toast } from "sonner";
 
 const CARD_COLORS = [
@@ -30,7 +31,10 @@ const CAT_META: Record<string, { emoji: string; ci: number }> = {
 export function ClientDashboard({ user, stats, recentOrders, tiers, pendingReview }: any) {
   const [avatarUrl, setAvatarUrl] = useState(user.avatar_url || null);
   const [uploading, setUploading] = useState(false);
+  const [subscription, setSubscription] = useState<any>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(()=>{(async()=>{if(!user.client_id)return;const{data:sub}=await createClient().from("client_subscriptions").select("*").eq("client_id",user.client_id).in("status",["active","pending","cancellation_requested"]).maybeSingle();setSubscription(sub);})();},[]);
 
   async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -101,17 +105,41 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
             </p>
           </div>
         </div>
-        <div className="flex gap-2 mb-2.5">
+        {/* Subscription status */}
+        {subscription && (
+          <div className="mb-2.5 px-2 py-1.5 rounded-lg flex items-center gap-1.5 text-[11px] leading-none" style={{ background: subscription.status==="active"?"linear-gradient(135deg, rgba(245,158,11,0.06), rgba(139,92,246,0.04))":"rgba(249,115,22,0.04)", border: subscription.status==="active"?"1px solid rgba(245,158,11,0.15)":"1px solid rgba(249,115,22,0.2)" }}>
+            {subscription.status==="active"?<Crown size={11} style={{color:"#F59E0B",flexShrink:0}}/>:<Clock size={11} style={{color:subscription.status==="pending"?"#F97316":"#F59E0B",flexShrink:0}}/>}
+            <span className="font-bold" style={{color:txt}}>{subscription.plan.toUpperCase()}</span>
+            {subscription.status==="active"&&<span className="font-bold" style={{color:"#16A34A"}}>· {subscription.designs_total - subscription.designs_used + (subscription.designs_rolled_over||0)} credits</span>}
+            {subscription.status==="pending"&&<span style={{color:"#F97316"}}>· Awaiting approval</span>}
+            {subscription.status==="cancellation_requested"&&<span style={{color:"#F59E0B"}}>· Under review</span>}
+            <Link href="/client/subscribe" className="font-bold no-underline ml-auto flex-shrink-0" style={{color:"#7C3AED"}}>Manage</Link>
+          </div>
+        )}
+        {!subscription && (
+          <div className="mb-2.5 p-2 rounded-lg flex items-center gap-1.5" style={{background:"linear-gradient(135deg, rgba(37,99,235,0.06), rgba(124,58,237,0.04))",border:"1px solid rgba(37,99,235,0.15)"}}>
+            <Sparkles size={12} style={{color:"#2563EB"}}/>
+            <span className="text-[11px] font-semibold" style={{color:txt}}>Save with a monthly plan</span>
+            <Link href="/client/subscribe" className="text-[9px] font-bold no-underline ml-auto" style={{color:"#2563EB"}}>View Plans</Link>
+          </div>
+        )}
+        <div className="flex gap-1.5 mb-2.5">
           <Link href="/client/new-order" className="flex-1">
-            <button className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-[13px] font-bold border-none cursor-pointer text-white transition-all active:scale-95"
-              style={{ background: `linear-gradient(135deg,${clr[4].bg},${clr[5].bg})`, boxShadow: `0 4px 12px ${clr[4].bgSoft}` }}>
-              <Plus size={15} /> Place Order
+            <button className="w-full inline-flex items-center justify-center gap-1 px-2 py-2 rounded-xl text-[11px] font-bold border-none cursor-pointer text-white transition-all active:scale-95"
+              style={{ background: `linear-gradient(135deg,${clr[4].bg},${clr[5].bg})` }}>
+              <Plus size={13} />Order
+            </button>
+          </Link>
+          <Link href="/client/subscribe" className="flex-1">
+            <button className="w-full inline-flex items-center justify-center gap-1 px-2 py-2 rounded-xl text-[11px] font-bold border cursor-pointer transition-all active:scale-95"
+              style={{ background: "transparent", color: "#F59E0B", borderColor: "rgba(245,158,11,0.3)" }}>
+              <Crown size={13} />Plans
             </button>
           </Link>
           <Link href="/client/my-orders" className="flex-1">
-            <button className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-[13px] font-bold border cursor-pointer transition-all active:scale-95"
+            <button className="w-full inline-flex items-center justify-center gap-1 px-2 py-2 rounded-xl text-[11px] font-bold border cursor-pointer transition-all active:scale-95"
               style={{ background: "transparent", color: clr[4].text, borderColor: clr[4].border }}>
-              <ClipboardList size={15} /> My Orders
+              <ClipboardList size={13} />Orders
             </button>
           </Link>
         </div>
@@ -125,20 +153,19 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
         </div>
       </div>
 
-      {/* Stats — single row */}
-      <div className="flex gap-2 sm:gap-3 mb-5 overflow-x-auto scrollbar-none flex-nowrap">
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-1.5 mb-4">
         {[
-          { label: "Total Orders", val: stats.total, ci: 4 },
+          { label: "Orders", val: stats.total, ci: 4 },
           { label: "Active", val: stats.active, ci: 3 },
-          { label: "Delivered", val: stats.delivered, ci: 1 },
-          { label: "Total Spent", val: formatCurrency(stats.totalSpent, "USD", true), ci: 2 },
+          { label: "Done", val: stats.delivered, ci: 1 },
+          { label: "Spent", val: formatCurrency(stats.totalSpent, "USD", true), ci: 2 },
         ].map(s => {
           const c = clr[s.ci];
           return (
-            <div key={s.label} className="flex-1 min-w-[90px] sm:min-w-[130px] rounded-2xl p-3 sm:p-3.5 text-center transition-all duration-200 hover:translate-y-[-2px]"
-              style={{ background: c.bgSoft, border: `1px solid ${c.border}` }}>
-              <div className="font-syne font-bold text-2xl sm:text-3xl mb-1 leading-tight" style={{ color: c.text }}>{s.val}</div>
-              <div className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold" style={{ color: txt2 }}>{s.label}</div>
+            <div key={s.label} className="rounded-xl p-2 text-center" style={{ background: c.bgSoft, border: `1px solid ${c.border}` }}>
+              <div className="font-syne font-bold text-base sm:text-xl" style={{ color: c.text }}>{s.val}</div>
+              <div className="text-[9px] uppercase tracking-wider font-bold mt-0.5" style={{ color: txt3 }}>{s.label}</div>
             </div>
           );
         })}
@@ -189,14 +216,16 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
                     </span>
                   </div>
                   {catTiers.map((t: any) => (
-                    <div key={t.id} className="flex justify-between items-center px-3 py-2 text-xs" style={{ borderBottom: "1px solid var(--border)", background: "var(--surface)" }}>
-                      <div className="min-w-0">
-                        <span className="font-medium" style={{ color: txt2 }}>{t.label}</span>
-                        <span className="text-[10px] ml-1.5 hidden sm:inline" style={{ color: txt3 }}>{t.size_desc}</span>
+                    <div key={t.id} className="flex items-center justify-between px-2.5 py-1.5 text-[11px]" style={{ borderBottom: "1px solid var(--border)", background: "var(--surface)" }}>
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        <span className="font-semibold truncate" style={{ color: txt2 }}>{t.label}</span>
+                        <span className="text-[10px] truncate hidden sm:inline" style={{ color: txt3 }}>{t.size_desc}</span>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                         <span style={{ color: txt3, fontSize: 10 }}>{t.est_hours}</span>
-                        <span className="font-syne font-bold text-sm" style={{ color: c.text }}>${Number(t.price).toFixed(0)}</span>
+                        {subscription && subscription.status === "active"
+                          ? <span className="font-bold text-[11px]" style={{color: (t.credit_cost||getCreditCost(subscription.plan,!!t.is_big_design))>1?"#F97316":"#16A34A"}}>{t.credit_cost||getCreditCost(subscription.plan,!!t.is_big_design)} credit{getCreditCost(subscription.plan,!!t.is_big_design,t.credit_cost)!==1?"s":""}</span>
+                          : <span className="font-syne font-bold text-xs" style={{ color: c.text }}>${Number(t.price).toFixed(0)}</span>}
                       </div>
                     </div>
                   ))}

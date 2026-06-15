@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Clock } from "lucide-react";
-import { BLOG_POSTS } from "@/lib/blog-data";
+import { fetchBlogPosts } from "@/lib/blog-data";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { GradientOrb } from "@/components/shared/GradientOrb";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
@@ -14,7 +14,8 @@ export const metadata: Metadata = {
   keywords: ["embroidery digitizing blog", "digitizing guides", "embroidery tutorials", "vector art guides", "embroidery tips"],
 };
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const BLOG_POSTS = await fetchBlogPosts(true);
   return (
     <>
       <BreadcrumbSchema items={[{ name: "Home", url: "/" }, { name: "Blog", url: "/blog" }]} />

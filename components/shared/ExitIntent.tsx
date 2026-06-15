@@ -4,19 +4,18 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { getVisitorState, markVisited } from "@/lib/visitor";
 
 function getReturnVisitor(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const v = localStorage.getItem("gx_visited");
-    if (v) {
-      const d = new Date(v);
-      const days = Math.floor((Date.now() - d.getTime()) / 86400000);
-      if (days < 30 && days >= 1) return `${days} day${days > 1 ? "s" : ""} ago`;
-      if (days < 1) return "today";
-    }
-    localStorage.setItem("gx_visited", new Date().toISOString());
-  } catch {}
+  const state = getVisitorState();
+  if (state.isNew) {
+    markVisited();
+    return null;
+  }
+  const d = new Date(state.visitedAt!);
+  const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+  if (days < 30 && days >= 1) return `${days} day${days > 1 ? "s" : ""} ago`;
+  if (days < 1) return "today";
   return null;
 }
 
