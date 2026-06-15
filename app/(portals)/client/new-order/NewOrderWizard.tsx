@@ -191,6 +191,14 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
             </div>
           </div>
 
+          {/* How It Works — compact strip */}
+          <div className="flex items-center gap-1.5 mb-3 text-[10px] justify-center" style={{color:txt3}}>
+            <span>📤 Upload</span><span style={{color:"var(--border2)"}}>→</span>
+            <span>✏️ We Digitize</span><span style={{color:"var(--border2)"}}>→</span>
+            <span>✅ You Approve</span><span style={{color:"var(--border2)"}}>→</span>
+            <span>📥 Download Files</span>
+          </div>
+
           {/* Tier selection */}
           <div className="mb-3">
             <p className="text-[10px] uppercase tracking-wider font-bold mb-2" style={{color:txt3}}>1. Choose service</p>

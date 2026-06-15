@@ -374,8 +374,15 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
               </Link>
             </div>
 
+            {/* Subscription upsell */}
+            <div className="mt-6 p-4 rounded-2xl text-center" style={{background:"linear-gradient(135deg, rgba(37,99,235,0.06), rgba(124,58,237,0.04))",border:"1px solid rgba(37,99,235,0.15)"}}>
+              <p className="text-[13px] sm:text-sm font-bold mb-1" style={{color:"var(--txt)"}}>📦 Order 10+ designs/month? Save with a plan</p>
+              <p className="text-[11px] sm:text-xs mb-2" style={{color:"var(--txt2)"}}>Fixed monthly pricing from $55/mo — includes priority turnaround, free revisions & format conversions</p>
+              <Link href="/subscribe"><Button variant="grad" size="sm">View Plans →</Button></Link>
+            </div>
+
             {/* Guarantees */}
-            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5 mt-6">
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5 mt-4">
               <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-[var(--txt2)]">
                 <span className="text-xs">🛡️</span> {SITE_STATS.satisfactionRate}% satisfaction guarantee
               </span>
