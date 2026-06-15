@@ -140,7 +140,7 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
       for(const f of files)fd.append("files",f);
       const upRes=await fetch("/api/upload/artwork",{method:"POST",body:fd});
       if(!upRes.ok){
-        await fetch(`/api/orders/${order.id}/status`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:"cancelled"})}).catch(()=>{});
+        await supabase.from("orders").update({status:"cancelled"}).eq("id",order.id).then(()=>{}).catch(()=>{});
         const e=await upRes.json().catch(()=>({}));toast.error(e.error||"Upload failed");setBusy(false);return;
       }
 
