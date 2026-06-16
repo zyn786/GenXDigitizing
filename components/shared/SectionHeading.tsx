@@ -7,6 +7,7 @@ interface SectionHeadingProps {
   description?: string;
   className?: string;
   labelColor?: "blue" | "orange" | "green";
+  id?: string;
 }
 
 const labelStyles = {
@@ -22,6 +23,7 @@ export function SectionHeading({
   description,
   className,
   labelColor = "blue",
+  id,
 }: SectionHeadingProps) {
   return (
     <div className={cn("text-center mb-14", className)}>

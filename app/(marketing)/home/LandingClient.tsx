@@ -424,6 +424,8 @@ function HeroSection() {
   return (
     <section className="relative flex flex-col items-center justify-start pt-2 pb-6 sm:pt-4 h-[90vh] sm:h-[85vh] overflow-hidden" aria-labelledby="hero-heading">
       <div className="absolute inset-0 z-0">
+        {/* Preload LCP hero poster for fast paint */}
+        <link rel="preload" as="image" href="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:low,so_0,w_1200/v1781040748/hero-bg-desktop_ogydtd.jpg" fetchPriority="high" />
         {/* Single video element — browser picks source by media query. Only loads ONE video. */}
         <video
           className="absolute inset-0 w-full h-full object-cover"
@@ -451,6 +453,7 @@ function HeroSection() {
             src="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264,q_auto:good,w_750/v1781040746/hero-bg-mobile_yz4bkh.mp4"
             type="video/mp4"
           />
+          <track kind="captions" label="English" srcLang="en" default />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/50 to-black/75 sm:from-black/55 sm:via-black/50 sm:to-black/70 pointer-events-none" />
       </div>
@@ -833,6 +836,7 @@ function ServicesSection() {
     <section className="py-12 sm:py-16 md:py-20 lg:py-24" aria-labelledby="services-heading">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
         <SectionHeading
+          id="services-heading"
           label="What We Digitize"
           title="Every Garment."
           gradientTitle="Every Format."
@@ -923,6 +927,7 @@ function HowItWorksSection() {
     <section className="py-12 sm:py-16 md:py-20" aria-labelledby="process-heading">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
         <SectionHeading
+          id="process-heading"
           label="How It Works"
           title="Order in Minutes,"
           gradientTitle="Delivered Fast"
@@ -1122,7 +1127,7 @@ function PricingSection({ tiers }: { tiers: Record<string, { size: string; price
   return (
     <section className="py-12 sm:py-16 md:py-20 lg:py-24" aria-labelledby="pricing-heading">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
-        <SectionHeading label="Pricing" title="Transparent Pricing." gradientTitle="No Surprises." description="All plans include free revisions, free format conversion, and free rush delivery. Pay only when satisfied." />
+        <SectionHeading id="pricing-heading" label="Pricing" title="Transparent Pricing." gradientTitle="No Surprises." description="All plans include free revisions, free format conversion, and free rush delivery. Pay only when satisfied." />
 
         <div className="grid md:grid-cols-3 gap-5 sm:gap-6 max-w-5xl mx-auto">
           {plans.map((plan) => (
@@ -1180,6 +1185,7 @@ function ManualVsAutoSection() {
     <section className="py-12 sm:py-16 md:py-20 bg-[#FAFAF9]" aria-labelledby="comparison-heading">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-12">
         <SectionHeading
+          id="comparison-heading"
           label="Quality Comparison"
           title="Manual Digitizing vs"
           gradientTitle="Auto-Tracing Software"
@@ -1252,7 +1258,7 @@ function FAQSection({ faqs }: { faqs: { q: string; a: string }[] }) {
   return (
     <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-[var(--surface)] border-y border-[var(--border)]" aria-labelledby="faq-heading">
       <div className="max-w-[880px] mx-auto px-4 sm:px-6 md:px-12">
-        <SectionHeading label="FAQ" title="Got Questions?" gradientTitle="We've Got Answers." />
+        <SectionHeading id="faq-heading" label="FAQ" title="Got Questions?" gradientTitle="We've Got Answers." />
 
         <div className="relative max-w-md mx-auto mb-8">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--txt3)]" />
