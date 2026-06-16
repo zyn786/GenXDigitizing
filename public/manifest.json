@@ -1,0 +1,12 @@
+{
+  "name": "GenXdigitizing — Professional Embroidery Digitizing",
+  "short_name": "GenXdigitizing",
+  "description": "Production-ready embroidery digitizing, vector art, and custom patches from $7.",
+  "start_url": "/",
+  "display": "browser",
+  "theme_color": "#2563EB",
+  "background_color": "#FFFFFF",
+  "icons": [
+    { "src": "/images/black_logo.png", "sizes": "1280x1280", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

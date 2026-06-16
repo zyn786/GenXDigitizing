@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { FreeDesignsClient } from "./FreeDesignsClient";
 
 export const metadata: Metadata = {
-  title: "Free Embroidery Designs — Download Sample Files | genxdigitizing",
+  title: "Free Embroidery Designs — Download Sample Files — genxdigitizing",
   description:
     "Download free embroidery design samples. Preview our digitizing quality before you order. DST, PES, EMB formats available. Compatible with Brother, Tajima, Janome machines.",
   keywords: "free embroidery designs, embroidery download, DST files, PES files, free embroidery samples, digitizing samples",
@@ -14,5 +15,10 @@ export const metadata: Metadata = {
 };
 
 export default function FreeDesignsPage() {
-  return <FreeDesignsClient />;
+  return (
+    <>
+      <BreadcrumbSchema items={[{ name: "Home", url: "/" }, { name: "Free Designs", url: "/free-designs" }]} />
+      <FreeDesignsClient />
+    </>
+  );
 }

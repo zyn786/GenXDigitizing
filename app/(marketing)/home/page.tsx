@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_STATS, fmtPlus } from "@/lib/site-config";
-import { FAQSchema, BreadcrumbSchema } from "@/components/shared/StructuredData";
+import { FAQSchema, BreadcrumbSchema, VideoObjectSchema } from "@/components/shared/StructuredData";
 import { LandingClient } from "./LandingClient";
 
 async function getLiveStats() {
@@ -26,6 +26,9 @@ export const metadata: Metadata = {
     title: "genxdigitizing — Production-Ready Embroidery Files",
     description: `Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. ${fmtPlus(SITE_STATS.ordersCompleted)} orders completed.`,
     type: "website",
+  },
+  alternates: {
+    canonical: "/",
   },
 };
 
@@ -99,6 +102,13 @@ export default async function HomePage() {
     <>
       <FAQSchema faqs={FAQS} />
       <BreadcrumbSchema items={[{ name: "Home", url: "/" }]} />
+      <VideoObjectSchema
+        name="GenXdigitizing — Professional Embroidery Digitizing"
+        description="See our embroidery digitizing process in action. Clean stitch paths, professional results for caps, jackets, and more."
+        contentUrl="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264,q_auto:good,w_1200/v1781040748/hero-bg-desktop_ogydtd.mp4"
+        thumbnailUrl="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:low,so_0,w_1200/v1781040748/hero-bg-desktop_ogydtd.jpg"
+        uploadDate="2025-06-01"
+      />
       <LandingClient liveStats={await getLiveStats()} services={services} process={PROCESS} testimonials={TESTIMONIALS} faqs={FAQS} />
     </>
   );

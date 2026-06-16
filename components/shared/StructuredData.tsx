@@ -1,6 +1,6 @@
 import { SITE_INFO, SITE_STATS } from "@/lib/site-config";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://genxdigitizing.com";
 
 /** Organization schema — include on every page via layout */
 export function OrganizationSchema() {
@@ -10,6 +10,7 @@ export function OrganizationSchema() {
     name: SITE_INFO.name,
     url: BASE_URL,
     logo: `${BASE_URL}/images/black_logo.png`,
+    image: `${BASE_URL}/images/black_logo.png`,
     email: SITE_INFO.email,
     ...(SITE_INFO.phone ? { telephone: SITE_INFO.phone } : {}),
     ...(SITE_INFO.address ? {
@@ -75,6 +76,65 @@ export function ServiceSchema({
       price: "7.00",
       priceCurrency: "USD",
       description: "Starting from $7",
+    },
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}
+
+/** VideoObject schema — for pages with a hero/promo video */
+export function VideoObjectSchema({
+  name,
+  description,
+  contentUrl,
+  thumbnailUrl,
+  uploadDate,
+  duration,
+}: {
+  name: string;
+  description: string;
+  contentUrl: string;
+  thumbnailUrl: string;
+  uploadDate: string;
+  duration?: string;
+}) {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name,
+    description,
+    thumbnailUrl,
+    contentUrl,
+    uploadDate,
+    ...(duration ? { duration } : {}),
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}
+
+/** WebSite schema — include on root layout for Google Sitelinks Searchbox */
+export function WebSiteSchema() {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_INFO.name,
+    url: BASE_URL,
+    description: `Production-ready embroidery digitizing, vector art, and custom patches. ${SITE_STATS.ordersCompleted.toLocaleString()}+ orders completed. Free revisions. Fast turnaround.`,
+    potentialAction: {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        urlTemplate: `${BASE_URL}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
     },
   };
   return (

@@ -4,7 +4,7 @@ import { BreadcrumbSchema, ServiceSchema } from "@/components/shared/StructuredD
 import { ServicePageTemplate, type ServicePageData } from "@/components/marketing/ServicePageTemplate";
 
 const DATA: ServicePageData = {
-  title: "Custom Patch Design Service — Embroidered, PVC & Woven",
+  title: "Custom Patch Design Service",
   subtitle: "Bulk Discounts | Free Shipping | From $5 Per Design",
   description: "Professional custom patch digitizing for embroidered, PVC, woven, chenille, and leather patches. Merrow borders, iron-on backing, and bulk order discounts. 500+ patches up to 50% off.",
   emoji: "🏷️", color: "#16A34A",

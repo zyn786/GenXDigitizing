@@ -4,7 +4,7 @@ import { SITE_STATS } from "@/lib/site-config";
 import { Toaster } from "sonner";
 import Script from "next/script";
 import { LiveOrderProvider } from "@/components/social-proof/LiveOrderProvider";
-import { OrganizationSchema } from "@/components/shared/StructuredData";
+import { OrganizationSchema, WebSiteSchema } from "@/components/shared/StructuredData";
 import "./globals.css";
 
 const syne = Syne({
@@ -24,7 +24,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     default:  "genxdigitizing — Premium Embroidery Digitizing from $7",
-    template: "%s | genxdigitizing",
+    template: "%s — genxdigitizing",
   },
   description:
     "Production-ready embroidery digitizing, vector art conversion, and custom patches from $7. Clean proofs, 12hr turnaround, free unlimited revisions.",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   authors: [{ name: "genxdigitizing" }],
   creator: "genxdigitizing",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com"
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://genxdigitizing.com"
   ),
   openGraph: {
     type:        "website",
@@ -67,6 +67,9 @@ export const metadata: Metadata = {
     index:  true,
     follow: true,
   },
+  alternates: {
+    canonical: "./",
+  },
 };
 
 export const viewport: Viewport = {
@@ -89,6 +92,8 @@ export default function RootLayout({
       <head>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#2563EB" />
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         {/* Google Analytics — deferred to idle to keep critical path clear */}
@@ -107,6 +112,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <OrganizationSchema />
+        <WebSiteSchema />
         {/* Register Service Worker for push notifications */}
         <script
           dangerouslySetInnerHTML={{

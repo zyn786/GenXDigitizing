@@ -33,7 +33,11 @@ const nextConfig = {
     }];
   },
 
-  async redirects() { return []; },
+  async redirects() {
+    return [
+      { source: "/home", destination: "/", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

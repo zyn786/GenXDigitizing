@@ -20,7 +20,7 @@ export const SITE_INFO = {
   whatsapp: "18302102135",
   email: "hello@genxdigitizing.com",
   trustpilotEmail: "genxdigitizing.com+a5c28d839b@invite.trustpilot.com",
-  address: null, // set when physical address available
+  address: "1214 New York 55, Lagrangeville, NY 12540", // set when physical address available
   founded: 2024,
 } as const;
 

@@ -4,7 +4,7 @@ import { BreadcrumbSchema, ServiceSchema } from "@/components/shared/StructuredD
 import { ServicePageTemplate, type ServicePageData } from "@/components/marketing/ServicePageTemplate";
 
 const DATA: ServicePageData = {
-  title: "Cap Digitizing Service — Professional Hat Embroidery Files",
+  title: "Cap Digitizing Service",
   subtitle: "Curve-Compensated Stitch Paths | Clean Sew-Outs | All Formats",
   description: "Specialized cap and hat digitizing with structural underlay, curve compensation, and optimized stitch angles for clean sew-outs on curved surfaces. Perfect for 6-panel, 5-panel, snapbacks, and fitted caps.",
   emoji: "🧢", color: "#F97316",

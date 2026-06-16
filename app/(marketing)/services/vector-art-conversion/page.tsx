@@ -4,7 +4,7 @@ import { BreadcrumbSchema, ServiceSchema } from "@/components/shared/StructuredD
 import { ServicePageTemplate, type ServicePageData } from "@/components/marketing/ServicePageTemplate";
 
 const DATA: ServicePageData = {
-  title: "Vector Art Conversion Service — Clean, Scalable Vectors",
+  title: "Vector Art Conversion Service",
   subtitle: "AI, SVG, EPS, PDF Output | Manual Redraw | From $8",
   description: "Professional vector art conversion from any source. JPGs, PNGs, hand sketches, and old artwork converted into clean, scalable vector files for screen printing, DTF, heat transfer, and large-format production.",
   emoji: "✏️", color: "#F97316",

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — genxdigitizing",
@@ -7,7 +8,9 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden">
+    <>
+      <BreadcrumbSchema items={[{ name: "Home", url: "/" }, { name: "Privacy Policy", url: "/privacy-policy" }]} />
+      <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden">
       <div className="max-w-[800px] mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20 mb-4">
           Legal
@@ -123,5 +126,6 @@ export default function PrivacyPolicyPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
