@@ -296,14 +296,16 @@ function BeforeAfterSlider({
   const [containerWidth, setContainerWidth] = useState(0);
   const dragging = useRef(false);
 
-  const measure = useCallback(() => {
-    if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth);
-  }, []);
   useEffect(() => {
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, [measure]);
+    const el = containerRef.current;
+    if (!el) return;
+    // ResizeObserver avoids forced reflow from offsetWidth read
+    const ro = new ResizeObserver(([entry]) => {
+      setContainerWidth(entry.contentRect.width);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const updatePosition = useCallback((clientX: number) => {
     const el = containerRef.current;
@@ -425,50 +427,36 @@ function HeroSection() {
   return (
     <section className="relative flex flex-col items-center justify-start pt-2 pb-6 sm:pt-4 h-[90vh] sm:h-[85vh] overflow-hidden" aria-labelledby="hero-heading">
       <div className="absolute inset-0 z-0">
-        {/* Preload LCP hero poster for fast paint */}
-        <link rel="preload" as="image" href="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:low,so_0,w_1200/v1781040748/hero-bg-desktop_ogydtd.jpg" fetchPriority="high" />
-        {/* Poster image shown immediately; video deferred until idle */}
+        {/* Poster image loads immediately; video deferred until idle */}
         <Image
-          src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:good,w_1200/v1781040748/hero-bg-desktop_ogydtd.jpg"
+          src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:low,f_auto,w_600/v1781040748/hero-bg-desktop_ogydtd.jpg"
           alt=""
-          fill className="object-cover sm:hidden" priority unoptimized
+          fill className="object-cover" priority unoptimized
           sizes="100vw"
         />
-        <Image
-          src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:good,w_750/v1781040746/hero-bg-mobile_yz4bkh.jpg"
-          alt=""
-          fill className="object-cover hidden sm:block" priority unoptimized
-          sizes="100vw"
-        />
-        {/* Single video element — lazy-loaded after idle callback */}
+        {/* Video lazy-loaded after mount — poster image serves as initial paint */}
         <video
+          ref={(el) => {
+            if (!el || el.hasChildNodes()) return;
+            // Defer source loading to idle callback
+            const load = () => {
+              el.innerHTML = `
+                <source src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:good,w_1200/v1781040748/hero-bg-desktop_ogydtd.webm" type="video/webm" media="(min-width: 640px)">
+                <source src="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264,q_auto:good,w_1200/v1781040748/hero-bg-desktop_ogydtd.mp4" type="video/mp4" media="(min-width: 640px)">
+                <source src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:good,w_750/v1781040746/hero-bg-mobile_yz4bkh.webm" type="video/webm">
+                <source src="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264,q_auto:good,w_750/v1781040746/hero-bg-mobile_yz4bkh.mp4" type="video/mp4">
+                <track kind="captions" label="English" srcLang="en" default>
+              `;
+              el.play().catch(() => {});
+            };
+            if ('requestIdleCallback' in window) requestIdleCallback(load);
+            else setTimeout(load, 2000);
+          }}
           className="absolute inset-0 w-full h-full object-cover"
-          autoPlay muted loop playsInline preload="none"
+          muted loop playsInline preload="none"
           width={1920} height={1080}
           poster="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:low,so_0,w_1200/v1781040748/hero-bg-desktop_ogydtd.jpg"
-        >
-          {/* Desktop (sm+): smaller compressed version */}
-          <source
-            src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:good,w_1200/v1781040748/hero-bg-desktop_ogydtd.webm"
-            type="video/webm"
-            media="(min-width: 640px)"
-          />
-          <source
-            src="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264,q_auto:good,w_1200/v1781040748/hero-bg-desktop_ogydtd.mp4"
-            type="video/mp4"
-            media="(min-width: 640px)"
-          />
-          {/* Mobile (below sm): vertical crop */}
-          <source
-            src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:good,w_750/v1781040746/hero-bg-mobile_yz4bkh.webm"
-            type="video/webm"
-          />
-          <source
-            src="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264,q_auto:good,w_750/v1781040746/hero-bg-mobile_yz4bkh.mp4"
-            type="video/mp4"
-          />
-          <track kind="captions" label="English" srcLang="en" default />
-        </video>
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/50 to-black/75 sm:from-black/55 sm:via-black/50 sm:to-black/70 pointer-events-none" />
       </div>
 
