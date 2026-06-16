@@ -1,14 +1,15 @@
 // @ts-nocheck
 import type { MetadataRoute } from "next";
 
+export const revalidate = 86400; // regenerate daily for fresh lastModified dates
+
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://genxdigitizing.com";
-const NOW  = new Date();
 
 type F = MetadataRoute.Sitemap[number]["changeFrequency"];
 
 function u(path: string, opts: { freq?: F; pri?: number } = {}) {
   const { freq = "monthly", pri = 0.8 } = opts;
-  return { url: `${BASE}${path}`, lastModified: NOW, changeFrequency: freq, priority: pri };
+  return { url: `${BASE}${path}`, lastModified: new Date(), changeFrequency: freq, priority: pri };
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
