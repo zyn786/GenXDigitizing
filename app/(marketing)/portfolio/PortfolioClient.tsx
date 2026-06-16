@@ -491,7 +491,7 @@ export function PortfolioClient() {
       <section className="pb-6 sm:pb-8">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
           {/* Main categories */}
-          <div className="flex flex-wrap justify-center gap-2 mb-3">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 mb-3">
             {mainCategories.map((cat) => {
               const count =
                 cat.slug === "all"
