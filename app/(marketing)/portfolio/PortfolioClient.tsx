@@ -46,10 +46,10 @@ function SectionBadge({ children, color = "#2563EB" }: { children: React.ReactNo
 
 function StatPill({ icon: Icon, value, label }: { icon: any; value: string; label: string }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--elevated)] border border-[var(--border)]">
-      <Icon size={14} className="text-[#2563EB]" />
-      <span className="text-xs font-semibold text-[var(--txt)]">{value}</span>
-      <span className="text-[10px] text-[var(--txt3)] hidden sm:inline">{label}</span>
+    <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[var(--elevated)] border border-[var(--border)]">
+      <Icon size={13} className="text-[#2563EB] flex-shrink-0" />
+      <span className="text-[11px] sm:text-xs font-semibold text-[var(--txt)] whitespace-nowrap">{value}</span>
+      <span className="text-[10px] text-[var(--txt3)] whitespace-nowrap">{label}</span>
     </div>
   );
 }
@@ -81,7 +81,7 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className="relative inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 border cursor-pointer"
+      className="relative inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[13px] sm:text-sm font-semibold transition-all duration-200 border cursor-pointer"
       style={{
         background: isActive
           ? `linear-gradient(135deg, ${color}, ${color}DD)`
@@ -91,17 +91,19 @@ function FilterChip({
         boxShadow: isActive ? `0 0 24px ${color}30` : "none",
       }}
     >
-      <span>{emoji}</span>
+      <span className="text-sm sm:text-base">{emoji}</span>
       <span>{label}</span>
-      <span
-        className="inline-flex items-center justify-center min-w-[20px] h-5 rounded-full text-[10px] font-bold px-1.5"
-        style={{
-          background: isActive ? `${color}30` : "var(--border)",
-          color: isActive ? color : "var(--txt3)",
-        }}
-      >
-        {count}
-      </span>
+      {count > 0 && (
+        <span
+          className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full text-[10px] font-bold px-1.5"
+          style={{
+            background: isActive ? `${color}30` : "var(--border)",
+            color: isActive ? color : "var(--txt3)",
+          }}
+        >
+          {count}
+        </span>
+      )}
     </button>
   );
 }
