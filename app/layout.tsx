@@ -24,7 +24,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     default:  "genxdigitizing — Premium Embroidery Digitizing from $7",
-    template: "%s — genxdigitizing",
   },
   description:
     "Production-ready embroidery digitizing, vector art conversion, and custom patches from $7. Clean proofs, 12hr turnaround, free unlimited revisions.",
