@@ -1,6 +1,6 @@
 import { SITE_INFO, SITE_STATS } from "@/lib/site-config";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://genxdigitizing.com";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com";
 
 /** Organization schema — include on every page via layout */
 export function OrganizationSchema() {

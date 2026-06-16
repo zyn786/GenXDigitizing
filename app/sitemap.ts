@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 
 export const revalidate = 86400; // regenerate daily for fresh lastModified dates
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://genxdigitizing.com";
+const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com";
 
 type F = MetadataRoute.Sitemap[number]["changeFrequency"];
 

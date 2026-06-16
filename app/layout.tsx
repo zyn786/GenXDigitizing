@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   authors: [{ name: "genxdigitizing" }],
   creator: "genxdigitizing",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://genxdigitizing.com"
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com"
   ),
   openGraph: {
     type:        "website",
