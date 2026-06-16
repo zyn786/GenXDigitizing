@@ -142,6 +142,11 @@ export function Footer() {
             <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] shadow-[0_0_6px_#16A34A]" />
             All systems operational
           </p>
+          {SITE_INFO.social && (
+            <div className="flex items-center justify-center gap-3">
+              <a href={SITE_INFO.social.instagram} target="_blank" rel="noopener noreferrer" className="text-[11px] text-[var(--txt3)] hover:text-[var(--txt)] transition-colors no-underline">📸 Instagram</a>
+            </div>
+          )}
         </div>
       </div>
     </footer>

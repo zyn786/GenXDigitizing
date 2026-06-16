@@ -25,6 +25,9 @@ export function OrganizationSchema() {
     } : {}),
     foundingDate: String(SITE_INFO.founded),
     description: `Production-ready embroidery digitizing, vector art, and custom patches. ${SITE_STATS.ordersCompleted.toLocaleString()}+ orders completed. Free revisions. Fast turnaround.`,
+    ...(SITE_INFO.social ? {
+      sameAs: Object.values(SITE_INFO.social),
+    } : {}),
   };
   return (
     <script

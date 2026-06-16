@@ -28,6 +28,9 @@ export const SITE_INFO = {
     country: "US",
   },
   founded: 2024,
+  social: {
+    instagram: "https://www.instagram.com/genxdigitizing",
+  },
 } as const;
 
 /** Format number with commas */
