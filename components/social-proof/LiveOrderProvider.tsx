@@ -38,6 +38,8 @@ export function LiveOrderProvider() {
   const poll = useCallback(async () => {
     try {
       const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return; // Silent skip for unauthenticated visitors
       const since = new Date(Date.now() - LOOKBACK_MINUTES * 60 * 1000).toISOString();
       const orders = await getRecentOrdersForLiveToast(supabase, since);
 
