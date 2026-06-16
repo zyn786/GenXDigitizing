@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   Search,
@@ -344,9 +345,9 @@ function BeforeAfterSlider({
       onMouseDown={startDrag}
       onTouchStart={startDrag}
     >
-      <img src={beforeUrl} alt={beforeAlt} className="absolute inset-0 w-full h-full object-cover" draggable={false} fetchPriority="high" width={800} height={600} />
+      <Image src={beforeUrl} alt={beforeAlt} fill className="object-cover" draggable={false} priority sizes="(max-width: 768px) 100vw, 800px" unoptimized />
       <div className="absolute top-0 left-0 h-full overflow-hidden" style={{ width: `${position}%` }}>
-        <img src={afterUrl} alt={afterAlt} className="absolute top-0 left-0 h-full object-cover" style={{ width: containerWidth || "100%", maxWidth: "none" }} draggable={false} fetchPriority="high" width={800} height={600} />
+        <Image src={afterUrl} alt={afterAlt} fill className="object-cover" style={{ maxWidth: "none" }} draggable={false} priority sizes="(max-width: 768px) 100vw, 800px" unoptimized />
       </div>
       <div className="absolute top-0 bottom-0 w-[3px] bg-white shadow-md pointer-events-none" style={{ left: `${position}%`, transform: "translateX(-50%)" }}>
         <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-white border-2 border-[var(--border)] shadow-lg flex items-center justify-center pointer-events-none">
@@ -426,7 +427,20 @@ function HeroSection() {
       <div className="absolute inset-0 z-0">
         {/* Preload LCP hero poster for fast paint */}
         <link rel="preload" as="image" href="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:low,so_0,w_1200/v1781040748/hero-bg-desktop_ogydtd.jpg" fetchPriority="high" />
-        {/* Single video element — browser picks source by media query. Only loads ONE video. */}
+        {/* Poster image shown immediately; video deferred until idle */}
+        <Image
+          src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:good,w_1200/v1781040748/hero-bg-desktop_ogydtd.jpg"
+          alt=""
+          fill className="object-cover sm:hidden" priority unoptimized
+          sizes="100vw"
+        />
+        <Image
+          src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:good,w_750/v1781040746/hero-bg-mobile_yz4bkh.jpg"
+          alt=""
+          fill className="object-cover hidden sm:block" priority unoptimized
+          sizes="100vw"
+        />
+        {/* Single video element — lazy-loaded after idle callback */}
         <video
           className="absolute inset-0 w-full h-full object-cover"
           autoPlay muted loop playsInline preload="none"
