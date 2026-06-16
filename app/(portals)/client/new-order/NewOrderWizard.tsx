@@ -1,10 +1,11 @@
 // @ts-nocheck
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { CheckCircle, ArrowRight, ArrowLeft } from "lucide-react";
+import { QuickOrder } from "./QuickOrder";
 import { Step1Tier } from "./Step1Tier";
 import { Step2Turnaround } from "./Step2Turnaround";
 import { Step3Upload } from "./Step3Upload";
@@ -71,6 +72,14 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
   const [stitchCount,setStitchCount]=useState("");
   const [quantity,setQuantity]=useState("1");
   const [instructions,setInstructions]=useState("");
+  const [subscription,setSubscription]=useState<any>(null);
+  const [creditBalance,setCreditBalance]=useState(0);
+
+  // Load subscription
+  useEffect(()=>{(async()=>{if(!clientId)return;const{data:sub}=await supabase.from("client_subscriptions").select("*").eq("client_id",clientId).eq("status","active").maybeSingle();setSubscription(sub);const{data:c}=await supabase.from("clients").select("credit_balance").eq("id",clientId).single();setCreditBalance(c?.credit_balance||0);})();},[]);
+
+  // Smart routing: subscribers get QuickOrder
+  if(subscription){return <QuickOrder tiers={tiers} clientId={clientId} userId={userId} subscription={subscription} creditBalance={creditBalance}/>;}
 
   const catLabel = sel? (sel.category==="digitizing"?"Embroidery Digitizing":sel.category==="vector"?"Vector Redraw":sel.category==="sewout"?"Patch Design":"") : "";
   const serviceName = catLabel && sel ? catLabel+" — "+sel.label : sel?.label||"";
