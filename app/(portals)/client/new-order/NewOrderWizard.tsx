@@ -87,7 +87,7 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
   const grouped:any = {};
   for(const t of tiers){grouped[t.category]=grouped[t.category]||[];grouped[t.category].push(t);}
   const isBig=sel?.is_big_design;
-  const selTurn=TURNS.find(t=>t.id===turn);
+  const selTurn=(TURNS||[]).find(t=>t.id===turn)||TURNS[0];
   const qty = parseInt(quantity)||1;
   const totalPrice = Number(sel?.price||0)*qty;
 

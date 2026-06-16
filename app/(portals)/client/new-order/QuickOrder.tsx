@@ -42,7 +42,7 @@ export function QuickOrder({tiers,clientId,userId,subscription,creditBalance}:Pr
   const cats=Object.keys(grouped);
   const [subCat,setSubCat]=useState(cats[0]||"digitizing");
   const isBig=sel?.is_big_design;
-  const selTurn=TURNS.find(t=>t.id===turn);
+  const selTurn=(TURNS||[]).find(t=>t.id===turn)||TURNS[0];
   const qty=parseInt(quantity)||1;
   const creditCost=sel?getCreditCost(subscription.plan,!!isBig,sel.credit_cost):0;
   const subRemaining=subscription.designs_total-subscription.designs_used+(subscription.designs_rolled_over||0);
