@@ -379,7 +379,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
               <p className="text-[14px] sm:text-base font-bold mb-2" style={{color:"var(--txt)"}}>📦 Ordering 10+ designs/month?</p>
               <div className="flex items-center justify-center gap-2 mb-2 text-[12px] sm:text-sm">
                 <span style={{color:"var(--txt3)",textDecoration:"line-through"}}>$7/design × 10 = $70</span>
-                <span style={{color:txt3}}>→</span>
+                <span style={{color:"var(--txt3)"}}>→</span>
                 <span style={{color:"#16A34A",fontWeight:700}}>$55/mo for 10 = save $15</span>
                 <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{background:"rgba(22,163,74,0.1)",color:"#16A34A"}}>21% off</span>
               </div>

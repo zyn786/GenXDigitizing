@@ -7,10 +7,10 @@ import { LandingClient } from "./LandingClient";
 
 async function getLiveStats() {
   const admin = createAdminClient();
-  const [{count:totalOrders}] = await admin.from("orders").select("*",{count:"exact",head:true});
-  const [{count:activeOrders}] = await admin.from("orders").select("*",{count:"exact",head:true}).not("status","in","(delivered,cancelled,refunded)");
-  const [{count:deliveredOrders}] = await admin.from("orders").select("*",{count:"exact",head:true}).eq("status","delivered");
-  const [{count:reviewCount}] = await admin.from("reviews").select("*",{count:"exact",head:true}).eq("is_published",true);
+  const {count:totalOrders} = await admin.from("orders").select("*",{count:"exact",head:true});
+  const {count:activeOrders} = await admin.from("orders").select("*",{count:"exact",head:true}).not("status","in","(delivered,cancelled,refunded)");
+  const {count:deliveredOrders} = await admin.from("orders").select("*",{count:"exact",head:true}).eq("status","delivered");
+  const {count:reviewCount} = await admin.from("reviews").select("*",{count:"exact",head:true}).eq("is_published",true);
   return {totalOrders:totalOrders||0,activeOrders:activeOrders||0,deliveredOrders:deliveredOrders||0,reviewCount:reviewCount||0};
 }
 
