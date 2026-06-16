@@ -84,8 +84,8 @@ export function QuickOrder({tiers,clientId,userId,subscription,creditBalance}:Pr
   return(
     <div className="portal-content pb-24" style={{background:"var(--bg)"}}>
       <div className="max-w-[600px] mx-auto">
-        {/* Header */}
-        <div className="rounded-2xl p-3 mb-2" style={{background:"linear-gradient(135deg, rgba(245,158,11,0.08), rgba(139,92,246,0.06))",border:"1px solid rgba(245,158,11,0.15)"}}>
+        {/* Header — stitch-inspired */}
+        <div className="rounded-2xl p-3 mb-2 relative overflow-hidden" style={{background:"linear-gradient(135deg, rgba(220,38,38,0.04), rgba(245,158,11,0.04), rgba(37,99,235,0.03))",border:"2px dashed rgba(245,158,11,0.2)"}}>
           <div className="flex items-center gap-1.5 mb-1">
             <Crown size={16} style={{color:"#F59E0B"}}/>
             <h2 className="font-syne font-bold text-base" style={{color:txt}}>Quick Order</h2>
@@ -144,7 +144,7 @@ export function QuickOrder({tiers,clientId,userId,subscription,creditBalance}:Pr
         </button>
         <div className="text-center mt-1.5 space-y-0.5">
           {sel&&<p className="text-[10px]" style={{color:txt3}}>⏱ Delivery: <strong style={{color:txt}}>{selTurn?.time||"12–24h"}</strong> · Pay only when satisfied</p>}
-          <p className="text-[10px]" style={{color:txt3}}>🛡️ Free revisions · ♾️ Free formats · 📤 Upload → ✏️ Digitize → ✅ Approve → 📥 Download</p>
+          <p className="text-[10px]" style={{color:txt3,fontStyle:"italic"}}>🧵 Thread-by-thread precision · 🛡️ Free revisions · ♾️ All formats included</p>
         </div>
       </div>
     </div>

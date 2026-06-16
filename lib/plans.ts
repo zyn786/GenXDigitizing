@@ -21,7 +21,7 @@ export const PLAN_CONFIG: Record<string, PlanConfig> = {
     price: 55,
     priceAnnual: 550,
     label: "Starter",
-    emoji: "🥉",
+    emoji: "🧵",
     features: [
       "10 Basic Left Chest Designs",
       "Free Minor Edits",
@@ -37,7 +37,7 @@ export const PLAN_CONFIG: Record<string, PlanConfig> = {
     price: 169,
     priceAnnual: 1690,
     label: "Business",
-    emoji: "🥈",
+    emoji: "🪡",
     features: [
       "30 Basic Designs",
       "Priority Queue",
@@ -54,7 +54,7 @@ export const PLAN_CONFIG: Record<string, PlanConfig> = {
     price: 279,
     priceAnnual: 2790,
     label: "Pro",
-    emoji: "🥇",
+    emoji: "🧶",
     features: [
       "50 Basic Designs",
       "Highest Priority",
@@ -71,7 +71,7 @@ export const PLAN_CONFIG: Record<string, PlanConfig> = {
     price: 499,
     priceAnnual: 4990,
     label: "Pro Max",
-    emoji: "💎",
+    emoji: "👕",
     features: [
       "80 Basic Designs",
       "Ultra-High Priority",
