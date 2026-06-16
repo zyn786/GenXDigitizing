@@ -86,12 +86,9 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
     if(!sel){toast.error("Select a tier");return;}
     if(!designName.trim()){toast.error("Enter a design name");return;}
     if(files.length===0){toast.error("Upload at least one reference image");return;}
-    if(!w||parseFloat(w)<=0){toast.error("Enter a valid width");return;}
-    if(!h||parseFloat(h)<=0){toast.error("Enter a valid height");return;}
-    if(!notes.trim()){toast.error("Enter placement notes");return;}
+    if((w&&!h)||(!w&&h)){toast.error("Enter both width and height, or leave both");return;}
     setBusy(true);
     try{
-      // Create order first (need ID for S3 upload)
       const {data:order,error:oErr}=await supabase.from("orders").insert({
         client_id:clientId,service_tier_id:sel.id,output_format:fmt,
         additional_formats:extras.length?extras:null,turnaround:turn,
@@ -101,14 +98,10 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
         design_name:designName.trim()||null,sla_deadline:calcDeadline(turn,isBig),
       }).select().single();
       if(oErr||!order){toast.error("Failed: "+(oErr?.message||"error"));setBusy(false);return;}
-      // Upload artwork files to S3 via API
-      const fd = new FormData();
-      fd.append("orderId", order.id);
-      for(const f of files){ fd.append("files", f); }
-      const upRes = await fetch("/api/upload/artwork", { method: "POST", body: fd });
-      if(!upRes.ok){ const e = await upRes.json().catch(()=>({})); toast.error(e.error||"Upload failed"); setBusy(false);return; }
-      fetch("/api/order-confirm",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({userId,orderNumber:order.order_number,service:sel.label,price:totalPrice,turnaround:turn})}).catch(()=>{});
+      const fd=new FormData();fd.append("orderId",order.id);for(const f of files)fd.append("files",f);
+      const upRes=await fetch("/api/upload/artwork",{method:"POST",body:fd});
+      if(!upRes.ok){await supabase.from("orders").update({status:"cancelled"}).eq("id",order.id);const e=await upRes.json().catch(()=>({}));toast.error(e.error||"Upload failed");setBusy(false);return;}
+      fetch("/api/order-confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId,orderNumber:order.order_number,service:sel.label,price:totalPrice,turnaround:turn})}).catch(()=>{});
       toast.success("Order placed! Redirecting...");
       router.push(`/client/my-orders/${order.id}`);
     }catch(err:any){toast.error(err?.message||"Error");}

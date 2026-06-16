@@ -32,9 +32,6 @@ export function Step3Upload({files,fileRef,setFiles,w,setW,h,setH,col,setCol,not
       {(()=>{
         const missing:string[]=[];
         if(files.length===0)missing.push("Upload artwork");
-        if(!w||parseFloat(w)<=0)missing.push("Enter width");
-        if(!h||parseFloat(h)<=0)missing.push("Enter height");
-        if(!notes.trim())missing.push("Enter placement notes");
         const canGo=missing.length===0;
         return(<>
           {!canGo&&<p className="text-[11px] text-center mt-3" style={{color:"#C2410C"}}>Required: {missing.join(" · ")}</p>}
