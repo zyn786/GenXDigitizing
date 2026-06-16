@@ -4,9 +4,35 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { Check, X, Crown, ExternalLink, Loader2, Clock, Link2, Ban, Send, Rocket, Pause, Play } from "lucide-react";
+import Link from "next/link";
+import { Check, X, Crown, ExternalLink, Loader2, Clock, Link2, Ban, Send, Rocket, Pause, Play, Plus } from "lucide-react";
 import { getPlanPrice, PLAN_CONFIG } from "@/lib/plans";
 import { logAuditEvent } from "@/lib/audit-log";
+
+function CreateSubForm({subs,invoices,onCreated}:{subs:any[];invoices:any[];onCreated:(sub:any)=>void}){
+  const [clientEmail,setClientEmail]=useState("");
+  const [plan,setPlan]=useState("business");
+  const [busy,setBusy]=useState(false);
+  async function create(){
+    if(!clientEmail.trim()){toast.error("Enter client email");return;}
+    setBusy(true);
+    try{
+      const res=await fetch("/api/admin/subscriptions/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:clientEmail.trim(),plan})});
+      const d=await res.json();
+      if(!res.ok){toast.error(d.error||"Failed");return;}
+      onCreated(d.subscription);
+      setClientEmail("");
+    }catch{toast.error("Network error");}
+    finally{setBusy(false);}
+  }
+  return(
+    <div className="flex items-center gap-2 flex-wrap">
+      <input value={clientEmail} onChange={e=>setClientEmail(e.target.value)} placeholder="client@email.com" className="flex-1 min-w-[180px] rounded-lg px-3 py-2 text-[12px] border" style={{background:"var(--elevated)",borderColor:"var(--border2)",color:"var(--txt)",outline:"none"}}/>
+      <select value={plan} onChange={e=>setPlan(e.target.value)} className="rounded-lg px-2 py-2 text-[12px] border" style={{background:"var(--elevated)",borderColor:"var(--border2)",color:"var(--txt)"}}>{["starter","business","pro","pro_max"].map(p=><option key={p} value={p}>{PLAN_CONFIG[p].label} ({PLAN_CONFIG[p].designs} designs/${PLAN_CONFIG[p].price}/mo)</option>)}</select>
+      <button onClick={create} disabled={busy} className="px-4 py-2 rounded-lg text-[12px] font-bold text-white border-none cursor-pointer disabled:opacity-50" style={{background:"#16A34A"}}>{busy?"Creating…":"Create"}</button>
+    </div>
+  );
+}
 
 interface Props {
   subscriptions: any[];
@@ -312,6 +338,34 @@ export function SubscriptionsAdmin({ subscriptions: initialSubs, invoices: initi
               <Check size={12} /> Active link: <a href={universalLink} target="_blank" rel="noreferrer" className="underline" style={{ color: "#2563EB" }}>{universalLink}</a>
             </div>
           )}
+        </section>
+
+        {/* Plan Pricing — editable from admin */}
+        <section className="mb-6 p-4 rounded-xl border" style={{ background: "var(--surface)", borderColor: "rgba(245,158,11,0.2)" }}>
+          <h3 className="font-syne font-bold text-[14px] mb-3 flex items-center gap-2" style={{ color: "var(--txt)" }}>
+            <Crown size={16} style={{ color: "#F59E0B" }} /> Plan Pricing
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+            {["starter","business","pro","pro_max"].map(p=>{
+              const cfg=PLAN_CONFIG[p];
+              return(
+              <div key={p} className="p-2 rounded-lg border text-center" style={{borderColor:"var(--border2)"}}>
+                <p className="text-[10px] font-bold uppercase mb-1" style={{color:"var(--txt)"}}>{cfg.label}</p>
+                <input type="number" defaultValue={cfg.price} onBlur={async(e)=>{const v=parseInt(e.target.value);if(v&&v>0){await supabase.from("platform_settings").upsert({key:`plan_${p}_price`,value:String(v)},{onConflict:"key"});PLAN_CONFIG[p].price=v;toast.success(`${cfg.label}: $${v}/mo`);}}}
+                  className="w-16 text-center rounded border text-[11px] py-0.5 mx-auto block" style={{background:"var(--elevated)",borderColor:"var(--border2)",color:"var(--txt)"}}/>
+                <p className="text-[9px] mt-0.5" style={{color:txt3}}>{cfg.designs} designs</p>
+              </div>
+            )})}
+          </div>
+          <p className="text-[10px]" style={{color:txt3}}>100+ designs/month? Clients request via <Link href="/contact" className="font-bold" style={{color:"#2563EB"}}>Contact</Link> — admin creates custom enterprise plan.</p>
+        </section>
+
+        {/* Admin Create Subscription */}
+        <section className="mb-6 p-4 rounded-xl border" style={{ background: "var(--surface)", borderColor: "rgba(22,163,74,0.2)" }}>
+          <h3 className="font-syne font-bold text-[14px] mb-3 flex items-center gap-2" style={{ color: "var(--txt)" }}>
+            <Plus size={16} style={{ color: "#16A34A" }} /> Create Subscription for Client
+          </h3>
+          <CreateSubForm subs={subs} invoices={invoices} onCreated={(sub:any)=>{setSubs(p=>[sub,...p]);toast.success("Subscription created!");}} />
         </section>
 
         {/* Pending approvals */}
