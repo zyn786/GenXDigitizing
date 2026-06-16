@@ -109,6 +109,8 @@ export function showBrowserNotification(title: string, body: string, actionUrl?:
       icon: "/favicon.ico",
       tag: "genxdigitizing-notif",
       requireInteraction: false,
+      vibrate: [200, 100, 200],
+      silent: false,
     });
 
     if (actionUrl) {
