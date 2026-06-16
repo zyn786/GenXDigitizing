@@ -375,10 +375,16 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
             </div>
 
             {/* Subscription upsell */}
-            <div className="mt-6 p-4 rounded-2xl text-center" style={{background:"linear-gradient(135deg, rgba(37,99,235,0.06), rgba(124,58,237,0.04))",border:"1px solid rgba(37,99,235,0.15)"}}>
-              <p className="text-[13px] sm:text-sm font-bold mb-1" style={{color:"var(--txt)"}}>📦 Order 10+ designs/month? Save with a plan</p>
-              <p className="text-[11px] sm:text-xs mb-2" style={{color:"var(--txt2)"}}>Fixed monthly pricing from $55/mo — includes priority turnaround, free revisions & format conversions</p>
-              <Link href="/subscribe"><Button variant="grad" size="sm">View Plans →</Button></Link>
+            <div className="mt-6 p-5 rounded-2xl text-center" style={{background:"linear-gradient(135deg, rgba(37,99,235,0.06), rgba(124,58,237,0.04))",border:"1px solid rgba(37,99,235,0.15)"}}>
+              <p className="text-[14px] sm:text-base font-bold mb-2" style={{color:"var(--txt)"}}>📦 Ordering 10+ designs/month?</p>
+              <div className="flex items-center justify-center gap-2 mb-2 text-[12px] sm:text-sm">
+                <span style={{color:"var(--txt3)",textDecoration:"line-through"}}>$7/design × 10 = $70</span>
+                <span style={{color:txt3}}>→</span>
+                <span style={{color:"#16A34A",fontWeight:700}}>$55/mo for 10 = save $15</span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{background:"rgba(22,163,74,0.1)",color:"#16A34A"}}>21% off</span>
+              </div>
+              <p className="text-[11px] sm:text-xs mb-2" style={{color:"var(--txt2)"}}>Includes priority turnaround, free revisions, format conversions & rollover credits</p>
+              <Link href="/subscribe"><Button variant="grad" size="sm">Compare Plans →</Button></Link>
             </div>
 
             {/* Guarantees */}

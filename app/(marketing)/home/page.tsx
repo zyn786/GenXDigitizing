@@ -5,6 +5,15 @@ import { SITE_STATS, fmtPlus } from "@/lib/site-config";
 import { FAQSchema, BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { LandingClient } from "./LandingClient";
 
+async function getLiveStats() {
+  const admin = createAdminClient();
+  const [{count:totalOrders}] = await admin.from("orders").select("*",{count:"exact",head:true});
+  const [{count:activeOrders}] = await admin.from("orders").select("*",{count:"exact",head:true}).not("status","in","(delivered,cancelled,refunded)");
+  const [{count:deliveredOrders}] = await admin.from("orders").select("*",{count:"exact",head:true}).eq("status","delivered");
+  const [{count:reviewCount}] = await admin.from("reviews").select("*",{count:"exact",head:true}).eq("is_published",true);
+  return {totalOrders:totalOrders||0,activeOrders:activeOrders||0,deliveredOrders:deliveredOrders||0,reviewCount:reviewCount||0};
+}
+
 export const metadata: Metadata = {
   title: "genxdigitizing — Premium Embroidery Digitizing from $7",
   description: `Production-ready embroidery digitizing, vector art, and custom patches. Clean proofs, fast turnaround, free revisions. Trusted by ${fmtPlus(SITE_STATS.ordersCompleted)} decorators worldwide.`,
@@ -90,7 +99,7 @@ export default async function HomePage() {
     <>
       <FAQSchema faqs={FAQS} />
       <BreadcrumbSchema items={[{ name: "Home", url: "/" }]} />
-      <LandingClient services={services} process={PROCESS} testimonials={TESTIMONIALS} faqs={FAQS} />
+      <LandingClient liveStats={await getLiveStats()} services={services} process={PROCESS} testimonials={TESTIMONIALS} faqs={FAQS} />
     </>
   );
 }
