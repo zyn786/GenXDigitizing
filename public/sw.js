@@ -1,5 +1,4 @@
 // Service Worker for Web Push Notifications
-// Immediately activate — don't wait for all windows to close
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
@@ -15,15 +14,19 @@ self.addEventListener("push", (event) => {
       data: { url: payload.url || "/" },
       requireInteraction: false,
       tag: "genx-notification",
+      vibrate: [200, 100, 200],
+      renotify: true,
+      silent: false,
     };
     event.waitUntil(self.registration.showNotification(title, options));
   } catch {
-    // Plain text fallback
     event.waitUntil(
       self.registration.showNotification("GenX Digitizing", {
         body: event.data.text(),
         icon: "/images/black_logo.png",
         badge: "/favicon.ico",
+        vibrate: [200, 100, 200],
+        silent: false,
       })
     );
   }
