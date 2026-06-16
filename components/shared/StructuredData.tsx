@@ -14,7 +14,14 @@ export function OrganizationSchema() {
     email: SITE_INFO.email,
     ...(SITE_INFO.phone ? { telephone: SITE_INFO.phone } : {}),
     ...(SITE_INFO.address ? {
-      address: { "@type": "PostalAddress", streetAddress: SITE_INFO.address },
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: SITE_INFO.address.street,
+        addressLocality: SITE_INFO.address.city,
+        addressRegion: SITE_INFO.address.region,
+        postalCode: SITE_INFO.address.postalCode,
+        addressCountry: SITE_INFO.address.country,
+      },
     } : {}),
     foundingDate: String(SITE_INFO.founded),
     description: `Production-ready embroidery digitizing, vector art, and custom patches. ${SITE_STATS.ordersCompleted.toLocaleString()}+ orders completed. Free revisions. Fast turnaround.`,

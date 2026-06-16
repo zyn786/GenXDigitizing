@@ -107,7 +107,7 @@ export default async function HomePage() {
         description="See our embroidery digitizing process in action. Clean stitch paths, professional results for caps, jackets, and more."
         contentUrl="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264,q_auto:good,w_1200/v1781040748/hero-bg-desktop_ogydtd.mp4"
         thumbnailUrl="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:low,so_0,w_1200/v1781040748/hero-bg-desktop_ogydtd.jpg"
-        uploadDate="2025-06-01"
+        uploadDate="2025-06-01T00:00:00+00:00"
       />
       <LandingClient liveStats={await getLiveStats()} services={services} process={PROCESS} testimonials={TESTIMONIALS} faqs={FAQS} />
     </>
