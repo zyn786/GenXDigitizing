@@ -30,6 +30,7 @@ export function OfferBanner({ autoOffers, isFirstVisitor, appliedCoupon, fileCou
 
     // Pick best offer
     // Priority: bulk > first_order > time_urgent > rush
+    if (!autoOffers?.length) return;
     const bulk = autoOffers.find(o => o.type === "bulk");
     if (bulk && fileCount >= 5) {
       setCurrentOffer(bulk);
