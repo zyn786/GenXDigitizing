@@ -69,8 +69,6 @@ export function PortfolioAdminClient() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(DEFAULT_FORM);
   const [saving, setSaving] = useState(false);
-  const [newTag, setNewTag] = useState("");
-  const [newKeyword, setNewKeyword] = useState("");
   const [uploading, setUploading] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
@@ -150,10 +148,6 @@ export function PortfolioAdminClient() {
   };
 
   const handleTitleChange = (title: string) => { setForm((f) => ({ ...f, title, slug: editingId ? f.slug : slugify(title) })); };
-  const addTag = () => { const tag = newTag.trim(); if (tag && !form.tags.includes(tag)) { setForm((f) => ({ ...f, tags: [...f.tags, tag] })); } setNewTag(""); };
-  const removeTag = (tag: string) => { setForm((f) => ({ ...f, tags: f.tags.filter((t) => t !== tag) })); };
-  const addKeyword = () => { const kw = newKeyword.trim().toLowerCase(); if (kw && !form.keywords.includes(kw)) { setForm((f) => ({ ...f, keywords: [...f.keywords, kw] })); } setNewKeyword(""); };
-  const removeKeyword = (kw: string) => { setForm((f) => ({ ...f, keywords: f.keywords.filter((k: string) => k !== kw) })); };
   const removeImage = (idx: number) => { setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) })); };
   const toggleImageBefore = (idx: number) => { setForm((f) => ({ ...f, images: f.images.map((img, i) => i === idx ? { ...img, isBefore: !img.isBefore } : img) })); };
 
@@ -347,9 +341,6 @@ export function PortfolioAdminClient() {
             <div className="p-4 sm:p-5 space-y-6">
               {/* ── Basic Info ── */}
               <div className="space-y-4">
-                <h3 className="font-syne font-bold text-sm flex items-center gap-2" style={{ color: txt }}>
-                  <span className="w-1 h-4 rounded-full" style={{ background: clr[4].icon }} /> Basic Info
-                </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Title *</label>
@@ -360,18 +351,7 @@ export function PortfolioAdminClient() {
                     <Input value={form.slug} onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} placeholder="auto-generated-from-title" />
                   </div>
                 </div>
-                <div>
-                  <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Description</label>
-                  <textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={2}
-                    placeholder="Short project description (shown on card)..."
-                    className="w-full rounded-xl border px-3.5 py-2.5 text-sm resize-y outline-none"
-                    style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: txt }} />
-                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Client Name</label>
-                    <Input value={form.clientName} onChange={(e) => setForm((f) => ({ ...f, clientName: e.target.value }))} placeholder="Optional" />
-                  </div>
                   <div>
                     <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Category *</label>
                     <select value={form.categoryId} onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}
@@ -382,57 +362,14 @@ export function PortfolioAdminClient() {
                     </select>
                   </div>
                 </div>
-              </div>
-
-              {/* ── Specs ── */}
-              <div className="space-y-4">
-                <h3 className="font-syne font-bold text-sm flex items-center gap-2" style={{ color: txt }}>
-                  <span className="w-1 h-4 rounded-full" style={{ background: clr[2].icon }} /> Specs &amp; Appearance
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {([
-                  ["Stitches", "stitches", "number", "4200"],
-                  ["Colors", "colors", "number", "1"],
-                  ["Format", "format", "text", "DST · PES"],
-                  ["Size", "size", "text", '3.5" × 2.1"'],
-                ] as const).map(([label, key, type, placeholder]) => (
-                  <div key={label}>
-                    <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>{label}</label>
-                    <Input type={type} value={(form as any)[key]} onChange={(e) => setForm((f) => ({ ...f, [key]: type === "number" ? Number(e.target.value) : e.target.value }))} placeholder={placeholder} />
-                  </div>
-                ))}
-              </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
-                  <div>
-                    <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Turnaround</label>
-                    <select value={form.turnaround} onChange={(e) => setForm((f) => ({ ...f, turnaround: e.target.value }))}
-                      className="w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none"
-                      style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: txt }}>
-                      <option value="Standard">Standard</option>
-                      <option value="Rush 6h">Rush 6h</option>
-                      <option value="Urgent 3h">Urgent 3h</option>
-                      <option value="Standard (~12h)">Standard (~12h)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Accent Color</label>
-                    <div className="flex gap-1.5 flex-wrap">
-                      {ACCENT_COLORS.map((color) => (
-                        <button key={color} onClick={() => setForm((f) => ({ ...f, accent: color }))}
-                          className="w-8 h-8 rounded-lg border-2 transition-all"
-                          style={{ background: color, borderColor: form.accent === color ? "var(--txt)" : "transparent" }} />
-                      ))}
-                    </div>
-                  </div>
+                <div>
+                  <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Description</label>
+                  <textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={2}
+                    placeholder="Short description shown on card..."
+                    className="w-full rounded-xl border px-3.5 py-2.5 text-sm resize-y outline-none"
+                    style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: txt }} />
                 </div>
               </div>
-
-              {/* ── Categories & Tags ── */}
-              <div className="space-y-4">
-                <h3 className="font-syne font-bold text-sm flex items-center gap-2" style={{ color: txt }}>
-                  <span className="w-1 h-4 rounded-full" style={{ background: clr[3].icon }} /> Categories &amp; Tags
-                </h3>
 
               {/* Sub-categories */}
               {form.categoryId && (() => {
@@ -441,7 +378,7 @@ export function PortfolioAdminClient() {
                 if (subs.length === 0) return null;
                 return (
                   <div>
-                    <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Sub-categories — click to add as tag</label>
+                    <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Sub-categories</label>
                     <div className="flex gap-1.5 flex-wrap">
                       {subs.map((sub) => {
                         const alreadyAdded = form.tags.includes(sub);
@@ -464,45 +401,6 @@ export function PortfolioAdminClient() {
                   </div>
                 );
               })()}
-
-              {/* Tags */}
-              <div>
-                <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Custom Tags</label>
-                <div className="flex items-center gap-2 mb-2">
-                  <Input value={newTag} onChange={(e) => setNewTag(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }} placeholder="Add custom tag..." className="flex-1" />
-                  <Button variant="ghost" size="sm" onClick={addTag}>Add</Button>
-                </div>
-                <div className="flex gap-1.5 flex-wrap">
-                  {form.tags.map((tag) => (
-                    <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border"
-                      style={{ background: `${form.accent}10`, color: form.accent, borderColor: `${form.accent}30` }}>
-                      {tag}
-                      <button onClick={() => removeTag(tag)} className="hover:opacity-70"><X size={10} /></button>
-                    </span>
-                  ))}
-                </div>
-              </div>
-              </div>
-
-              {/* Keywords */}
-              <div>
-                <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>
-                  SEO Keywords <span className="font-normal" style={{ color: txt3 }}>— for search engines, comma-separated</span>
-                </label>
-                <div className="flex items-center gap-2 mb-2">
-                  <Input value={newKeyword} onChange={(e) => setNewKeyword(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addKeyword(); } }} placeholder="Add keyword..." className="flex-1" />
-                  <Button variant="ghost" size="sm" onClick={addKeyword}>Add</Button>
-                </div>
-                <div className="flex gap-1.5 flex-wrap">
-                  {form.keywords.map((kw: string) => (
-                    <span key={kw} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border"
-                      style={{ background: "var(--elevated)", color: "var(--txt2)", borderColor: "var(--border)" }}>
-                      {kw}
-                      <button onClick={() => removeKeyword(kw)} className="hover:opacity-70"><X size={10} /></button>
-                    </span>
-                  ))}
-                </div>
-              </div>
 
               {/* ── Images ── */}
               <div className="space-y-4">
