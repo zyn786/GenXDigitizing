@@ -11,13 +11,13 @@ import { isOfferDismissed, dismissOffer, isTimeInRange } from "@/lib/visitor";
 import type { CouponOffer } from "@/types/coupon";
 
 interface OfferBannerProps {
-  autoOffers: CouponOffer[];
-  isFirstVisitor: boolean;
-  appliedCoupon: unknown | null;
-  fileCount: number;
+  autoOffers?: CouponOffer[];
+  isFirstVisitor?: boolean;
+  appliedCoupon?: unknown | null;
+  fileCount?: number;
 }
 
-export function OfferBanner({ autoOffers, isFirstVisitor, appliedCoupon, fileCount }: OfferBannerProps) {
+export function OfferBanner({ autoOffers = [], isFirstVisitor = false, appliedCoupon = null, fileCount = 0 }: OfferBannerProps) {
   const [dismissed, setDismissed] = useState(true);
   const [currentOffer, setCurrentOffer] = useState<CouponOffer | null>(null);
 

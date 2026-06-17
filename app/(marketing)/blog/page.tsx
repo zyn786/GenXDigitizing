@@ -8,6 +8,8 @@ import { GradientOrb } from "@/components/shared/GradientOrb";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { Button } from "@/components/ui/Button";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Blog — Embroidery Digitizing Guides, Tips & Tutorials",
   description: "Expert guides on embroidery digitizing, vector art conversion, file formats, and industry best practices. Free educational content for embroidery professionals.",

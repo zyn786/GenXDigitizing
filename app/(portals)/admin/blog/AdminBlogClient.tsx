@@ -13,9 +13,12 @@ import {
   Loader2,
   Check,
   AlertCircle,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import BlogContent from "@/components/blog/BlogContent";
+import type { BlogPost as BlogPostType } from "@/lib/blog-data";
 
 interface BlogPost {
   id: string;
@@ -43,7 +46,7 @@ const EMPTY_POST = {
   accentColor: "#2563EB",
   published: false,
   content: {
-    sections: [{ heading: "", body: "" }],
+    sections: [{ heading: "", body: "", image: "", images: [], layout: "text-only" }],
     faqs: [{ q: "", a: "" }],
     internalLinks: [{ text: "", href: "" }],
     cta: { text: "", href: "/contact", label: "Upload Design" },
@@ -58,7 +61,32 @@ export default function AdminBlogPage() {
   const [form, setForm] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<any[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  function formToBlogPost(): BlogPostType {
+    if (!form) return {} as BlogPostType;
+    const kw = typeof form.keywords === "string"
+      ? form.keywords.split(",").map((k: string) => k.trim()).filter(Boolean)
+      : form.keywords || [];
+    return {
+      slug: form.slug,
+      title: form.title,
+      description: form.description,
+      date: new Date().toISOString().split("T")[0],
+      category: form.category || "General",
+      readTime: "6 min read",
+      keywords: kw,
+      hero: { emoji: form.emoji || "📝", color: form.accentColor || "#2563EB", image: form.heroImage || undefined },
+      sections: form.content?.sections || [],
+      faqs: form.content?.faqs || [],
+      internalLinks: form.content?.internalLinks || [],
+      cta: form.content?.cta || { text: "Get a Free Quote", href: "/contact", label: "Upload Design" },
+    };
+  }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -81,6 +109,68 @@ export default function AdminBlogPage() {
     }
   }
 
+  async function handleSectionImageUpload(e: React.ChangeEvent<HTMLInputElement>, sectionIndex: number) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("files", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      if (!res.ok) throw new Error("Upload failed");
+      const results = await res.json();
+      if (results.length > 0) {
+        updateContentField("sections", sectionIndex, "image", results[0].url);
+        setMessage({ type: "success", text: "Section image uploaded!" });
+      }
+    } catch {
+      setMessage({ type: "error", text: "Upload failed" });
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleSectionMultiImageUpload(e: React.ChangeEvent<HTMLInputElement>, sectionIndex: number) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        const fd = new FormData();
+        fd.append("files", file);
+        const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+        if (!res.ok) throw new Error("Upload failed");
+        const results = await res.json();
+        if (results.length > 0) urls.push(results[0].url);
+      }
+      setForm((prev: any) => {
+        const content = { ...prev.content };
+        const arr = [...(content.sections || [])];
+        arr[sectionIndex] = { ...arr[sectionIndex], images: [...(arr[sectionIndex].images || []), ...urls] };
+        content.sections = arr;
+        return { ...prev, content };
+      });
+      setMessage({ type: "success", text: `${urls.length} image(s) uploaded!` });
+    } catch {
+      setMessage({ type: "error", text: "Upload failed" });
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function removeSectionImage(sectionIndex: number, imageIndex: number) {
+    setForm((prev: any) => {
+      const content = { ...prev.content };
+      const arr = [...(content.sections || [])];
+      const imgs = [...(arr[sectionIndex].images || [])];
+      imgs.splice(imageIndex, 1);
+      arr[sectionIndex] = { ...arr[sectionIndex], images: imgs };
+      content.sections = arr;
+      return { ...prev, content };
+    });
+  }
+
   async function loadPosts() {
     setLoading(true);
     try {
@@ -95,6 +185,44 @@ export default function AdminBlogPage() {
   }
 
   useEffect(() => { loadPosts(); }, []);
+
+  async function loadComments() {
+    setLoadingComments(true);
+    try {
+      const res = await fetch("/api/admin/blog/comments");
+      const data = await res.json();
+      setComments(data.comments || []);
+    } catch {
+      // silent
+    } finally {
+      setLoadingComments(false);
+    }
+  }
+
+  async function handleApproveComment(id: string, approved: boolean) {
+    try {
+      const res = await fetch("/api/admin/blog/comments", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, is_approved: approved }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      loadComments();
+    } catch {
+      setMessage({ type: "error", text: "Failed to update comment" });
+    }
+  }
+
+  async function handleDeleteComment(id: string) {
+    if (!confirm("Delete this comment?")) return;
+    try {
+      const res = await fetch(`/api/admin/blog/comments?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed");
+      loadComments();
+    } catch {
+      setMessage({ type: "error", text: "Failed to delete comment" });
+    }
+  }
 
   function openCreate() {
     setForm(JSON.parse(JSON.stringify(EMPTY_POST)));
@@ -134,7 +262,7 @@ export default function AdminBlogPage() {
     setForm((prev: any) => {
       const content = { ...prev.content };
       const arr = [...(content[path] || [])];
-      if (path === "sections") arr.push({ heading: "", body: "" });
+      if (path === "sections") arr.push({ heading: "", body: "", image: "", images: [], layout: "text-only" });
       else if (path === "faqs") arr.push({ q: "", a: "" });
       else if (path === "internalLinks") arr.push({ text: "", href: "" });
       content[path] = arr;
@@ -295,6 +423,63 @@ export default function AdminBlogPage() {
         </div>
       )}
 
+      {/* Comment Moderation */}
+      {posts.length > 0 && (
+        <div className="mt-6">
+          <button
+            onClick={() => { setShowComments(!showComments); if (!showComments) loadComments(); }}
+            className="flex items-center gap-2 text-sm font-semibold text-[var(--txt2)] hover:text-[var(--txt)] transition-colors"
+          >
+            <span className={`transition-transform ${showComments ? "rotate-90" : ""}`}>▸</span>
+            Comments {comments.length > 0 && <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--elevated)] border border-[var(--border)]">{comments.length}</span>}
+          </button>
+          {showComments && (
+            <div className="mt-3 space-y-3">
+              {loadingComments ? (
+                <div className="flex justify-center py-8"><Loader2 size={18} className="animate-spin text-[var(--txt3)]" /></div>
+              ) : comments.length === 0 ? (
+                <p className="text-sm text-[var(--txt3)] py-4 text-center">No comments yet.</p>
+              ) : (
+                comments.map((c: any) => (
+                  <div key={c.id} className={`p-3 rounded-xl border ${c.is_approved ? "bg-[var(--surface)] border-[var(--border)]" : "bg-[#F97316]/5 border-[#F97316]/20"}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-semibold text-[var(--txt)]">{c.author_name}</span>
+                          <span className="text-[10px] text-[var(--txt3)]">{new Date(c.created_at).toLocaleDateString()}</span>
+                          <span className="text-[10px] text-[var(--txt3)] truncate">on {c.blog_posts?.title || "—"}</span>
+                          {c.is_approved ? (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#16A34A]/10 text-[#16A34A]">Approved</span>
+                          ) : (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#F97316]/10 text-[#F97316]">Pending</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-[var(--txt2)] leading-relaxed">{c.content}</p>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {!c.is_approved && (
+                          <button onClick={() => handleApproveComment(c.id, true)} className="p-1.5 rounded-lg hover:bg-[#16A34A]/10 text-[var(--txt3)] hover:text-[#16A34A]" title="Approve">
+                            <Check size={14} />
+                          </button>
+                        )}
+                        {c.is_approved && (
+                          <button onClick={() => handleApproveComment(c.id, false)} className="p-1.5 rounded-lg hover:bg-[var(--elevated)] text-[var(--txt3)]" title="Unapprove">
+                            <EyeOff size={14} />
+                          </button>
+                        )}
+                        <button onClick={() => handleDeleteComment(c.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-[var(--txt3)] hover:text-[#DC2626]" title="Delete">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Modal Editor */}
       {showModal && form && (
         <div className="fixed inset-0 z-[200] flex items-start justify-center p-4 overflow-y-auto">
@@ -354,13 +539,93 @@ export default function AdminBlogPage() {
                 </div>
                 <div className="space-y-3">
                   {form.content.sections.map((s: any, i: number) => (
-                    <div key={i} className="p-3 rounded-xl bg-[var(--elevated)] border border-[var(--border)] space-y-2">
+                    <div key={i} className="p-3 rounded-xl bg-[var(--elevated)] border border-[var(--border)] space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-[var(--txt3)]">Section {i + 1}</span>
                         <button onClick={() => removeContentItem("sections", i)} className="text-[#DC2626] text-xs hover:underline">Remove</button>
                       </div>
                       <Input value={s.heading} onChange={(e) => updateContentField("sections", i, "heading", e.target.value)} placeholder="Section heading" />
-                      <textarea value={s.body} onChange={(e) => updateContentField("sections", i, "body", e.target.value)} placeholder="Section body" rows={4} className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] text-sm text-[var(--txt)] p-3 resize-y" />
+                      <textarea value={s.body} onChange={(e) => updateContentField("sections", i, "body", e.target.value)} placeholder="Section body (supports **bold**, *italic*, tables, bullet/numbered lists)" rows={4} className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] text-sm text-[var(--txt)] p-3 resize-y" />
+
+                      {/* Layout template selector */}
+                      <div>
+                        <label className="block text-[10px] font-medium text-[var(--txt3)] mb-1">Layout Template</label>
+                        <select
+                          value={s.layout || "text-only"}
+                          onChange={(e) => updateContentField("sections", i, "layout", e.target.value)}
+                          className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] text-sm text-[var(--txt)] p-2.5"
+                        >
+                          <option value="text-only">Text Only</option>
+                          <option value="image-top">Image Top (single, full-width)</option>
+                          <option value="image-grid-2">Image Grid — 2 Columns</option>
+                          <option value="image-grid-3">Image Grid — 3 Columns</option>
+                        </select>
+                      </div>
+
+                      {/* Single image (for image-top layout) */}
+                      {(s.layout === "image-top" || !s.layout || s.layout === "text-only") && (
+                        <div>
+                          <label className="block text-[10px] font-medium text-[var(--txt3)] mb-1">Section Image</label>
+                          <div className="flex items-start gap-2">
+                            <Input value={s.image || ""} onChange={(e) => updateContentField("sections", i, "image", e.target.value)} placeholder="https://res.cloudinary.com/.../image.webp" />
+                            <label className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-lg text-[10px] font-semibold bg-[var(--bg)] border border-[var(--border)] text-[var(--txt2)] hover:text-[var(--txt)] cursor-pointer transition-all">
+                              {uploading ? "..." : "Upload"}
+                              <input type="file" accept="image/*" onChange={(e) => handleSectionImageUpload(e, i)} className="hidden" disabled={uploading} />
+                            </label>
+                          </div>
+                          {s.image && (
+                            <img src={s.image} alt={`Section ${i + 1}`} className="mt-2 w-full max-h-28 object-cover rounded-lg border border-[var(--border)]" />
+                          )}
+                        </div>
+                      )}
+
+                      {/* Multi-image (for grid layouts) */}
+                      {(s.layout === "image-grid-2" || s.layout === "image-grid-3") && (
+                        <div>
+                          <label className="block text-[10px] font-medium text-[var(--txt3)] mb-1">Grid Images</label>
+                          <div className="flex items-center gap-2 mb-2">
+                            <label className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-lg text-[10px] font-semibold bg-[var(--bg)] border border-[var(--border)] text-[var(--txt2)] hover:text-[var(--txt)] cursor-pointer transition-all">
+                              {uploading ? "..." : "Upload Images"}
+                              <input type="file" accept="image/*" multiple onChange={(e) => handleSectionMultiImageUpload(e, i)} className="hidden" disabled={uploading} />
+                            </label>
+                            <span className="text-[10px] text-[var(--txt3)]">{(s.images || []).length} image(s) — paste URLs or upload</span>
+                          </div>
+                          {(s.images || []).length > 0 && (
+                            <div className="space-y-1.5 mb-2">
+                              {(s.images || []).map((url: string, imgIdx: number) => (
+                                <div key={imgIdx} className="flex items-center gap-2">
+                                  <Input value={url} onChange={(e) => {
+                                    setForm((prev: any) => {
+                                      const content = { ...prev.content };
+                                      const arr = [...(content.sections || [])];
+                                      const imgs = [...(arr[i].images || [])];
+                                      imgs[imgIdx] = e.target.value;
+                                      arr[i] = { ...arr[i], images: imgs };
+                                      content.sections = arr;
+                                      return { ...prev, content };
+                                    });
+                                  }} placeholder={`Image ${imgIdx + 1} URL`} />
+                                  <button onClick={() => removeSectionImage(i, imgIdx)} className="flex-shrink-0 text-[#DC2626]"><Trash2 size={14} /></button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <button
+                            onClick={() => {
+                              setForm((prev: any) => {
+                                const content = { ...prev.content };
+                                const arr = [...(content.sections || [])];
+                                arr[i] = { ...arr[i], images: [...(arr[i].images || []), ""] };
+                                content.sections = arr;
+                                return { ...prev, content };
+                              });
+                            }}
+                            className="text-[10px] text-[#2563EB] hover:underline font-medium"
+                          >
+                            + Add Image URL
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -421,7 +686,35 @@ export default function AdminBlogPage() {
               <Button variant="grad" size="md" onClick={handleSave} disabled={saving} leftIcon={saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}>
                 {saving ? "Saving..." : "Save Post"}
               </Button>
+              <Button variant="outline" size="md" onClick={() => setShowPreview(true)} leftIcon={<Play size={15} />}>
+                Preview
+              </Button>
               <Button variant="ghost" size="md" onClick={closeModal}>Cancel</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {showPreview && form && (
+        <div className="fixed inset-0 z-[300] flex items-start justify-center overflow-y-auto">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowPreview(false)} />
+          <div className="relative z-10 w-full max-w-5xl my-4 bg-[var(--bg)] border border-[var(--border2)] rounded-2xl shadow-2xl overflow-hidden">
+            {/* Preview toolbar */}
+            <div className="sticky top-0 z-10 flex items-center justify-between p-3 sm:p-4 border-b border-[var(--border)] bg-[var(--surface)]">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold px-2 py-1 rounded-full bg-[#F97316]/10 text-[#F97316] border border-[#F97316]/20">Preview</span>
+                <span className="text-xs text-[var(--txt3)]">See how your post looks before publishing</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => setShowPreview(false)} leftIcon={<X size={14} />}>
+                  Close
+                </Button>
+              </div>
+            </div>
+            {/* Preview content */}
+            <div className="overflow-y-auto max-h-[80vh]">
+              <BlogContent post={formToBlogPost()} showBack={false} />
             </div>
           </div>
         </div>

@@ -20,7 +20,15 @@
       "mcp__plugin_supabase_supabase__list_projects",
       "mcp__plugin_supabase_supabase__apply_migration",
       "Skill(run)",
-      "Bash(npx playwright *)"
+      "Bash(npx playwright *)",
+      "Bash(npm run *)",
+      "Bash(Get-Content *)",
+      "Bash(npx next *)",
+      "Bash(git add *)",
+      "Bash(git commit -m '@ *)",
+      "Bash(git push *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)"
     ]
   }
 }

@@ -210,6 +210,13 @@ export function ChatProvider({
   // ── Voice recording ───────────────────────────────────────
   const startRecording = useCallback(async () => {
     try {
+      if (navigator.permissions) {
+        const micStatus = await navigator.permissions.query({ name: "microphone" as PermissionName });
+        if (micStatus.state === "denied") {
+          toast.error("Microphone blocked. Enable it in your browser site settings.");
+          return;
+        }
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
       audioChunks.current = [];

@@ -9,6 +9,8 @@ import { Check, X, Crown, ExternalLink, Loader2, Clock, Link2, Ban, Send, Rocket
 import { getPlanPrice, PLAN_CONFIG } from "@/lib/plans";
 import { logAuditEvent } from "@/lib/audit-log";
 
+const txt = "var(--txt)", txt2 = "var(--txt2)", txt3 = "var(--txt3)";
+
 function CreateSubForm({subs,invoices,onCreated}:{subs:any[];invoices:any[];onCreated:(sub:any)=>void}){
   const [clientEmail,setClientEmail]=useState("");
   const [plan,setPlan]=useState("business");
