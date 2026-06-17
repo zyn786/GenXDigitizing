@@ -350,7 +350,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
                         l.href === "/free-designs"
                           ? "text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] font-bold"
                           : isActive
-                            ? "text-[var(--txt)]"
+                            ? "text-[var(--txt)] bg-[#2563EB]/8"
                             : "text-[var(--txt2)] hover:text-[var(--txt)] hover:bg-[var(--elevated)]/50"
                       )}
                     >
