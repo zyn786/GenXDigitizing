@@ -54,7 +54,7 @@ function ImageCarousel({
 
   return (
     <div
-      className="relative group/carousel aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--elevated)] cursor-pointer select-none"
+      className="relative group/carousel aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--elevated)] cursor-pointer select-none isolate"
       onTouchStart={(e) => { touchStart.current = e.touches[0].clientX; }}
       onTouchMove={(e) => { touchDelta.current = e.touches[0].clientX - touchStart.current; }}
       onTouchEnd={() => {
@@ -290,8 +290,8 @@ function SpecPill({ icon: Icon, label, value, color }: {
       >
         <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5" style={{ color }} />
       </div>
-      <div className="min-w-0">
-        <div className="text-[10px] sm:text-[11px] text-[var(--txt3)] leading-tight font-medium tracking-wide uppercase">
+      <div className="min-w-0 overflow-hidden">
+        <div className="text-[10px] sm:text-[11px] text-[var(--txt3)] leading-tight font-medium tracking-wide uppercase truncate">
           {label}
         </div>
         <div className="text-xs sm:text-sm font-bold text-[var(--txt)] leading-tight truncate">
@@ -363,7 +363,7 @@ function DesignCard({
       >
         <div
           className="group/card h-full flex flex-col bg-[var(--surface)]/90 backdrop-blur-xl rounded-2xl
-            border border-[var(--border)] overflow-hidden
+            border border-[var(--border)] overflow-hidden w-full
             shadow-[0_1px_3px_rgba(0,0,0,0.02),0_4px_12px_rgba(0,0,0,0.02)]
             hover:shadow-[0_8px_30px_rgba(0,0,0,0.05),0_0_0_1px_rgba(37,99,235,0.08)]
             hover:border-[#2563EB]/20
