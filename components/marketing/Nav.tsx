@@ -179,7 +179,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden lg:flex items-center gap-0.5">
+        <div className="hidden lg:flex items-center gap-0">
           {LINKS.filter(l => !l.mobileOnly).map((l) => {
             const isActive = l.href === "/home"
               ? (pathname === "/" || pathname === "/home" || pathname.startsWith("/home/"))
@@ -189,7 +189,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
                 key={l.href}
                 href={l.href}
                 className={cn(
-                  "relative px-3 xl:px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-200 no-underline",
+                  "relative px-2 xl:px-3 py-2.5 rounded-xl text-[12px] xl:text-[13px] font-semibold transition-all duration-200 no-underline",
                   l.href === "/free-designs"
                     ? isActive
                       ? "bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white shadow-[0_2px_12px_rgba(37,99,235,0.3)]"
@@ -213,7 +213,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
         </div>
 
         {/* Desktop CTAs */}
-        <div className="hidden lg:flex items-center gap-1.5">
+        <div className="hidden lg:flex items-center gap-1">
           {SITE_INFO.whatsapp && (
             <a href={`https://wa.me/${SITE_INFO.whatsapp}`} target="_blank" rel="noopener noreferrer"
               className="p-2 rounded-xl text-[#25D366] hover:bg-[#25D366]/10 transition-all duration-200" aria-label="WhatsApp">
