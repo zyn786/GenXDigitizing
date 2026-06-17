@@ -44,6 +44,7 @@ const DEFAULT_FORM = {
   title: "", slug: "", description: "", clientName: "", categoryId: "",
   stitches: 0, colors: 1, format: "DST · PES", turnaround: "Standard",
   size: "", accent: "#5B21B6", featured: false, visible: true, tags: [] as string[],
+  keywords: [] as string[],
   images: [] as PortfolioImage[],
 };
 
@@ -69,6 +70,7 @@ export function PortfolioAdminClient() {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [saving, setSaving] = useState(false);
   const [newTag, setNewTag] = useState("");
+  const [newKeyword, setNewKeyword] = useState("");
   const [uploading, setUploading] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
@@ -143,13 +145,15 @@ export function PortfolioAdminClient() {
   const openNew = () => { setEditingId(null); setForm(DEFAULT_FORM); setShowModal(true); };
   const openEdit = (p: Portfolio) => {
     setEditingId(p.id);
-    setForm({ title: p.title, slug: p.slug, description: p.description, clientName: p.clientName || "", categoryId: p.categoryId, stitches: p.stitches || 0, colors: p.colors, format: p.format, turnaround: p.turnaround, size: p.size, accent: p.accent, featured: p.featured, visible: p.visible, tags: p.tags, images: p.images.map((img) => ({ ...img })) });
+    setForm({ title: p.title, slug: p.slug, description: p.description, clientName: p.clientName || "", categoryId: p.categoryId, stitches: p.stitches || 0, colors: p.colors, format: p.format, turnaround: p.turnaround, size: p.size, accent: p.accent, featured: p.featured, visible: p.visible, tags: p.tags, keywords: p.keywords || [], images: p.images.map((img) => ({ ...img })) });
     setShowModal(true);
   };
 
   const handleTitleChange = (title: string) => { setForm((f) => ({ ...f, title, slug: editingId ? f.slug : slugify(title) })); };
   const addTag = () => { const tag = newTag.trim(); if (tag && !form.tags.includes(tag)) { setForm((f) => ({ ...f, tags: [...f.tags, tag] })); } setNewTag(""); };
   const removeTag = (tag: string) => { setForm((f) => ({ ...f, tags: f.tags.filter((t) => t !== tag) })); };
+  const addKeyword = () => { const kw = newKeyword.trim().toLowerCase(); if (kw && !form.keywords.includes(kw)) { setForm((f) => ({ ...f, keywords: [...f.keywords, kw] })); } setNewKeyword(""); };
+  const removeKeyword = (kw: string) => { setForm((f) => ({ ...f, keywords: f.keywords.filter((k: string) => k !== kw) })); };
   const removeImage = (idx: number) => { setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) })); };
   const toggleImageBefore = (idx: number) => { setForm((f) => ({ ...f, images: f.images.map((img, i) => i === idx ? { ...img, isBefore: !img.isBefore } : img) })); };
 
@@ -478,6 +482,26 @@ export function PortfolioAdminClient() {
                   ))}
                 </div>
               </div>
+              </div>
+
+              {/* Keywords */}
+              <div>
+                <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>
+                  SEO Keywords <span className="font-normal" style={{ color: txt3 }}>— for search engines, comma-separated</span>
+                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <Input value={newKeyword} onChange={(e) => setNewKeyword(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addKeyword(); } }} placeholder="Add keyword..." className="flex-1" />
+                  <Button variant="ghost" size="sm" onClick={addKeyword}>Add</Button>
+                </div>
+                <div className="flex gap-1.5 flex-wrap">
+                  {form.keywords.map((kw: string) => (
+                    <span key={kw} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border"
+                      style={{ background: "var(--elevated)", color: "var(--txt2)", borderColor: "var(--border)" }}>
+                      {kw}
+                      <button onClick={() => removeKeyword(kw)} className="hover:opacity-70"><X size={10} /></button>
+                    </span>
+                  ))}
+                </div>
               </div>
 
               {/* ── Images ── */}
