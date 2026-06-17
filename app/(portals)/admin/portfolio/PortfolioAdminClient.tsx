@@ -37,6 +37,7 @@ interface Portfolio {
   categoryId: string; category: Category; stitches?: number; colors: number;
   format: string; turnaround: string; size: string; accent: string;
   featured: boolean; visible: boolean; sortOrder: number; tags: string[];
+  keywords?: string[];
   images: PortfolioImage[];
 }
 
