@@ -3,12 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Loader2, ArrowRight } from "lucide-react";
-import { HorizontalSlider } from "./HorizontalSlider";
+import { PortfolioCard } from "./PortfolioCard";
 import { PortfolioModal } from "./PortfolioModal";
 import { PortfolioFilters } from "./PortfolioFilters";
 import { fetchPortfolio, DEFAULT_CATEGORIES } from "./data";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
-import { SectionHeading } from "@/components/shared/SectionHeading";
 
 import { Button } from "@/components/ui/Button";
 import type { PortfolioItem, PortfolioCategory } from "./data";
@@ -64,15 +63,26 @@ export function PortfolioPreview() {
 
       {/* ── Portfolio Section ─────────────────────────────── */}
       <AnimatedSection className="py-24 bg-[var(--bg)] !px-0">
-        {/* Heading — contained */}
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
-          <SectionHeading
-            label="Our Portfolio"
-            labelColor="blue"
-            title="See Our Best"
-            gradientTitle="Work"
-            description="Professional embroidery digitizing, vector art, and custom patch design — hand-crafted for quality and precision."
-          />
+        {/* Heading + Filters */}
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 text-center">
+          {/* Badge */}
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.08em] bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20 mb-5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] animate-pulse" />
+            Our Portfolio
+          </span>
+
+          {/* Title */}
+          <h2 className="font-syne font-bold text-[clamp(32px,5vw,56px)] leading-[1.08] mb-3 text-[var(--txt)]">
+            See Our Best{" "}
+            <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
+              Work
+            </span>
+          </h2>
+
+          {/* Description */}
+          <p className="text-sm sm:text-base text-[var(--txt2)] max-w-lg mx-auto mb-8">
+            Professional embroidery digitizing, vector art, and custom patch design — hand-crafted for quality and precision.
+          </p>
 
           {/* Filters */}
           {!loading && !error && (
@@ -96,12 +106,24 @@ export function PortfolioPreview() {
           </div>
         ) : (
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
-            <HorizontalSlider
-              items={filtered}
-              onItemClick={setSelectedItem}
-              emptyMessage="No projects in this category yet. Check back soon!"
-              autoSlide
-            />
+            {filtered.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-sm text-[var(--txt3)]">No projects in this category yet. Check back soon!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                {filtered.slice(0, 4).map((item, idx) => (
+                  <div key={item.id || idx} className="animate-fade-in-up" style={{ animationDelay: `${idx * 80}ms` }}>
+                    <PortfolioCard
+                      item={item}
+                      index={idx}
+                      onClick={() => setSelectedItem(item)}
+                      onCategoryClick={setActiveCategory}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

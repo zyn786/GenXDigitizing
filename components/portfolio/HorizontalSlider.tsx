@@ -9,6 +9,7 @@ import type { PortfolioItem } from "./data";
 interface HorizontalSliderProps {
   items: PortfolioItem[];
   onItemClick: (item: PortfolioItem) => void;
+  onCategoryClick?: (slug: string) => void;
   emptyMessage?: string;
   autoSlide?: boolean;
 }
@@ -16,6 +17,7 @@ interface HorizontalSliderProps {
 export function HorizontalSlider({
   items,
   onItemClick,
+  onCategoryClick,
   emptyMessage = "No projects found in this category.",
   autoSlide = false,
 }: HorizontalSliderProps) {
@@ -140,7 +142,7 @@ export function HorizontalSlider({
       >
         {items.map((item, i) => (
           <div key={item.id} className="snap-start">
-            <PortfolioCard item={item} index={i} onClick={() => onItemClick(item)} />
+            <PortfolioCard item={item} index={i} onClick={() => onItemClick(item)} onCategoryClick={onCategoryClick} />
           </div>
         ))}
 

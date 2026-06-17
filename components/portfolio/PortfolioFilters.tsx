@@ -12,54 +12,47 @@ interface PortfolioFiltersProps {
 
 export function PortfolioFilters({ active, onChange, counts, categories }: PortfolioFiltersProps) {
   return (
-    <div className="flex gap-1.5 flex-wrap justify-center mb-10">
+    <div className="flex gap-2 flex-wrap justify-center mb-10">
       {categories.map((cat) => {
         const isActive = active === cat.slug;
         const count = counts[cat.slug] ?? 0;
 
         return (
-          <button
+          <motion.button
             key={cat.slug}
             onClick={() => onChange(cat.slug)}
-            className={`relative inline-flex items-center gap-1 px-3 py-1.5 rounded-full
-              text-xs font-medium transition-all duration-200 border cursor-pointer
-              hover:scale-[1.03] active:scale-[0.97]
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className={`relative inline-flex items-center gap-2 px-4 py-2.5 rounded-xl
+              text-sm font-semibold transition-all duration-200 border cursor-pointer
               ${isActive
-                ? "text-[var(--txt)] font-bold shadow-lg"
-                : "text-[var(--txt2)] hover:text-[var(--txt)]"
+                ? "text-white shadow-lg"
+                : "text-[var(--txt2)] hover:text-[var(--txt)] bg-[var(--surface)] border-[var(--border)] hover:border-[var(--border3)]"
               }`}
-            style={{
-              background: isActive
-                ? `linear-gradient(135deg, ${cat.color}20, ${cat.color}10)`
-                : "var(--border)",
-              borderColor: isActive ? `${cat.color}50` : "var(--border2)",
-              boxShadow: isActive ? `0 0 20px ${cat.color}20` : "none",
-            }}
+            style={
+              isActive
+                ? {
+                    background: `linear-gradient(135deg, ${cat.color}, ${cat.color}dd)`,
+                    borderColor: cat.color,
+                    boxShadow: `0 4px 20px ${cat.color}40`,
+                  }
+                : {}
+            }
           >
-            {isActive && (
-              <motion.div
-                layoutId="activeFilter"
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background: `linear-gradient(135deg, ${cat.color}15, ${cat.color}08)`,
-                  border: `1px solid ${cat.color}40`,
-                }}
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              />
-            )}
-            <span className="relative z-10 text-sm">{cat.emoji}</span>
-            <span className="relative z-10">{cat.name}</span>
-            <span
-              className={`relative z-10 inline-flex items-center justify-center min-w-[18px] h-4
-                rounded-full text-[9px] font-bold px-1
-                ${isActive
-                  ? "bg-white/15 text-[var(--txt)]"
-                  : "bg-[var(--border2)] text-[var(--txt3)]"
+            <span className="text-base leading-none">{cat.emoji}</span>
+            <span>{cat.name}</span>
+            {count > 0 && (
+              <span
+                className={`inline-flex items-center justify-center min-w-[20px] h-5 rounded-full text-[10px] font-bold px-1.5 ${
+                  isActive
+                    ? "bg-white/20 text-white"
+                    : "bg-[var(--elevated)] text-[var(--txt3)]"
                 }`}
-            >
-              {count}
-            </span>
-          </button>
+              >
+                {count}
+              </span>
+            )}
+          </motion.button>
         );
       })}
     </div>

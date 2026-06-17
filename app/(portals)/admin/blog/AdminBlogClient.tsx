@@ -547,23 +547,40 @@ export default function AdminBlogPage() {
                       <Input value={s.heading} onChange={(e) => updateContentField("sections", i, "heading", e.target.value)} placeholder="Section heading" />
                       <textarea value={s.body} onChange={(e) => updateContentField("sections", i, "body", e.target.value)} placeholder="Section body (supports **bold**, *italic*, tables, bullet/numbered lists)" rows={4} className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] text-sm text-[var(--txt)] p-3 resize-y" />
 
-                      {/* Layout template selector */}
+                      {/* Layout template chooser — visual cards */}
                       <div>
-                        <label className="block text-[10px] font-medium text-[var(--txt3)] mb-1">Layout Template</label>
-                        <select
-                          value={s.layout || "text-only"}
-                          onChange={(e) => updateContentField("sections", i, "layout", e.target.value)}
-                          className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] text-sm text-[var(--txt)] p-2.5"
-                        >
-                          <option value="text-only">Text Only</option>
-                          <option value="image-top">Image Top (single, full-width)</option>
-                          <option value="image-grid-2">Image Grid — 2 Columns</option>
-                          <option value="image-grid-3">Image Grid — 3 Columns</option>
-                        </select>
+                        <label className="block text-[10px] font-medium text-[var(--txt3)] mb-2">Layout Template</label>
+                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                          {([
+                            { value: "text-only", label: "Text", icon: "📝", preview: "≡" },
+                            { value: "image-top", label: "Image Top", icon: "🖼️", preview: "▬" },
+                            { value: "image-left", label: "Img Left", icon: "◧", preview: "◨" },
+                            { value: "image-right", label: "Img Right", icon: "◨", preview: "◧" },
+                            { value: "image-grid-2", label: "Grid 2", icon: "⊞", preview: "⊞" },
+                            { value: "image-grid-3", label: "Grid 3", icon: "▦", preview: "▦" },
+                            { value: "image-grid-4", label: "Grid 4", icon: "⊟", preview: "⊟" },
+                            { value: "comparison", label: "Compare", icon: "⇔", preview: "⇔" },
+                          ] as { value: string; label: string; icon: string; preview: string }[]).map((tpl) => (
+                            <button
+                              key={tpl.value}
+                              type="button"
+                              onClick={() => updateContentField("sections", i, "layout", tpl.value)}
+                              className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border text-center transition-all ${
+                                (s.layout || "text-only") === tpl.value
+                                  ? "border-[#2563EB] bg-[#2563EB]/5 text-[#2563EB] ring-1 ring-[#2563EB]/20"
+                                  : "border-[var(--border)] bg-[var(--bg)] text-[var(--txt3)] hover:border-[var(--border3)] hover:text-[var(--txt)]"
+                              }`}
+                            >
+                              <span className="text-lg leading-none">{tpl.icon}</span>
+                              <span className="text-[9px] font-semibold leading-tight">{tpl.label}</span>
+                              <span className="text-[16px] leading-none opacity-40">{tpl.preview}</span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
 
-                      {/* Single image (for image-top layout) */}
-                      {(s.layout === "image-top" || !s.layout || s.layout === "text-only") && (
+                      {/* Single image (for image-top, image-left, image-right layouts) */}
+                      {(s.layout === "image-top" || s.layout === "image-left" || s.layout === "image-right" || !s.layout || s.layout === "text-only") && (
                         <div>
                           <label className="block text-[10px] font-medium text-[var(--txt3)] mb-1">Section Image</label>
                           <div className="flex items-start gap-2">
@@ -579,8 +596,8 @@ export default function AdminBlogPage() {
                         </div>
                       )}
 
-                      {/* Multi-image (for grid layouts) */}
-                      {(s.layout === "image-grid-2" || s.layout === "image-grid-3") && (
+                      {/* Multi-image (for grid and comparison layouts) */}
+                      {(s.layout === "image-grid-2" || s.layout === "image-grid-3" || s.layout === "image-grid-4" || s.layout === "comparison") && (
                         <div>
                           <label className="block text-[10px] font-medium text-[var(--txt3)] mb-1">Grid Images</label>
                           <div className="flex items-center gap-2 mb-2">

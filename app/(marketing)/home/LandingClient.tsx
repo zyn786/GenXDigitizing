@@ -125,15 +125,6 @@ const WHY_CHOOSE_US = [
   },
 ];
 
-const CLIENT_LOGOS = [
-  { name: "ProStitch Apparel", country: "USA", type: "Embroidery Shop" },
-  { name: "Branded Threads Co.", country: "UK", type: "Apparel Brand" },
-  { name: "Victory Sportswear", country: "Nigeria", type: "Sportswear" },
-  { name: "Monogram Collective", country: "India", type: "Custom Apparel" },
-  { name: "ThreadWorks Studio", country: "USA", type: "Production House" },
-  { name: "The Embroidery House", country: "Canada", type: "Commercial Shop" },
-];
-
 const SEWOUT_SHOWCASE = [
   {
     label: "Cap Embroidery",
@@ -160,7 +151,6 @@ const BEFORE_AFTER_SETS = [
     label: "Digitizing",
     beforeUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1779288234/Before-5_upqe91.webp",
     afterUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1779288234/After-5_hod7v0.webp",
-    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1779288234/After-5_hod7v0.gif",
     beforeAlt: "Original artwork before digitizing",
     afterAlt: "Digitized embroidery file with stitch paths",
   },
@@ -168,7 +158,6 @@ const BEFORE_AFTER_SETS = [
     label: "Vector Art",
     beforeUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1780366590/Artboard_1_ag0ycx.webp",
     afterUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1780366590/Artboard_1_2_uhntgw.webp",
-    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1780366590/Artboard_1_2_uhntgw.gif",
     beforeAlt: "Raster image before vector conversion",
     afterAlt: "Clean vector art output",
   },
@@ -176,7 +165,6 @@ const BEFORE_AFTER_SETS = [
     label: "Patch Design",
     beforeUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1780368066/Untitled-1_ua0tor.webp",
     afterUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1780368068/Untitleduu-1_s7qc6c.webp",
-    gifUrl: "https://res.cloudinary.com/djoixgojj/image/upload/f_auto,q_auto,w_800/v1780368068/Untitleduu-1_s7qc6c.gif",
     beforeAlt: "Patch concept before digitizing",
     afterAlt: "Production-ready patch file",
   },
@@ -462,8 +450,7 @@ function HeroSection() {
 
 {/* Mobile bottom bar */}
 <div
-  className="sm:hidden fixed bottom-0 inset-x-0 z-[99999] pb-5 safe-area-bottom"
-  style={{ isolation: "isolate" }}
+  className="sm:hidden fixed bottom-0 inset-x-0 z-40 pb-5 safe-area-bottom"
 >
   {/* Buttons */}
   <div className="px-3 pt-3 pb-3 flex items-center gap-2 bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] shadow-[0_1px_8px_rgba(37,99,235,0.2)]">
@@ -639,47 +626,15 @@ function HeroSection() {
    SECTION 3: CLIENT LOGOS
    ═══════════════════════════════════════════════════════════════ */
 
-function ClientLogosSection() {
-  return (
-    <section className="py-8 sm:py-10">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-12">
-        <AnimatedSection>
-          <div className="text-center mb-6">
-            <SectionBadge color="#7C3AED">Trusted Worldwide</SectionBadge>
-            <p className="text-sm text-[var(--txt2)] mt-3 max-w-lg mx-auto">
-              Join {fmtPlus(SITE_STATS.clientsServed)} embroidery businesses in {fmtPlus(SITE_STATS.countriesServed)} countries who trust genxdigitizing for production-ready digitizing.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3">
-            {CLIENT_LOGOS.map((client) => (
-              <div
-                key={client.name}
-                className="flex flex-col items-center text-center p-3 sm:p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--border3)] transition-all duration-200"
-              >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2563EB]/20 to-[#7C3AED]/20 flex items-center justify-center text-sm font-bold text-[#2563EB] mb-2">
-                  {client.name.charAt(0)}
-                </div>
-                <p className="text-[10px] sm:text-[11px] font-semibold text-[var(--txt)] truncate w-full">{client.name}</p>
-                <p className="text-[9px] text-[var(--txt3)]">
-                  {client.type} · {client.country}
-                </p>
-              </div>
-            ))}
-          </div>
-        </AnimatedSection>
-      </div>
-    </section>
-  );
-}
-
 /* ═══════════════════════════════════════════════════════════════
    SECTION 5: BEFORE/AFTER SHOWCASE (dedicated)
    ═══════════════════════════════════════════════════════════════ */
 
-function BeforeAfterShowcaseSection() {
+function _DeletedBeforeAfterShowcaseSection() { return null; }
+function __unused_before_after() { return null; }
+function __unused_body_after() {
   const [activeSet, setActiveSet] = useState(0);
-  const current = BEFORE_AFTER_SETS[activeSet];
+  const current = [] as any;
 
   const BENEFITS = [
     { icon: "🧵", title: "Fabric-Aware Paths", desc: "Stitch angles and density tuned per material — caps, jackets, polos each get different treatment" },
@@ -833,7 +788,9 @@ function BeforeAfterShowcaseSection() {
    SECTION 6: SERVICES
    ═══════════════════════════════════════════════════════════════ */
 
-function ServicesSection() {
+function _DeletedServicesSection() { return null; }
+function __unused_services() { return null; }
+function __unused_services_body() {
   return (
     <section className="py-12 sm:py-16 md:py-20 lg:py-24" aria-labelledby="services-heading">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
@@ -981,7 +938,8 @@ function HowItWorksSection() {
    SECTION 9: CASE STUDIES
    ═══════════════════════════════════════════════════════════════ */
 
-function CaseStudiesSection() {
+function _DeletedCaseStudiesSection() { return null; }
+function __unused_case_studies() {
   return (
     <section className="py-12 sm:py-16 md:py-20 bg-[#FAFAF9]" aria-labelledby="case-studies-heading">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-12">
@@ -1063,7 +1021,7 @@ function TestimonialsSection({ testimonials }: { testimonials: { name: string; c
             <SectionBadge color="#EAB308">Client Reviews</SectionBadge>
             <h2 id="reviews-heading" className="font-syne font-bold text-3xl md:text-5xl mt-3 mb-3 leading-[1.15]">
               <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
-                Loved by {fmtPlus(SITE_STATS.clientsServed)}+
+                Loved by {fmtPlus(SITE_STATS.clientsServed)}
               </span>{" "}
               Embroidery Pros
             </h2>
@@ -1182,7 +1140,8 @@ function PricingSection({ tiers }: { tiers: Record<string, { size: string; price
    SECTION 12: MANUAL VS AUTO COMPARISON
    ═══════════════════════════════════════════════════════════════ */
 
-function ManualVsAutoSection() {
+function _DeletedManualVsAutoSection() { return null; }
+function __unused_manual_vs_auto() {
   return (
     <section className="py-12 sm:py-16 md:py-20 bg-[#FAFAF9]" aria-labelledby="comparison-heading">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-12">
@@ -1362,6 +1321,180 @@ interface Props {
   faqs: { q: string; a: string }[];
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   SECTION: BEFORE/AFTER VISUAL PROOF
+   ═══════════════════════════════════════════════════════════════ */
+
+function BeforeAfterShowcaseSection() {
+  const [activeSet, setActiveSet] = useState(0);
+  const [sliderPos, setSliderPos] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const current = BEFORE_AFTER_SETS[activeSet];
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  function handleMove(e: React.MouseEvent | React.TouchEvent) {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    setSliderPos(x);
+  }
+
+  function handleDown(e: React.MouseEvent | React.TouchEvent) {
+    e.preventDefault();
+    setIsDragging(true);
+    handleMove(e);
+  }
+
+  useEffect(() => {
+    if (!isDragging) return;
+    function onMove(e: MouseEvent | TouchEvent) { handleMove(e as any); }
+    function onUp() { setIsDragging(false); }
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove);
+    window.addEventListener("touchend", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, [isDragging]);
+
+  return (
+    <section className="py-12 sm:py-16 md:py-20" aria-labelledby="showcase-heading">
+      <div className="max-w-[1000px] mx-auto px-4 sm:px-6 md:px-12">
+        <AnimatedSection>
+          {/* Header */}
+          <div className="text-center mb-8 sm:mb-10">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#F97316]/10 text-[#F97316] border border-[#F97316]/20 mb-4">
+              Visual Proof
+            </span>
+            <h2 id="showcase-heading" className="font-syne font-bold text-[clamp(28px,5vw,48px)] leading-[1.08] mb-3 text-[var(--txt)]">
+              See the{" "}
+              <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
+                Difference
+              </span>
+            </h2>
+            <p className="text-sm sm:text-base text-[var(--txt2)] max-w-lg mx-auto">
+              Every file hand-digitized. No auto-trace. No shortcuts. The results speak for themselves.
+            </p>
+          </div>
+
+          {/* Tab switcher */}
+          <div className="flex items-center justify-center gap-2 mb-6">
+            {BEFORE_AFTER_SETS.map((set, i) => (
+              <button
+                key={set.label}
+                onClick={() => { setActiveSet(i); setSliderPos(50); }}
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
+                  i === activeSet
+                    ? "bg-[#F97316] text-white shadow-sm"
+                    : "bg-[var(--elevated)] border border-[var(--border)] text-[var(--txt2)] hover:text-[var(--txt)]"
+                }`}
+              >
+                {set.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Before/After Slider */}
+          <div
+            ref={containerRef}
+            className="relative w-full rounded-[8px] overflow-hidden select-none cursor-ew-resize"
+            style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.12)" }}
+            onMouseDown={handleDown}
+            onTouchStart={handleDown}
+          >
+            {/* Hidden image — sets natural container height */}
+            <img
+              src={current.beforeUrl}
+              alt=""
+              className="block w-full h-auto invisible"
+              draggable={false}
+            />
+
+            {/* Before image (underneath — fills container) */}
+            <img
+              src={current.beforeUrl}
+              alt={current.beforeAlt}
+              className="absolute inset-0 w-full h-full object-cover"
+              draggable={false}
+            />
+
+            {/* After image (revealed by slider) */}
+            <div
+              className="absolute inset-0 overflow-hidden"
+              style={{ clipPath: `inset(0 0 0 ${sliderPos}%)` }}
+            >
+              <img
+                src={current.afterUrl}
+                alt={current.afterAlt}
+                className="absolute inset-0 w-full h-full object-cover"
+                draggable={false}
+              />
+            </div>
+
+            {/* Slider handle line */}
+            <div
+              className="absolute top-0 bottom-0 w-[3px] pointer-events-none"
+              style={{
+                left: `${sliderPos}%`,
+                background: "linear-gradient(180deg, transparent 0%, #F97316 30%, #F97316 70%, transparent 100%)",
+                boxShadow: "0 0 12px rgba(249,115,22,0.5)",
+              }}
+            />
+
+            {/* Slider handle knob */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none"
+              style={{ left: `${sliderPos}%` }}
+            >
+              <div className="w-12 h-12 rounded-full bg-[#F97316] shadow-2xl flex items-center justify-center ring-4 ring-white/90">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 5l-4 7 4 7" /><path d="M16 5l4 7-4 7" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Labels */}
+            <span className="absolute top-4 left-4 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-[#DC2626] text-white shadow-lg">
+              Before
+            </span>
+            <span className="absolute top-4 right-4 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-[#16A34A] text-white shadow-lg">
+              After
+            </span>
+
+            {/* Bottom overlay — title + category */}
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 sm:p-5"
+              style={{
+                background: "linear-gradient(0deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 60%, transparent 100%)",
+              }}
+            >
+              <div>
+                <p className="text-white text-sm sm:text-base font-syne font-bold leading-tight">
+                  {current.label}
+                </p>
+                <p className="text-white/70 text-[11px] sm:text-xs mt-0.5">
+                  Hand-digitized embroidery — production-ready quality
+                </p>
+              </div>
+              <span className="flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white backdrop-blur-sm border border-white/20">
+                {activeSet === 0 ? "🧵 Digitizing" : activeSet === 1 ? "✏️ Vector Art" : "🏷️ Patches"}
+              </span>
+            </div>
+          </div>
+
+          <p className="text-center text-[11px] text-[var(--txt3)] mt-4">
+            ⟷ Drag the handle to compare before vs after
+          </p>
+        </AnimatedSection>
+      </div>
+    </section>
+  );
+}
+
 export function LandingClient({ services, process, testimonials, faqs }: Props) {
   const tiers: Record<string, { size: string; price: string }[]> = {};
   for (const svc of services) {
@@ -1374,17 +1507,14 @@ export function LandingClient({ services, process, testimonials, faqs }: Props) 
       {/* 1. HERO */}
       <HeroSection />
 
-      {/* 4. STATISTICS (TrustStatsSection = built-in) */}
+      {/* 4. STATISTICS / OPERATIONS LIVE */}
       <TrustStatsSection />
-      
-      {/* 3. CLIENT LOGOS */}
-      <ClientLogosSection />
 
-      {/* 5. BEFORE/AFTER SHOWCASE */}
+      {/* PORTFOLIO PREVIEW */}
+      <PortfolioPreview />
+
+      {/* VISUAL PROOF — BEFORE/AFTER */}
       <BeforeAfterShowcaseSection />
-
-      {/* 6. SERVICES */}
-      <ServicesSection />
 
       {/* 7. WHY CHOOSE US */}
       <WhyChooseUsSection />
@@ -1392,17 +1522,8 @@ export function LandingClient({ services, process, testimonials, faqs }: Props) 
       {/* 8. HOW IT WORKS */}
       <HowItWorksSection />
 
-      {/* PORTFOLIO PREVIEW (bonus social proof) */}
-      <PortfolioPreview />
-
-      {/* 9. CASE STUDIES (2 detailed) */}
-      <CaseStudiesSection />
-
       {/* PRICING */}
       <PricingSection tiers={tiers} />
-
-      {/* MANUAL VS AUTO (bonus differentiator) */}
-      <ManualVsAutoSection />
 
       {/* 10. REVIEWS / TESTIMONIALS */}
       <TestimonialsSection testimonials={testimonials} />

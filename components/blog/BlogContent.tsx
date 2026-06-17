@@ -185,6 +185,52 @@ export default function BlogContent({ post, showBack = true, children }: { post:
                     </div>
                   )}
 
+                  {/* Layout: image-left — image beside text */}
+                  {section.layout === "image-left" && section.image && (
+                    <div className="grid sm:grid-cols-2 gap-4 sm:gap-5 mb-5 items-start">
+                      <div className="rounded-xl overflow-hidden aspect-[4/3] border border-[var(--border)]">
+                        <img src={section.image} alt={section.heading} className="w-full h-full object-cover" loading="lazy" />
+                      </div>
+                      <div className="text-[15px] sm:text-base text-[var(--txt2)] leading-relaxed">
+                        {section.body.split(/\n{2,}/).map((block, j) => (
+                          <SectionBlock key={j} block={block} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Layout: image-right — text beside image */}
+                  {section.layout === "image-right" && section.image && (
+                    <div className="grid sm:grid-cols-2 gap-4 sm:gap-5 mb-5 items-start">
+                      <div className="text-[15px] sm:text-base text-[var(--txt2)] leading-relaxed order-2 sm:order-1">
+                        {section.body.split(/\n{2,}/).map((block, j) => (
+                          <SectionBlock key={j} block={block} />
+                        ))}
+                      </div>
+                      <div className="rounded-xl overflow-hidden aspect-[4/3] border border-[var(--border)] order-1 sm:order-2">
+                        <img src={section.image} alt={section.heading} className="w-full h-full object-cover" loading="lazy" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Layout: comparison — before/after */}
+                  {section.layout === "comparison" && (section.images || []).length >= 2 && (
+                    <div className="grid grid-cols-2 gap-3 mb-5">
+                      <div className="rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--surface)]">
+                        <div className="px-3 py-2 border-b border-[var(--border)] text-[10px] font-bold uppercase tracking-wider text-[var(--txt2)] text-center">Before</div>
+                        <div className="aspect-[4/3]">
+                          <img src={(section.images || [])[0]} alt="Before" className="w-full h-full object-cover" loading="lazy" />
+                        </div>
+                      </div>
+                      <div className="rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--surface)]">
+                        <div className="px-3 py-2 border-b border-[var(--border)] text-[10px] font-bold uppercase tracking-wider text-[var(--txt2)] text-center">After</div>
+                        <div className="aspect-[4/3]">
+                          <img src={(section.images || [])[1]} alt="After" className="w-full h-full object-cover" loading="lazy" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Layout: image-grid-2 */}
                   {section.layout === "image-grid-2" && (section.images || []).length > 0 && (
                     <div className="grid grid-cols-2 gap-3 mb-5">
@@ -207,11 +253,25 @@ export default function BlogContent({ post, showBack = true, children }: { post:
                     </div>
                   )}
 
-                  <div className="space-y-3 sm:space-y-4">
-                    {section.body.split(/\n{2,}/).map((block, j) => (
-                      <SectionBlock key={j} block={block} />
-                    ))}
-                  </div>
+                  {/* Layout: image-grid-4 */}
+                  {section.layout === "image-grid-4" && (section.images || []).length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-5">
+                      {(section.images || []).map((url, imgIdx) => (
+                        <div key={imgIdx} className="rounded-xl overflow-hidden aspect-square border border-[var(--border)]">
+                          <img src={url} alt={`${section.heading} — image ${imgIdx + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Only render body here for layouts that don't already render it */}
+                  {section.layout !== "image-left" && section.layout !== "image-right" && (
+                    <div className="space-y-3 sm:space-y-4">
+                      {section.body.split(/\n{2,}/).map((block, j) => (
+                        <SectionBlock key={j} block={block} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

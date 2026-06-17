@@ -14,7 +14,6 @@ import {
   Shield,
   Zap,
   Eye,
-  Layers,
   Download,
   FileCheck,
   SlidersHorizontal,
@@ -81,7 +80,7 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className="relative inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[13px] sm:text-sm font-semibold transition-all duration-200 border cursor-pointer"
+      className="relative inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[12px] sm:text-sm font-semibold transition-all duration-200 border cursor-pointer"
       style={{
         background: isActive
           ? `linear-gradient(135deg, ${color}, ${color}DD)`
@@ -108,15 +107,17 @@ function FilterChip({
   );
 }
 
-/* ── Portfolio Card (inline for conversion focus) ────────── */
+/* ── Portfolio Card (image-only) ─────────────────────── */
 function GalleryCard({
   item,
   onClick,
   index,
+  onCategoryClick,
 }: {
   item: PortfolioItem;
   onClick: () => void;
   index: number;
+  onCategoryClick?: (slug: string) => void;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -124,10 +125,6 @@ function GalleryCard({
   const thumbnail = item.images?.find((i: any) => i.isThumbnail || i.sortOrder === -1);
   const firstImage = thumbnail || item.images?.[0];
   const accent = item.accent || category?.color || "#2563EB";
-  const emoji = category?.emoji || "✦";
-  const hasBeforeAfter = item.images?.some((i: any) => i.isBefore) && item.images?.some((i: any) => !i.isBefore);
-  const beforeImg = item.images?.find((i: any) => i.isBefore);
-  const afterImg = item.images?.find((i: any) => !i.isBefore);
 
   return (
     <motion.article
@@ -137,27 +134,16 @@ function GalleryCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
-      className="group relative rounded-2xl cursor-pointer overflow-hidden transition-all duration-300 flex flex-col"
+      className="group relative rounded-[8px] cursor-pointer overflow-hidden transition-all duration-300 bg-[var(--surface)]"
       style={{
-        background: "var(--surface)",
-        border: `1px solid ${isHovered ? accent + "50" : "var(--border2)"}`,
+        border: `1px solid ${isHovered ? accent + "40" : "var(--border2)"}`,
         boxShadow: isHovered
-          ? `0 16px 48px ${accent}14, 0 0 0 1px ${accent}18 inset`
+          ? `0 16px 48px ${accent}14`
           : "0 2px 8px rgba(0,0,0,0.04)",
       }}
     >
       {/* Image area */}
-      <div className="relative aspect-[4/3] overflow-hidden" style={{ background: `${accent}06` }}>
-        {/* Grid bg */}
-        <div
-          className="absolute inset-0 transition-opacity duration-500"
-          style={{
-            backgroundImage: `linear-gradient(${accent}08 1px, transparent 1px), linear-gradient(90deg, ${accent}08 1px, transparent 1px)`,
-            backgroundSize: "20px 20px",
-            opacity: isHovered ? 0.8 : 0.3,
-          }}
-        />
-
+      <div className="relative aspect-[4/5] sm:aspect-[3/4] overflow-hidden" style={{ background: `${accent}06` }}>
         {firstImage && !imgError ? (
           <>
             <img
@@ -167,23 +153,22 @@ function GalleryCard({
               onError={() => setImgError(true)}
               className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
               style={{
-                opacity: isHovered ? 1 : 0.88,
                 transform: isHovered ? "scale(1.06)" : "scale(1)",
               }}
             />
-            {/* Hover overlay with preview CTA */}
+            {/* Hover: View indicator */}
             <div
-              className="absolute inset-0 flex items-center justify-center transition-all duration-300"
+              className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100 rounded-[8px] overflow-hidden"
               style={{
-                background: `linear-gradient(to top, ${accent}40 0%, transparent 50%)`,
-                opacity: isHovered ? 1 : 0,
+                background: `linear-gradient(180deg, transparent 40%, ${accent}30 100%)`,
               }}
             >
               <span
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white bg-white/15 backdrop-blur-md border border-white/20"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold text-white"
+                style={{ background: `${accent}90`, backdropFilter: "blur(8px)" }}
               >
-                <Eye size={13} />
-                Preview
+                <Eye size={15} />
+                View
               </span>
             </div>
           </>
@@ -193,23 +178,6 @@ function GalleryCard({
           </div>
         )}
 
-        {/* Badges */}
-        <div className="absolute top-2.5 left-2.5 flex gap-1.5 z-10">
-          {category && (
-            <span
-              className="text-[9px] font-bold uppercase tracking-[0.05em] px-2 py-0.5 rounded-full"
-              style={{ background: `${accent}18`, color: accent, border: `1px solid ${accent}35` }}
-            >
-              {category.name}
-            </span>
-          )}
-          {hasBeforeAfter && (
-            <span className="text-[9px] font-bold uppercase tracking-[0.05em] px-2 py-0.5 rounded-full bg-[#F97316]/15 text-[#F97316] border border-[#F97316]/30">
-              Before / After
-            </span>
-          )}
-        </div>
-
         {item.images.length > 1 && (
           <span className="absolute top-2.5 right-2.5 z-10 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/40 text-white/90 backdrop-blur-sm">
             +{item.images.length - 1}
@@ -217,56 +185,33 @@ function GalleryCard({
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-4 flex flex-col gap-2.5 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <h3
-            className="font-syne font-bold text-sm leading-snug transition-colors"
-            style={{ color: isHovered ? accent : "var(--txt)" }}
-          >
-            {item.title}
-          </h3>
-          {item.turnaround && (
-            <span className="flex-shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/20">
-              {item.turnaround}
+      {/* Info section */}
+      <div className="p-3 sm:p-4 flex flex-col gap-2">
+        <h3 className="font-syne font-bold text-sm sm:text-[15px] leading-snug text-[var(--txt)] line-clamp-1">
+          {item.title}
+        </h3>
+
+        {item.description ? (
+          <p className="text-[11px] sm:text-xs text-[var(--txt2)] leading-relaxed line-clamp-2">
+            {item.description}
+          </p>
+        ) : null}
+
+        <div className="flex flex-wrap items-center gap-1.5 mt-auto pt-1">
+          {category && (
+            <span className="text-[9px] sm:text-[11px] font-medium px-2 py-px sm:px-2.5 sm:py-1 rounded-full bg-[var(--elevated)] text-[var(--txt3)] border border-[var(--border)]">
+              {category.emoji} {category.name}
             </span>
           )}
-        </div>
-
-        <p className="text-xs text-[var(--txt2)] leading-relaxed line-clamp-2">{item.description}</p>
-
-        {/* Quick stats row */}
-        <div className="grid grid-cols-3 gap-1.5 mt-auto">
-          {item.stitches && item.stitches > 0 && (
-            <div className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg bg-[var(--border)] border border-[var(--border2)]">
-              <Layers size={10} className="text-[var(--txt3)]" />
-              <span className="text-[10px] font-mono font-semibold text-[var(--txt)]">{(item.stitches / 1000).toFixed(1)}k</span>
-            </div>
+          {item.tags && item.tags.slice(0, 3).map((tag: string) => (
+            <span key={tag} className="text-[9px] sm:text-[11px] font-medium px-2 py-px sm:px-2.5 sm:py-1 rounded-full bg-[var(--elevated)] text-[var(--txt3)] border border-[var(--border)]">
+              {tag}
+            </span>
+          ))}
+          {item.tags && item.tags.length > 3 && (
+            <span className="text-[9px] sm:text-[11px] text-[var(--txt3)]">+{item.tags.length - 3}</span>
           )}
-          <div className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg bg-[var(--border)] border border-[var(--border2)]">
-            <span className="text-[10px]">🎨</span>
-            <span className="text-[10px] font-mono font-semibold text-[var(--txt)]">{item.colors}</span>
-          </div>
-          <div className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg bg-[var(--border)] border border-[var(--border2)]">
-            <Download size={10} className="text-[var(--txt3)]" />
-            <span className="text-[10px] font-semibold text-[var(--txt)] truncate max-w-[55px]">{item.outputFormat}</span>
-          </div>
         </div>
-
-        {/* Quick CTA */}
-        <Link
-          href="/contact"
-          onClick={(e) => e.stopPropagation()}
-          className="mt-2 flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-[11px] font-semibold no-underline transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-          style={{
-            background: isHovered ? `linear-gradient(135deg, ${accent}, ${accent}DD)` : `${accent}10`,
-            color: isHovered ? "#fff" : accent,
-            border: `1px solid ${isHovered ? "transparent" : accent + "25"}`,
-          }}
-        >
-          Order This Style
-          <ArrowRight size={11} />
-        </Link>
       </div>
     </motion.article>
   );
@@ -400,8 +345,6 @@ export function PortfolioClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "compare">("grid");
-
   useEffect(() => {
     fetchPortfolio()
       .then((data) => {
@@ -426,11 +369,6 @@ export function PortfolioClient() {
     if (activeSub && !i.tags?.includes(activeSub)) return false;
     return true;
   });
-
-  // Before/after items
-  const beforeAfterItems = filtered.filter(
-    (i) => i.images?.some((img: any) => img.isBefore) && i.images?.some((img: any) => !img.isBefore)
-  );
 
   return (
     <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden">
@@ -491,7 +429,7 @@ export function PortfolioClient() {
       <section className="pb-6 sm:pb-8">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
           {/* Main categories */}
-          <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 mb-3">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-1.5 sm:gap-2 mb-3">
             {mainCategories.map((cat) => {
               const count =
                 cat.slug === "all"
@@ -558,45 +496,12 @@ export function PortfolioClient() {
             )}
           </AnimatePresence>
 
-          {/* View mode toggle + count */}
-          <div className="flex items-center justify-between max-w-[1400px] mx-auto mt-2">
-            <p className="text-xs sm:text-sm text-[var(--txt3)]">
+          {/* Count */}
+          <div className="text-center max-w-[1400px] mx-auto mt-2">
+            <p className="text-xs text-[var(--txt3)]">
               Showing <strong className="text-[var(--txt)]">{filtered.length}</strong> projects
-              {activeSub && (
-                <>
-                  {" "}in <strong className="text-[#F97316]">{activeSub}</strong>
-                </>
-              )}
+              {activeSub && <span> in <strong className="text-[#F97316]">{activeSub}</strong></span>}
             </p>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => setViewMode("grid")}
-                className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 border"
-                style={{
-                  background: viewMode === "grid" ? "#2563EB15" : "var(--surface)",
-                  color: viewMode === "grid" ? "#2563EB" : "var(--txt3)",
-                  borderColor: viewMode === "grid" ? "#2563EB30" : "var(--border2)",
-                }}
-              >
-                <SlidersHorizontal size={12} className="inline mr-1" />
-                Gallery
-              </button>
-              {beforeAfterItems.length > 0 && (
-                <button
-                  onClick={() => setViewMode("compare")}
-                  className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 border"
-                  style={{
-                    background: viewMode === "compare" ? "#F9731615" : "var(--surface)",
-                    color: viewMode === "compare" ? "#F97316" : "var(--txt3)",
-                    borderColor: viewMode === "compare" ? "#F9731630" : "var(--border2)",
-                  }}
-                >
-                  <ArrowUpRight size={12} className="inline mr-1" />
-                  Before / After
-                </button>
-              )}
-            </div>
           </div>
         </div>
       </section>
@@ -637,62 +542,16 @@ export function PortfolioClient() {
                 </Button>
               </Link>
             </div>
-          ) : viewMode === "compare" ? (
-            /* ── Before/After Comparison Grid ─────────────────── */
-            <div className="space-y-8">
-              <AnimatedSection>
-                <div className="text-center mb-8">
-                  <SectionBadge color="#F97316">Before &amp; After</SectionBadge>
-                  <h2 className="font-syne font-bold text-2xl sm:text-3xl mt-3 mb-2">
-                    See the Transformation
-                  </h2>
-                  <p className="text-sm text-[var(--txt2)] max-w-xl mx-auto">
-                    Original artwork vs digitized embroidery files. Every project below shows the quality difference
-                    hand-digitizing makes.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                  {beforeAfterItems.map((item) => (
-                    <BeforeAfterCard
-                      key={item.id}
-                      item={item}
-                      onClick={() => setSelectedItem(item)}
-                    />
-                  ))}
-                </div>
-
-                {/* Remaining items without before/after */}
-                {filtered.filter((i) => !beforeAfterItems.includes(i)).length > 0 && (
-                  <div className="mt-12">
-                    <h3 className="font-syne font-bold text-lg mb-5 text-center text-[var(--txt2)]">
-                      More Projects
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                      {filtered
-                        .filter((i) => !beforeAfterItems.includes(i))
-                        .map((item, idx) => (
-                          <GalleryCard
-                            key={item.id}
-                            item={item}
-                            index={idx}
-                            onClick={() => setSelectedItem(item)}
-                          />
-                        ))}
-                    </div>
-                  </div>
-                )}
-              </AnimatedSection>
-            </div>
           ) : (
-            /* ── Standard Gallery Grid ───────────────────────── */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+            /* ── Gallery Grid ───────────────────────── */
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
               {filtered.map((item, idx) => (
                 <GalleryCard
                   key={item.id}
                   item={item}
                   index={idx}
                   onClick={() => setSelectedItem(item)}
+                  onCategoryClick={(slug) => { setActiveCat(slug); setActiveSub(null); }}
                 />
               ))}
             </div>
@@ -739,99 +598,29 @@ export function PortfolioClient() {
       )}
 
       {/* ════════════════════════════════════════════════════════
-          CLIENT RESULTS — Social proof section
+          FINAL CTA
           ════════════════════════════════════════════════════════ */}
-      {items.filter((i) => i.clientName).length > 0 && (
-        <section className="py-10 sm:py-14">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
-            <AnimatedSection>
-              <div className="text-center mb-8">
-                <SectionBadge color="#16A34A">Client Results</SectionBadge>
-                <h2 className="font-syne font-bold text-2xl sm:text-3xl mt-3 mb-2">
-                  Trusted by Embroidery Pros
-                </h2>
-                <p className="text-sm text-[var(--txt2)] max-w-xl mx-auto">
-                  Real feedback from real clients. Every project delivered production-ready.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                {items
-                  .filter((i) => i.clientName)
-                  .slice(0, 6)
-                  .map((item) => (
-                    <ClientResultCard key={item.id} item={item} />
-                  ))}
-              </div>
-            </AnimatedSection>
+      <section className="py-12 sm:py-16 md:py-20">
+        <div className="max-w-[800px] mx-auto px-4 sm:px-6 text-center">
+          <h2 className="font-syne font-bold text-2xl sm:text-3xl md:text-4xl mb-3 text-[var(--txt)]">
+            Ready for Production-Ready Files?
+          </h2>
+          <p className="text-sm sm:text-base text-[var(--txt2)] mb-6 max-w-md mx-auto">
+            Upload your design — get a proof — pay when satisfied. From <strong className="text-[var(--txt)]">$7</strong> per design.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/contact">
+              <Button variant="grad" size="lg" rightIcon={<ArrowRight size={15} />}>
+                Upload Design — Free Quote
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button variant="ghost" size="md">View Pricing</Button>
+            </Link>
           </div>
-        </section>
-      )}
-
-      {/* ════════════════════════════════════════════════════════
-          TRUST BAR — Verification signals
-          ════════════════════════════════════════════════════════ */}
-      <section className="py-8 sm:py-10">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-            {[
-              { icon: Star, label: `${SITE_STATS.avgRating}/5 Rating`, sub: `${fmtPlus(SITE_STATS.verifiedReviews)} verified reviews` },
-              { icon: Shield, label: "100% Guaranteed", sub: "Pay when satisfied" },
-              { icon: Zap, label: "3–24h Delivery", sub: "Rush & urgent free" },
-              { icon: Download, label: "8+ File Formats", sub: "DST, PES, EMB & more" },
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.label}
-                  className="flex flex-col items-center text-center p-4 sm:p-5 rounded-2xl bg-[var(--elevated)] border border-[var(--border)]"
-                >
-                  <Icon size={20} className="text-[#2563EB] mb-2" />
-                  <p className="font-syne font-bold text-sm text-[var(--txt)]">{item.label}</p>
-                  <p className="text-[11px] text-[var(--txt3)] mt-0.5">{item.sub}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════
-          FINAL CTA — Conversion close
-          ════════════════════════════════════════════════════════ */}
-      <section className="py-12 sm:py-16">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
-          <div className="relative overflow-hidden rounded-3xl sm:rounded-[36px] border border-[#2563EB]/20 bg-gradient-to-br from-[#2563EB]/10 via-white/40 to-[#F97316]/10 p-8 sm:p-12 md:p-16 text-center shadow-[0_0_60px_rgba(37,99,235,0.1)] backdrop-blur-xl">
-            <GradientOrb color="#2563EB" size={280} className="-top-24 left-1/2 -translate-x-1/2 opacity-20" />
-
-            <div className="relative z-10 max-w-xl mx-auto">
-              <div className="text-5xl mb-4">🧵</div>
-              <h2 className="font-syne font-bold text-2xl sm:text-3xl md:text-4xl mb-3">
-                Ready for Production-Ready Files?
-              </h2>
-              <p className="text-base sm:text-lg text-[var(--txt2)] mb-2">
-                Upload your design. Get a proof. Pay when satisfied.
-              </p>
-              <p className="text-sm text-[var(--txt3)] mb-6">
-                From <strong className="text-[var(--txt)]">$7</strong> per design. Free revisions. Free formats. Free rush delivery.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link href="/contact">
-                  <Button variant="grad" size="lg" className="!px-8" rightIcon={<ArrowRight size={16} />}>
-                    Upload Design — Free Quote
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button variant="ghost" size="lg">
-                    Create Account
-                  </Button>
-                </Link>
-              </div>
-              <p className="text-xs text-[var(--txt3)] mt-4">
-                🔄 Free revisions forever &bull; All machine formats &bull; Pay when satisfied
-              </p>
-            </div>
-          </div>
+          <p className="text-[11px] text-[var(--txt3)] mt-4">
+            🔄 Free revisions forever &bull; All machine formats &bull; Pay when satisfied
+          </p>
         </div>
       </section>
 

@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { Eye, Clock, Palette, Ruler, ImageOff, ArrowRight } from "lucide-react";
+import { Eye, ImageOff } from "lucide-react";
 import type { PortfolioItem } from "./data";
 import { generateBlurPlaceholder } from "./data";
 
@@ -11,29 +10,10 @@ interface PortfolioCardProps {
   item: PortfolioItem;
   index: number;
   onClick: () => void;
+  onCategoryClick?: (slug: string) => void;
 }
 
-function TurnaroundBadge({ turnaround, accent }: { turnaround: string; accent: string }) {
-  const isUrgent = turnaround.includes("Urgent");
-  const isRush = turnaround.includes("Rush");
-  const color = isUrgent ? "#DC2626" : isRush ? "#F97316" : "#16A34A";
-  const icon = isUrgent ? "🔥" : isRush ? "⚡" : "🕐";
-
-  return (
-    <span
-      className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
-      style={{
-        background: `${color}15`,
-        color,
-        borderColor: `${color}30`,
-      }}
-    >
-      {icon} {turnaround}
-    </span>
-  );
-}
-
-export function PortfolioCard({ item, index, onClick }: PortfolioCardProps) {
+export function PortfolioCard({ item, index, onClick, onCategoryClick }: PortfolioCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [imgError, setImgError] = useState(false);
   const category = item.category;
@@ -48,237 +28,82 @@ export function PortfolioCard({ item, index, onClick }: PortfolioCardProps) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
-      className="relative flex-shrink-0 w-full lg:w-[300px] lg:min-w-[300px] xl:w-[360px] rounded-2xl cursor-pointer
-        overflow-hidden transition-all duration-300 group select-none flex flex-col animate-fade-in-up"
+      className="relative w-full rounded-[8px] cursor-pointer
+        overflow-hidden transition-all duration-300 group select-none animate-fade-in-up bg-[var(--surface)]"
       style={{
-        background: `linear-gradient(145deg, var(--surface), var(--elevated))`,
-        borderColor: isHovered ? `${accent}50` : "var(--border2)",
-        borderWidth: 1,
-        borderStyle: "solid",
+        border: `1px solid ${isHovered ? accent + "40" : "var(--border2)"}`,
         boxShadow: isHovered
-          ? `0 20px 60px ${accent}15, 0 0 0 1px ${accent}20 inset`
+          ? `0 16px 48px ${accent}14`
           : "0 2px 8px rgba(0,0,0,0.04)",
         animationDelay: `${index * 60}ms`,
       }}
     >
-      {/* Animated border glow */}
-      <div
-        className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-500"
-        style={{
-          opacity: isHovered ? 1 : 0,
-          background: `linear-gradient(135deg, ${accent}15, transparent 40%, ${accent}08, transparent 80%)`,
-        }}
-      />
-
-      {/* Glass highlight */}
-      <div
-        className="absolute -inset-px rounded-2xl pointer-events-none transition-opacity duration-500"
-        style={{
-          opacity: isHovered ? 1 : 0,
-          background: `linear-gradient(135deg, ${accent}08 0%, transparent 50%, ${accent}05 100%)`,
-        }}
-      />
-
-      {/* Preview area — fixed aspect ratio */}
-      <div
-        className="relative w-full aspect-[4/3] flex items-center justify-center overflow-hidden"
-        style={{
-          background: `linear-gradient(135deg, ${accent}06, ${accent}02)`,
-          borderBottom: `1px solid ${isHovered ? accent + "30" : "var(--border)"}`,
-        }}
-      >
-        {/* Grid pattern (behind image) */}
-        <div
-          className="absolute inset-0 transition-opacity duration-500"
-          style={{
-            backgroundImage: `linear-gradient(${accent}08 1px, transparent 1px),
-              linear-gradient(90deg, ${accent}08 1px, transparent 1px)`,
-            backgroundSize: "24px 24px",
-            opacity: isHovered ? 1 : 0.4,
-          }}
-        />
-
-        {/* Real image */}
-        {firstImage ? (
-          !imgError ? (
-            <>
-              {/* Blur placeholder */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={blurData}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover scale-110"
-                style={{ filter: "blur(20px)" }}
-                aria-hidden="true"
-              />
-              {/* Actual image with fallback handling */}
-              <Image
-                src={firstImage.url}
-                alt={firstImage.alt || item.title}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                onError={() => setImgError(true)}
-                className="object-cover transition-all duration-500"
-                style={{
-                  opacity: isHovered ? 1 : 0.9,
-                  transform: isHovered ? "scale(1.08)" : "scale(1)",
-                }}
-              />
-            </>
-          ) : (
-            /* Broken image — show category icon nicely */
-            <div
-              className="flex flex-col items-center gap-2 relative z-10 select-none transition-transform duration-300"
+      {/* Image */}
+      <div className="relative aspect-[4/5] sm:aspect-[3/4] overflow-hidden" style={{ background: `${accent}06` }}>
+        {firstImage && !imgError ? (
+          <>
+            <img
+              src={firstImage.url}
+              alt={item.title}
+              loading="lazy"
+              onError={() => setImgError(true)}
+              className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
               style={{ transform: isHovered ? "scale(1.05)" : "scale(1)" }}
+            />
+            {/* Hover overlay — subtle, just "View" */}
+            <div
+              className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100 rounded-[8px] overflow-hidden"
+              style={{ background: `linear-gradient(180deg, transparent 50%, ${accent}35 100%)` }}
             >
-              <ImageOff size={32} className="opacity-30" style={{ color: accent }} />
-              <span className="text-[10px] opacity-40" style={{ color: accent }}>Image unavailable</span>
+              <span
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white"
+                style={{ background: `${accent}85`, backdropFilter: "blur(8px)" }}
+              >
+                <Eye size={15} /> View
+              </span>
             </div>
-          )
+          </>
         ) : (
-          /* No image — decorative placeholder */
-          <div
-            className="text-5xl relative z-10 select-none transition-transform duration-300"
-            style={{
-              transform: isHovered ? "scale(1.08)" : "scale(1)",
-              filter: `drop-shadow(0 0 ${isHovered ? 24 : 12}px ${accent}50)`,
-            }}
-          >
+          <div className="absolute inset-0 flex items-center justify-center text-5xl" style={{ filter: `drop-shadow(0 0 12px ${accent}50)` }}>
             {emoji}
           </div>
         )}
 
-        {/* Category badge */}
-        {category && (
-          <span
-            className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-[0.06em]
-              px-2 py-0.5 rounded-full z-10"
-            style={{
-              background: `${accent}15`,
-              color: accent,
-              border: `1px solid ${accent}30`,
-            }}
-          >
-            {category.name}
-          </span>
-        )}
-
-        {/* Image count badge */}
+        {/* Image count */}
         {item.images.length > 1 && (
-          <span className="absolute top-3 right-3 text-[10px] font-semibold px-2 py-0.5 rounded-full z-10 bg-[var(--txt)]/40 text-[var(--bg)] backdrop-blur-sm">
+          <span className="absolute top-2.5 right-2.5 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/40 text-white backdrop-blur-sm">
             +{item.images.length - 1}
           </span>
         )}
-
-        {/* Client name */}
-        {item.clientName && (
-          <span className="absolute bottom-3 left-3 text-[10px] font-medium px-2 py-0.5 rounded-full z-10 bg-[var(--txt)]/50 text-[var(--bg)]/80 backdrop-blur-sm">
-            {item.clientName}
-          </span>
-        )}
-
-        {/* Preview button */}
-        <div
-          className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5
-            px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all duration-200"
-          style={{
-            background: `${accent}20`,
-            color: accent,
-            border: `1px solid ${accent}40`,
-            backdropFilter: "blur(8px)",
-            opacity: isHovered ? 1 : 0,
-            transform: isHovered ? "translateY(0)" : "translateY(8px)",
-          }}
-        >
-          <Eye size={12} />
-          Preview
-        </div>
       </div>
 
-      {/* Content */}
-      <div className="p-5 flex flex-col gap-3 flex-1">
-        {/* Title & turnaround */}
-        <div className="flex items-start justify-between gap-2">
-          <h3
-            className="font-syne font-bold text-[15px] leading-snug bg-clip-text text-transparent"
-            style={{
-              backgroundImage: isHovered
-                ? `linear-gradient(135deg, var(--txt), ${accent})`
-                : `linear-gradient(135deg, var(--txt), var(--txt2))`,
-            }}
-          >
-            {item.title}
-          </h3>
-          <div className="flex-shrink-0 mt-0.5">
-            <TurnaroundBadge turnaround={item.turnaround} accent={accent} />
-          </div>
-        </div>
+      {/* Info */}
+      <div className="p-3 sm:p-4 flex flex-col gap-2">
+        <h3 className="font-syne font-bold text-sm sm:text-[15px] leading-snug text-[var(--txt)] line-clamp-1">
+          {item.title}
+        </h3>
 
-        {/* Description */}
-        <p className="text-xs text-[var(--txt2)] leading-relaxed line-clamp-2">
-          {item.description}
-        </p>
+        {item.description ? (
+          <p className="text-[11px] sm:text-xs text-[var(--txt2)] leading-relaxed line-clamp-2">
+            {item.description}
+          </p>
+        ) : null}
 
-        {/* Quick stats */}
-        <div className="grid grid-cols-3 gap-1.5">
-          {item.stitches && item.stitches > 0 && (
-            <div
-              className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg"
-              style={{
-                background: isHovered ? `${accent}08` : "var(--border)",
-                border: `1px solid ${isHovered ? accent + "20" : "var(--border2)"}`,
-              }}
-            >
-              <Ruler size={11} style={{ color: isHovered ? accent : "var(--txt3)" }} />
-              <span className="text-[10px] font-mono font-semibold text-[var(--txt)]">
-                {(item.stitches / 1000).toFixed(1)}k
-              </span>
-            </div>
+        <div className="flex flex-wrap items-center gap-1.5 mt-auto pt-1">
+          {category && (
+            <span className="text-[9px] sm:text-[11px] font-medium px-2 py-px sm:px-2.5 sm:py-1 rounded-full bg-[var(--elevated)] text-[var(--txt3)] border border-[var(--border)]">
+              {category.emoji} {category.name}
+            </span>
           )}
-          <div
-            className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg"
-            style={{
-              background: isHovered ? `${accent}08` : "var(--border)",
-              border: `1px solid ${isHovered ? accent + "20" : "var(--border2)"}`,
-            }}
-          >
-            <Palette size={11} style={{ color: isHovered ? accent : "var(--txt3)" }} />
-            <span className="text-[10px] font-mono font-semibold text-[var(--txt)]">
-              {item.colors}
+          {item.tags && item.tags.slice(0, 3).map((tag: string) => (
+            <span key={tag} className="text-[9px] sm:text-[11px] font-medium px-2 py-px sm:px-2.5 sm:py-1 rounded-full bg-[var(--elevated)] text-[var(--txt3)] border border-[var(--border)]">
+              {tag}
             </span>
-          </div>
-          <div
-            className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg"
-            style={{
-              background: isHovered ? `${accent}08` : "var(--border)",
-              border: `1px solid ${isHovered ? accent + "20" : "var(--border2)"}`,
-            }}
-          >
-            <Clock size={11} style={{ color: isHovered ? accent : "var(--txt3)" }} />
-            <span className="text-[10px] font-semibold text-[var(--txt)] truncate max-w-[60px]">
-              {item.designSize || item.outputFormat}
-            </span>
-          </div>
+          ))}
+          {item.tags && item.tags.length > 3 && (
+            <span className="text-[9px] sm:text-[11px] text-[var(--txt3)]">+{item.tags.length - 3}</span>
+          )}
         </div>
-
-        {/* Conversion CTA */}
-        <Link
-          href="/client/new-order"
-          onClick={(e) => e.stopPropagation()}
-          className="mt-3 flex items-center justify-center gap-1.5 w-full py-2 rounded-xl
-            text-[11px] font-semibold no-underline transition-all duration-200
-            hover:scale-[1.02] active:scale-[0.98]"
-          style={{
-            background: isHovered
-              ? `linear-gradient(135deg, ${accent}, ${accent}dd)`
-              : `${accent}12`,
-            color: isHovered ? "#fff" : accent,
-            border: `1px solid ${isHovered ? "transparent" : accent + "30"}`,
-          }}
-        >
-          Order This Style
-          <ArrowRight size={11} />
-        </Link>
       </div>
     </article>
   );

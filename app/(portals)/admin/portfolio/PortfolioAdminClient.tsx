@@ -265,11 +265,11 @@ export function PortfolioAdminClient() {
             <div className="cursor-grab flex-shrink-0" style={{ color: txt3 }}><GripVertical size={16} /></div>
 
             {/* Thumbnail */}
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex-shrink-0 flex items-center justify-center text-lg"
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden"
               style={{ background: `linear-gradient(135deg, ${p.accent}20, ${p.accent}08)`, border: `1px solid ${p.accent}30` }}>
               {(p.images.find((i: any) => i.isThumbnail || i.sortOrder === -1) || p.images[0]) ? (
-                <img src={(p.images.find((i: any) => i.isThumbnail || i.sortOrder === -1) || p.images[0]).url} alt={p.title} className="w-full h-full object-cover rounded-lg" loading="lazy" />
-              ) : <Palette size={16} style={{ color: p.accent }} />}
+                <img src={(p.images.find((i: any) => i.isThumbnail || i.sortOrder === -1) || p.images[0]).url} alt={p.title} className="w-full h-full object-cover" loading="lazy" />
+              ) : <Palette size={18} style={{ color: p.accent }} />}
             </div>
 
             {/* Info */}
@@ -340,44 +340,52 @@ export function PortfolioAdminClient() {
             </div>
 
             {/* Body */}
-            <div className="p-4 sm:p-5 space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Title *</label>
-                  <Input value={form.title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Project title" />
+            <div className="p-4 sm:p-5 space-y-6">
+              {/* ── Basic Info ── */}
+              <div className="space-y-4">
+                <h3 className="font-syne font-bold text-sm flex items-center gap-2" style={{ color: txt }}>
+                  <span className="w-1 h-4 rounded-full" style={{ background: clr[4].icon }} /> Basic Info
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Title *</label>
+                    <Input value={form.title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Project title" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Slug *</label>
+                    <Input value={form.slug} onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} placeholder="auto-generated-from-title" />
+                  </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Slug *</label>
-                  <Input value={form.slug} onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} placeholder="project-slug" />
+                  <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Description</label>
+                  <textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={2}
+                    placeholder="Short project description (shown on card)..."
+                    className="w-full rounded-xl border px-3.5 py-2.5 text-sm resize-y outline-none"
+                    style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: txt }} />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Client Name</label>
+                    <Input value={form.clientName} onChange={(e) => setForm((f) => ({ ...f, clientName: e.target.value }))} placeholder="Optional" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Category *</label>
+                    <select value={form.categoryId} onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}
+                      className="w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none"
+                      style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: txt }}>
+                      <option value="">Select category...</option>
+                      {categories.map((c) => (<option key={c.id} value={c.id}>{c.emoji} {c.name}</option>))}
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Description</label>
-                <textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={3}
-                  placeholder="Project description..."
-                  className="w-full rounded-xl border px-3.5 py-2.5 text-sm resize-y outline-none"
-                  style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: txt }} />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Client Name</label>
-                  <Input value={form.clientName} onChange={(e) => setForm((f) => ({ ...f, clientName: e.target.value }))} placeholder="Client name (optional)" />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Category *</label>
-                  <select value={form.categoryId} onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}
-                    className="w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none"
-                    style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: txt }}>
-                    <option value="">Select category...</option>
-                    {categories.map((c) => (<option key={c.id} value={c.id}>{c.emoji} {c.name}</option>))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Specs grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {/* ── Specs ── */}
+              <div className="space-y-4">
+                <h3 className="font-syne font-bold text-sm flex items-center gap-2" style={{ color: txt }}>
+                  <span className="w-1 h-4 rounded-full" style={{ background: clr[2].icon }} /> Specs &amp; Appearance
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {([
                   ["Stitches", "stitches", "number", "4200"],
                   ["Colors", "colors", "number", "1"],
@@ -391,30 +399,36 @@ export function PortfolioAdminClient() {
                 ))}
               </div>
 
-              {/* Turnaround + Accent */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Turnaround</label>
-                  <select value={form.turnaround} onChange={(e) => setForm((f) => ({ ...f, turnaround: e.target.value }))}
-                    className="w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none"
-                    style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: txt }}>
-                    <option value="Standard">Standard</option>
-                    <option value="Rush 6h">Rush 6h</option>
-                    <option value="Urgent 3h">Urgent 3h</option>
-                    <option value="Standard (~12h)">Standard (~12h)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Accent Color</label>
-                  <div className="flex gap-1.5 flex-wrap">
-                    {ACCENT_COLORS.map((color) => (
-                      <button key={color} onClick={() => setForm((f) => ({ ...f, accent: color }))}
-                        className="w-8 h-8 rounded-lg border-2 transition-all"
-                        style={{ background: color, borderColor: form.accent === color ? "var(--txt)" : "transparent" }} />
-                    ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                  <div>
+                    <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Turnaround</label>
+                    <select value={form.turnaround} onChange={(e) => setForm((f) => ({ ...f, turnaround: e.target.value }))}
+                      className="w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none"
+                      style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: txt }}>
+                      <option value="Standard">Standard</option>
+                      <option value="Rush 6h">Rush 6h</option>
+                      <option value="Urgent 3h">Urgent 3h</option>
+                      <option value="Standard (~12h)">Standard (~12h)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Accent Color</label>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {ACCENT_COLORS.map((color) => (
+                        <button key={color} onClick={() => setForm((f) => ({ ...f, accent: color }))}
+                          className="w-8 h-8 rounded-lg border-2 transition-all"
+                          style={{ background: color, borderColor: form.accent === color ? "var(--txt)" : "transparent" }} />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* ── Categories & Tags ── */}
+              <div className="space-y-4">
+                <h3 className="font-syne font-bold text-sm flex items-center gap-2" style={{ color: txt }}>
+                  <span className="w-1 h-4 rounded-full" style={{ background: clr[3].icon }} /> Categories &amp; Tags
+                </h3>
 
               {/* Sub-categories */}
               {form.categoryId && (() => {
@@ -449,9 +463,9 @@ export function PortfolioAdminClient() {
 
               {/* Tags */}
               <div>
-                <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Tags</label>
+                <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>Custom Tags</label>
                 <div className="flex items-center gap-2 mb-2">
-                  <Input value={newTag} onChange={(e) => setNewTag(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }} placeholder="Add tag..." className="flex-1" />
+                  <Input value={newTag} onChange={(e) => setNewTag(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }} placeholder="Add custom tag..." className="flex-1" />
                   <Button variant="ghost" size="sm" onClick={addTag}>Add</Button>
                 </div>
                 <div className="flex gap-1.5 flex-wrap">
@@ -464,75 +478,84 @@ export function PortfolioAdminClient() {
                   ))}
                 </div>
               </div>
+              </div>
+
+              {/* ── Images ── */}
+              <div className="space-y-4">
+                <h3 className="font-syne font-bold text-sm flex items-center gap-2" style={{ color: txt }}>
+                  <span className="w-1 h-4 rounded-full" style={{ background: clr[5].icon }} /> Images
+                </h3>
 
               {/* Thumbnail upload */}
               <div>
-                <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>
-                  Thumbnail <span className="font-normal" style={{ color: txt3 }}>— 600×400px recommended, max 4MB</span>
+                <label className="text-xs font-semibold mb-2 block" style={{ color: txt2 }}>
+                  Thumbnail <span className="font-normal" style={{ color: txt3 }}>— main card image, 3:4 ratio recommended</span>
                 </label>
-                <div {...getThumbRootProps()} className="border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all"
-                  style={{ borderColor: isThumbDrag ? CARD_COLORS[2].border : "var(--border2)", background: isThumbDrag ? CARD_COLORS[2].bgSoft : "transparent" }}>
-                  <input {...getThumbInputProps()} />
-                  {uploading ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <Loader2 size={20} className="animate-spin" style={{ color: CARD_COLORS[2].icon }} />
-                      <span className="text-xs" style={{ color: txt2 }}>Uploading...</span>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-1.5">
-                      <ImagePlus size={20} style={{ color: txt3 }} />
-                      <span className="text-sm" style={{ color: txt2 }}>Drop thumbnail here</span>
-                      <span className="text-xs" style={{ color: txt3 }}>600×400px · PNG/JPG/WebP</span>
-                    </div>
-                  )}
-                </div>
-                {form.images.filter((i) => i.isThumbnail).map((img, idx) => (
-                  <div key={`thumb-${idx}`} className="mt-2 flex items-center gap-2 p-2 rounded-lg border"
-                    style={{ background: "var(--elevated)", borderColor: "var(--border2)" }}>
-                    <img src={img.url} alt="Thumbnail" className="w-12 h-9 object-cover rounded" />
-                    <span className="text-xs flex-1" style={{ color: txt2 }}>Thumbnail {img.width && img.height ? `(${img.width}×${img.height})` : ""}</span>
-                    <button onClick={() => { setForm((f) => ({ ...f, images: f.images.filter((i) => !i.isThumbnail) })); }}
-                      style={{ color: txt3 }} onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = CARD_COLORS[5].text}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = txt3}><X size={14} /></button>
+                <div className="flex items-start gap-4">
+                  {/* Thumbnail preview */}
+                  <div className="w-32 h-40 sm:w-36 sm:h-48 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden border relative"
+                    style={{ background: `${form.accent}10`, borderColor: "var(--border2)" }}>
+                    {form.images.filter((i) => i.isThumbnail)[0] ? (
+                      <>
+                        <img src={form.images.filter((i) => i.isThumbnail)[0].url} alt="Thumbnail" className="w-full h-full object-cover" />
+                        <button onClick={() => setForm((f) => ({ ...f, images: f.images.filter((i) => !i.isThumbnail) }))}
+                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white"><X size={10} /></button>
+                      </>
+                    ) : (
+                      <ImagePlus size={22} style={{ color: txt3, opacity: 0.5 }} />
+                    )}
                   </div>
-                ))}
+                  {/* Drop zone */}
+                  <div {...getThumbRootProps()} className="flex-1 border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1 min-h-[160px] sm:min-h-[192px]"
+                    style={{ borderColor: isThumbDrag ? CARD_COLORS[2].border : "var(--border2)", background: isThumbDrag ? CARD_COLORS[2].bgSoft : "transparent" }}>
+                    <input {...getThumbInputProps()} />
+                    {uploading ? (
+                      <><Loader2 size={18} className="animate-spin" style={{ color: CARD_COLORS[2].icon }} /><span className="text-xs" style={{ color: txt2 }}>Uploading...</span></>
+                    ) : (
+                      <><Upload size={18} style={{ color: txt3 }} /><span className="text-xs font-medium" style={{ color: txt2 }}>Drop or click to upload</span><span className="text-[10px]" style={{ color: txt3 }}>PNG/JPG/WebP · max 4MB</span></>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Project images upload */}
               <div>
-                <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>
-                  Project Images ({form.images.filter((i) => !i.isThumbnail).length})
-                  <span className="font-normal" style={{ color: txt3 }}> — 1920×1080px recommended, max 16MB each</span>
+                <label className="text-xs font-semibold mb-2 block" style={{ color: txt2 }}>
+                  Gallery Images ({form.images.filter((i) => !i.isThumbnail).length})
+                  <span className="font-normal" style={{ color: txt3 }}> — shown in lightbox, 4:3 ratio recommended</span>
                 </label>
-                <div {...getImageRootProps()} className="border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all"
+                <div {...getImageRootProps()} className="border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all"
                   style={{ borderColor: isImageDrag ? CARD_COLORS[4].border : "var(--border2)", background: isImageDrag ? CARD_COLORS[4].bgSoft : "transparent" }}>
                   <input {...getImageInputProps()} />
-                  <div className="flex flex-col items-center gap-1.5">
-                    <Upload size={20} style={{ color: txt3 }} />
-                    <span className="text-sm" style={{ color: txt2 }}>Drop project images here</span>
-                    <span className="text-xs" style={{ color: txt3 }}>1920×1080px · PNG/JPG/WebP · up to 16MB</span>
+                  <div className="flex flex-col items-center gap-1">
+                    <Upload size={18} style={{ color: txt3 }} />
+                    <span className="text-xs font-medium" style={{ color: txt2 }}>Drop or click to upload gallery images</span>
+                    <span className="text-[10px]" style={{ color: txt3 }}>PNG/JPG/WebP · up to 16MB each · multiple files OK</span>
                   </div>
                 </div>
                 {form.images.filter((i) => !i.isThumbnail).length > 0 && (
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
                     {form.images.filter((i) => !i.isThumbnail).map((img, idx) => (
-                      <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border group" style={{ borderColor: "var(--border2)" }}>
+                      <div key={idx} className="relative aspect-[3/2] rounded-xl overflow-hidden border group" style={{ borderColor: "var(--border2)" }}>
                         <img src={img.url} alt={img.alt || `Image ${idx + 1}`} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                           <button onClick={() => toggleImageBefore(form.images.findIndex((i) => i === img))}
                             title={img.isBefore ? "Set as after" : "Set as before"}
-                            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
                             style={{ background: img.isBefore ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)", color: img.isBefore ? "#000" : "#fff" }}>B</button>
                           <button onClick={() => { setForm((f) => ({ ...f, images: f.images.filter((i) => i !== img) })); }}
-                            className="w-7 h-7 rounded-full bg-red-500/80 flex items-center justify-center text-white"><X size={12} /></button>
+                            className="w-8 h-8 rounded-full bg-red-500/80 flex items-center justify-center text-white"><X size={14} /></button>
                         </div>
-                        {img.isBefore && (
-                          <span className="absolute top-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(0,0,0,0.6)", color: "#fff" }}>Before</span>
-                        )}
+                        <span className="absolute top-2 left-2 text-[9px] font-semibold px-2 py-0.5 rounded-full"
+                          style={{ background: img.isBefore ? "rgba(220,38,38,0.85)" : "rgba(0,0,0,0.55)", color: "#fff" }}>
+                          {img.isBefore ? "Before" : `Image ${idx + 1}`}
+                        </span>
                       </div>
                     ))}
                   </div>
                 )}
+              </div>
+
               </div>
 
               {/* Toggles */}

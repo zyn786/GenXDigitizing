@@ -76,7 +76,7 @@ export function ExitIntent() {
   if (!show || dismissed) return null;
 
   return (
-    <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}>
       <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-[440px] w-full text-center shadow-2xl relative animate-fade-in-up">
         <button onClick={() => setDismissed(true)} className="absolute top-4 right-4 p-1.5 rounded-xl hover:bg-gray-100 text-gray-400"><X size={16} /></button>
 
