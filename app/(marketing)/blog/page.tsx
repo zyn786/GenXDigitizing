@@ -50,13 +50,13 @@ export default async function BlogPage() {
                       className="h-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden hover:border-[var(--border3)] hover:-translate-y-1 transition-all duration-200 flex flex-col"
                     >
                       {post.hero.image ? (
-                        <div className="aspect-[16/9] overflow-hidden">
+                        <div className="w-full aspect-[16/9] overflow-hidden flex-shrink-0">
                           <img src={post.hero.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                         </div>
                       ) : (
                         <div
-                          className="aspect-[16/9] flex items-center justify-center text-5xl"
-                          style={{ background: `linear-gradient(135deg, ${post.hero.color}15, ${post.hero.color}08)` }}
+                          className="w-full aspect-[16/9] flex items-center justify-center text-5xl flex-shrink-0 text-[var(--txt)]"
+                          style={{ background: `linear-gradient(135deg, ${post.hero.color}22, ${post.hero.color}0d)` }}
                         >
                           {post.hero.emoji}
                         </div>
