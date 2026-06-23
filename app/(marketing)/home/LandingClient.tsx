@@ -1381,105 +1381,89 @@ function BeforeAfterShowcaseSection() {
             </p>
           </div>
 
-          {/* Tab switcher */}
-          <div className="flex items-center justify-center gap-2 mb-6">
-            {BEFORE_AFTER_SETS.map((set, i) => (
-              <button
-                key={set.label}
-                onClick={() => { setActiveSet(i); setSliderPos(50); }}
-                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                  i === activeSet
-                    ? "bg-[#F97316] text-white shadow-sm"
-                    : "bg-[var(--elevated)] border border-[var(--border)] text-[var(--txt2)] hover:text-[var(--txt)]"
-                }`}
+          {/* Desktop: 2-col layout | Mobile: stacked */}
+          <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-10 xl:gap-14 items-start">
+            {/* Left: Slider */}
+            <div>
+              {/* Tab switcher */}
+              <div className="flex items-center justify-center lg:justify-start gap-2 mb-5">
+                {BEFORE_AFTER_SETS.map((set, i) => (
+                  <button
+                    key={set.label}
+                    onClick={() => { setActiveSet(i); setSliderPos(50); }}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
+                      i === activeSet
+                        ? "bg-[#F97316] text-white shadow-sm"
+                        : "bg-[var(--elevated)] border border-[var(--border)] text-[var(--txt2)] hover:text-[var(--txt)]"
+                    }`}
+                  >
+                    {i === 0 ? "🧵" : i === 1 ? "✏️" : "🏷️"} {set.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Before/After Slider */}
+              <div
+                ref={containerRef}
+                className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden select-none cursor-ew-resize"
+                style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.12)" }}
+                onMouseDown={handleDown}
+                onTouchStart={handleDown}
               >
-                {set.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Before/After Slider — aspect-ratio set via CSS, no spacer img needed */}
-          <div
-            ref={containerRef}
-            className="relative w-full aspect-[4/3] rounded-[8px] overflow-hidden select-none cursor-ew-resize"
-            style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.12)" }}
-            onMouseDown={handleDown}
-            onTouchStart={handleDown}
-          >
-            {/* Before image (underneath — fills container) */}
-            <img
-              src={current.beforeUrl}
-              alt={current.beforeAlt}
-              className="absolute inset-0 w-full h-full object-cover"
-              draggable={false}
-            />
-
-            {/* After image (revealed by slider) */}
-            <div
-              className="absolute inset-0 overflow-hidden"
-              style={{ clipPath: `inset(0 0 0 ${sliderPos}%)` }}
-            >
-              <img
-                src={current.afterUrl}
-                alt={current.afterAlt}
-                className="absolute inset-0 w-full h-full object-cover"
-                draggable={false}
-              />
+                <img src={current.beforeUrl} alt={current.beforeAlt} className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+                <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 0 0 ${sliderPos}%)` }}>
+                  <img src={current.afterUrl} alt={current.afterAlt} className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+                </div>
+                {/* Handle */}
+                <div className="absolute top-0 bottom-0 w-[3px] pointer-events-none" style={{ left: `${sliderPos}%`, background: "linear-gradient(180deg, transparent 0%, #F97316 30%, #F97316 70%, transparent 100%)", boxShadow: "0 0 12px rgba(249,115,22,0.5)" }} />
+                <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none" style={{ left: `${sliderPos}%` }}>
+                  <div className="w-12 h-12 rounded-full bg-[#F97316] shadow-2xl flex items-center justify-center ring-4 ring-white/90">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 5l-4 7 4 7" /><path d="M16 5l4 7-4 7" /></svg>
+                  </div>
+                </div>
+                <span className="absolute top-4 left-4 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-[#DC2626] text-white shadow-lg">Before</span>
+                <span className="absolute top-4 right-4 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-[#16A34A] text-white shadow-lg">After</span>
+                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 sm:p-5" style={{ background: "linear-gradient(0deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 60%, transparent 100%)" }}>
+                  <div>
+                    <p className="text-white text-sm sm:text-base font-syne font-bold leading-tight">{current.label}</p>
+                    <p className="text-white/70 text-[11px] sm:text-xs mt-0.5">Hand-digitized — production-ready quality</p>
+                  </div>
+                  <span className="flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white backdrop-blur-sm border border-white/20">
+                    {activeSet === 0 ? "🧵 Digitizing" : activeSet === 1 ? "✏️ Vector Art" : "🏷️ Patches"}
+                  </span>
+                </div>
+              </div>
+              <p className="text-center lg:text-left text-[11px] text-[var(--txt3)] mt-3">⟷ Drag the handle to compare before vs after</p>
             </div>
 
-            {/* Slider handle line */}
-            <div
-              className="absolute top-0 bottom-0 w-[3px] pointer-events-none"
-              style={{
-                left: `${sliderPos}%`,
-                background: "linear-gradient(180deg, transparent 0%, #F97316 30%, #F97316 70%, transparent 100%)",
-                boxShadow: "0 0 12px rgba(249,115,22,0.5)",
-              }}
-            />
-
-            {/* Slider handle knob */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none"
-              style={{ left: `${sliderPos}%` }}
-            >
-              <div className="w-12 h-12 rounded-full bg-[#F97316] shadow-2xl flex items-center justify-center ring-4 ring-white/90">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8 5l-4 7 4 7" /><path d="M16 5l4 7-4 7" />
-                </svg>
+            {/* Right: Context — desktop only */}
+            <div className="hidden lg:block">
+              <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] p-6">
+                <h3 className="font-syne font-bold text-lg mb-4 text-[var(--txt)]">Why Hand-Digitizing Wins</h3>
+                <div className="space-y-4">
+                  {[
+                    { icon: "🧵", title: "Clean Stitch Paths", desc: "Every stitch placed by hand — optimized for your fabric type and machine. No jagged auto-trace edges." },
+                    { icon: "🔤", title: "Sharp Small Text", desc: "Legible lettering down to 5mm. Auto-trace blurs small text — our manual process keeps it crisp." },
+                    { icon: "⚡", title: "Production-Ready", desc: "Minimal thread breaks, efficient trims, fewer machine stops. Files run clean on first load." },
+                    { icon: "🎯", title: "Perfect Registration", desc: "Every color change and boundary aligned. No gaps, no overlaps, no re-hooping needed." },
+                  ].map((b) => (
+                    <div key={b.title} className="flex items-start gap-3">
+                      <span className="text-xl flex-shrink-0 mt-0.5">{b.icon}</span>
+                      <div>
+                        <p className="text-sm font-semibold text-[var(--txt)] mb-0.5">{b.title}</p>
+                        <p className="text-xs text-[var(--txt2)] leading-relaxed">{b.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 pt-4 border-t border-[var(--border)]">
+                  <p className="text-[11px] text-[var(--txt3)] leading-relaxed">
+                    <strong className="text-[var(--txt)]">{activeSet === 0 ? "🧵 Digitizing" : activeSet === 1 ? "✏️ Vector Art" : "🏷️ Patches"}</strong> — shown above. Drag the orange handle left to see the original artwork, right to reveal the finished result.
+                  </p>
+                </div>
               </div>
             </div>
-
-            {/* Labels */}
-            <span className="absolute top-4 left-4 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-[#DC2626] text-white shadow-lg">
-              Before
-            </span>
-            <span className="absolute top-4 right-4 text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-[#16A34A] text-white shadow-lg">
-              After
-            </span>
-
-            {/* Bottom overlay — title + category */}
-            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 sm:p-5"
-              style={{
-                background: "linear-gradient(0deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 60%, transparent 100%)",
-              }}
-            >
-              <div>
-                <p className="text-white text-sm sm:text-base font-syne font-bold leading-tight">
-                  {current.label}
-                </p>
-                <p className="text-white/70 text-[11px] sm:text-xs mt-0.5">
-                  Hand-digitized embroidery — production-ready quality
-                </p>
-              </div>
-              <span className="flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white backdrop-blur-sm border border-white/20">
-                {activeSet === 0 ? "🧵 Digitizing" : activeSet === 1 ? "✏️ Vector Art" : "🏷️ Patches"}
-              </span>
-            </div>
           </div>
-
-          <p className="text-center text-[11px] text-[var(--txt3)] mt-4">
-            ⟷ Drag the handle to compare before vs after
-          </p>
         </AnimatedSection>
       </div>
     </section>

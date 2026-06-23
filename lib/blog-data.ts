@@ -17,6 +17,14 @@ export interface BlogPost {
 // Empty — all blog content managed via admin panel /admin/blog
 export const STATIC_POSTS: BlogPost[] = [];
 
+function calcReadTime(p: any): string {
+  const sections = p.content?.sections || [];
+  const bodyText = sections.map((s: any) => (s.body || "") + (s.heading || "")).join(" ");
+  const words = bodyText.split(/\s+/).filter(Boolean).length;
+  const mins = Math.max(1, Math.ceil(words / 200));
+  return `${mins} min read`;
+}
+
 function mapPost(p: any): BlogPost {
   return {
     id: p.id,
@@ -25,7 +33,7 @@ function mapPost(p: any): BlogPost {
     description: p.description,
     date: p.created_at?.split("T")[0],
     category: p.category,
-    readTime: "6 min read",
+    readTime: calcReadTime(p),
     keywords: p.keywords || [],
     hero: { emoji: p.emoji || "📝", color: p.accent_color || "#2563EB", image: p.hero_image || undefined },
     sections: p.content?.sections || [],

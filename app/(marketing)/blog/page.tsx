@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   title: "Blog — Embroidery Digitizing Guides, Tips & Tutorials",
   description: "Expert guides on embroidery digitizing, vector art conversion, file formats, and industry best practices. Free educational content for embroidery professionals.",
   keywords: ["embroidery digitizing blog", "digitizing guides", "embroidery tutorials", "vector art guides", "embroidery tips"],
+  alternates: { canonical: "/blog" },
 };
 
 export default async function BlogPage() {
