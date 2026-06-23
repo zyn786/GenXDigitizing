@@ -324,31 +324,21 @@ function DesignCard({
     if (!design.downloadUrl) return;
     setDownloading(true);
 
-    try {
-      await fetch("/api/free-designs/download", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ designId: design.id }),
-      });
+    // Track download (non-blocking)
+    fetch("/api/free-designs/download", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ designId: design.id }),
+    }).catch(() => {});
 
-      // Trigger download on same page
-      const a = document.createElement("a");
-      a.href = design.downloadUrl!;
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      setDownloaded(true);
+    // Trigger download
+    window.open(design.downloadUrl, "_blank");
+    setDownloaded(true);
       toast.success("Download started!", {
         description: `${design.title} — check your downloads folder.`,
       });
-      setTimeout(() => setDownloaded(false), 3000);
-    } catch {
-      toast.error("Download failed. Please try again.");
-    } finally {
-      setDownloading(false);
-    }
+    setTimeout(() => setDownloaded(false), 3000);
+    setDownloading(false);
   };
 
   const images = (design.images || []).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));

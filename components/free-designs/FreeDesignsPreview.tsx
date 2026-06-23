@@ -20,23 +20,15 @@ function PreviewCard({ design, index }: { design: FreeDesign; index: number }) {
 
   const handleDownload = async () => {
     if (!design.downloadUrl) return;
-    try {
-      await fetch("/api/free-designs/download", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ designId: design.id }),
-      });
-      // Trigger download on same page
-      const a = document.createElement("a");
-      a.href = design.downloadUrl!;
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      toast.success(`Downloading ${design.title}...`);
-    } catch {
-      toast.error("Download failed.");
-    }
+    // Track download (non-blocking)
+    fetch("/api/free-designs/download", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ designId: design.id }),
+    }).catch(() => {});
+    // Trigger download
+    window.open(design.downloadUrl, "_blank");
+    toast.success(`Downloading ${design.title}...`);
   };
 
   return (
