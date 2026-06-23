@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { CheckCircle, ArrowRight, ArrowLeft } from "lucide-react";
+import { useCoupon } from "@/hooks/use-coupon";
+import { CouponInput } from "@/components/marketing/CouponInput";
 import { QuickOrder } from "./QuickOrder";
 import { Step1Tier } from "./Step1Tier";
 import { Step2Turnaround } from "./Step2Turnaround";
@@ -75,6 +77,14 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
   const [subscription,setSubscription]=useState<any>(null);
   const [creditBalance,setCreditBalance]=useState(0);
 
+  // Coupon
+  const {
+    couponCode, setCouponCode,
+    appliedCoupon, discount,
+    isApplying, error: couponError,
+    applyCoupon, removeCoupon,
+  } = useCoupon(1);
+
   // Load subscription
   useEffect(()=>{(async()=>{if(!clientId)return;const{data:sub}=await supabase.from("client_subscriptions").select("*").eq("client_id",clientId).eq("status","active").maybeSingle();setSubscription(sub);const{data:c}=await supabase.from("clients").select("credit_balance").eq("id",clientId).single();setCreditBalance(c?.credit_balance||0);})();},[]);
 
@@ -107,6 +117,14 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
         design_name:designName.trim()||null,sla_deadline:calcDeadline(turn,isBig),
       }).select().single();
       if(oErr||!order){toast.error("Failed: "+(oErr?.message||"error"));setBusy(false);return;}
+      // Attach coupon if applied
+      if (appliedCoupon) {
+        await supabase.from("orders").update({
+          coupon_code: appliedCoupon.code,
+          coupon_id: appliedCoupon.id,
+          discount_amount: discount,
+        }).eq("id", order.id);
+      }
       const fd=new FormData();fd.append("orderId",order.id);for(const f of files)fd.append("files",f);
       const upRes=await fetch("/api/upload/artwork",{method:"POST",body:fd});
       if(!upRes.ok){await supabase.from("orders").update({status:"cancelled"}).eq("id",order.id);const e=await upRes.json().catch(()=>({}));toast.error(e.error||"Upload failed");setBusy(false);return;}
@@ -152,7 +170,7 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
         {step===1&&<Step1Tier grouped={grouped} sel={sel} serviceName={serviceName} setSel={setSel} designName={designName} setDesignName={setDesignName} fmt={fmt} setFmt={setFmt} extras={extras} setExtras={setExtras} qty={qty} totalPrice={totalPrice} setStep={setStep}/>}
         {step===2&&<Step2Turnaround turn={turn} setTurn={setTurn} isBig={isBig} setStep={setStep}/>}
         {step===3&&<Step3Upload files={files} fileRef={fileRef} setFiles={setFiles} w={w} setW={setW} h={h} setH={setH} col={col} setCol={setCol} notes={notes} setNotes={setNotes} stitchCount={stitchCount} setStitchCount={setStitchCount} quantity={quantity} setQuantity={setQuantity} instructions={instructions} setInstructions={setInstructions} setStep={setStep}/>}
-        {step===4&&<Step4Confirm sel={sel} serviceName={serviceName} selTurn={selTurn} fmt={fmt} extras={extras} designName={designName} files={files} w={w} h={h} col={col} notes={notes} qty={qty} stitchCount={stitchCount} instructions={instructions} totalPrice={totalPrice} busy={busy} placeOrder={placeOrder} setStep={setStep}/>}
+        {step===4&&<Step4Confirm sel={sel} serviceName={serviceName} selTurn={selTurn} fmt={fmt} extras={extras} designName={designName} files={files} w={w} h={h} col={col} notes={notes} qty={qty} stitchCount={stitchCount} instructions={instructions} totalPrice={totalPrice} busy={busy} placeOrder={placeOrder} setStep={setStep} couponCode={couponCode} setCouponCode={setCouponCode} appliedCoupon={appliedCoupon} discount={discount} isApplying={isApplying} couponError={couponError} applyCoupon={applyCoupon} removeCoupon={removeCoupon}/>}
       </div>
     </div>
   );

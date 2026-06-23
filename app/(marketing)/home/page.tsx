@@ -15,8 +15,8 @@ async function getLiveStats() {
 }
 
 export const metadata: Metadata = {
-  title: "genxdigitizing — Premium Embroidery Digitizing from $7",
-  description: `Production-ready embroidery digitizing, vector art, and custom patches. Clean proofs, fast turnaround, free revisions. Trusted by ${fmtPlus(SITE_STATS.ordersCompleted)} decorators worldwide.`,
+  title: "Professional Embroidery Digitizing Services — genxdigitizing",
+  description: "Professional embroidery digitizing services. Fast turnaround, machine-ready files, unlimited revisions. Trusted by embroidery businesses worldwide. Get a free quote today.",
   keywords: [
     "embroidery digitizing service","DST file","PES file","EMB file",
     "embroidery digitizing online","cap logo digitizing","left chest digitizing",

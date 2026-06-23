@@ -124,18 +124,48 @@ export function PortfolioModal({
         {/* Bottom bar */}
         <div className="absolute bottom-0 inset-x-0 z-20">
           {/* Info */}
-          <div className="px-4 sm:px-6 pb-2 text-center">
-            <p className="text-white text-sm sm:text-base font-syne font-bold leading-tight truncate px-4">
+          <div className="px-4 sm:px-6 pb-2 text-center max-w-2xl mx-auto">
+            <p className="text-white text-sm sm:text-base font-syne font-bold leading-tight px-4">
               {item.title}
             </p>
-            {item.tags && item.tags.length > 0 && (
-              <div className="flex flex-wrap items-center justify-center gap-1 mt-1.5">
-                {item.tags.map((tag: string) => (
-                  <span key={tag} className="text-[10px] sm:text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-white/8 text-white/60 border border-white/10">
-                    {tag}
-                  </span>
-                ))}
+            {/* Structured case-study fields */}
+            {(item.industry || item.challenge || item.solution || item.result) ? (
+              <div className="mt-2 px-2 grid grid-cols-2 gap-1.5 text-left">
+                {item.industry && (
+                  <div className="bg-white/8 rounded-lg px-3 py-2">
+                    <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-white/40 font-bold mb-0.5">Industry</p>
+                    <p className="text-[11px] sm:text-xs text-white/80 leading-snug">{item.industry}</p>
+                  </div>
+                )}
+                {item.challenge && (
+                  <div className="bg-white/8 rounded-lg px-3 py-2">
+                    <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-red-300 font-bold mb-0.5">Challenge</p>
+                    <p className="text-[11px] sm:text-xs text-white/80 leading-snug">{item.challenge}</p>
+                  </div>
+                )}
+                {item.solution && (
+                  <div className="bg-white/8 rounded-lg px-3 py-2">
+                    <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-blue-300 font-bold mb-0.5">Solution</p>
+                    <p className="text-[11px] sm:text-xs text-white/80 leading-snug">{item.solution}</p>
+                  </div>
+                )}
+                {item.result && (
+                  <div className="bg-white/8 rounded-lg px-3 py-2">
+                    <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-green-300 font-bold mb-0.5">Result</p>
+                    <p className="text-[11px] sm:text-xs text-white/80 leading-snug">{item.result}</p>
+                  </div>
+                )}
               </div>
+            ) : (
+              item.tags && item.tags.length > 0 && (
+                <div className="flex flex-wrap items-center justify-center gap-1 mt-1.5">
+                  {item.tags.map((tag: string) => (
+                    <span key={tag} className="text-[10px] sm:text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-white/8 text-white/60 border border-white/10">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )
             )}
           </div>
 

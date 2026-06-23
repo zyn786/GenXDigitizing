@@ -92,7 +92,14 @@ export async function middleware(request: NextRequest) {
   );
 
   // Refresh session — MUST call getUser() not getSession()
-  const { data: { user } } = await supabase.auth.getUser();
+  // Catch stale/invalid refresh tokens to prevent unhandled errors
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // session cookie invalid or refresh token expired — treat as logged out
+  }
 
   // ── Not logged in → protect portal routes and API routes ──
   if (!user) {

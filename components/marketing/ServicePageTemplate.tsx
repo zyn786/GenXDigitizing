@@ -11,6 +11,8 @@ import { SITE_STATS, fmtPlus } from "@/lib/site-config";
 import { fetchPortfolio } from "@/components/portfolio/data";
 import type { PortfolioItem } from "@/components/portfolio/data";
 import { ContactForm } from "@/app/(marketing)/contact/ContactForm";
+import { FreeSampleBanner } from "@/components/marketing/FreeSampleBanner";
+import { SewOutGuarantee } from "@/components/marketing/SewOutGuarantee";
 
 export interface ServicePageData {
   title: string;
@@ -145,7 +147,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
       <section className="py-10 sm:py-14 bg-[var(--surface)]">
         <div className="max-w-[600px] mx-auto px-4 sm:px-6 text-center">
           <AnimatedSection>
-            <h2 className="font-syne font-bold text-2xl sm:text-3xl mb-2">Simple, Transparent Pricing</h2>
+            <h2 className="font-syne font-bold text-2xl sm:text-3xl mb-2">Simple, No-Surprise Pricing</h2>
             <p className="text-sm text-[var(--txt2)] mb-6">Starting from ${data.startingPrice}. Free revisions. Free formats. Fast turnaround.</p>
             <div className="grid grid-cols-3 gap-3 mb-6">
               {[
@@ -192,6 +194,9 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
         </div>
       </section>
 
+      {/* ── GUARANTEE ──────────────────────────────── */}
+      <SewOutGuarantee variant="banner" />
+
       {/* ── FAQ ─────────────────────────────────────── */}
       <section className="py-10 sm:py-14 bg-[var(--surface)]">
         <div className="max-w-[720px] mx-auto px-4 sm:px-6">
@@ -213,6 +218,9 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
           </AnimatedSection>
         </div>
       </section>
+
+      {/* ── FREE SAMPLE BANNER ────────────────────── */}
+      <FreeSampleBanner />
 
       {/* ── ORDER FORM ────────────────────────────── */}
       <section className="py-12 sm:py-16">

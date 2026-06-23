@@ -14,11 +14,14 @@ type DB = SupabaseClient<Database>;
 // ── Auth ─────────────────────────────────────────────────────
 
 export async function getCurrentUser(supabase: DB) {
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  if (error || !user) {
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // stale / invalid session
+  }
+  if (!user) {
     return null;
   }
 

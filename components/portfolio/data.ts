@@ -26,6 +26,11 @@ export interface PortfolioItem {
   slug: string;
   description: string;
   clientName?: string;
+  /** Structured case-study fields */
+  industry?: string;
+  challenge?: string;
+  solution?: string;
+  result?: string;
   categoryId: string;
   category?: PortfolioCategory;
   stitches?: number;

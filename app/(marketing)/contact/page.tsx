@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SITE_INFO, SITE_STATS } from "@/lib/site-config";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { ContactForm } from "./ContactForm";
+import { FreeSampleBanner } from "@/components/marketing/FreeSampleBanner";
 
 export const metadata: Metadata = {
   title: "Contact — Get a Free Quote — genxdigitizing",
@@ -96,6 +97,9 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
+
+      {/* Free Sample Banner */}
+      <FreeSampleBanner />
     </div>
     </>
   );

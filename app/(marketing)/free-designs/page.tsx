@@ -3,13 +3,13 @@ import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { FreeDesignsClient } from "./FreeDesignsClient";
 
 export const metadata: Metadata = {
-  title: "Free Embroidery Designs — Download Sample Files — genxdigitizing",
+  title: "Free Sample Digitizing — Download & Test Our Quality — genxdigitizing",
   description:
-    "Download free embroidery design samples. Preview our digitizing quality before you order. DST, PES, EMB formats available. Compatible with Brother, Tajima, Janome machines.",
-  keywords: "free embroidery designs, embroidery download, DST files, PES files, free embroidery samples, digitizing samples",
+    "Download free embroidery digitizing samples. Test our stitch quality on your machine before ordering. DST, PES, EMB formats. Compatible with Brother, Tajima, Janome.",
+  keywords: "free sample digitizing, free embroidery designs, embroidery download, DST files, PES files, free embroidery samples, digitizing samples",
   openGraph: {
-    title: "Free Embroidery Designs — genxdigitizing",
-    description: "Download high-quality embroidery sample files and preview our digitizing quality before placing your order.",
+    title: "Free Sample Digitizing — genxdigitizing",
+    description: "Download free digitized sample files and preview our stitch quality before placing your order.",
     type: "website",
   },
 };
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function FreeDesignsPage() {
   return (
     <>
-      <BreadcrumbSchema items={[{ name: "Home", url: "/" }, { name: "Free Designs", url: "/free-designs" }]} />
+      <BreadcrumbSchema items={[{ name: "Home", url: "/" }, { name: "Free Sample Digitizing", url: "/free-designs" }]} />
       <FreeDesignsClient />
     </>
   );

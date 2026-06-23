@@ -6,9 +6,6 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Upload, X, ArrowRight, Check, Shield, Zap, Star, Sparkles, Building2, Minus, Plus, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { useCoupon } from "@/hooks/use-coupon";
-import { OfferBanner } from "@/components/marketing/OfferBanner";
-import { CouponInput } from "@/components/marketing/CouponInput";
 import { TieredPricingTable } from "@/components/marketing/TieredPricingTable";
 
 /* ── Constants ─────────────────────────────────────── */
@@ -73,15 +70,6 @@ export function UploadWizard() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const isB2B = company.trim() !== "" || files.length >= 3 || (email && !/@(gmail|yahoo|hotmail|outlook)\./i.test(email));
-
-  // Coupon / offers
-  const {
-    couponCode, setCouponCode,
-    appliedCoupon, discount,
-    isApplying, error: couponError,
-    applyCoupon, removeCoupon,
-    isFirstVisitor, visitorId, autoOffers,
-  } = useCoupon(files.length, email);
 
   // Live timeline progress
   const timelineDone = [
@@ -151,12 +139,6 @@ export function UploadWizard() {
       fd.append("placement", placement); fd.append("format", format); fd.append("speed", speed);
       fd.append("notes", notes); fd.append("name", name); fd.append("email", email);
       fd.append("company", company);
-      if (appliedCoupon) {
-        fd.append("coupon_code", appliedCoupon.code);
-        fd.append("coupon_id", appliedCoupon.id);
-        fd.append("discount_amount", String(discount));
-      }
-      fd.append("visitor_id", visitorId);
       files.forEach(f => fd.append("files", f.file));
       const res = await fetch("/api/upload/guest-order", { method: "POST", body: fd });
       if (!res.ok) { const e = await res.json().catch(() => ({})); toast.error(e.error || "Upload failed"); return; }
@@ -263,14 +245,6 @@ export function UploadWizard() {
           <p className="text-[13px] sm:text-sm text-[var(--txt2)] text-center mb-3 sm:mb-4">
             Free quote in ~1 hour — no payment required
           </p>
-
-          {/* ═══ OFFER BANNER ═══════════════════ */}
-          <OfferBanner
-            autoOffers={autoOffers}
-            isFirstVisitor={isFirstVisitor}
-            appliedCoupon={appliedCoupon}
-            fileCount={files.length}
-          />
 
           {/* ═══ SECTION 1: UPLOAD ══════════════ */}
           <section className="mb-6 sm:mb-8">
@@ -422,21 +396,9 @@ export function UploadWizard() {
             </div>
           </section>
 
-          {/* ═══ COUPON & PRICING ═════════════════ */}
+          {/* ═══ PRICING ═════════════════ */}
           <section className="mb-4 sm:mb-6">
-            <CouponInput
-              value={couponCode}
-              onChange={setCouponCode}
-              onApply={applyCoupon}
-              onRemove={removeCoupon}
-              appliedCoupon={appliedCoupon}
-              discount={discount}
-              isApplying={isApplying}
-              error={couponError}
-            />
-            <div className="mt-3 sm:mt-4">
-              <TieredPricingTable fileCount={files.length} />
-            </div>
+            <TieredPricingTable fileCount={files.length} />
           </section>
 
           {/* ═══ SECTION 4: REVIEW & SEND ═══════ */}
@@ -468,13 +430,6 @@ export function UploadWizard() {
                     <span className="font-semibold text-[var(--txt)]">{v}</span>
                   </div>
                 ))}
-                {/* Discount row */}
-                {appliedCoupon && discount > 0 && (
-                  <div className="flex justify-between py-1.5 text-[12px] sm:text-[13px] border-b border-[var(--border)]">
-                    <span className="text-[var(--txt3)]">Discount ({appliedCoupon.code})</span>
-                    <span className="font-semibold text-[#16A34A]">-${discount.toFixed(2)}/ea</span>
-                  </div>
-                )}
               </div>
             )}
 

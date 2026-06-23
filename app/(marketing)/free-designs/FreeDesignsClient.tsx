@@ -563,7 +563,7 @@ export function FreeDesignsClient() {
                 uppercase tracking-wider bg-[#16A34A]/8 text-[#16A34A] border border-[#16A34A]/15 mb-4 sm:mb-5"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] animate-pulse" />
-              Free Downloads
+              Free Sample Digitizing
             </span>
           </motion.div>
 
@@ -574,9 +574,9 @@ export function FreeDesignsClient() {
             transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
             className="font-syne font-bold text-[clamp(30px,6vw,60px)] leading-[1.08] mb-3 sm:mb-4"
           >
-            Free Embroidery{" "}
+            Free{" "}
             <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
-              Designs
+              Sample Digitizing
             </span>
           </motion.h1>
 
@@ -587,7 +587,7 @@ export function FreeDesignsClient() {
             transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             className="text-sm sm:text-base text-[var(--txt2)] leading-relaxed max-w-[480px] mx-auto mb-6 sm:mb-8"
           >
-            Download high-quality embroidery sample files and preview our digitizing quality before placing your order.
+            Download free digitized sample files. Test our stitch quality on your machine before placing your first order.
           </motion.p>
 
           {/* Search bar — inside hero */}

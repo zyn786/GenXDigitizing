@@ -6,6 +6,7 @@ import { BackToTop } from "@/components/shared/BackToTop";
 import { ExitIntent } from "@/components/shared/ExitIntent";
 import { OfferBanner } from "@/components/marketing/OfferBanner";
 import { LiveOrderProvider } from "@/components/social-proof/LiveOrderProvider";
+import { WhatsAppWidget } from "@/components/marketing/WhatsAppWidget";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -19,6 +20,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <div className="pt-[100px] pb-4 sm:pb-6">{children}</div>
       <Footer />
       <BackToTop />
+      <WhatsAppWidget />
     </>
   );
 }

@@ -170,7 +170,7 @@ export function FreeDesignsPreview() {
   const loadDesigns = () => {
     setLoading(true);
     setFailed(false);
-    fetch("/api/free-designs?featured=true")
+    fetch("/api/free-designs")
       .then(async (r) => {
         if (!r.ok) throw new Error("Failed to load");
         return r.json();
@@ -197,7 +197,7 @@ export function FreeDesignsPreview() {
               uppercase tracking-wider bg-[#16A34A]/8 text-[#16A34A] border border-[#16A34A]/15 mb-4"
           >
             <Download className="w-3 h-3" />
-            Free Downloads
+            Free Sample Digitizing
           </span>
           <h2 className="font-syne font-bold text-2xl sm:text-3xl md:text-4xl mb-3 leading-[1.15]">
             Free Design{" "}

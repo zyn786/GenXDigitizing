@@ -77,7 +77,7 @@ export function SubscribeContent() {
       <section className="pt-8 sm:pt-12 pb-6 sm:pb-8 px-4 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <h1 className="font-syne font-bold text-[28px] sm:text-[36px] lg:text-[44px] mb-3 sm:mb-4 tracking-tight max-w-[720px] mx-auto leading-tight">
-            Monthly Digitizing Plans That Save You Time &amp; Money
+            Professional Digitizing, Fixed Monthly Price
           </h1>
           <p className="text-[14px] sm:text-base text-[var(--txt2)] max-w-[560px] mx-auto mb-6 sm:mb-8">
             Get professional embroidery digitizing every month with fixed pricing, faster turnaround, and priority support. Perfect for businesses with recurring embroidery needs.

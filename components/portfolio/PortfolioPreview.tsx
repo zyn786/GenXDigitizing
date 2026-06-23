@@ -62,7 +62,7 @@ export function PortfolioPreview() {
     <>
 
       {/* ── Portfolio Section ─────────────────────────────── */}
-      <AnimatedSection className="py-24 bg-[var(--bg)] !px-0">
+      <AnimatedSection className="py-12 sm:py-16 md:py-20 bg-[var(--bg)] !px-0">
         {/* Heading + Filters */}
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 text-center">
           {/* Badge */}

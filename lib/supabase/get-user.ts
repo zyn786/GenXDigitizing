@@ -20,7 +20,15 @@ export interface SimpleUser {
  */
 export async function getAdminUser(): Promise<SimpleUser> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // stale / invalid session — redirect to login
+  }
+
   if (!user) redirect("/login");
 
   const { data: p } = await supabase
