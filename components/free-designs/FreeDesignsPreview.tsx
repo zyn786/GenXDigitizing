@@ -189,7 +189,7 @@ export function FreeDesignsPreview() {
               uppercase tracking-wider bg-[#16A34A]/8 text-[#16A34A] border border-[#16A34A]/15 mb-4"
           >
             <Download className="w-3 h-3" />
-            Free Sample Digitizing
+            FREE SAMPLES
           </span>
           <h2 className="font-syne font-bold text-2xl sm:text-3xl md:text-4xl mb-3 leading-[1.15]">
             Free Design{" "}

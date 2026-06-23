@@ -21,7 +21,7 @@ export function FreeSampleBanner({ variant = "default", className = "" }: FreeSa
             </div>
             <div>
               <p className="font-syne font-bold text-sm sm:text-base leading-tight">
-                New Clients Get One Free Sample Digitizing
+                New Clients Get One FREE SAMPLE
               </p>
               <p className="text-[11px] sm:text-xs text-white/70">
                 No payment required — try us risk-free

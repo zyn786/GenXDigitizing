@@ -46,19 +46,26 @@ function slugify(str: string): string {
 function formatNumber(n: number) { return n.toLocaleString(); }
 
 // ── Image Uploader ──────────────────────────────────────────
-function ImageUploader({ images, onAdd, onRemove, uploading }: {
-  images: FreeDesignImage[]; onAdd: (img: FreeDesignImage) => void; onRemove: (index: number) => void; uploading: boolean;
+function ImageUploader({ images, onAdd, onRemove, uploading, onUploadingChange }: {
+  images: FreeDesignImage[]; onAdd: (img: FreeDesignImage) => void; onRemove: (index: number) => void; uploading: boolean; onUploadingChange: (v: boolean) => void;
 }) {
   const handleUpload = async (files: File[]) => {
-    const formData = new FormData();
-    files.forEach((f) => formData.append("files", f));
-    const res = await fetch("/api/admin/upload-free-design-image", { method: "POST", body: formData });
-    if (!res.ok) { toast.error("Image upload failed"); return; }
-    const results = await res.json();
-    results.forEach((r: any, i: number) => {
-      onAdd({ url: r.url, thumbnailUrl: r.thumbnailUrl, blurhash: r.blurhash, alt: "", width: r.width, height: r.height, sortOrder: images.length + i });
-    });
-    toast.success(`${results.length} image(s) uploaded`);
+    onUploadingChange(true);
+    try {
+      const formData = new FormData();
+      files.forEach((f) => formData.append("files", f));
+      const res = await fetch("/api/admin/upload-free-design-image", { method: "POST", body: formData });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toast.error(data.error || `Image upload failed (${res.status})`); return; }
+      data.forEach((r: any, i: number) => {
+        onAdd({ url: r.url, thumbnailUrl: r.thumbnailUrl, blurhash: r.blurhash, alt: "", width: r.width, height: r.height, sortOrder: images.length + i });
+      });
+      toast.success(`${data.length} image(s) uploaded`);
+    } catch (err: any) {
+      toast.error(err.message || "Image upload failed");
+    } finally {
+      onUploadingChange(false);
+    }
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -101,17 +108,24 @@ function ImageUploader({ images, onAdd, onRemove, uploading }: {
 }
 
 // ── File Uploader (S3) ──────────────────────────────────────
-function FileUploader({ url, onUpload, uploading }: {
-  url: string; onUpload: (url: string, fileName: string) => void; uploading: boolean;
+function FileUploader({ url, onUpload, uploading, onUploadingChange }: {
+  url: string; onUpload: (url: string) => void; uploading: boolean; onUploadingChange: (v: boolean) => void;
 }) {
   const handleUpload = async (files: File[]) => {
     const file = files[0]; if (!file) return;
-    const formData = new FormData(); formData.append("file", file);
-    const res = await fetch("/api/admin/upload-free-design-file", { method: "POST", body: formData });
-    if (!res.ok) { toast.error("File upload failed"); return; }
-    const result = await res.json();
-    onUpload(result.url, result.fileName);
-    toast.success("Design file uploaded");
+    onUploadingChange(true);
+    try {
+      const formData = new FormData(); formData.append("file", file);
+      const res = await fetch("/api/admin/upload-free-design-file", { method: "POST", body: formData });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toast.error(data.error || `File upload failed (${res.status})`); return; }
+      onUpload(data.url);
+      toast.success("Design file uploaded");
+    } catch (err: any) {
+      toast.error(err.message || "File upload failed");
+    } finally {
+      onUploadingChange(false);
+    }
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop: handleUpload, maxFiles: 1, disabled: uploading });
@@ -123,7 +137,7 @@ function FileUploader({ url, onUpload, uploading }: {
         <div className="flex items-center gap-2 p-3 rounded-lg border" style={{ background: "var(--elevated)", borderColor: "var(--border)" }}>
           <Download className="w-4 h-4 flex-shrink-0" style={{ color: clr[1].icon }} />
           <span className="text-xs truncate flex-1" style={{ color: txt2 }}>{url}</span>
-          <button onClick={() => onUpload("", "")} className="text-[10px] hover:underline font-medium flex-shrink-0" style={{ color: clr[5].text }}>Remove</button>
+          <button onClick={() => onUpload("")} className="text-[10px] hover:underline font-medium flex-shrink-0" style={{ color: clr[5].text }}>Remove</button>
         </div>
       ) : (
         <div {...getRootProps()}
@@ -472,11 +486,13 @@ export function FreeDesignsAdminClient() {
               <ImageUploader images={form.images}
                 onAdd={(img) => setForm((f) => ({ ...f, images: [...f.images, img] }))}
                 onRemove={(i) => setForm((f) => ({ ...f, images: f.images.filter((_, idx) => idx !== i) }))}
-                uploading={uploadingImg} />
+                uploading={uploadingImg}
+                onUploadingChange={setUploadingImg} />
 
               <FileUploader url={form.downloadUrl}
                 onUpload={(url) => { setForm((f) => ({ ...f, downloadUrl: url })); }}
-                uploading={uploadingFile} />
+                uploading={uploadingFile}
+                onUploadingChange={setUploadingFile} />
 
               {/* Toggles */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6">

@@ -553,7 +553,7 @@ export function FreeDesignsClient() {
                 uppercase tracking-wider bg-[#16A34A]/8 text-[#16A34A] border border-[#16A34A]/15 mb-4 sm:mb-5"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] animate-pulse" />
-              Free Sample Digitizing
+              FREE SAMPLES
             </span>
           </motion.div>
 
