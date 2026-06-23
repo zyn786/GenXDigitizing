@@ -9,6 +9,7 @@ import { GradientOrb } from "@/components/shared/GradientOrb";
 import { Button } from "@/components/ui/Button";
 import { fetchPortfolio } from "@/components/portfolio/data";
 import type { PortfolioItem } from "@/components/portfolio/data";
+import { PortfolioModal } from "@/components/portfolio/PortfolioModal";
 
 /* ── Service definitions (no pricing displayed) ──────────── */
 const SERVICES = [
@@ -76,13 +77,13 @@ const SERVICES = [
 ];
 
 /* ── Portfolio thumbnail for service sections ────────────── */
-function PortfolioThumb({ item }: { item: PortfolioItem }) {
+function PortfolioThumb({ item, onClick }: { item: PortfolioItem; onClick: () => void }) {
   const [imgError, setImgError] = useState(false);
   const thumbnail = item.images?.find((i: any) => i.isThumbnail || i.sortOrder === -1);
   const firstImage = thumbnail || item.images?.[0];
 
   return (
-    <Link href="/portfolio" className="group block">
+    <button onClick={onClick} className="group block w-full text-left bg-transparent border-none p-0 cursor-pointer">
       <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[var(--elevated)] border border-[var(--border)] group-hover:border-[var(--border3)] transition-all duration-200">
         {firstImage && !imgError ? (
           <img
@@ -104,7 +105,7 @@ function PortfolioThumb({ item }: { item: PortfolioItem }) {
           </p>
         </div>
       </div>
-    </Link>
+    </button>
   );
 }
 
@@ -123,6 +124,7 @@ interface ServiceTier {
 /* ── Main Services Content ───────────────────────────────── */
 export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
+  const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
 
   // Compute starting price per category
   const priceMap: Record<string, number> = {};
@@ -355,7 +357,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
                       {portfolioForService.map((item) => (
-                        <PortfolioThumb key={item.id} item={item} />
+                        <PortfolioThumb key={item.id} item={item} onClick={() => setSelectedItem(item)} />
                       ))}
                     </div>
                   </div>
@@ -449,6 +451,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
           </div>
         </div>
       </section>
+    <PortfolioModal item={selectedItem} onClose={() => setSelectedItem(null)} />
     </div>
   );
 }

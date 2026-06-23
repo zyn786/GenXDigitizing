@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { SITE_STATS, fmtPlus } from "@/lib/site-config";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
@@ -24,7 +25,9 @@ export default function PortfolioPage() {
   return (
     <>
       <BreadcrumbSchema items={[{ name: "Home", url: "/" }, { name: "Portfolio", url: "/portfolio" }]} />
-      <PortfolioClient />
+      <Suspense fallback={<div className="py-16" />}>
+        <PortfolioClient />
+      </Suspense>
     </>
   );
 }

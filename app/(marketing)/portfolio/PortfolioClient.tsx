@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2,
@@ -345,6 +346,8 @@ export function PortfolioClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     fetchPortfolio()
       .then((data) => {
@@ -352,10 +355,17 @@ export function PortfolioClient() {
         const validSlugs = ["digitizing", "vector", "patches"];
         const filteredCats = data.categories.filter((c: any) => validSlugs.includes(c.slug));
         if (filteredCats.length) setCategories(filteredCats);
+
+        // Auto-open item from ?item= query param
+        const itemSlug = searchParams.get("item");
+        if (itemSlug) {
+          const match = data.items.find((i: PortfolioItem) => i.slug === itemSlug);
+          if (match) setSelectedItem(match);
+        }
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, []);
+  }, [searchParams]);
 
   const mainCategories = [
     { slug: "all", name: "All Work", emoji: "✦", color: "#2563EB" },

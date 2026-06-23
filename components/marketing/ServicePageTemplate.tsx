@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { SITE_STATS, fmtPlus } from "@/lib/site-config";
 import { fetchPortfolio } from "@/components/portfolio/data";
 import type { PortfolioItem } from "@/components/portfolio/data";
+import { PortfolioModal } from "@/components/portfolio/PortfolioModal";
 import { ContactForm } from "@/app/(marketing)/contact/ContactForm";
 import { FreeSampleBanner } from "@/components/marketing/FreeSampleBanner";
 import { SewOutGuarantee } from "@/components/marketing/SewOutGuarantee";
@@ -34,6 +35,7 @@ export interface ServicePageData {
 export function ServicePageTemplate({ data }: { data: ServicePageData }) {
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [portfolioLoading, setPortfolioLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
 
   useEffect(() => {
     if (!data.portfolioSlug) { setPortfolioLoading(false); return; }
@@ -44,6 +46,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
   }, [data.portfolioSlug]);
 
   return (
+    <>
     <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden">
       {/* ── HERO ────────────────────────────────────── */}
       <section className="relative text-center pt-12 sm:pt-16 md:pt-20 pb-8 sm:pb-10 px-4 sm:px-6">
@@ -114,7 +117,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
                     {portfolioItems.map((item) => {
                       const img = item.images?.find((i: any) => i.isThumbnail || i.sortOrder === -1) || item.images?.[0];
                       return (
-                        <Link key={item.id} href={`/portfolio?item=${item.slug}`} className="group rounded-2xl overflow-hidden bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border3)] transition-all duration-300 hover:shadow-lg">
+                        <button key={item.id} onClick={() => setSelectedItem(item)} className="group rounded-2xl overflow-hidden bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border3)] transition-all duration-300 hover:shadow-lg cursor-pointer w-full text-left bg-transparent p-0 border-solid">
                           <div className="relative aspect-[4/3] overflow-hidden" style={{ background: `linear-gradient(135deg, ${data.color}10, ${data.color}05)` }}>
                             {img ? (
                               <Image src={img.url} alt={img.alt || item.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -127,7 +130,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
                             <h3 className="font-syne font-bold text-sm mb-1 group-hover:text-[var(--txt)] text-[var(--txt2)] transition-colors">{item.title}</h3>
                             <p className="text-xs text-[var(--txt3)] line-clamp-2">{item.description}</p>
                           </div>
-                        </Link>
+                        </button>
                       );
                     })}
                   </div>
@@ -235,5 +238,9 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
         </div>
       </section>
     </div>
+
+    {/* Portfolio Modal — opens on same page */}
+    <PortfolioModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+    </>
   );
 }
