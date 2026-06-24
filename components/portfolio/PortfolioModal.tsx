@@ -57,7 +57,7 @@ export function PortfolioModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[999] bg-black/95 backdrop-blur-sm flex flex-col"
+        className="fixed inset-0 z-[999] bg-black/95  flex flex-col"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         onClick={handleClose}
       >
@@ -78,7 +78,7 @@ export function PortfolioModal({
           </div>
           <button
             onClick={handleClose}
-            className="p-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-2 rounded-full text-white/70 hover:text-white hover:bg-white/20transition-colors"
           >
             <X size={20} />
           </button>
@@ -110,13 +110,13 @@ export function PortfolioModal({
                 <>
                   <button
                     onClick={(e) => { e.stopPropagation(); goPrev(); }}
-                    className="hidden sm:flex absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 items-center justify-center transition-colors backdrop-blur-sm"
+                    className="hidden sm:flex absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20text-white hover:bg-white/20 items-center justify-center transition-colors "
                   >
                     <ChevronLeft size={20} />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); goNext(); }}
-                    className="hidden sm:flex absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 items-center justify-center transition-colors backdrop-blur-sm"
+                    className="hidden sm:flex absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20text-white hover:bg-white/20 items-center justify-center transition-colors "
                   >
                     <ChevronRight size={20} />
                   </button>

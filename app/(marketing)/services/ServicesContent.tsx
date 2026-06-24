@@ -425,7 +425,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
       {/* ── FINAL CTA ──────────────────────────────────────── */}
       <section className="py-16 sm:py-18 md:py-20">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
-          <div className="relative overflow-hidden rounded-3xl sm:rounded-[36px] border border-[#2563EB]/20 bg-gradient-to-br from-[#2563EB]/10 via-white/40 to-[#F97316]/10 p-8 sm:p-12 md:p-16 text-center shadow-[0_0_60px_rgba(37,99,235,0.1)] backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-3xl sm:rounded-[36px] border border-[#2563EB]/20 bg-gradient-to-br from-[#2563EB]/10 via-white/40 to-[#F97316]/10 p-8 sm:p-12 md:p-16 text-center shadow-[0_0_60px_rgba(37,99,235,0.1)] ">
             <GradientOrb color="#2563EB" size={260} className="-top-24 left-1/2 -translate-x-1/2 opacity-20" />
 
             <div className="relative z-10">

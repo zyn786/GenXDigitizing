@@ -33,7 +33,7 @@ function PreviewCard({ design, index }: { design: FreeDesign; index: number }) {
 
   return (
     <div
-      className="group/card h-full flex flex-col bg-[var(--surface)]/90 backdrop-blur-xl rounded-2xl
+      className="group/card h-full flex flex-col bg-[var(--surface)]/90  rounded-2xl
         border border-[var(--border)] overflow-hidden animate-fade-in-up
         hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300"
       style={{ animationDelay: `${index * 100}ms` }}
@@ -76,7 +76,7 @@ function PreviewCard({ design, index }: { design: FreeDesign; index: number }) {
         {/* Swipe hint (mobile/tablet) */}
         {images.length > 1 && (
           <div className="lg:hidden absolute bottom-2.5 left-1/2 -translate-x-1/2">
-            <span className="text-[10px] text-white/70 bg-black/30 backdrop-blur-sm px-2.5 py-0.5 rounded-full">
+            <span className="text-[10px] text-white/70 bg-black/50 px-2.5 py-0.5 rounded-full">
               swipe to see more
             </span>
           </div>

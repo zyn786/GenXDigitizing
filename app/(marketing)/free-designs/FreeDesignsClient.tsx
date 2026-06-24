@@ -100,9 +100,9 @@ function ImageCarousel({
           <button
             onClick={(e) => { e.stopPropagation(); go(-1); }}
             className="hidden lg:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full
-              bg-white/80 backdrop-blur-md border border-white/40 items-center justify-center
+              bg-white/90 border border-white/40 items-center justify-center
               opacity-0 group-hover/carousel:opacity-100 translate-x-1 group-hover/carousel:translate-x-0
-              transition-all duration-300 hover:bg-white hover:shadow-md hover:scale-105"
+              transition-all duration-300 hover:shadow-md hover:scale-105"
             aria-label="Previous image"
           >
             <ChevronLeft className="w-4 h-4 text-gray-800" />
@@ -110,9 +110,9 @@ function ImageCarousel({
           <button
             onClick={(e) => { e.stopPropagation(); go(1); }}
             className="hidden lg:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full
-              bg-white/80 backdrop-blur-md border border-white/40 items-center justify-center
+              bg-white/90 border border-white/40 items-center justify-center
               opacity-0 group-hover/carousel:opacity-100 -translate-x-1 group-hover/carousel:translate-x-0
-              transition-all duration-300 hover:bg-white hover:shadow-md hover:scale-105"
+              transition-all duration-300 hover:shadow-md hover:scale-105"
             aria-label="Next image"
           >
             <ChevronRight className="w-4 h-4 text-gray-800" />
@@ -122,7 +122,7 @@ function ImageCarousel({
 
       {/* Zoom indicator (desktop only) */}
       <div className="hidden lg:block absolute top-3 right-3 opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300 pointer-events-none">
-        <div className="w-7 h-7 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center">
+        <div className="w-7 h-7 rounded-full bg-black/60 flex items-center justify-center">
           <Eye className="w-3.5 h-3.5 text-white" />
         </div>
       </div>
@@ -152,7 +152,7 @@ function ImageCarousel({
       {/* Swipe hint (mobile/tablet only) */}
       {images.length > 1 && (
         <div className="lg:hidden absolute bottom-2.5 left-1/2 -translate-x-1/2 z-10">
-          <span className="text-[10px] text-white/70 bg-black/30 backdrop-blur-sm px-2.5 py-0.5 rounded-full">
+          <span className="text-[10px] text-white/70 bg-black/50 px-2.5 py-0.5 rounded-full">
             swipe to see more
           </span>
         </div>
@@ -184,7 +184,7 @@ function Lightbox({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 backdrop-blur-xl p-4 sm:p-6"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95  p-4 sm:p-6"
       onClick={onClose}
       onTouchStart={(e) => { touchStart.current = e.touches[0].clientX; }}
       onTouchMove={(e) => { touchDelta.current = e.touches[0].clientX - touchStart.current; }}
@@ -212,7 +212,7 @@ function Lightbox({
           <button
             onClick={(e) => { e.stopPropagation(); onPrev(); }}
             className="hidden lg:flex absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full
-              bg-white/10 border border-white/25 items-center justify-center
+              bg-white/20border border-white/25 items-center justify-center
               text-white hover:bg-white/25 transition-colors z-10"
             aria-label="Previous image"
           >
@@ -221,7 +221,7 @@ function Lightbox({
           <button
             onClick={(e) => { e.stopPropagation(); onNext(); }}
             className="hidden lg:flex absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full
-              bg-white/10 border border-white/25 items-center justify-center
+              bg-white/20border border-white/25 items-center justify-center
               text-white hover:bg-white/25 transition-colors z-10"
             aria-label="Next image"
           >
@@ -352,7 +352,7 @@ function DesignCard({
         transition={{ duration: 0.45, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
       >
         <div
-          className="group/card h-full flex flex-col bg-[var(--surface)]/90 backdrop-blur-xl rounded-2xl
+          className="group/card h-full flex flex-col bg-[var(--surface)]/90  rounded-2xl
             border border-[var(--border)] overflow-hidden w-full
             shadow-[0_1px_3px_rgba(0,0,0,0.02),0_4px_12px_rgba(0,0,0,0.02)]
             hover:shadow-[0_8px_30px_rgba(0,0,0,0.05),0_0_0_1px_rgba(37,99,235,0.08)]
@@ -594,7 +594,7 @@ export function FreeDesignsClient() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full h-11 sm:h-12 pl-10 sm:pl-11 pr-10 rounded-xl sm:rounded-2xl
-                bg-[var(--surface)]/95 backdrop-blur-xl
+                bg-[var(--surface)]/95 
                 border border-[var(--border)] text-sm text-[var(--txt)]
                 placeholder:text-[var(--txt3)]
                 focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10

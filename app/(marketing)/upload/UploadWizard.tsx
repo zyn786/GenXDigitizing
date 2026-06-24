@@ -529,7 +529,7 @@ export function UploadWizard() {
       </div>
 
       {/* Sticky submit (mobile) */}
-      <div className="fixed bottom-0 inset-x-0 z-30 bg-[var(--bg)]/95 backdrop-blur-sm border-t border-[var(--border)] px-4 pt-2 pb-[max(8px,env(safe-area-inset-bottom))] sm:hidden">
+      <div className="fixed bottom-0 inset-x-0 z-30 bg-[var(--bg)]/95  border-t border-[var(--border)] px-4 pt-2 pb-[max(8px,env(safe-area-inset-bottom))] sm:hidden">
         <div className="max-w-[560px] mx-auto">
           <button onClick={handleSubmit} disabled={submitting} type="button"
             className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] text-white font-bold text-[13px] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(37,99,235,0.3)]">

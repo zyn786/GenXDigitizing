@@ -166,7 +166,7 @@ export function ChatWindow() {
     <div className="flex-1 flex flex-col bg-[var(--bg)] min-h-0 min-w-0 overflow-hidden">
       {/* ── Premium Header ────────────────────────────────── */}
       <div className="flex-shrink-0 px-3 sm:px-4 py-3 border-b border-[var(--border)]
-        bg-[var(--surface)]/95 backdrop-blur-xl flex items-center gap-2.5 sm:gap-3 sticky top-0 z-10 min-w-0 overflow-hidden">
+        bg-[var(--surface)]/95  flex items-center gap-2.5 sm:gap-3 sticky top-0 z-10 min-w-0 overflow-hidden">
         {/* Back (mobile) — hidden for clients */}
         {currentUserRole !== "client" && (
           <button

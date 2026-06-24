@@ -180,7 +180,7 @@ function GalleryCard({
         )}
 
         {item.images.length > 1 && (
-          <span className="absolute top-2.5 right-2.5 z-10 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/40 text-white/90 backdrop-blur-sm">
+          <span className="absolute top-2.5 right-2.5 z-10 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/40 text-white/90 ">
             +{item.images.length - 1}
           </span>
         )}

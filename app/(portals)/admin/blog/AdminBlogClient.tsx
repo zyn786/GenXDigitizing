@@ -484,7 +484,7 @@ export default function AdminBlogPage() {
       {showModal && form && (
         <div className="fixed inset-0 z-[200] flex items-start justify-center p-4 overflow-y-auto">
           {/* Backdrop */}
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={closeModal} />
+          <div className="fixed inset-0 bg-black/50 " onClick={closeModal} />
 
           <div className="relative z-10 w-full max-w-3xl my-4 bg-[var(--surface)] border border-[var(--border2)] rounded-2xl shadow-2xl">
             {/* Modal header */}
@@ -715,7 +715,7 @@ export default function AdminBlogPage() {
       {/* Preview Modal */}
       {showPreview && form && (
         <div className="fixed inset-0 z-[300] flex items-start justify-center overflow-y-auto">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowPreview(false)} />
+          <div className="fixed inset-0 bg-black/60 " onClick={() => setShowPreview(false)} />
           <div className="relative z-10 w-full max-w-5xl my-4 bg-[var(--bg)] border border-[var(--border2)] rounded-2xl shadow-2xl overflow-hidden">
             {/* Preview toolbar */}
             <div className="sticky top-0 z-10 flex items-center justify-between p-3 sm:p-4 border-b border-[var(--border)] bg-[var(--surface)]">

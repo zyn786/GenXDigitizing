@@ -104,7 +104,7 @@ export function HorizontalSlider({
         onClick={() => scroll("left")}
         className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-xl
           flex items-center justify-center
-          bg-[var(--surface)]/90 backdrop-blur-md border border-[var(--border2)]
+          bg-[var(--surface)]/90  border border-[var(--border2)]
           text-[var(--txt2)] hover:text-[var(--txt)] hover:border-[var(--border3)]
           shadow-lg transition-all pointer-events-none"
         style={{ pointerEvents: showLeftArrow ? "auto" : "none" }}
@@ -119,7 +119,7 @@ export function HorizontalSlider({
         onClick={() => scroll("right")}
         className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-xl
           flex items-center justify-center
-          bg-[var(--surface)]/90 backdrop-blur-md border border-[var(--border2)]
+          bg-[var(--surface)]/90  border border-[var(--border2)]
           text-[var(--txt2)] hover:text-[var(--txt)] hover:border-[var(--border3)]
           shadow-lg transition-all pointer-events-none"
         style={{ pointerEvents: showRightArrow ? "auto" : "none" }}

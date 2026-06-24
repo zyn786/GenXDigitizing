@@ -347,9 +347,9 @@ function BeforeAfterSlider({
           <GripHorizontal size={15} className="text-[var(--txt3)]" />
         </div>
       </div>
-      <span className="absolute top-3 right-3 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-sm z-10 pointer-events-none">Before</span>
+      <span className="absolute top-3 right-3 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-black/60 text-white  z-10 pointer-events-none">Before</span>
       <span className="absolute top-3 left-3 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[#16A34A] text-white z-10 pointer-events-none">After</span>
-      <div className="hidden sm:block absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm border border-[var(--border)] rounded-full px-4 py-1.5 text-xs font-semibold text-[var(--txt)] shadow-sm z-10 pointer-events-none whitespace-nowrap">
+      <div className="hidden sm:block absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95  border border-[var(--border)] rounded-full px-4 py-1.5 text-xs font-semibold text-[var(--txt)] shadow-sm z-10 pointer-events-none whitespace-nowrap">
         ← Drag to compare →
       </div>
     </div>
@@ -399,12 +399,12 @@ function SewoutGifShowcase({
       )}
 
       {/* Badges */}
-      <span className="absolute top-3 right-3 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[#16A34A]/90 text-white z-10 pointer-events-none backdrop-blur-sm">
+      <span className="absolute top-3 right-3 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[#16A34A]/90 text-white z-10 pointer-events-none ">
         {hasGif && !gifError ? "Real Sew-Out" : "Finished Result"}
       </span>
 
       {!hasGif && (
-        <span className="absolute top-3 left-3 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-black/50 text-white/80 z-10 pointer-events-none backdrop-blur-sm">
+        <span className="absolute top-3 left-3 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-black/50 text-white/80 z-10 pointer-events-none ">
           Static Preview
         </span>
       )}
@@ -512,7 +512,7 @@ function HeroSection() {
         <div className="relative overflow-hidden py-2" aria-label="Our services">
           <div className="flex gap-2 sm:gap-3 animate-marquee w-max">
             {[...SERVICE_CARDS, ...SERVICE_CARDS].map((card, i) => (
-              <div key={`${card.title}-${i}`} className="flex items-center gap-2 sm:gap-3 bg-white/8 backdrop-blur-md border border-white/10 rounded-xl px-2.5 sm:px-4 py-1.5 sm:py-2.5 flex-shrink-0 min-w-[135px] sm:min-w-[220px]">
+              <div key={`${card.title}-${i}`} className="flex items-center gap-2 sm:gap-3 bg-white/90 border border-[var(--border)] rounded-xl px-2.5 sm:px-4 py-1.5 sm:py-2.5 flex-shrink-0 min-w-[135px] sm:min-w-[220px]">
                 <span className="text-base sm:text-xl flex-shrink-0">{card.emoji}</span>
                 <div className="min-w-0">
                   <div className="text-[10px] sm:text-xs font-semibold text-white truncate">{card.title}</div>
@@ -527,7 +527,7 @@ function HeroSection() {
       {/* Center-aligned hero content */}
       <div className="relative z-10 w-full max-w-[900px] mx-auto px-4 sm:px-6 text-center flex-1 flex flex-col">
         {/* Mini trust bar */}
-        <div className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 mb-2.5 sm:mb-6 text-[11px] sm:text-[13px] font-medium bg-white/10 backdrop-blur-md px-4 sm:px-6 py-2 sm:py-2.5 rounded-full border border-white/15 w-auto max-w-full">
+        <div className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 mb-2.5 sm:mb-6 text-[11px] sm:text-[13px] font-medium bg-white/10 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full border border-white/15 w-auto max-w-full">
           <span className="flex items-center gap-0.5" aria-label={`${SITE_STATS.avgRating} out of 5 stars`}>
             <span className="font-bold text-white mr-0.5">{SITE_STATS.avgRating}</span>
             {Array.from({ length: 5 }).map((_, i) => (
@@ -628,7 +628,7 @@ function HeroSection() {
           ].map((stat) => {
             const Icon = stat.icon;
             return (
-              <div key={stat.sub} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-3 sm:p-4 flex flex-col items-center text-center hover:bg-white/10 transition-all">
+              <div key={stat.sub} className="bg-white/10 border border-white/10 rounded-2xl p-3 sm:p-4 flex flex-col items-center text-center hover:bg-white/20 transition-all">
                 <Icon size={16} className="text-white/50 mb-1.5" />
                 <span className="font-syne font-bold text-sm sm:text-lg text-white">{stat.value}</span>
                 <span className="text-[10px] sm:text-[11px] text-white/40 mt-0.5">{stat.sub}</span>
@@ -993,7 +993,7 @@ function __unused_case_studies() {
 
                 {/* Results card */}
                 <div className="bg-gradient-to-br from-[#0F3460] via-[#1D4ED8] to-[#2563EB] rounded-2xl p-6 sm:p-7 text-white relative overflow-hidden shadow-lg">
-                  <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/5 pointer-events-none" />
+                  <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/12pointer-events-none" />
                   <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center mb-4">
                     <Trophy size={20} className="text-white" />
                   </div>
@@ -1445,7 +1445,7 @@ function BeforeAfterShowcaseSection() {
                     <p className="text-white text-sm sm:text-base font-syne font-bold leading-tight">{current.label}</p>
                     <p className="text-white/70 text-[11px] sm:text-xs mt-0.5">Hand-digitized — production-ready quality</p>
                   </div>
-                  <span className="flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white backdrop-blur-sm border border-white/20">
+                  <span className="flex-shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white  border border-white/20">
                     {activeSet === 0 ? "🧵 Digitizing" : activeSet === 1 ? "✏️ Vector Art" : "🏷️ Patches"}
                   </span>
                 </div>

@@ -770,7 +770,7 @@ export function SubscribePlans() {
         {showCancelModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowCancelModal(false)} />
+            <div className="absolute inset-0 bg-black/50 " onClick={() => setShowCancelModal(false)} />
             {/* Modal */}
             <div className="relative w-full max-w-[420px] rounded-2xl p-5 sm:p-6 shadow-2xl animate-fade-in-up" style={{ background: "var(--surface)", border: "1px solid var(--border2)" }}>
               <div className="text-center mb-5">

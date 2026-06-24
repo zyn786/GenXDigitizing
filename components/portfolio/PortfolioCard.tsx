@@ -79,7 +79,7 @@ export function PortfolioCard({ item, index, onClick, onCategoryClick }: Portfol
 
         {/* Image count badge */}
         {item.images.length > 1 && (
-          <span className="absolute top-3 right-3 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-black/50 text-white/90 backdrop-blur-md border border-white/10 z-[3]">
+          <span className="absolute top-3 right-3 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-black/50 text-white/90  border border-white/10 z-[3]">
             +{item.images.length - 1}
           </span>
         )}

@@ -353,7 +353,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="md:hidden fixed inset-0 z-30 bg-white/60 backdrop-blur-sm"
+              className="md:hidden fixed inset-0 z-30 bg-white/90"
               style={{ top: topOffset ? `calc(${topOffset} + 64px)` : "64px" }}
               onClick={() => setOpen(false)}
             />

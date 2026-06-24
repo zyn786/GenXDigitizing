@@ -68,7 +68,7 @@ export default function ResetPasswordPage() {
           </Link>
         </div>
 
-        <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-2xl p-8 backdrop-blur-xl">
+        <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-2xl p-8 ">
 
           {done ? (
             <div className="text-center">
