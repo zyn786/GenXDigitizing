@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import type { PortfolioItem } from "./data";
@@ -28,7 +29,10 @@ export function PortfolioModal({
     onClose();
   }, [onClose]);
 
-  if (!item) return null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!item || !mounted) return null;
 
   const images = item.images || [];
   const total = images.length;
@@ -46,7 +50,7 @@ export function PortfolioModal({
     setTouchStart(null);
   }
 
-  return (
+  const modal = (
     <AnimatePresence>
       <motion.div
         key="backdrop"
@@ -54,6 +58,7 @@ export function PortfolioModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[999] bg-black/95 backdrop-blur-sm flex flex-col"
+        style={{ paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         onClick={handleClose}
       >
         {/* ── Top bar (in flow) ────────────────────────── */}
@@ -79,13 +84,12 @@ export function PortfolioModal({
           </button>
         </div>
 
-        {/* ── Image area ──────────────────────────────── */}
+        {/* ── Image area — tap black space to close ────── */}
         <motion.div
           key="modal"
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.96 }}
-          onClick={(e) => e.stopPropagation()}
           className="relative flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden px-4 sm:px-12"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
@@ -98,6 +102,7 @@ export function PortfolioModal({
                 alt={current.alt || item.title}
                 className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg"
                 draggable={false}
+                onClick={(e) => e.stopPropagation()}
               />
 
               {/* Desktop arrows */}
@@ -191,4 +196,6 @@ export function PortfolioModal({
       </motion.div>
     </AnimatePresence>
   );
+
+  return createPortal(modal, document.body);
 }

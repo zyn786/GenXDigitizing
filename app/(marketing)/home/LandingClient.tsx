@@ -453,10 +453,10 @@ function HeroSection() {
 
 {/* Mobile bottom bar */}
 <div
-  className="sm:hidden fixed bottom-0 inset-x-0 z-40 pb-[env(safe-area-inset-bottom,12px)]"
+  className="sm:hidden fixed bottom-0 inset-x-0 z-40"
 >
   {/* Buttons */}
-  <div className="px-3 pt-3 pb-3 flex items-center gap-2 bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#0F3460] shadow-[0_1px_8px_rgba(37,99,235,0.2)]">
+  <div className="px-3 pt-3 flex items-center gap-2 bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#0F3460] shadow-[0_1px_8px_rgba(37,99,235,0.2)]" style={{ paddingBottom: "env(safe-area-inset-bottom, 12px)" }}>
     <div className="relative flex-shrink-0">
       {/* Popup label — bounces, hides on scroll */}
       <div className="absolute -top-12 left-1/2 -translate-x-4 z-50">
