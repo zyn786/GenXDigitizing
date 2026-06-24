@@ -20,7 +20,6 @@ const buttonVariants = cva(
       variant: {
         grad:    "text-white font-semibold shadow-sm bg-[#2563EB] hover:bg-[#1D4ED8] hover:-translate-y-px hover:shadow-md",
         cyan:    "text-white font-semibold shadow-sm bg-[#06B6D4] hover:bg-[#0891B2] hover:-translate-y-px hover:shadow-md",
-        ghost:   "text-[var(--txt)] bg-transparent border border-[var(--border2)] hover:bg-[var(--elevated)] hover:border-[var(--border3)]",
         danger:  "text-white font-semibold shadow-sm bg-[#DC2626] hover:bg-[#B91C1C] hover:-translate-y-px hover:shadow-md",
         outline: "text-[#2563EB] bg-transparent border border-[#2563EB]/40 hover:bg-[#EFF3FF] hover:border-[#2563EB]/60",
         ghost2:  "text-[var(--txt3)] bg-transparent hover:text-[var(--txt)] hover:bg-[var(--border)]",

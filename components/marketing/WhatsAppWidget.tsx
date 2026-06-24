@@ -13,7 +13,7 @@ export function WhatsAppWidget() {
   const isHome = pathname === "/home" || pathname === "/";
 
   return (
-    <div className={`fixed bottom-24 sm:bottom-8 right-4 sm:right-6 z-[60] flex flex-col items-end gap-2 ${isHome ? "hidden sm:flex" : ""}`}>
+    <div className={`fixed bottom-8 sm:bottom-6 right-4 sm:right-6 z-[60] flex flex-col items-end gap-2 ${isHome ? "hidden sm:flex" : ""}`}>
       <AnimatePresence>
         {open && (
           <motion.div

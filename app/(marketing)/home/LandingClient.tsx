@@ -453,10 +453,10 @@ function HeroSection() {
 
 {/* Mobile bottom bar */}
 <div
-  className="sm:hidden fixed bottom-0 inset-x-0 z-40"
+  className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#0F3460] shadow-[0_1px_8px_rgba(37,99,235,0.2)]"
 >
   {/* Buttons */}
-  <div className="px-3 pt-3 flex items-center gap-2 bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#0F3460] shadow-[0_1px_8px_rgba(37,99,235,0.2)]" style={{ paddingBottom: "env(safe-area-inset-bottom, 12px)" }}>
+  <div className="px-3 pt-3 flex items-center gap-2" style={{ paddingBottom: "env(safe-area-inset-bottom, 12px)" }}>
     <div className="relative flex-shrink-0">
       {/* Popup label — bounces, hides on scroll */}
       <div className="absolute -top-12 left-1/2 -translate-x-4 z-50">
@@ -498,8 +498,15 @@ function HeroSection() {
       </Button>
     </Link>
   </div>
+  {/* Trust line */}
+  <div className="flex items-center justify-center gap-1 pt-1 pb-1" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+    <svg viewBox="0 0 24 24" className="w-2.5 h-2.5 fill-white/90"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+    <span className="text-[9px] font-medium text-white/90">100% Secure</span>
+    <span className="text-[9px] text-white/50">·</span>
+    <span className="text-[9px] font-medium text-white/90">SSL Encrypted</span>
+  </div>
 </div>
-        
+
       {/* Service cards slider */}
       <div className="relative z-10 max-w-[1400px] mx-auto px-0 sm:px-6 md:px-12 mb-6 sm:mb-8">
         <div className="relative overflow-hidden py-2" aria-label="Our services">
