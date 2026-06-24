@@ -28,6 +28,7 @@ const DATA: ServicePageData = {
     { name: "Sarah Kim", company: "Branded Threads Co., UK", text: "High-volume cap orders needed consistent 3D puff handling. genxdigitizing delivered proper underlay and height on every file with under 12-hour turnaround." },
   ],
   portfolioSlug: "digitizing",
+  portfolioTag: "Cap",
   cta: { text: "Get Professional Cap Digitizing — Free Quote", href: "/contact" },
 };
 

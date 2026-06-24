@@ -24,6 +24,7 @@ const DATA: ServicePageData = {
   formats: "DST, PES, EMB, JEF, XXX, VIP",
   turnaround: "12–24h (rush available)",
   portfolioSlug: "digitizing",
+  portfolioTag: "Applique",
   benefits: [
     {
       icon: "📍",

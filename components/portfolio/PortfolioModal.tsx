@@ -53,11 +53,11 @@ export function PortfolioModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center"
+        className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-sm flex flex-col"
         onClick={handleClose}
       >
-        {/* Top bar */}
-        <div className="absolute top-0 inset-x-0 z-20 flex items-center justify-between p-3 sm:p-4">
+        {/* ── Top bar (in flow) ────────────────────────── */}
+        <div className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center gap-2 min-w-0">
             {item.category && (
               <span
@@ -79,14 +79,14 @@ export function PortfolioModal({
           </button>
         </div>
 
-        {/* Main image area */}
+        {/* ── Image area ──────────────────────────────── */}
         <motion.div
           key="modal"
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.96 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative flex-1 w-full flex items-center justify-center px-4 pt-14 pb-24 sm:px-12 sm:pt-16 sm:pb-20"
+          className="relative flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden px-4 sm:px-12"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
@@ -96,7 +96,7 @@ export function PortfolioModal({
               <img
                 src={current.url}
                 alt={current.alt || item.title}
-                className="max-w-full max-h-full object-contain rounded-lg"
+                className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg"
                 draggable={false}
               />
 
@@ -121,16 +121,25 @@ export function PortfolioModal({
           )}
         </motion.div>
 
-        {/* Bottom bar */}
-        <div className="absolute bottom-0 inset-x-0 z-20">
-          {/* Info */}
-          <div className="px-4 sm:px-6 pb-2 text-center max-w-2xl mx-auto">
-            <p className="text-white text-sm sm:text-base font-syne font-bold leading-tight px-4">
+        {/* ── Bottom info (in flow) ───────────────────── */}
+        <div className="flex-shrink-0 px-4 sm:px-6 pb-4 sm:pb-5 pt-3 sm:pt-4">
+          {/* Title + tags */}
+          <div className="text-center max-w-lg mx-auto mb-3">
+            <p className="text-white text-sm sm:text-base font-syne font-bold leading-tight mb-2">
               {item.title}
             </p>
-            {/* Structured case-study fields */}
-            {(item.industry || item.challenge || item.solution || item.result) ? (
-              <div className="mt-2 px-2 grid grid-cols-2 gap-1.5 text-left">
+            {item.tags && item.tags.length > 0 && (
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                {item.tags.map((tag: string) => (
+                  <span key={tag} className="text-[10px] sm:text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-white/8 text-white/60 border border-white/10">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            {/* Case-study fields */}
+            {(item.industry || item.challenge || item.solution || item.result) && (
+              <div className="mt-2 grid grid-cols-2 gap-1.5 text-left">
                 {item.industry && (
                   <div className="bg-white/8 rounded-lg px-3 py-2">
                     <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-white/40 font-bold mb-0.5">Industry</p>
@@ -156,27 +165,17 @@ export function PortfolioModal({
                   </div>
                 )}
               </div>
-            ) : (
-              item.tags && item.tags.length > 0 && (
-                <div className="flex flex-wrap items-center justify-center gap-1 mt-1.5">
-                  {item.tags.map((tag: string) => (
-                    <span key={tag} className="text-[10px] sm:text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-white/8 text-white/60 border border-white/10">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )
             )}
           </div>
 
           {/* Thumbnails */}
           {total > 1 && (
-            <div className="flex gap-2 px-4 sm:px-6 pb-4 sm:pb-5 pt-2 overflow-x-auto justify-center">
+            <div className="flex gap-2 overflow-x-auto justify-center pb-1">
               {images.map((img, i) => (
                 <button
                   key={img.url}
                   onClick={(e) => { e.stopPropagation(); setActiveIdx(i); }}
-                  className={`flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden transition-all duration-200 ${
+                  className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden transition-all duration-200 ${
                     i === activeIdx
                       ? "ring-2 ring-white scale-105 opacity-100"
                       : "opacity-50 hover:opacity-80"

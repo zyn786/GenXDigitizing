@@ -6,7 +6,7 @@ export function TopBar() {
 
   return (
     <div className="fixed top-0 inset-x-0 z-[110] h-9
-      bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316]
+      bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#0F3460]
       shadow-[0_1px_8px_rgba(37,99,235,0.2)]">
       <div className="h-full max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 flex items-center justify-between">
         <a

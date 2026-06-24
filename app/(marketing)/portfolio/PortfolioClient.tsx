@@ -81,7 +81,7 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className="relative inline-flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[12px] sm:text-sm font-semibold transition-all duration-200 border cursor-pointer"
+      className="relative flex flex-col items-center gap-0.5 sm:flex-row sm:gap-1.5 px-2 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-sm font-semibold transition-all duration-200 border cursor-pointer w-full sm:w-auto"
       style={{
         background: isActive
           ? `linear-gradient(135deg, ${color}, ${color}DD)`
@@ -91,14 +91,14 @@ function FilterChip({
         boxShadow: isActive ? `0 0 24px ${color}30` : "none",
       }}
     >
-      <span className="text-sm sm:text-base">{emoji}</span>
-      <span>{label}</span>
+      <span className="text-base sm:text-sm leading-none">{emoji}</span>
+      <span className="text-[10px] sm:text-sm leading-tight">{label}</span>
       {count > 0 && (
         <span
-          className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full text-[10px] font-bold px-1.5"
+          className="absolute -top-1 -right-1 sm:static inline-flex items-center justify-center min-w-[16px] h-[16px] sm:min-w-[18px] sm:h-[18px] rounded-full text-[9px] sm:text-[10px] font-bold px-1"
           style={{
             background: isActive ? `${color}30` : "var(--border)",
-            color: isActive ? color : "var(--txt3)",
+            color: isActive ? "#fff" : "var(--txt3)",
           }}
         >
           {count}
@@ -339,22 +339,23 @@ function ClientResultCard({ item }: { item: PortfolioItem }) {
    MAIN COMPONENT
    ═════════════════════════════════════════════════════════════ */
 export function PortfolioClient() {
-  const [activeCat, setActiveCat] = useState("all");
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+  const validSlugs = ["digitizing", "vector", "patches"];
+  const [activeCat, setActiveCat] = useState(validSlugs.includes(categoryParam || "") ? categoryParam! : "all");
   const [activeSub, setActiveSub] = useState<string | null>(null);
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [categories, setCategories] = useState<PortfolioCategory[]>(DEFAULT_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     fetchPortfolio()
       .then((data) => {
         setItems(data.items);
-        const validSlugs = ["digitizing", "vector", "patches"];
-        const filteredCats = data.categories.filter((c: any) => validSlugs.includes(c.slug));
-        if (filteredCats.length) setCategories(filteredCats);
+        const dbValidCats = data.categories.filter((c: any) => validSlugs.includes(c.slug));
+        if (dbValidCats.length) setCategories(dbValidCats);
 
         // Auto-open item from ?item= query param
         const itemSlug = searchParams.get("item");
@@ -439,7 +440,7 @@ export function PortfolioClient() {
       <section className="pb-6 sm:pb-8">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
           {/* Main categories */}
-          <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-1.5 sm:gap-2 mb-3">
+          <div className="grid grid-cols-4 sm:flex sm:flex-wrap justify-center gap-1.5 sm:gap-2 mb-3">
             {mainCategories.map((cat) => {
               const count =
                 cat.slug === "all"
@@ -462,46 +463,54 @@ export function PortfolioClient() {
             })}
           </div>
 
-          {/* Sub-category chips */}
+          {/* Sub-category chips — scrollable on mobile, hide zero-count */}
           <AnimatePresence>
             {subs.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="flex flex-wrap justify-center gap-1.5 mb-2"
+                className="mb-2"
               >
-                <button
-                  onClick={() => setActiveSub(null)}
-                  className="px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-200 border"
-                  style={{
-                    background: !activeSub ? "#2563EB" : "var(--surface)",
-                    color: !activeSub ? "#fff" : "var(--txt2)",
-                    borderColor: !activeSub ? "transparent" : "var(--border2)",
-                  }}
-                >
-                  All {categories.find((c) => c.slug === activeCat)?.name || ""}
-                </button>
-                {subs.map((sub) => {
-                  const isSel = activeSub === sub;
-                  const subCount = items.filter(
-                    (i) => i.category?.slug === activeCat && i.tags?.includes(sub)
-                  ).length;
-                  return (
-                    <button
-                      key={sub}
-                      onClick={() => setActiveSub(isSel ? null : sub)}
-                      className="px-3 py-1 rounded-full text-[11px] font-medium transition-all duration-200 border"
-                      style={{
-                        background: isSel ? "#F97316" : "var(--surface)",
-                        color: isSel ? "#fff" : "var(--txt2)",
-                        borderColor: isSel ? "transparent" : "var(--border2)",
-                      }}
-                    >
-                      {sub} ({subCount})
-                    </button>
-                  );
-                })}
+                <div className="relative">
+                  {/* Fade hint on right edge — mobile only */}
+                  <div className="sm:hidden absolute right-0 top-0 bottom-0 w-10 z-10 pointer-events-none" style={{ background: "linear-gradient(to left, var(--bg) 30%, transparent 100%)" }} />
+                  <div className="flex flex-nowrap gap-2 px-2 sm:px-0 overflow-x-auto scrollbar-none pb-1.5"
+                    style={{ WebkitOverflowScrolling: "touch" }}>
+                  {/* "All" reset button */}
+                  <button
+                    onClick={() => setActiveSub(null)}
+                    className="px-3 sm:px-3.5 py-2 sm:py-1.5 rounded-full text-[12px] sm:text-[11px] font-semibold transition-all duration-200 border whitespace-nowrap flex-shrink-0"
+                    style={{
+                      background: !activeSub ? "#2563EB" : "var(--surface)",
+                      color: !activeSub ? "#fff" : "var(--txt2)",
+                      borderColor: !activeSub ? "transparent" : "var(--border2)",
+                    }}
+                  >
+                    All
+                  </button>
+                  {subs.map((sub) => {
+                    const isSel = activeSub === sub;
+                    const subCount = items.filter(
+                      (i) => i.category?.slug === activeCat && i.tags?.includes(sub)
+                    ).length;
+                    return (
+                      <button
+                        key={sub}
+                        onClick={() => setActiveSub(isSel ? null : sub)}
+                        className="px-3 sm:px-3.5 py-2 sm:py-1.5 rounded-full text-[12px] sm:text-[11px] font-medium transition-all duration-200 border whitespace-nowrap flex-shrink-0"
+                        style={{
+                          background: isSel ? "#F97316" : "var(--surface)",
+                          color: isSel ? "#fff" : "var(--txt2)",
+                          borderColor: isSel ? "transparent" : "var(--border2)",
+                        }}
+                      >
+                        {sub} <span className="opacity-60 ml-0.5">{subCount}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -606,33 +615,6 @@ export function PortfolioClient() {
           </div>
         </section>
       )}
-
-      {/* ════════════════════════════════════════════════════════
-          FINAL CTA
-          ════════════════════════════════════════════════════════ */}
-      <section className="py-12 sm:py-16 md:py-20">
-        <div className="max-w-[800px] mx-auto px-4 sm:px-6 text-center">
-          <h2 className="font-syne font-bold text-2xl sm:text-3xl md:text-4xl mb-3 text-[var(--txt)]">
-            Ready for Production-Ready Files?
-          </h2>
-          <p className="text-sm sm:text-base text-[var(--txt2)] mb-6 max-w-md mx-auto">
-            Upload your design — get a proof — pay when satisfied. From <strong className="text-[var(--txt)]">$7</strong> per design.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/contact">
-              <Button variant="grad" size="lg" rightIcon={<ArrowRight size={15} />}>
-                Upload Design — Free Quote
-              </Button>
-            </Link>
-            <Link href="/pricing">
-              <Button variant="ghost" size="md">View Pricing</Button>
-            </Link>
-          </div>
-          <p className="text-[11px] text-[var(--txt3)] mt-4">
-            🔄 Free revisions forever &bull; All machine formats &bull; Pay when satisfied
-          </p>
-        </div>
-      </section>
 
       {/* ════════════════════════════════════════════════════════
           MODAL — Detail view

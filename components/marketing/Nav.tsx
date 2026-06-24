@@ -35,12 +35,9 @@ const SERVICES_SUB = [
 ];
 
 const PORTFOLIO_SUB = [
-  { label: "Left Chest", href: "/portfolio?category=digitizing" },
-  { label: "Caps", href: "/portfolio?category=digitizing" },
-  { label: "3D Puff", href: "/portfolio?category=digitizing" },
-  { label: "Jacket Back", href: "/portfolio?category=digitizing" },
-  { label: "Patches", href: "/portfolio?category=patches" },
-  { label: "Vector Art", href: "/portfolio?category=vector" },
+  { label: "🧵 Digitizing", href: "/portfolio?category=digitizing" },
+  { label: "✏️ Vector Art", href: "/portfolio?category=vector" },
+  { label: "🏷️ Patches", href: "/portfolio?category=patches" },
 ];
 
 const PORTAL_HOME: Record<string, string> = {

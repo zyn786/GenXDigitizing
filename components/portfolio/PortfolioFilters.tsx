@@ -11,11 +11,14 @@ interface PortfolioFiltersProps {
 }
 
 export function PortfolioFilters({ active, onChange, counts, categories }: PortfolioFiltersProps) {
+  // Default to first category if none active or active not in list
+  const validSlugs = categories.map(c => c.slug);
+  const current = validSlugs.includes(active) ? active : validSlugs[0];
+
   return (
-    <div className="flex gap-2 flex-wrap justify-center mb-10">
+    <div className="grid grid-cols-3 gap-2 sm:gap-3 max-w-md mx-auto">
       {categories.map((cat) => {
-        const isActive = active === cat.slug;
-        const count = counts[cat.slug] ?? 0;
+        const isActive = current === cat.slug;
 
         return (
           <motion.button
@@ -23,8 +26,8 @@ export function PortfolioFilters({ active, onChange, counts, categories }: Portf
             onClick={() => onChange(cat.slug)}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className={`relative inline-flex items-center gap-2 px-4 py-2.5 rounded-xl
-              text-sm font-semibold transition-all duration-200 border cursor-pointer
+            className={`relative inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl
+              text-xs sm:text-sm font-semibold transition-all duration-200 border cursor-pointer w-full
               ${isActive
                 ? "text-white shadow-lg"
                 : "text-[var(--txt2)] hover:text-[var(--txt)] bg-[var(--surface)] border-[var(--border)] hover:border-[var(--border3)]"
@@ -39,19 +42,8 @@ export function PortfolioFilters({ active, onChange, counts, categories }: Portf
                 : {}
             }
           >
-            <span className="text-base leading-none">{cat.emoji}</span>
-            <span>{cat.name}</span>
-            {count > 0 && (
-              <span
-                className={`inline-flex items-center justify-center min-w-[20px] h-5 rounded-full text-[10px] font-bold px-1.5 ${
-                  isActive
-                    ? "bg-white/20 text-white"
-                    : "bg-[var(--elevated)] text-[var(--txt3)]"
-                }`}
-              >
-                {count}
-              </span>
-            )}
+            <span className="text-sm sm:text-base leading-none flex-shrink-0">{cat.emoji}</span>
+            <span className="truncate">{cat.name}</span>
           </motion.button>
         );
       })}

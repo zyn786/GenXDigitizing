@@ -26,6 +26,7 @@ const DATA: ServicePageData = {
     { name: "David Chen", company: "The Embroidery House, Canada", text: "Large format digitizing is hard to get right. genxdigitizing nails it every time. Density is perfect — no puckering, no distortion." },
   ],
   portfolioSlug: "digitizing",
+  portfolioTag: "Jacket Back",
   cta: { text: "Digitize Your Jacket Back — Free Quote", href: "/contact" },
 };
 

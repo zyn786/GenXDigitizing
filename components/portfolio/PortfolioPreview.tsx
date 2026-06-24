@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/Button";
 import type { PortfolioItem, PortfolioCategory } from "./data";
 
 export function PortfolioPreview() {
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeCategory, setActiveCategory] = useState("digitizing");
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [categories, setCategories] = useState<PortfolioCategory[]>(DEFAULT_CATEGORIES);
@@ -62,17 +62,17 @@ export function PortfolioPreview() {
     <>
 
       {/* ── Portfolio Section ─────────────────────────────── */}
-      <AnimatedSection className="py-12 sm:py-16 md:py-20 bg-[var(--bg)] !px-0">
+      <AnimatedSection className="py-10 sm:py-16 md:py-20 bg-[var(--bg)] !px-0">
         {/* Heading + Filters */}
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 text-center">
           {/* Badge */}
-          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.08em] bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20 mb-5">
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.08em] bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20 mb-4 sm:mb-5">
             <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] animate-pulse" />
             Our Portfolio
           </span>
 
           {/* Title */}
-          <h2 className="font-syne font-bold text-[clamp(32px,5vw,56px)] leading-[1.08] mb-3 text-[var(--txt)]">
+          <h2 className="font-syne font-bold text-[clamp(32px,5vw,56px)] leading-[1.08] mb-2 sm:mb-3 text-[var(--txt)]">
             See Our Best{" "}
             <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
               Work
@@ -80,18 +80,20 @@ export function PortfolioPreview() {
           </h2>
 
           {/* Description */}
-          <p className="text-sm sm:text-base text-[var(--txt2)] max-w-lg mx-auto mb-8">
+          <p className="text-sm sm:text-base text-[var(--txt2)] max-w-lg mx-auto mb-5 sm:mb-6">
             Professional embroidery digitizing, vector art, and custom patch design — hand-crafted for quality and precision.
           </p>
 
-          {/* Filters */}
+          {/* Filters — 3 categories only, single row */}
           {!loading && !error && (
-            <PortfolioFilters
-              active={activeCategory}
-              onChange={setActiveCategory}
-              counts={counts}
-              categories={categories}
-            />
+            <div className="mb-6 sm:mb-8">
+              <PortfolioFilters
+                active={activeCategory}
+                onChange={setActiveCategory}
+                counts={counts}
+                categories={categories.filter(c => c.slug !== "all")}
+              />
+            </div>
           )}
         </div>
 
@@ -111,24 +113,63 @@ export function PortfolioPreview() {
                 <p className="text-sm text-[var(--txt3)]">No projects in this category yet. Check back soon!</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                {filtered.slice(0, 4).map((item, idx) => (
-                  <div key={item.id || idx} className="animate-fade-in-up" style={{ animationDelay: `${idx * 80}ms` }}>
-                    <PortfolioCard
-                      item={item}
-                      index={idx}
-                      onClick={() => setSelectedItem(item)}
-                      onCategoryClick={setActiveCategory}
-                    />
+              <>
+                {/* Mobile: swipeable snap slider */}
+                <div className="sm:hidden relative pt-2 pb-6">
+                  {/* Ambient glow */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[250px] rounded-full blur-[100px] opacity-[0.07] pointer-events-none" style={{ background: `radial-gradient(circle, ${filtered[0]?.accent || "#2563EB"} 0%, transparent 70%)` }} />
+                  {/* Edge fades */}
+                  <div className="absolute left-0 top-0 bottom-0 w-10 z-10 pointer-events-none" style={{ background: "linear-gradient(to right, var(--bg) 0%, transparent 100%)" }} />
+                  <div className="absolute right-0 top-0 bottom-0 w-10 z-10 pointer-events-none" style={{ background: "linear-gradient(to left, var(--bg) 0%, transparent 100%)" }} />
+                  {/* Cards */}
+                  <div className="flex gap-4 overflow-x-auto scrollbar-none snap-x snap-mandatory scroll-smooth pl-5 pr-5"
+                    style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
+                    {filtered.map((item, idx) => (
+                      <div key={item.id || idx} className="w-[82vw] shrink-0 snap-start">
+                        <PortfolioCard
+                          item={item}
+                          index={idx}
+                          onClick={() => setSelectedItem(item)}
+                          onCategoryClick={setActiveCategory}
+                        />
+                      </div>
+                    ))}
+                    <div className="w-4 shrink-0" />
                   </div>
-                ))}
-              </div>
+                  <p className="text-center text-[10px] text-[var(--txt3)] mt-2.5 opacity-50">← swipe →</p>
+                </div>
+
+                {/* Desktop: marquee auto-scroll */}
+                <div className="hidden sm:block relative py-6 overflow-hidden">
+                  {/* Ambient glow */}
+                  <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[400px] h-[200px] rounded-full blur-[120px] opacity-8 pointer-events-none" style={{ background: `radial-gradient(circle, ${filtered[0]?.accent || "#2563EB"} 0%, transparent 70%)` }} />
+                  <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[400px] h-[200px] rounded-full blur-[120px] opacity-6 pointer-events-none" style={{ background: `radial-gradient(circle, #7C3AED 0%, transparent 70%)` }} />
+                  {/* Edge fades */}
+                  <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none" style={{ background: "linear-gradient(to right, var(--bg) 20%, transparent 100%)" }} />
+                  <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none" style={{ background: "linear-gradient(to left, var(--bg) 20%, transparent 100%)" }} />
+                  {/* Marquee */}
+                  <div className="flex gap-5 animate-marquee w-max px-8">
+                    {filtered.length > 0 ? (
+                      [...filtered, ...filtered, ...filtered].map((item, idx) => (
+                        <div key={`${item.id}-${idx}`} className="w-[280px] lg:w-[320px] shrink-0 transition-transform duration-300 hover:scale-[1.02]">
+                          <PortfolioCard
+                            item={item}
+                            index={idx % filtered.length}
+                            onClick={() => setSelectedItem(item)}
+                            onCategoryClick={setActiveCategory}
+                          />
+                        </div>
+                      ))
+                    ) : null}
+                  </div>
+                </div>
+              </>
             )}
           </div>
         )}
 
         {/* CTA — contained */}
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 flex justify-center mt-12">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12 flex justify-center mt-8 sm:mt-12">
           <Link href="/portfolio">
             <Button variant="grad" size="lg" rightIcon={<ArrowRight size={15} />}>
               View Full Portfolio

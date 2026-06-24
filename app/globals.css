@@ -113,6 +113,11 @@ a, button, input, select, textarea,
     animation-play-state: paused;
   }
 
+  @keyframes bounceUp {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
   /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {

@@ -1,4 +1,6 @@
 // @ts-nocheck
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { getS3SignedUrl } from "@/lib/s3";
 

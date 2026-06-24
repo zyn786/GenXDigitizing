@@ -28,6 +28,7 @@ const DATA: ServicePageData = {
     { name: "David Chen", company: "The Embroidery House, Canada", text: "Their puff digitizing is exceptional. Every cap comes out with perfect height and clean edges. No foam showing through anywhere." },
   ],
   portfolioSlug: "digitizing",
+  portfolioTag: "Puff 3D",
   cta: { text: "Get 3D Puff Digitizing — Free Quote", href: "/contact" },
 };
 

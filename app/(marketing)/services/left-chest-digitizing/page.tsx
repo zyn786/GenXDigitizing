@@ -28,6 +28,7 @@ const DATA: ServicePageData = {
     { name: "Priya Mehta", company: "Monogram Collective, India", text: "Fast, affordable, and the free format conversion saves me time. I get DST, PES, and JEF all in one order for every logo." },
   ],
   portfolioSlug: "digitizing",
+  portfolioTag: "Left Chest",
   cta: { text: "Digitize Your Left Chest Logo — Free Quote", href: "/contact" },
 };
 

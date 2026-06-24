@@ -74,8 +74,13 @@ export function SubscribeContent() {
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--txt)]">
       {/* ═══ HERO ══════════════════════════════ */}
-      <section className="pt-8 sm:pt-12 pb-6 sm:pb-8 px-4 text-center">
+      <section className="relative text-center pt-12 pb-8 sm:pt-16 sm:pb-10 md:pt-20 md:pb-14 px-4 sm:px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          {/* Pill badge */}
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.08em] bg-[#F97316]/10 text-[#F97316] border border-[#F97316]/20 mb-4 sm:mb-5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#F97316] animate-pulse" />
+            Subscription Plans
+          </span>
           <h1 className="font-syne font-bold text-[28px] sm:text-[36px] lg:text-[44px] mb-3 sm:mb-4 tracking-tight max-w-[720px] mx-auto leading-tight">
             Professional Digitizing, Fixed Monthly Price
           </h1>

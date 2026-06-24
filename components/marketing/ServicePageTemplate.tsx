@@ -29,6 +29,7 @@ export interface ServicePageData {
   faqs: { q: string; a: string }[];
   testimonials: { name: string; company: string; text: string }[];
   portfolioSlug?: string; // category slug for portfolio filtering
+  portfolioTag?: string;  // optional: filter by specific tag (e.g. "Cap", "Jacket Back")
   cta: { text: string; href: string };
 }
 
@@ -36,14 +37,19 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [portfolioLoading, setPortfolioLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
+  const [activeSub] = useState<string | null>(data.portfolioTag || null);
 
   useEffect(() => {
     if (!data.portfolioSlug) { setPortfolioLoading(false); return; }
     fetchPortfolio(data.portfolioSlug)
-      .then((res) => setPortfolioItems(res.items.slice(0, 6)))
+      .then((res) => setPortfolioItems(res.items))
       .catch(() => {})
       .finally(() => setPortfolioLoading(false));
   }, [data.portfolioSlug]);
+
+  const filteredPortfolio = activeSub
+    ? portfolioItems.filter(i => i.tags?.includes(activeSub))
+    : portfolioItems;
 
   return (
     <>
@@ -99,7 +105,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
       {/* ── PORTFOLIO ─────────────────────────────── */}
       {data.portfolioSlug && (
         <section className="py-10 sm:py-14 bg-[var(--surface)]">
-          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-12">
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
             <AnimatedSection>
               <div className="text-center mb-8">
                 <h2 className="font-syne font-bold text-2xl sm:text-3xl mb-2">Our {data.title} Work</h2>
@@ -109,12 +115,12 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
                 <div className="flex items-center justify-center py-10">
                   <div className="w-6 h-6 border-2 border-[var(--border3)] border-t-[var(--txt3)] rounded-full animate-spin" />
                 </div>
-              ) : portfolioItems.length === 0 ? (
+              ) : filteredPortfolio.length === 0 ? (
                 <p className="text-center text-sm text-[var(--txt3)] py-10">Portfolio samples coming soon. <Link href="/portfolio" className="underline" style={{ color: data.color }}>View full portfolio →</Link></p>
               ) : (
                 <>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {portfolioItems.map((item) => {
+                    {filteredPortfolio.slice(0, 6).map((item) => {
                       const img = item.images?.find((i: any) => i.isThumbnail || i.sortOrder === -1) || item.images?.[0];
                       return (
                         <button key={item.id} onClick={() => setSelectedItem(item)} className="group rounded-2xl overflow-hidden bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--border3)] transition-all duration-300 hover:shadow-lg cursor-pointer w-full text-left bg-transparent p-0 border-solid">
@@ -135,7 +141,7 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
                     })}
                   </div>
                   <div className="flex justify-center mt-8">
-                    <Link href="/portfolio">
+                    <Link href={`/portfolio?category=${data.portfolioSlug}`}>
                       <Button variant="outline" size="md" rightIcon={<ArrowRight size={14} />}>View Full Portfolio</Button>
                     </Link>
                   </div>

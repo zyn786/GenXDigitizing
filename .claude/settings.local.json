@@ -33,7 +33,8 @@
       "Bash(sed -i '565s|<Link href=\"/portfolio\" className=\"flex-1 sm:flex-none\">|<a href=\"https://wa.me/18302102135\" target=\"_blank\" rel=\"noopener noreferrer\" className=\"flex-1 sm:flex-none no-underline\">|' \"app/\\(marketing\\)/home/LandingClient.tsx\")",
       "Bash(sed -i '574s|</Link>|</a>|' \"app/\\(marketing\\)/home/LandingClient.tsx\")",
       "Bash(sed -i 's/title: \"genxdigitizing — Premium Embroidery Digitizing from \\\\$7\"/title: \"Professional Embroidery Digitizing Services — genxdigitizing\"/' \"app/\\(marketing\\)/home/page.tsx\")",
-      "Bash(sed -i 's/description: .Production-ready embroidery digitizing, vector art, and custom patches. Clean proofs, fast turnaround, free revisions. Trusted by .*/description: \"Professional embroidery digitizing services. Fast turnaround, machine-ready files, unlimited revisions. Trusted by embroidery businesses worldwide. Get a free quote today.\"/' \"app/\\(marketing\\)/home/page.tsx\")"
+      "Bash(sed -i 's/description: .Production-ready embroidery digitizing, vector art, and custom patches. Clean proofs, fast turnaround, free revisions. Trusted by .*/description: \"Professional embroidery digitizing services. Fast turnaround, machine-ready files, unlimited revisions. Trusted by embroidery businesses worldwide. Get a free quote today.\"/' \"app/\\(marketing\\)/home/page.tsx\")",
+      "WebFetch(domain:www.genxdigitizing.com)"
     ]
   }
 }
