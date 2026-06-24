@@ -453,7 +453,7 @@ function HeroSection() {
 
 {/* Mobile bottom bar */}
 <div
-  className="sm:hidden fixed bottom-0 inset-x-0 z-40 pb-5 safe-area-bottom"
+  className="sm:hidden fixed bottom-0 inset-x-0 z-40 pb-[env(safe-area-inset-bottom,12px)]"
 >
   {/* Buttons */}
   <div className="px-3 pt-3 pb-3 flex items-center gap-2 bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#0F3460] shadow-[0_1px_8px_rgba(37,99,235,0.2)]">
@@ -1488,7 +1488,7 @@ export function LandingClient({ services, process, testimonials, faqs }: Props) 
   }
 
   return (
-    <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden pb-28 sm:pb-0">
+    <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden pb-24 sm:pb-0">
       {/* 1. HERO */}
       <HeroSection />
 
