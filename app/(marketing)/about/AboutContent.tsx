@@ -374,7 +374,7 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
       <section className="py-10 sm:py-14 md:py-18">
         <div className="max-w-[1400px] mx-auto px-5 sm:px-6 md:px-12">
           <AnimatedSection>
-            <div className="relative overflow-hidden rounded-3xl border border-[#7C3AED]/15 bg-gradient-to-br from-[#7C3AED]/8 via-[#2563EB]/5 to-[#F97316]/5 p-8 sm:p-12 md:p-16 text-center">
+            <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-white/90 p-8 sm:p-12 md:p-16 text-center">
               <GradientOrb color="#7C3AED" size={300} className="top-[-100px] right-[-80px] opacity-15" />
 
               <div className="relative z-10 max-w-3xl mx-auto">

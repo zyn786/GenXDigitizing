@@ -298,7 +298,7 @@ export default function BlogContent({ post, showBack = true, children }: { post:
             {children}
 
             {/* CTA */}
-            <div className="mt-12 text-center p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-[#2563EB]/10 via-[#7C3AED]/5 to-[#F97316]/5 border border-[#2563EB]/15">
+            <div className="mt-12 text-center p-6 sm:p-8 rounded-2xl bg-white/90 border border-[var(--border)]">
               <h3 className="font-syne font-bold text-lg sm:text-xl mb-2">Ready to Get Started?</h3>
               <p className="text-sm text-[var(--txt2)] mb-5 max-w-md mx-auto leading-relaxed">
                 {post.cta.text}

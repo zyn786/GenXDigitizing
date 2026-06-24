@@ -584,7 +584,7 @@ export function PortfolioClient() {
       {filtered.length > 0 && (
         <section className="py-8 sm:py-10">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
-            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#2563EB]/15 bg-gradient-to-r from-[#2563EB]/8 via-[#7C3AED]/5 to-[#F97316]/8 p-6 sm:p-10 text-center">
+            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[var(--border)] bg-white/90 p-6 sm:p-10 text-center">
               <GradientOrb color="#2563EB" size={200} className="-top-16 left-1/3 opacity-12" />
 
               <div className="relative z-10 max-w-xl mx-auto">

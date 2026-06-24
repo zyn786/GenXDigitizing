@@ -512,7 +512,7 @@ function HeroSection() {
         <div className="relative overflow-hidden py-2" aria-label="Our services">
           <div className="flex gap-2 sm:gap-3 animate-marquee w-max">
             {[...SERVICE_CARDS, ...SERVICE_CARDS].map((card, i) => (
-              <div key={`${card.title}-${i}`} className="flex items-center gap-2 sm:gap-3 bg-white/90 border border-[var(--border)] rounded-xl px-2.5 sm:px-4 py-1.5 sm:py-2.5 flex-shrink-0 min-w-[135px] sm:min-w-[220px]">
+              <div key={`${card.title}-${i}`} className="flex items-center gap-2 sm:gap-3 bg-white/15 border border-white/10 rounded-xl px-2.5 sm:px-4 py-1.5 sm:py-2.5 flex-shrink-0 min-w-[135px] sm:min-w-[220px]">
                 <span className="text-base sm:text-xl flex-shrink-0">{card.emoji}</span>
                 <div className="min-w-0">
                   <div className="text-[10px] sm:text-xs font-semibold text-white truncate">{card.title}</div>

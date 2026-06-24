@@ -216,7 +216,7 @@ function ResultCard({ result }: { result: EstimateResult }) {
       initial={{ opacity: 0, scale: 0.95, y: 8 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="bg-gradient-to-br from-[#2563EB]/10 via-[#7C3AED]/5 to-[#F97316]/5 border border-[#2563EB]/20 rounded-2xl p-5 sm:p-6 text-center"
+      className="bg-white/90 border border-[var(--border)] rounded-2xl p-5 sm:p-6 text-center"
     >
       <div className="flex items-center justify-center gap-1.5 mb-1">
         <Sparkles size={15} className="text-[#2563EB]" />

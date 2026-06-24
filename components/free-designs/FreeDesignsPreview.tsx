@@ -33,7 +33,7 @@ function PreviewCard({ design, index }: { design: FreeDesign; index: number }) {
 
   return (
     <div
-      className="group/card h-full flex flex-col bg-[var(--surface)]/90  rounded-2xl
+      className="group/card h-full flex flex-col bg-white/90 rounded-2xl
         border border-[var(--border)] overflow-hidden animate-fade-in-up
         hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300"
       style={{ animationDelay: `${index * 100}ms` }}

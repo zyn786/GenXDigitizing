@@ -485,7 +485,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
                   </Link>
 
                   {/* Premium highlights card */}
-                  <div className="mt-2.5 p-3.5 rounded-2xl bg-gradient-to-br from-[#2563EB]/5 to-[#7C3AED]/5 border border-[#2563EB]/10">
+                  <div className="mt-2.5 p-3.5 rounded-2xl bg-white/90 border border-[var(--border)]">
                     <div className="grid grid-cols-2 gap-2.5">
                       <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white/50">
                         <Star size={16} className="text-[#F59E0B] fill-[#F59E0B] flex-shrink-0" />
@@ -516,7 +516,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-center gap-3 mt-2.5 pt-2.5 border-t border-[#2563EB]/10">
+                    <div className="flex items-center justify-center gap-3 mt-2.5 pt-2.5 border-t border-[var(--border)]">
                       <div className="flex items-center gap-1">
                         <Shield size={12} className="text-[#16A34A]" />
                         <span className="text-[10px] font-medium text-[#16A34A]">100% Secure</span>

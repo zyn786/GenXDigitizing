@@ -144,7 +144,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
           return (
             <AnimatedSection key={cat} className="!py-0" direction="up">
               <div
-                className={`relative overflow-hidden rounded-2xl sm:rounded-[32px] border bg-[var(--surface)]/90  ${theme.border} ${theme.glow} transition-transform duration-300 hover:-translate-y-1`}
+                className={`relative overflow-hidden rounded-2xl sm:rounded-[32px] border bg-white/90 ${theme.border} ${theme.glow} transition-transform duration-300 hover:-translate-y-1`}
               >
                 <div className={`h-1.5 w-full bg-gradient-to-r ${theme.gradient}`} />
 
