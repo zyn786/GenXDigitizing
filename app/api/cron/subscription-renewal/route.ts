@@ -1,14 +1,16 @@
 // @ts-nocheck
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 /**
  * Subscription Renewal Cron — runs daily via Vercel Cron.
  *
- * Grace period lifecycle:
- *   Day 0:     Period ends → auto-renew with rollover + new invoice
- *   Day 1-7:   Grace period → reminder notifications
- *   Day 7:     Grace expired → pause subscription
- *   Day 30:    Abandoned → cancel/expire
+ * Lifecycle:
+ *   Day -3:     Pre-renewal alert → client reminder + admin summary
+ *   Day 0:      Period ends → auto-renew with rollover + new invoice
+ *   Day 1-7:    Grace period → reminder notifications
+ *   Day 7:      Grace expired → pause subscription
+ *   Day 30:     Abandoned → cancel/expire
  *
  * Secure with CRON_SECRET env var.
  */
@@ -17,11 +19,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { PLAN_CONFIG } from "@/lib/plans";
 import { emailSubscriptionExpiring } from "@/lib/email/subscription";
-import { notifyUser } from "@/lib/notify-helpers";
+import { notifyUser, notifyRole } from "@/lib/notify-helpers";
 import { createCronMonitor } from "@/lib/cron-monitor";
 
 const GRACE_DAYS = 7;
 const ABANDON_DAYS = 30;
+const PRE_RENEWAL_DAYS = 3; // Alert 3 days before period ends
 
 export async function GET(req: NextRequest) {
   const monitor = createCronMonitor("subscription-renewal");
@@ -36,10 +39,68 @@ export async function GET(req: NextRequest) {
   const graceStart = new Date(now.getTime() - GRACE_DAYS * 24 * 3600000);
   const abandonStart = new Date(now.getTime() - ABANDON_DAYS * 24 * 3600000);
 
+  // Pre-renewal tracking
+  const preRenewalAlert: string[] = [];
   const renewed: string[] = [];
   const reminded: string[] = [];
   const paused: string[] = [];
   const expired: string[] = [];
+
+  // ── Phase 0: Pre-renewal alerts (3 days before period ends) ──
+  const preRenewalStart = new Date(now.getTime() + PRE_RENEWAL_DAYS * 24 * 3600000);
+  const preRenewalEnd = new Date(now.getTime() + (PRE_RENEWAL_DAYS + 1) * 24 * 3600000);
+
+  const { data: renewingSoon } = await supabase
+    .from("client_subscriptions")
+    .select("*, clients:client_id(user_id, email, company_name)")
+    .eq("status", "active")
+    .gte("current_period_end", preRenewalStart.toISOString())
+    .lt("current_period_end", preRenewalEnd.toISOString());
+
+  const adminAlertLines: string[] = [];
+
+  for (const sub of renewingSoon ?? []) {
+    const planCfg = PLAN_CONFIG[sub.plan];
+    if (!planCfg) continue;
+
+    const clientUser = (sub.clients as any)?.user_id;
+    const clientEmail = (sub.clients as any)?.email;
+    const company = (sub.clients as any)?.company_name || "Unknown";
+    const remaining = (sub.designs_total || 0) - (sub.designs_used || 0) + (sub.designs_rolled_over || 0);
+
+    // Notify client
+    if (clientUser) {
+      notifyUser(clientUser, {
+        type: "system",
+        title: `📅 Subscription renews in ${PRE_RENEWAL_DAYS} days — ${sub.plan.toUpperCase()}`,
+        body: `Your ${planCfg.label} plan (${planCfg.designs} designs/mo) renews at $${planCfg.price} on ${new Date(sub.current_period_end).toLocaleDateString("en-US", { month: "short", day: "numeric" })}. ${remaining} designs remaining — use them before they reset!`,
+        action_url: "/client/subscribe",
+      }).catch(e => console.error("[cron] Pre-renewal notify error:", e));
+    }
+
+    // Email client
+    if (clientEmail) {
+      emailSubscriptionExpiring(clientEmail, planCfg.label, PRE_RENEWAL_DAYS, remaining).catch(() => {});
+    }
+
+    // Build admin summary line
+    const endDate = new Date(sub.current_period_end).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    adminAlertLines.push(`• ${company} — ${planCfg.label} ($${planCfg.price}/mo) → renews ${endDate}, ${remaining} designs left`);
+
+    preRenewalAlert.push(sub.id);
+  }
+
+  // Batched admin alert
+  if (adminAlertLines.length > 0) {
+    const count = adminAlertLines.length;
+    const summary = `${count} subscription${count > 1 ? "s" : ""} renewing in ${PRE_RENEWAL_DAYS} days:\n${adminAlertLines.join("\n")}`;
+    notifyRole("admin", {
+      type: "system",
+      title: `📅 ${count} subscription${count > 1 ? "s" : ""} renewing in ${PRE_RENEWAL_DAYS} days`,
+      body: summary,
+      action_url: "/admin/subscriptions",
+    }).catch(e => console.error("[cron] Admin pre-renewal alert error:", e));
+  }
 
   // ── Phase 1: Auto-renew subscriptions that just ended ──────
   const { data: justEnded } = await supabase
@@ -177,6 +238,7 @@ export async function GET(req: NextRequest) {
   }
 
   return monitor.success({
+    preRenewalAlerts: preRenewalAlert.length,
     renewed: renewed.length,
     reminded: reminded.length,
     paused: paused.length,

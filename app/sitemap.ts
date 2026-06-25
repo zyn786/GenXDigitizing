@@ -1,7 +1,8 @@
 // @ts-nocheck
 import type { MetadataRoute } from "next";
+import { createAdminClient } from "@/lib/supabase/server";
 
-export const revalidate = 86400; // regenerate daily for fresh lastModified dates
+export const revalidate = 86400; // regenerate daily
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com";
 
@@ -12,7 +13,28 @@ function u(path: string, opts: { freq?: F; pri?: number } = {}) {
   return { url: `${BASE}${path}`, lastModified: new Date(), changeFrequency: freq, priority: pri };
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Fetch blog posts dynamically
+  let blogEntries: MetadataRoute.Sitemap = [];
+  try {
+    const supabase = createAdminClient();
+    const { data: posts } = await supabase
+      .from("blog_posts")
+      .select("slug")
+      .eq("published", true);
+    blogEntries = (posts || []).map((p: { slug: string }) =>
+      u(`/blog/${p.slug}`, { freq: "monthly", pri: 0.8 })
+    );
+  } catch {
+    // Fallback to hardcoded entries if DB unavailable
+    blogEntries = [
+      u("/blog/what-is-embroidery-digitizing",     { freq: "monthly", pri: 0.8 }),
+      u("/blog/manual-vs-auto-digitizing",         { freq: "monthly", pri: 0.8 }),
+      u("/blog/embroidery-file-formats-explained", { freq: "monthly", pri: 0.8 }),
+      u("/blog/how-to-convert-jpg-to-vector",      { freq: "monthly", pri: 0.8 }),
+    ];
+  }
+
   return [
     // ── Core ────────────────────────────────────────────
     u("/",              { freq: "weekly",  pri: 1.0 }),
@@ -28,11 +50,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     u("/contact",       { freq: "monthly", pri: 0.85 }),
     u("/subscribe",     { freq: "monthly", pri: 0.85 }),
 
-    // ── Blog posts ──────────────────────────────────────
-    u("/blog/what-is-embroidery-digitizing",     { freq: "monthly", pri: 0.8 }),
-    u("/blog/manual-vs-auto-digitizing",         { freq: "monthly", pri: 0.8 }),
-    u("/blog/embroidery-file-formats-explained", { freq: "monthly", pri: 0.8 }),
-    u("/blog/how-to-convert-jpg-to-vector",      { freq: "monthly", pri: 0.8 }),
+    // ── Blog posts (dynamic) ─────────────────────────────
+    ...blogEntries,
 
     // ── Service pages ───────────────────────────────────
     u("/services/3d-puff-digitizing",              { freq: "monthly", pri: 0.8 }),

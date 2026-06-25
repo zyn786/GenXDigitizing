@@ -11,6 +11,52 @@ import { logAuditEvent } from "@/lib/audit-log";
 
 const txt = "var(--txt)", txt2 = "var(--txt2)", txt3 = "var(--txt3)";
 
+function PlanPricingGrid() {
+  const supabase = createClient();
+  const [prices, setPrices] = useState<Record<string,number>>(() => {
+    const init: Record<string,number> = {};
+    for (const [k, v] of Object.entries(PLAN_CONFIG)) init[k] = v.price;
+    return init;
+  });
+
+  async function updatePrice(plan: string, val: number) {
+    setPrices(prev => ({ ...prev, [plan]: val }));
+    PLAN_CONFIG[plan].price = val;
+    await supabase
+      .from("platform_settings")
+      .upsert({ key: `plan_${plan}_price`, value: String(val) }, { onConflict: "key" });
+    toast.success(`${PLAN_CONFIG[plan].label}: $${val}/mo`);
+  }
+
+  return (
+    <div className="grid grid-cols-4 gap-2 mb-3">
+      {(["starter","business","pro","pro_max"] as const).map(p => {
+        const cfg = PLAN_CONFIG[p];
+        return (
+          <div key={p} className="p-2 rounded-lg border text-center" style={{ borderColor: "var(--border2)" }}>
+            <p className="text-[10px] font-bold uppercase mb-1" style={{ color: "var(--txt)" }}>{cfg.label}</p>
+            <input
+              type="number"
+              value={prices[p] ?? cfg.price}
+              onChange={e => {
+                const v = parseInt(e.target.value);
+                if (!isNaN(v)) setPrices(prev => ({ ...prev, [p]: v }));
+              }}
+              onBlur={async e => {
+                const v = parseInt(e.target.value);
+                if (v && v > 0) await updatePrice(p, v);
+              }}
+              className="w-16 text-center rounded border text-[11px] py-0.5 mx-auto block"
+              style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: "var(--txt)" }}
+            />
+            <p className="text-[9px] mt-0.5" style={{ color: txt3 }}>{cfg.designs} designs</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function CreateSubForm({subs,invoices,onCreated}:{subs:any[];invoices:any[];onCreated:(sub:any)=>void}){
   const [clientEmail,setClientEmail]=useState("");
   const [plan,setPlan]=useState("business");
@@ -347,18 +393,7 @@ export function SubscriptionsAdmin({ subscriptions: initialSubs, invoices: initi
           <h3 className="font-syne font-bold text-[14px] mb-3 flex items-center gap-2" style={{ color: "var(--txt)" }}>
             <Crown size={16} style={{ color: "#F59E0B" }} /> Plan Pricing
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-            {["starter","business","pro","pro_max"].map(p=>{
-              const cfg=PLAN_CONFIG[p];
-              return(
-              <div key={p} className="p-2 rounded-lg border text-center" style={{borderColor:"var(--border2)"}}>
-                <p className="text-[10px] font-bold uppercase mb-1" style={{color:"var(--txt)"}}>{cfg.label}</p>
-                <input type="number" defaultValue={cfg.price} onBlur={async(e)=>{const v=parseInt(e.target.value);if(v&&v>0){await supabase.from("platform_settings").upsert({key:`plan_${p}_price`,value:String(v)},{onConflict:"key"});PLAN_CONFIG[p].price=v;toast.success(`${cfg.label}: $${v}/mo`);}}}
-                  className="w-16 text-center rounded border text-[11px] py-0.5 mx-auto block" style={{background:"var(--elevated)",borderColor:"var(--border2)",color:"var(--txt)"}}/>
-                <p className="text-[9px] mt-0.5" style={{color:txt3}}>{cfg.designs} designs</p>
-              </div>
-            )})}
-          </div>
+          <PlanPricingGrid />
           <p className="text-[10px]" style={{color:txt3}}>100+ designs/month? Clients request via <Link href="/contact" className="font-bold" style={{color:"#2563EB"}}>Contact</Link> — admin creates custom enterprise plan.</p>
         </section>
 

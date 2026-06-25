@@ -1,7 +1,11 @@
 /**
- * Centralized site statistics — single source of truth.
+ * Centralized site statistics — single source of truth for marketing pages.
  * Every stat displayed on the site MUST reference these values.
  * Update here, updates everywhere.
+ *
+ * NOTE: Home page fetches live stats via getLiveStats() which may show
+ * higher numbers. These values serve as fallback/floor — update quarterly
+ * to match actual performance. Last updated: 2026-06-25.
  */
 export const SITE_STATS = {
   ordersCompleted: 5000,
@@ -30,6 +34,7 @@ export const SITE_INFO = {
   founded: 2024,
   social: {
     instagram: "https://www.instagram.com/genxdigitizing",
+    facebook: "https://www.facebook.com/genxdigitizing",
   },
 } as const;
 

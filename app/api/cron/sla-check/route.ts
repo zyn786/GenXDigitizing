@@ -1,5 +1,6 @@
 // @ts-nocheck
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 /**
  * SLA Warning Cron — runs every 30 min via Vercel Cron.

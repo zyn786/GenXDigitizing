@@ -1,8 +1,15 @@
 // @ts-nocheck
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 5 subscriptions per IP per 15 minutes
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    if (!checkRateLimit("subscribe", ip, 5)) {
+      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+    }
+
     const { email, source } = await req.json();
 
     if (!email || !email.includes("@")) {
@@ -23,11 +30,9 @@ export async function POST(req: Request) {
         console.log("[subscribe] DB insert failed (non-critical):", error.message);
       }
     } catch (dbErr: any) {
-      // Table may not exist — log and continue. Email still captured via server logs.
       console.log("[subscribe] DB unavailable, email logged:", email.toLowerCase().trim());
     }
 
-    // Always return success — email captured
     console.log("[subscribe] New subscriber:", email.toLowerCase().trim(), "| source:", source || "website");
     return NextResponse.json({ success: true, message: "Subscribed" });
   } catch (err) {

@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Plus,
   Pencil,
@@ -14,6 +14,14 @@ import {
   Check,
   AlertCircle,
   Play,
+  Search,
+  FileText,
+  MessageSquare,
+  Upload,
+  Image as ImageIcon,
+  Globe,
+  Hash,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -35,6 +43,11 @@ interface BlogPost {
   created_at: string;
 }
 
+const CATEGORIES = [
+  "General", "Digitizing 101", "Vector Art", "Patches",
+  "Tutorials", "Industry News", "Case Studies",
+];
+
 const EMPTY_POST = {
   slug: "",
   title: "",
@@ -53,6 +66,17 @@ const EMPTY_POST = {
   },
 };
 
+const LAYOUT_OPTIONS = [
+  { value: "text-only", label: "Text", icon: "📝" },
+  { value: "image-top", label: "Img Top", icon: "🖼️" },
+  { value: "image-left", label: "Img Left", icon: "◧" },
+  { value: "image-right", label: "Img Right", icon: "◨" },
+  { value: "image-grid-2", label: "2-Up", icon: "⊞" },
+  { value: "image-grid-3", label: "3-Up", icon: "▦" },
+  { value: "image-grid-4", label: "4-Up", icon: "⊟" },
+  { value: "comparison", label: "Compare", icon: "⇔" },
+] as const;
+
 export default function AdminBlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,10 +86,36 @@ export default function AdminBlogPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [showComments, setShowComments] = useState(false);
+  const [activeTab, setActiveTab] = useState<"posts" | "comments">("posts");
   const [comments, setComments] = useState<any[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Search & filter
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+
+  // Stats
+  const stats = useMemo(() => {
+    const published = posts.filter(p => p.published).length;
+    const drafts = posts.filter(p => !p.published).length;
+    const uniqueCategories = [...new Set(posts.map(p => p.category).filter(Boolean))];
+    return { total: posts.length, published, drafts, categories: uniqueCategories.length };
+  }, [posts]);
+
+  // Filtered posts
+  const filteredPosts = useMemo(() => {
+    return posts.filter(p => {
+      const mq = !search || p.title.toLowerCase().includes(search.toLowerCase()) || p.description?.toLowerCase().includes(search.toLowerCase());
+      const ms = statusFilter === "all" || (statusFilter === "published" ? p.published : !p.published);
+      const mc = categoryFilter === "all" || p.category === categoryFilter;
+      return mq && ms && mc;
+    });
+  }, [posts, search, statusFilter, categoryFilter]);
+
+  // Unique categories from posts
+  const usedCategories = useMemo(() => [...new Set(posts.map(p => p.category).filter(Boolean))], [posts]);
 
   function formToBlogPost(): BlogPostType {
     if (!form) return {} as BlogPostType;
@@ -88,25 +138,26 @@ export default function AdminBlogPage() {
     };
   }
 
+  // ── Image upload handlers ──────────────────────────────────────
+  async function uploadFile(file: File): Promise<string | null> {
+    const fd = new FormData();
+    fd.append("files", file);
+    const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+    if (!res.ok) throw new Error("Upload failed");
+    const results = await res.json();
+    return results[0]?.url || null;
+  }
+
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
     try {
-      const fd = new FormData();
-      fd.append("files", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      if (!res.ok) throw new Error("Upload failed");
-      const results = await res.json();
-      if (results.length > 0) {
-        updateField("heroImage", results[0].url);
-        setMessage({ type: "success", text: "Image uploaded!" });
-      }
+      const url = await uploadFile(file);
+      if (url) { updateField("heroImage", url); setMessage({ type: "success", text: "Image uploaded!" }); }
     } catch {
       setMessage({ type: "error", text: "Upload failed" });
-    } finally {
-      setUploading(false);
-    }
+    } finally { setUploading(false); }
   }
 
   async function handleSectionImageUpload(e: React.ChangeEvent<HTMLInputElement>, sectionIndex: number) {
@@ -114,20 +165,11 @@ export default function AdminBlogPage() {
     if (!file) return;
     setUploading(true);
     try {
-      const fd = new FormData();
-      fd.append("files", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      if (!res.ok) throw new Error("Upload failed");
-      const results = await res.json();
-      if (results.length > 0) {
-        updateContentField("sections", sectionIndex, "image", results[0].url);
-        setMessage({ type: "success", text: "Section image uploaded!" });
-      }
+      const url = await uploadFile(file);
+      if (url) { updateContentField("sections", sectionIndex, "image", url); setMessage({ type: "success", text: "Section image uploaded!" }); }
     } catch {
       setMessage({ type: "error", text: "Upload failed" });
-    } finally {
-      setUploading(false);
-    }
+    } finally { setUploading(false); }
   }
 
   async function handleSectionMultiImageUpload(e: React.ChangeEvent<HTMLInputElement>, sectionIndex: number) {
@@ -137,12 +179,8 @@ export default function AdminBlogPage() {
     try {
       const urls: string[] = [];
       for (const file of Array.from(files)) {
-        const fd = new FormData();
-        fd.append("files", file);
-        const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-        if (!res.ok) throw new Error("Upload failed");
-        const results = await res.json();
-        if (results.length > 0) urls.push(results[0].url);
+        const url = await uploadFile(file);
+        if (url) urls.push(url);
       }
       setForm((prev: any) => {
         const content = { ...prev.content };
@@ -154,9 +192,7 @@ export default function AdminBlogPage() {
       setMessage({ type: "success", text: `${urls.length} image(s) uploaded!` });
     } catch {
       setMessage({ type: "error", text: "Upload failed" });
-    } finally {
-      setUploading(false);
-    }
+    } finally { setUploading(false); }
   }
 
   function removeSectionImage(sectionIndex: number, imageIndex: number) {
@@ -171,6 +207,7 @@ export default function AdminBlogPage() {
     });
   }
 
+  // ── CRUD ───────────────────────────────────────────────────────
   async function loadPosts() {
     setLoading(true);
     try {
@@ -179,9 +216,7 @@ export default function AdminBlogPage() {
       setPosts(data.posts || []);
     } catch {
       setMessage({ type: "error", text: "Failed to load posts" });
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }
 
   useEffect(() => { loadPosts(); }, []);
@@ -192,11 +227,8 @@ export default function AdminBlogPage() {
       const res = await fetch("/api/admin/blog/comments");
       const data = await res.json();
       setComments(data.comments || []);
-    } catch {
-      // silent
-    } finally {
-      setLoadingComments(false);
-    }
+    } catch { /* silent */ }
+    finally { setLoadingComments(false); }
   }
 
   async function handleApproveComment(id: string, approved: boolean) {
@@ -238,9 +270,7 @@ export default function AdminBlogPage() {
   }
 
   function closeModal() {
-    setShowModal(false);
-    setForm(null);
-    setEditingId(null);
+    setShowModal(false); setForm(null); setEditingId(null);
   }
 
   function updateField(field: string, value: any) {
@@ -281,8 +311,7 @@ export default function AdminBlogPage() {
   }
 
   async function handleSave() {
-    setSaving(true);
-    setMessage(null);
+    setSaving(true); setMessage(null);
     try {
       const payload = {
         ...form,
@@ -291,7 +320,6 @@ export default function AdminBlogPage() {
           ? form.keywords.split(",").map((k: string) => k.trim()).filter(Boolean)
           : form.keywords,
       };
-
       if (!editingId) {
         const res = await fetch("/api/admin/blog", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
         if (!res.ok) throw new Error((await res.json()).error);
@@ -301,14 +329,10 @@ export default function AdminBlogPage() {
         if (!res.ok) throw new Error((await res.json()).error);
         setMessage({ type: "success", text: "Post updated!" });
       }
-
-      closeModal();
-      loadPosts();
+      closeModal(); loadPosts();
     } catch (e: any) {
       setMessage({ type: "error", text: e.message || "Save failed" });
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   }
 
   async function handleDelete(id: string) {
@@ -316,11 +340,8 @@ export default function AdminBlogPage() {
     try {
       const res = await fetch(`/api/admin/blog?id=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Delete failed");
-      setMessage({ type: "success", text: "Post deleted" });
-      loadPosts();
-    } catch {
-      setMessage({ type: "error", text: "Delete failed" });
-    }
+      setMessage({ type: "success", text: "Post deleted" }); loadPosts();
+    } catch { setMessage({ type: "error", text: "Delete failed" }); }
   }
 
   async function handleTogglePublish(post: BlogPost) {
@@ -332,375 +353,580 @@ export default function AdminBlogPage() {
       });
       if (!res.ok) throw new Error("Update failed");
       loadPosts();
-    } catch {
-      setMessage({ type: "error", text: "Toggle failed" });
-    }
+    } catch { setMessage({ type: "error", text: "Toggle failed" }); }
   }
 
   async function handleSeed() {
-    if (!confirm("Import 4 pre-written blog posts (What Is Embroidery Digitizing, Manual vs Auto, File Formats, JPG to Vector)? Existing posts with matching slugs will be skipped.")) return;
+    if (!confirm("Import 4 pre-written blog posts? Existing posts with matching slugs will be skipped.")) return;
     setSaving(true);
     try {
       const res = await fetch("/api/admin/blog/seed", { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setMessage({ type: "success", text: `${data.imported || 0} posts imported!` });
-      loadPosts();
+      setMessage({ type: "success", text: `${data.imported || 0} posts imported!` }); loadPosts();
     } catch (e: any) {
       setMessage({ type: "error", text: e.message || "Import failed" });
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   }
 
+  // ── Render ─────────────────────────────────────────────────────
   return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-[1200px] mx-auto">
-      <div className="flex items-center justify-end mb-6">
-        <Button variant="grad" size="md" leftIcon={<Plus size={15} />} onClick={openCreate}>
-          New Post
-        </Button>
+    <div className="p-4 sm:p-6 md:p-8 max-w-[1300px] mx-auto">
+      {/* Header */}
+      <div className="mb-6">
+        <h2 className="font-syne font-bold text-xl sm:text-2xl"
+          style={{
+            background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+          }}>
+          Blog Management
+        </h2>
+        <p className="text-xs sm:text-[13px] mt-1" style={{ color: "var(--txt3)" }}>
+          Create, edit, and manage blog content
+        </p>
+      </div>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-5">
+        {[
+          { label: "Total Posts", val: stats.total, icon: <FileText size={16} />, ci: 0 },
+          { label: "Published", val: stats.published, icon: <Globe size={16} />, ci: 1 },
+          { label: "Drafts", val: stats.drafts, icon: <Pencil size={16} />, ci: 2 },
+          { label: "Categories", val: stats.categories, icon: <Hash size={16} />, ci: 3 },
+        ].map((s) => (
+          <div key={s.label} className="rounded-2xl p-3.5 sm:p-4 border"
+            style={{
+              background: [
+                "rgba(37,99,235,0.06)", "rgba(16,185,129,0.06)",
+                "rgba(249,115,22,0.06)", "rgba(139,92,246,0.06)",
+              ][s.ci],
+              borderColor: [
+                "rgba(37,99,235,0.2)", "rgba(16,185,129,0.2)",
+                "rgba(249,115,22,0.2)", "rgba(139,92,246,0.2)",
+              ][s.ci],
+            }}
+          >
+            <div className="flex items-center gap-2 mb-1"
+              style={{ color: ["#2563EB", "#16A34A", "#F97316", "#7C3AED"][s.ci] }}>
+              {s.icon}
+              <span className="text-[10px] font-semibold uppercase tracking-wide">{s.label}</span>
+            </div>
+            <p className="text-xl sm:text-2xl font-bold" style={{ color: "var(--txt)" }}>{s.val}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+        <div className="flex items-center gap-2 flex-1 flex-wrap">
+          {/* Search */}
+          <div className="relative flex-1 min-w-[180px] max-w-[320px]">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--txt3)]" />
+            <input
+              type="text" placeholder="Search posts..." value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 rounded-xl text-[13px] border outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]/20"
+              style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: "var(--txt)" }}
+            />
+          </div>
+          {/* Status filter */}
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)}
+            className="rounded-xl px-3 py-2 text-[13px] border outline-none cursor-pointer"
+            style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: "var(--txt)" }}>
+            <option value="all">All Status</option>
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+          </select>
+          {/* Category filter */}
+          <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}
+            className="rounded-xl px-3 py-2 text-[13px] border outline-none cursor-pointer"
+            style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: "var(--txt)" }}>
+            <option value="all">All Categories</option>
+            {usedCategories.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={handleSeed} disabled={saving}>
+            {saving ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+            <span className="hidden sm:inline ml-1.5">Seed Posts</span>
+          </Button>
+          <Button variant="grad" size="md" leftIcon={<Plus size={15} />} onClick={openCreate}>
+            New Post
+          </Button>
+        </div>
+      </div>
+
+      {/* Tabs: Posts | Comments */}
+      <div className="flex items-center gap-0 mb-4 border-b" style={{ borderColor: "var(--border)" }}>
+        {[
+          { key: "posts", label: "Posts", count: posts.length },
+          { key: "comments", label: "Comments", count: comments.length },
+        ].map(t => (
+          <button key={t.key} onClick={() => { setActiveTab(t.key as any); if (t.key === "comments") loadComments(); }}
+            className={`flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border-b-2 transition-all bg-transparent cursor-pointer ${
+              activeTab === t.key
+                ? "border-[#2563EB] text-[#2563EB]"
+                : "border-transparent text-[var(--txt3)] hover:text-[var(--txt)]"
+            }`}>
+            {t.key === "posts" ? <FileText size={14} /> : <MessageSquare size={14} />}
+            {t.label}
+            {t.count > 0 && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full"
+                style={{
+                  background: activeTab === t.key ? "rgba(37,99,235,0.12)" : "var(--elevated)",
+                  color: activeTab === t.key ? "#2563EB" : "var(--txt3)",
+                }}>
+                {t.count}
+              </span>
+            )}
+          </button>
+        ))}
       </div>
 
       {/* Message */}
       {message && (
-        <div className={`mb-4 flex items-center gap-2 text-sm p-3 rounded-xl ${message.type === "success" ? "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/20" : "bg-[#DC2626]/10 text-[#DC2626] border border-[#DC2626]/20"}`}>
+        <div className={`mb-4 flex items-center gap-2 text-[13px] p-3 rounded-xl ${
+          message.type === "success"
+            ? "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/20"
+            : "bg-[#DC2626]/10 text-[#DC2626] border border-[#DC2626]/20"
+        }`}>
           {message.type === "success" ? <Check size={15} /> : <AlertCircle size={15} />}
           {message.text}
         </div>
       )}
 
-      {/* Post list */}
-      {loading ? (
-        <div className="flex justify-center py-16"><Loader2 size={24} className="animate-spin text-[var(--txt3)]" /></div>
-      ) : posts.length === 0 ? (
-        <div className="text-center py-16 px-4">
-          <div className="w-20 h-20 rounded-2xl bg-[var(--elevated)] border border-[var(--border)] flex items-center justify-center text-4xl mx-auto mb-5">📝</div>
-          <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-2">No Blog Posts Yet</h2>
-          <p className="text-sm text-[var(--txt2)] max-w-sm mx-auto mb-6">Create your first post manually, or import 4 pre-written articles optimized for SEO.</p>
-          <div className="flex flex-col sm:flex-row gap-2.5 justify-center">
-            <Button variant="grad" size="md" leftIcon={<Plus size={15} />} onClick={openCreate}>
-              Create New Post
-            </Button>
-            <Button variant="outline" size="md" onClick={handleSeed} disabled={saving}>
-              {saving ? "Importing..." : "Import 4 Sample Posts"}
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {posts.map((post) => (
-            <div key={post.id} className="flex items-start justify-between gap-4 p-4 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--border3)] transition-all">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg">{post.emoji || "📝"}</span>
-                  <h3 className="font-syne font-bold text-sm truncate">{post.title}</h3>
-                  {post.published ? (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#16A34A]/10 text-[#16A34A] font-medium flex items-center gap-1"><Eye size={10} /> Published</span>
-                  ) : (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--border)] text-[var(--txt3)] font-medium flex items-center gap-1"><EyeOff size={10} /> Draft</span>
-                  )}
-                </div>
-                <p className="text-xs text-[var(--txt2)] truncate">{post.description}</p>
-                <div className="flex items-center gap-3 mt-1.5 text-[10px] text-[var(--txt3)]">
-                  <span>{post.category}</span>
-                  <span>{post.slug}</span>
-                  <span>{new Date(post.created_at).toLocaleDateString()}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <button onClick={() => handleTogglePublish(post)} className="p-2 rounded-lg hover:bg-[var(--elevated)] text-[var(--txt3)]" title={post.published ? "Unpublish" : "Publish"}>
-                  {post.published ? <EyeOff size={14} /> : <Eye size={14} />}
-                </button>
-                <button onClick={() => openEdit(post)} className="p-2 rounded-lg hover:bg-[var(--elevated)] text-[var(--txt3)]" title="Edit">
-                  <Pencil size={14} />
-                </button>
-                <button onClick={() => handleDelete(post.id)} className="p-2 rounded-lg hover:bg-red-50 text-[var(--txt3)] hover:text-[#DC2626]" title="Delete">
-                  <Trash2 size={14} />
-                </button>
+      {/* ── Posts Tab ──────────────────────────────────────────── */}
+      {activeTab === "posts" && (
+        <>
+          {loading ? (
+            <div className="flex justify-center py-16"><Loader2 size={24} className="animate-spin text-[var(--txt3)]" /></div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-16 px-4">
+              <div className="w-20 h-20 rounded-2xl bg-[var(--elevated)] border border-[var(--border)] flex items-center justify-center text-4xl mx-auto mb-5">📝</div>
+              <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-2">No Blog Posts Yet</h2>
+              <p className="text-sm text-[var(--txt2)] max-w-sm mx-auto mb-6">Create your first post manually, or import 4 pre-written articles optimized for SEO.</p>
+              <div className="flex flex-col sm:flex-row gap-2.5 justify-center">
+                <Button variant="grad" size="md" leftIcon={<Plus size={15} />} onClick={openCreate}>Create New Post</Button>
+                <Button variant="outline" size="md" onClick={handleSeed} disabled={saving}>
+                  {saving ? "Importing..." : "Import 4 Sample Posts"}
+                </Button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* Comment Moderation */}
-      {posts.length > 0 && (
-        <div className="mt-6">
-          <button
-            onClick={() => { setShowComments(!showComments); if (!showComments) loadComments(); }}
-            className="flex items-center gap-2 text-sm font-semibold text-[var(--txt2)] hover:text-[var(--txt)] transition-colors"
-          >
-            <span className={`transition-transform ${showComments ? "rotate-90" : ""}`}>▸</span>
-            Comments {comments.length > 0 && <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--elevated)] border border-[var(--border)]">{comments.length}</span>}
-          </button>
-          {showComments && (
-            <div className="mt-3 space-y-3">
-              {loadingComments ? (
-                <div className="flex justify-center py-8"><Loader2 size={18} className="animate-spin text-[var(--txt3)]" /></div>
-              ) : comments.length === 0 ? (
-                <p className="text-sm text-[var(--txt3)] py-4 text-center">No comments yet.</p>
-              ) : (
-                comments.map((c: any) => (
-                  <div key={c.id} className={`p-3 rounded-xl border ${c.is_approved ? "bg-[var(--surface)] border-[var(--border)]" : "bg-[#F97316]/5 border-[#F97316]/20"}`}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-semibold text-[var(--txt)]">{c.author_name}</span>
-                          <span className="text-[10px] text-[var(--txt3)]">{new Date(c.created_at).toLocaleDateString()}</span>
-                          <span className="text-[10px] text-[var(--txt3)] truncate">on {c.blog_posts?.title || "—"}</span>
-                          {c.is_approved ? (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#16A34A]/10 text-[#16A34A]">Approved</span>
-                          ) : (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#F97316]/10 text-[#F97316]">Pending</span>
-                          )}
-                        </div>
-                        <p className="text-xs text-[var(--txt2)] leading-relaxed">{c.content}</p>
-                      </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        {!c.is_approved && (
-                          <button onClick={() => handleApproveComment(c.id, true)} className="p-1.5 rounded-lg hover:bg-[#16A34A]/10 text-[var(--txt3)] hover:text-[#16A34A]" title="Approve">
-                            <Check size={14} />
-                          </button>
-                        )}
-                        {c.is_approved && (
-                          <button onClick={() => handleApproveComment(c.id, false)} className="p-1.5 rounded-lg hover:bg-[var(--elevated)] text-[var(--txt3)]" title="Unapprove">
-                            <EyeOff size={14} />
-                          </button>
-                        )}
-                        <button onClick={() => handleDeleteComment(c.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-[var(--txt3)] hover:text-[#DC2626]" title="Delete">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
+          ) : filteredPosts.length === 0 ? (
+            <div className="text-center py-16 px-4">
+              <p className="text-sm text-[var(--txt2)]">No posts match your filters.</p>
+              <button onClick={() => { setSearch(""); setStatusFilter("all"); setCategoryFilter("all"); }}
+                className="text-sm text-[#2563EB] hover:underline mt-2 bg-transparent border-none cursor-pointer">
+                Clear filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+              {filteredPosts.map((post) => (
+                <div key={post.id}
+                  className="group rounded-2xl border overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+                  style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+                  {/* Card hero area */}
+                  <div className="relative h-24 sm:h-32 flex items-center justify-center"
+                    style={{
+                      background: post.heroImage
+                        ? `url(${post.heroImage}) center/cover`
+                        : `linear-gradient(135deg, ${post.accentColor}22, ${post.accentColor}44)`,
+                    }}>
+                    {!post.heroImage && (
+                      <span className="text-4xl">{post.emoji || "📝"}</span>
+                    )}
+                    {/* Status badge */}
+                    <span className="absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded-full font-medium"
+                      style={{
+                        background: post.published ? "rgba(22,163,74,0.12)" : "var(--elevated)",
+                        color: post.published ? "#16A34A" : "var(--txt3)",
+                        border: `1px solid ${post.published ? "rgba(22,163,74,0.25)" : "var(--border2)"}`,
+                      }}>
+                      {post.published ? "Published" : "Draft"}
+                    </span>
+                  </div>
+                  {/* Card body */}
+                  <div className="p-3.5">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md"
+                        style={{ background: `${post.accentColor}15`, color: post.accentColor }}>
+                        {post.category || "General"}
+                      </span>
+                    </div>
+                    <h3 className="font-syne font-bold text-sm leading-snug mb-1 line-clamp-2" style={{ color: "var(--txt)" }}>
+                      {post.title}
+                    </h3>
+                    <p className="text-[11px] leading-relaxed line-clamp-2 mb-3" style={{ color: "var(--txt3)" }}>
+                      {post.description}
+                    </p>
+                    <div className="flex items-center gap-2 text-[10px] mb-3" style={{ color: "var(--txt3)" }}>
+                      <Calendar size={10} />
+                      <span>{new Date(post.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                      <span className="opacity-40">|</span>
+                      <span className="font-mono">{post.slug}</span>
+                    </div>
+                    {/* Actions */}
+                    <div className="flex items-center gap-1 pt-2 border-t" style={{ borderColor: "var(--border)" }}>
+                      <button onClick={() => handleTogglePublish(post)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors hover:bg-[var(--elevated)] bg-transparent border-none cursor-pointer"
+                        style={{ color: "var(--txt2)" }}
+                        title={post.published ? "Unpublish" : "Publish"}>
+                        {post.published ? <><EyeOff size={12} /> <span className="hidden sm:inline">Unpublish</span></> : <><Eye size={12} /> <span className="hidden sm:inline">Publish</span></>}
+                      </button>
+                      <button onClick={() => openEdit(post)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors hover:bg-[var(--elevated)] bg-transparent border-none cursor-pointer"
+                        style={{ color: "var(--txt2)" }}>
+                        <Pencil size={12} /> <span className="hidden sm:inline">Edit</span>
+                      </button>
+                      <button onClick={() => handleDelete(post.id)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors hover:bg-red-50 hover:text-[#DC2626] bg-transparent border-none cursor-pointer ml-auto"
+                        style={{ color: "var(--txt3)" }}>
+                        <Trash2 size={12} />
+                      </button>
                     </div>
                   </div>
-                ))
-              )}
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── Comments Tab ─────────────────────────────────────────── */}
+      {activeTab === "comments" && (
+        <div>
+          {loadingComments ? (
+            <div className="flex justify-center py-12"><Loader2 size={18} className="animate-spin text-[var(--txt3)]" /></div>
+          ) : comments.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-14 h-14 rounded-xl bg-[var(--elevated)] border border-[var(--border)] flex items-center justify-center text-2xl mx-auto mb-3">💬</div>
+              <p className="text-sm text-[var(--txt2)]">No comments yet.</p>
+              <p className="text-xs text-[var(--txt3)] mt-1">Comments will appear here once readers start engaging.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+              {comments.map((c: any) => (
+                <div key={c.id} className="p-4 rounded-2xl border transition-all"
+                  style={{
+                    background: c.is_approved ? "var(--surface)" : "rgba(249,115,22,0.04)",
+                    borderColor: c.is_approved ? "var(--border)" : "rgba(249,115,22,0.2)",
+                  }}>
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[13px] font-semibold" style={{ color: "var(--txt)" }}>{c.author_name}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                          style={{
+                            background: c.is_approved ? "rgba(22,163,74,0.1)" : "rgba(249,115,22,0.1)",
+                            color: c.is_approved ? "#16A34A" : "#F97316",
+                          }}>
+                          {c.is_approved ? "Approved" : "Pending"}
+                        </span>
+                      </div>
+                      <div className="text-[11px] mt-0.5" style={{ color: "var(--txt3)" }}>
+                        {new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        {" · "}
+                        <span className="font-medium">{c.blog_posts?.title || "—"}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {!c.is_approved ? (
+                        <button onClick={() => handleApproveComment(c.id, true)}
+                          className="p-1.5 rounded-lg hover:bg-[#16A34A]/10 text-[var(--txt3)] hover:text-[#16A34A] bg-transparent border-none cursor-pointer"
+                          title="Approve"><Check size={14} /></button>
+                      ) : (
+                        <button onClick={() => handleApproveComment(c.id, false)}
+                          className="p-1.5 rounded-lg hover:bg-[var(--elevated)] text-[var(--txt3)] bg-transparent border-none cursor-pointer"
+                          title="Unapprove"><EyeOff size={14} /></button>
+                      )}
+                      <button onClick={() => handleDeleteComment(c.id)}
+                        className="p-1.5 rounded-lg hover:bg-red-50 text-[var(--txt3)] hover:text-[#DC2626] bg-transparent border-none cursor-pointer"
+                        title="Delete"><Trash2 size={14} /></button>
+                    </div>
+                  </div>
+                  <p className="text-xs leading-relaxed" style={{ color: "var(--txt2)" }}>{c.content}</p>
+                </div>
+              ))}
             </div>
           )}
         </div>
       )}
 
-      {/* Modal Editor */}
+      {/* ── Editor Modal ──────────────────────────────────────────── */}
       {showModal && form && (
         <div className="fixed inset-0 z-[200] flex items-start justify-center p-4 overflow-y-auto">
-          {/* Backdrop */}
-          <div className="fixed inset-0 bg-black/50 " onClick={closeModal} />
-
-          <div className="relative z-10 w-full max-w-3xl my-4 bg-[var(--surface)] border border-[var(--border2)] rounded-2xl shadow-2xl">
+          <div className="fixed inset-0 bg-black/50" onClick={closeModal} />
+          <div className="relative z-10 w-full max-w-4xl my-4 bg-[var(--surface)] border border-[var(--border2)] rounded-2xl shadow-2xl">
             {/* Modal header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between p-4 sm:p-6 border-b border-[var(--border)] bg-[var(--surface)] rounded-t-2xl">
-              <h2 className="font-syne font-bold text-lg">{editingId ? "Edit Post" : "New Post"}</h2>
-              <button onClick={closeModal} className="p-2 rounded-lg hover:bg-[var(--elevated)] text-[var(--txt3)]"><X size={18} /></button>
+            <div className="sticky top-0 z-10 flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border)] bg-[var(--surface)] rounded-t-2xl">
+              <div>
+                <h2 className="font-syne font-bold text-lg">{editingId ? "Edit Post" : "New Post"}</h2>
+                {editingId && <p className="text-[11px] text-[var(--txt3)] mt-0.5">Editing: {form.slug || "untitled"}</p>}
+              </div>
+              <button onClick={closeModal} className="p-2 rounded-xl hover:bg-[var(--elevated)] text-[var(--txt3)] bg-transparent border-none cursor-pointer">
+                <X size={18} />
+              </button>
             </div>
 
-            {/* Form body */}
-            <div className="p-4 sm:p-6 space-y-5 overflow-y-auto max-h-[70vh]">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <Input label="Slug" value={form.slug} onChange={(e) => updateField("slug", e.target.value)} placeholder="my-post-slug" />
-                <Input label="Title" value={form.title} onChange={(e) => updateField("title", e.target.value)} placeholder="Post title" />
-                <div className="sm:col-span-2">
-                  <Input label="Description" value={form.description} onChange={(e) => updateField("description", e.target.value)} placeholder="SEO description" />
-                </div>
-                <Input label="Category" value={form.category} onChange={(e) => updateField("category", e.target.value)} placeholder="e.g. Digitizing 101" />
-                <Input label="Keywords (comma separated)" value={Array.isArray(form.keywords) ? form.keywords.join(", ") : form.keywords} onChange={(e) => updateField("keywords", e.target.value)} placeholder="keyword1, keyword2" />
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-[var(--txt2)] mb-2">Hero Image</label>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-1">
-                      <Input value={form.heroImage || ""} onChange={(e) => updateField("heroImage", e.target.value)} placeholder="https://res.cloudinary.com/.../image.webp" />
-                      <p className="text-[10px] text-[var(--txt3)] mt-1">Recommended: 1200×630px, 16:9 ratio, WebP format</p>
-                    </div>
-                    <label className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-[var(--elevated)] border border-[var(--border)] text-[var(--txt2)] hover:text-[var(--txt)] hover:border-[var(--border3)] cursor-pointer transition-all">
-                      {uploading ? "Uploading..." : "Upload"}
-                      <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
-                    </label>
+            {/* Form body — split into left (meta) and right (content) on desktop */}
+            <div className="overflow-y-auto max-h-[70vh]">
+              <div className="p-4 sm:p-5 space-y-5">
+                {/* Meta fields */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2 grid sm:grid-cols-2 gap-4">
+                    <Input label="Slug" value={form.slug} onChange={(e) => updateField("slug", e.target.value)} placeholder="my-post-slug" />
+                    <Input label="Category" value={form.category} onChange={(e) => updateField("category", e.target.value)} placeholder="e.g. Digitizing 101" />
                   </div>
-                  {form.heroImage && (
-                    <img src={form.heroImage} alt="Preview" className="mt-2 w-full max-h-32 object-cover rounded-xl border border-[var(--border)]" />
-                  )}
+                  <div className="sm:col-span-2">
+                    <Input label="Title" value={form.title} onChange={(e) => updateField("title", e.target.value)} placeholder="Post title" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Input label="Description (SEO)" value={form.description} onChange={(e) => updateField("description", e.target.value)} placeholder="Meta description for search engines" />
+                  </div>
+                  <Input label="Emoji" value={form.emoji} onChange={(e) => updateField("emoji", e.target.value)} placeholder="📝" />
+                  <div>
+                    <label className="block text-[11px] font-medium uppercase tracking-[0.04em] mb-1.5 text-[var(--txt3)]">Accent Color</label>
+                    <input type="color" value={form.accentColor} onChange={(e) => updateField("accentColor", e.target.value)}
+                      className="w-full h-10 rounded-lg border border-[var(--border)] cursor-pointer" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Input label="Keywords (comma-separated)" value={Array.isArray(form.keywords) ? form.keywords.join(", ") : form.keywords}
+                      onChange={(e) => updateField("keywords", e.target.value)} placeholder="keyword1, keyword2, keyword3" />
+                  </div>
+                  {/* Hero Image */}
+                  <div className="sm:col-span-2">
+                    <label className="block text-[11px] font-medium uppercase tracking-[0.04em] mb-1.5 text-[var(--txt3)]">Hero Image</label>
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1">
+                        <Input value={form.heroImage || ""} onChange={(e) => updateField("heroImage", e.target.value)}
+                          placeholder="https://res.cloudinary.com/.../image.webp" />
+                        <p className="text-[10px] text-[var(--txt3)] mt-1">Recommended: 1200×630px, 16:9, WebP</p>
+                      </div>
+                      <label className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition-all"
+                        style={{ background: "var(--elevated)", border: "1px solid var(--border)", color: "var(--txt2)" }}>
+                        {uploading ? "Uploading..." : "Upload"}
+                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
+                      </label>
+                    </div>
+                    {form.heroImage && (
+                      <img src={form.heroImage} alt="Preview" className="mt-2 w-full max-h-36 object-cover rounded-xl border border-[var(--border)]" />
+                    )}
+                  </div>
+                  {/* Publish toggle */}
+                  <div className="sm:col-span-2 flex items-center gap-2.5">
+                    <input type="checkbox" id="published" checked={form.published} onChange={(e) => updateField("published", e.target.checked)}
+                      className="w-4 h-4 rounded accent-[#2563EB] cursor-pointer" />
+                    <label htmlFor="published" className="text-sm text-[var(--txt2)] cursor-pointer select-none">Published (visible on site)</label>
+                  </div>
                 </div>
-                <Input label="Emoji" value={form.emoji} onChange={(e) => updateField("emoji", e.target.value)} placeholder="📝" />
+
+                <hr style={{ borderColor: "var(--border)" }} />
+
+                {/* Sections */}
                 <div>
-                  <label className="block text-xs font-medium text-[var(--txt2)] mb-1">Color</label>
-                  <input type="color" value={form.accentColor} onChange={(e) => updateField("accentColor", e.target.value)} className="w-full h-10 rounded-lg border border-[var(--border)] cursor-pointer" />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="published" checked={form.published} onChange={(e) => updateField("published", e.target.checked)} className="rounded" />
-                <label htmlFor="published" className="text-sm text-[var(--txt2)]">Published (visible on site)</label>
-              </div>
-
-              {/* Sections */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-syne font-bold text-sm">Sections</h3>
-                  <button onClick={() => addContentItem("sections")} className="text-xs text-[#2563EB] hover:underline font-medium">+ Add</button>
-                </div>
-                <div className="space-y-3">
-                  {form.content.sections.map((s: any, i: number) => (
-                    <div key={i} className="p-3 rounded-xl bg-[var(--elevated)] border border-[var(--border)] space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-[var(--txt3)]">Section {i + 1}</span>
-                        <button onClick={() => removeContentItem("sections", i)} className="text-[#DC2626] text-xs hover:underline">Remove</button>
-                      </div>
-                      <Input value={s.heading} onChange={(e) => updateContentField("sections", i, "heading", e.target.value)} placeholder="Section heading" />
-                      <textarea value={s.body} onChange={(e) => updateContentField("sections", i, "body", e.target.value)} placeholder="Section body (supports **bold**, *italic*, tables, bullet/numbered lists)" rows={4} className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] text-sm text-[var(--txt)] p-3 resize-y" />
-
-                      {/* Layout template chooser — visual cards */}
-                      <div>
-                        <label className="block text-[10px] font-medium text-[var(--txt3)] mb-2">Layout Template</label>
-                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                          {([
-                            { value: "text-only", label: "Text", icon: "📝", preview: "≡" },
-                            { value: "image-top", label: "Image Top", icon: "🖼️", preview: "▬" },
-                            { value: "image-left", label: "Img Left", icon: "◧", preview: "◨" },
-                            { value: "image-right", label: "Img Right", icon: "◨", preview: "◧" },
-                            { value: "image-grid-2", label: "Grid 2", icon: "⊞", preview: "⊞" },
-                            { value: "image-grid-3", label: "Grid 3", icon: "▦", preview: "▦" },
-                            { value: "image-grid-4", label: "Grid 4", icon: "⊟", preview: "⊟" },
-                            { value: "comparison", label: "Compare", icon: "⇔", preview: "⇔" },
-                          ] as { value: string; label: string; icon: string; preview: string }[]).map((tpl) => (
-                            <button
-                              key={tpl.value}
-                              type="button"
-                              onClick={() => updateContentField("sections", i, "layout", tpl.value)}
-                              className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border text-center transition-all ${
-                                (s.layout || "text-only") === tpl.value
-                                  ? "border-[#2563EB] bg-[#2563EB]/5 text-[#2563EB] ring-1 ring-[#2563EB]/20"
-                                  : "border-[var(--border)] bg-[var(--bg)] text-[var(--txt3)] hover:border-[var(--border3)] hover:text-[var(--txt)]"
-                              }`}
-                            >
-                              <span className="text-lg leading-none">{tpl.icon}</span>
-                              <span className="text-[9px] font-semibold leading-tight">{tpl.label}</span>
-                              <span className="text-[16px] leading-none opacity-40">{tpl.preview}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Single image (for image-top, image-left, image-right layouts) */}
-                      {(s.layout === "image-top" || s.layout === "image-left" || s.layout === "image-right" || !s.layout || s.layout === "text-only") && (
-                        <div>
-                          <label className="block text-[10px] font-medium text-[var(--txt3)] mb-1">Section Image</label>
-                          <div className="flex items-start gap-2">
-                            <Input value={s.image || ""} onChange={(e) => updateContentField("sections", i, "image", e.target.value)} placeholder="https://res.cloudinary.com/.../image.webp" />
-                            <label className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-lg text-[10px] font-semibold bg-[var(--bg)] border border-[var(--border)] text-[var(--txt2)] hover:text-[var(--txt)] cursor-pointer transition-all">
-                              {uploading ? "..." : "Upload"}
-                              <input type="file" accept="image/*" onChange={(e) => handleSectionImageUpload(e, i)} className="hidden" disabled={uploading} />
-                            </label>
-                          </div>
-                          {s.image && (
-                            <img src={s.image} alt={`Section ${i + 1}`} className="mt-2 w-full max-h-28 object-cover rounded-lg border border-[var(--border)]" />
-                          )}
-                        </div>
-                      )}
-
-                      {/* Multi-image (for grid and comparison layouts) */}
-                      {(s.layout === "image-grid-2" || s.layout === "image-grid-3" || s.layout === "image-grid-4" || s.layout === "comparison") && (
-                        <div>
-                          <label className="block text-[10px] font-medium text-[var(--txt3)] mb-1">Grid Images</label>
-                          <div className="flex items-center gap-2 mb-2">
-                            <label className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-lg text-[10px] font-semibold bg-[var(--bg)] border border-[var(--border)] text-[var(--txt2)] hover:text-[var(--txt)] cursor-pointer transition-all">
-                              {uploading ? "..." : "Upload Images"}
-                              <input type="file" accept="image/*" multiple onChange={(e) => handleSectionMultiImageUpload(e, i)} className="hidden" disabled={uploading} />
-                            </label>
-                            <span className="text-[10px] text-[var(--txt3)]">{(s.images || []).length} image(s) — paste URLs or upload</span>
-                          </div>
-                          {(s.images || []).length > 0 && (
-                            <div className="space-y-1.5 mb-2">
-                              {(s.images || []).map((url: string, imgIdx: number) => (
-                                <div key={imgIdx} className="flex items-center gap-2">
-                                  <Input value={url} onChange={(e) => {
-                                    setForm((prev: any) => {
-                                      const content = { ...prev.content };
-                                      const arr = [...(content.sections || [])];
-                                      const imgs = [...(arr[i].images || [])];
-                                      imgs[imgIdx] = e.target.value;
-                                      arr[i] = { ...arr[i], images: imgs };
-                                      content.sections = arr;
-                                      return { ...prev, content };
-                                    });
-                                  }} placeholder={`Image ${imgIdx + 1} URL`} />
-                                  <button onClick={() => removeSectionImage(i, imgIdx)} className="flex-shrink-0 text-[#DC2626]"><Trash2 size={14} /></button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          <button
-                            onClick={() => {
-                              setForm((prev: any) => {
-                                const content = { ...prev.content };
-                                const arr = [...(content.sections || [])];
-                                arr[i] = { ...arr[i], images: [...(arr[i].images || []), ""] };
-                                content.sections = arr;
-                                return { ...prev, content };
-                              });
-                            }}
-                            className="text-[10px] text-[#2563EB] hover:underline font-medium"
-                          >
-                            + Add Image URL
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-syne font-bold text-[15px]" style={{ color: "var(--txt)" }}>Content Sections</h3>
+                    <button onClick={() => addContentItem("sections")}
+                      className="text-xs text-[#2563EB] hover:underline font-semibold bg-transparent border-none cursor-pointer">
+                      + Add Section
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {form.content.sections.map((s: any, i: number) => (
+                      <div key={i} className="p-4 rounded-xl border space-y-3"
+                        style={{ background: "var(--elevated)", borderColor: "var(--border)" }}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--txt2)" }}>
+                            Section {i + 1}
+                          </span>
+                          <button onClick={() => removeContentItem("sections", i)}
+                            className="text-[11px] text-[#DC2626] hover:underline font-medium bg-transparent border-none cursor-pointer">
+                            Remove
                           </button>
                         </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* FAQs */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-syne font-bold text-sm">FAQs</h3>
-                  <button onClick={() => addContentItem("faqs")} className="text-xs text-[#2563EB] hover:underline font-medium">+ Add</button>
-                </div>
-                <div className="space-y-2">
-                  {form.content.faqs.map((f: any, i: number) => (
-                    <div key={i} className="p-2 rounded-xl bg-[var(--elevated)] space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-[var(--txt3)]">FAQ {i + 1}</span>
-                        <button onClick={() => removeContentItem("faqs", i)} className="text-[#DC2626] text-[10px] hover:underline">Remove</button>
+                        <Input value={s.heading} onChange={(e) => updateContentField("sections", i, "heading", e.target.value)}
+                          placeholder="Section heading" />
+
+                        <textarea value={s.body}
+                          onChange={(e) => updateContentField("sections", i, "body", e.target.value)}
+                          placeholder="Section body — supports **bold**, *italic*, tables, bullet/numbered lists"
+                          rows={5}
+                          className="w-full rounded-xl border p-3 text-sm resize-y outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]/20"
+                          style={{ background: "var(--bg)", borderColor: "var(--border2)", color: "var(--txt)" }}
+                        />
+
+                        {/* Layout picker */}
+                        <div>
+                          <label className="block text-[10px] font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--txt3)" }}>
+                            Layout
+                          </label>
+                          <div className="flex flex-wrap gap-1.5">
+                            {LAYOUT_OPTIONS.map((tpl) => (
+                              <button key={tpl.value} type="button"
+                                onClick={() => updateContentField("sections", i, "layout", tpl.value)}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-semibold border transition-all bg-transparent cursor-pointer ${
+                                  (s.layout || "text-only") === tpl.value
+                                    ? "border-[#2563EB] bg-[#2563EB]/8 text-[#2563EB]"
+                                    : "border-[var(--border)] text-[var(--txt3)] hover:border-[var(--border3)] hover:text-[var(--txt)]"
+                                }`}>
+                                <span className="text-sm">{tpl.icon}</span> {tpl.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Single image upload */}
+                        {(!s.layout || s.layout === "text-only" || s.layout === "image-top" || s.layout === "image-left" || s.layout === "image-right") && (
+                          <div>
+                            <label className="block text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: "var(--txt3)" }}>
+                              Section Image
+                            </label>
+                            <div className="flex items-start gap-2">
+                              <Input value={s.image || ""} onChange={(e) => updateContentField("sections", i, "image", e.target.value)}
+                                placeholder="https://res.cloudinary.com/.../image.webp" />
+                              <label className="flex-shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-lg text-[10px] font-semibold cursor-pointer transition-all"
+                                style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--txt2)" }}>
+                                {uploading ? "..." : "Upload"}
+                                <input type="file" accept="image/*" onChange={(e) => handleSectionImageUpload(e, i)} className="hidden" disabled={uploading} />
+                              </label>
+                            </div>
+                            {s.image && (
+                              <img src={s.image} alt={`Section ${i + 1}`}
+                                className="mt-2 w-full max-h-32 object-cover rounded-lg border border-[var(--border)]" />
+                            )}
+                          </div>
+                        )}
+
+                        {/* Multi-image (grid/comparison layouts) */}
+                        {(s.layout === "image-grid-2" || s.layout === "image-grid-3" || s.layout === "image-grid-4" || s.layout === "comparison") && (
+                          <div>
+                            <label className="block text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: "var(--txt3)" }}>
+                              Grid Images
+                            </label>
+                            <div className="flex items-center gap-2 mb-2">
+                              <label className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-[10px] font-semibold cursor-pointer transition-all"
+                                style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--txt2)" }}>
+                                <ImageIcon size={12} /> Upload
+                                <input type="file" accept="image/*" multiple onChange={(e) => handleSectionMultiImageUpload(e, i)} className="hidden" disabled={uploading} />
+                              </label>
+                              <span className="text-[10px]" style={{ color: "var(--txt3)" }}>
+                                {(s.images || []).length} image(s)
+                              </span>
+                            </div>
+                            {(s.images || []).length > 0 && (
+                              <div className="space-y-1.5 mb-2">
+                                {(s.images || []).map((url: string, imgIdx: number) => (
+                                  <div key={imgIdx} className="flex items-center gap-2">
+                                    <Input value={url} onChange={(e) => {
+                                      setForm((prev: any) => {
+                                        const content = { ...prev.content };
+                                        const arr = [...(content.sections || [])];
+                                        const imgs = [...(arr[i].images || [])];
+                                        imgs[imgIdx] = e.target.value;
+                                        arr[i] = { ...arr[i], images: imgs };
+                                        content.sections = arr;
+                                        return { ...prev, content };
+                                      });
+                                    }} placeholder={`Image ${imgIdx + 1} URL`} />
+                                    <button onClick={() => removeSectionImage(i, imgIdx)}
+                                      className="flex-shrink-0 text-[#DC2626] bg-transparent border-none cursor-pointer">
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <button onClick={() => {
+                              setForm((prev: any) => {
+                                const content = { ...prev.content }; const arr = [...(content.sections || [])];
+                                arr[i] = { ...arr[i], images: [...(arr[i].images || []), ""] };
+                                content.sections = arr; return { ...prev, content };
+                              });
+                            }}
+                              className="text-[10px] text-[#2563EB] hover:underline font-medium bg-transparent border-none cursor-pointer">
+                              + Add Image URL
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <Input value={f.q} onChange={(e) => updateContentField("faqs", i, "q", e.target.value)} placeholder="Question" />
-                      <Input value={f.a} onChange={(e) => updateContentField("faqs", i, "a", e.target.value)} placeholder="Answer" />
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Internal Links */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-syne font-bold text-sm">Internal Links</h3>
-                  <button onClick={() => addContentItem("internalLinks")} className="text-xs text-[#2563EB] hover:underline font-medium">+ Add</button>
-                </div>
-                <div className="space-y-2">
-                  {form.content.internalLinks.map((l: any, i: number) => (
-                    <div key={i} className="grid sm:grid-cols-2 gap-2 p-2 rounded-xl bg-[var(--elevated)]">
-                      <Input value={l.text} onChange={(e) => updateContentField("internalLinks", i, "text", e.target.value)} placeholder="Link text" />
-                      <div className="flex gap-2">
-                        <Input value={l.href} onChange={(e) => updateContentField("internalLinks", i, "href", e.target.value)} placeholder="e.g. /services" />
-                        <button onClick={() => removeContentItem("internalLinks", i)} className="text-[#DC2626] flex-shrink-0"><Trash2 size={14} /></button>
+                {/* FAQs */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-syne font-bold text-[15px]" style={{ color: "var(--txt)" }}>FAQs</h3>
+                    <button onClick={() => addContentItem("faqs")}
+                      className="text-xs text-[#2563EB] hover:underline font-semibold bg-transparent border-none cursor-pointer">
+                      + Add FAQ
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {form.content.faqs.map((f: any, i: number) => (
+                      <div key={i} className="p-3 rounded-xl border space-y-2"
+                        style={{ background: "var(--elevated)", borderColor: "var(--border)" }}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--txt3)" }}>FAQ {i + 1}</span>
+                          <button onClick={() => removeContentItem("faqs", i)}
+                            className="text-[11px] text-[#DC2626] hover:underline font-medium bg-transparent border-none cursor-pointer">Remove</button>
+                        </div>
+                        <Input value={f.q} onChange={(e) => updateContentField("faqs", i, "q", e.target.value)} placeholder="Question" />
+                        <Input value={f.a} onChange={(e) => updateContentField("faqs", i, "a", e.target.value)} placeholder="Answer" />
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* CTA */}
-              <div>
-                <h3 className="font-syne font-bold text-sm mb-2">Bottom CTA</h3>
-                <div className="grid sm:grid-cols-3 gap-2 p-2 rounded-xl bg-[var(--elevated)]">
-                  <Input value={form.content.cta.text} onChange={(e) => setForm((prev: any) => ({ ...prev, content: { ...prev.content, cta: { ...prev.content.cta, text: e.target.value } } }))} placeholder="CTA text" />
-                  <Input value={form.content.cta.href} onChange={(e) => setForm((prev: any) => ({ ...prev, content: { ...prev.content, cta: { ...prev.content.cta, href: e.target.value } } }))} placeholder="e.g. /contact" />
-                  <Input value={form.content.cta.label} onChange={(e) => setForm((prev: any) => ({ ...prev, content: { ...prev.content, cta: { ...prev.content.cta, label: e.target.value } } }))} placeholder="Button label" />
+                {/* Internal Links */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-syne font-bold text-[15px]" style={{ color: "var(--txt)" }}>Internal Links</h3>
+                    <button onClick={() => addContentItem("internalLinks")}
+                      className="text-xs text-[#2563EB] hover:underline font-semibold bg-transparent border-none cursor-pointer">
+                      + Add Link
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {form.content.internalLinks.map((l: any, i: number) => (
+                      <div key={i} className="grid sm:grid-cols-2 gap-2 p-3 rounded-xl border"
+                        style={{ background: "var(--elevated)", borderColor: "var(--border)" }}>
+                        <Input value={l.text} onChange={(e) => updateContentField("internalLinks", i, "text", e.target.value)} placeholder="Link text" />
+                        <div className="flex gap-2">
+                          <Input value={l.href} onChange={(e) => updateContentField("internalLinks", i, "href", e.target.value)} placeholder="e.g. /services" />
+                          <button onClick={() => removeContentItem("internalLinks", i)}
+                            className="flex-shrink-0 text-[#DC2626] bg-transparent border-none cursor-pointer"><Trash2 size={14} /></button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div>
+                  <h3 className="font-syne font-bold text-[15px] mb-3" style={{ color: "var(--txt)" }}>Bottom CTA</h3>
+                  <div className="grid sm:grid-cols-3 gap-2 p-3 rounded-xl border"
+                    style={{ background: "var(--elevated)", borderColor: "var(--border)" }}>
+                    <Input value={form.content.cta.text} onChange={(e) => setForm((prev: any) => ({
+                      ...prev, content: { ...prev.content, cta: { ...prev.content.cta, text: e.target.value } }
+                    }))} placeholder="CTA text" />
+                    <Input value={form.content.cta.href} onChange={(e) => setForm((prev: any) => ({
+                      ...prev, content: { ...prev.content, cta: { ...prev.content.cta, href: e.target.value } }
+                    }))} placeholder="e.g. /contact" />
+                    <Input value={form.content.cta.label} onChange={(e) => setForm((prev: any) => ({
+                      ...prev, content: { ...prev.content, cta: { ...prev.content.cta, label: e.target.value } }
+                    }))} placeholder="Button label" />
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Modal footer */}
-            <div className="sticky bottom-0 flex items-center gap-2 p-4 sm:p-6 border-t border-[var(--border)] bg-[var(--surface)] rounded-b-2xl">
-              <Button variant="grad" size="md" onClick={handleSave} disabled={saving} leftIcon={saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}>
+            <div className="sticky bottom-0 flex items-center gap-2 p-4 sm:p-5 border-t border-[var(--border)] bg-[var(--surface)] rounded-b-2xl">
+              <Button variant="grad" size="md" onClick={handleSave} disabled={saving}
+                leftIcon={saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}>
                 {saving ? "Saving..." : "Save Post"}
               </Button>
               <Button variant="outline" size="md" onClick={() => setShowPreview(true)} leftIcon={<Play size={15} />}>
@@ -712,24 +938,18 @@ export default function AdminBlogPage() {
         </div>
       )}
 
-      {/* Preview Modal */}
+      {/* ── Preview Modal ────────────────────────────────────────── */}
       {showPreview && form && (
         <div className="fixed inset-0 z-[300] flex items-start justify-center overflow-y-auto">
-          <div className="fixed inset-0 bg-black/60 " onClick={() => setShowPreview(false)} />
+          <div className="fixed inset-0 bg-black/60" onClick={() => setShowPreview(false)} />
           <div className="relative z-10 w-full max-w-5xl my-4 bg-[var(--bg)] border border-[var(--border2)] rounded-2xl shadow-2xl overflow-hidden">
-            {/* Preview toolbar */}
             <div className="sticky top-0 z-10 flex items-center justify-between p-3 sm:p-4 border-b border-[var(--border)] bg-[var(--surface)]">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold px-2 py-1 rounded-full bg-[#F97316]/10 text-[#F97316] border border-[#F97316]/20">Preview</span>
-                <span className="text-xs text-[var(--txt3)]">See how your post looks before publishing</span>
+                <span className="text-xs text-[var(--txt3)]">Post preview — close to continue editing</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={() => setShowPreview(false)} leftIcon={<X size={14} />}>
-                  Close
-                </Button>
-              </div>
+              <Button variant="ghost" size="sm" onClick={() => setShowPreview(false)} leftIcon={<X size={14} />}>Close</Button>
             </div>
-            {/* Preview content */}
             <div className="overflow-y-auto max-h-[80vh]">
               <BlogContent post={formToBlogPost()} showBack={false} />
             </div>

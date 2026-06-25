@@ -49,8 +49,8 @@ export const metadata: Metadata = {
     images: [
       {
         url:    "/images/black_logo.png",
-        width:  1280,
-        height: 1280,
+        width:  1200,
+        height: 630,
         alt:    "genxdigitizing — Professional Embroidery Digitizing",
       },
     ],
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "./",
+    canonical: process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com",
   },
 };
 
@@ -90,7 +90,7 @@ export default function RootLayout({
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#2563EB" />
+
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         {/* Google Analytics — deferred to idle to keep critical path clear */}

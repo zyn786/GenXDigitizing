@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_STATS, SITE_INFO, fmtPlus } from "@/lib/site-config";
-import { OrganizationSchema, BreadcrumbSchema } from "@/components/shared/StructuredData";
+import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { AboutContent } from "./AboutContent";
 
 export const metadata: Metadata = {
@@ -32,7 +32,6 @@ export default async function AboutPage() {
 
   return (
     <>
-      <OrganizationSchema />
       <BreadcrumbSchema
         items={[
           { name: "Home", url: "/" },

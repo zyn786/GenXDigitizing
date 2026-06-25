@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // GET — fetch approved comments for a blog post
 export async function GET(
@@ -34,6 +35,12 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { slug: string } }
 ) {
+  // Rate limit: 3 comments per IP per 15 minutes
+  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+  if (!checkRateLimit("blog-comments", ip, 3)) {
+    return NextResponse.json({ error: "Too many comments. Please try again later." }, { status: 429 });
+  }
+
   const supabase = createAdminClient();
 
   const { data: post } = await supabase

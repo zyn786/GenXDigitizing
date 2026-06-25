@@ -107,7 +107,22 @@ function AuthButtons() {
     supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false).then(() => {});
   }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <>
+        <Link href="/login" className="no-underline">
+          <Button variant="ghost" size="sm" leftIcon={<LogIn size={14} />}>
+            Sign In
+          </Button>
+        </Link>
+        <Link href="/register" className="no-underline">
+          <Button variant="ghost" size="sm" leftIcon={<UserPlus size={14} />}>
+            Register
+          </Button>
+        </Link>
+      </>
+    );
+  }
 
   const portalUrl = PORTAL_HOME[user.role] || "/client";
 

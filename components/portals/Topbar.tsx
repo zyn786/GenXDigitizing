@@ -212,7 +212,7 @@ export function Topbar({ title, subtitle, user }: TopbarProps) {
   const handleSignOut = async () => {
     try { await supabase.auth.signOut(); } catch {}
     toast.success("Signed out");
-    router.push("/login");
+    router.push("/home");
   };
 
   return (

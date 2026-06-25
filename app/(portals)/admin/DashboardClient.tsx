@@ -62,8 +62,8 @@ export function AdminDashClient({ stats, recentOrders, breakdown }: Props) {
         </p>
       </div>
 
-      {/* Stat cards — 2-col mobile, 3-col tablet, 3-col desktop */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3 mb-5">
+      {/* Stat cards — 3-col everywhere */}
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-3 mb-5">
         {statCards.map((s) => {
           const clr = CARD_COLORS[s.ci];
           return (
