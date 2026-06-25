@@ -24,16 +24,19 @@ export function PortfolioPreview() {
     async function load() {
       try {
         const data = await fetchPortfolio();
-        setItems(data.items);
+        // 10 per category for landing preview
+        const pick = (slug: string) => data.items.filter((i: any) => i.category?.slug === slug).slice(0, 10);
+        const selected = [...pick("digitizing"), ...pick("vector"), ...pick("patches")];
+        setItems(selected);
         const validSlugs = ["digitizing", "vector", "patches"];
         const dbCategories = data.categories.filter((c: any) => validSlugs.includes(c.slug));
         if (dbCategories.length > 0) {
           const merged = dbCategories.map((c: any) => ({
             ...c,
-            count: data.items.filter((i: any) => i.category?.slug === c.slug).length,
+            count: pick(c.slug).length,
           }));
           setCategories([
-            { id: "all", name: "All Work", slug: "all", emoji: "✦", color: "#2563EB", sortOrder: 0, count: data.items.length },
+            { id: "all", name: "All Work", slug: "all", emoji: "✦", color: "#2563EB", sortOrder: 0, count: selected.length },
             ...merged,
           ]);
         }
@@ -148,7 +151,7 @@ export function PortfolioPreview() {
                   <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none" style={{ background: "linear-gradient(to right, var(--bg) 20%, transparent 100%)" }} />
                   <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none" style={{ background: "linear-gradient(to left, var(--bg) 20%, transparent 100%)" }} />
                   {/* Marquee */}
-                  <div className="flex gap-5 animate-marquee w-max px-8">
+                  <div className="flex gap-5 animate-marquee-slow w-max px-8">
                     {filtered.length > 0 ? (
                       [...filtered, ...filtered, ...filtered].map((item, idx) => (
                         <div key={`${item.id}-${idx}`} className="w-[280px] lg:w-[320px] shrink-0 transition-transform duration-300 hover:scale-[1.02]">
