@@ -13,9 +13,15 @@ function getAudioContext(): AudioContext {
   return audioCtx;
 }
 
-export function playNotificationSound() {
+export async function playNotificationSound() {
   try {
     const ctx = getAudioContext();
+
+    // Resume if suspended (Safari/iOS suspend after idle)
+    if (ctx.state === "suspended") {
+      await ctx.resume();
+    }
+
     const now = ctx.currentTime;
 
     // Simple two-tone chime
@@ -130,7 +136,7 @@ export function showBrowserNotification(title: string, body: string, actionUrl?:
 }
 
 export function notify(title: string, body: string, actionUrl?: string | null) {
-  playNotificationSound();
+  playNotificationSound().catch(() => {}); // fire-and-forget — audio failure is non-critical
   const shown = showBrowserNotification(title, body, actionUrl);
   // Fallback: show sonner toast when browser notification unavailable
   if (!shown) {

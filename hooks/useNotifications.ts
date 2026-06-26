@@ -71,19 +71,16 @@ export function useNotifications(userId: string | undefined, opts?: { skipRealti
   }, [notifications]);
 
   const channelRef = useRef<ReturnType<typeof supabase.current.channel> | null>(null);
+  const subscribedRef = useRef(false);
 
   useEffect(() => {
-    if (!userId) { return; }
+    if (!userId || subscribedRef.current) { return; }
 
     fetchNotifications();
 
     if (skipRealtime) return;
 
-    // Prevent duplicate subscription
-    if (channelRef.current) {
-      supabase.current.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
+    subscribedRef.current = true;
 
     const channel = supabase.current.channel(`notifs-${userId}`);
     channelRef.current = channel;
@@ -99,15 +96,22 @@ export function useNotifications(userId: string | undefined, opts?: { skipRealti
         },
         (payload) => {
           const newNotif = payload.new as Notification;
-          setNotifications((prev) => [newNotif, ...prev]);
+          setNotifications((prev) => {
+            if (prev.some((x) => x.id === newNotif.id)) return prev;
+            return [newNotif, ...prev];
+          });
           notify(newNotif.title, newNotif.body, newNotif.action_url);
         }
       )
       .subscribe((status) => {
         console.log("[useNotifications] Realtime status:", status);
         if (status === "CLOSED" || status === "CHANNEL_ERROR") {
-          console.warn("[useNotifications] Realtime disconnected");
-          channelRef.current = null;
+          console.warn("[useNotifications] Realtime disconnected — retrying in 3s");
+          subscribedRef.current = false;
+          setTimeout(() => {
+            subscribedRef.current = false;
+            fetchNotifications();
+          }, 3000);
         }
       });
 
@@ -115,9 +119,18 @@ export function useNotifications(userId: string | undefined, opts?: { skipRealti
       if (channelRef.current) {
         supabase.current.removeChannel(channelRef.current);
         channelRef.current = null;
+        subscribedRef.current = false;
       }
     };
   }, [userId, fetchNotifications, skipRealtime]);
+
+  // Fallback poll every 60s in case realtime disconnects
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!subscribedRef.current) fetchNotifications();
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
 
   return {
     notifications,
