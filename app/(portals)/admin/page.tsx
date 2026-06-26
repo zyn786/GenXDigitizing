@@ -6,9 +6,20 @@ import { createClient }    from "@/lib/supabase/server";
 import { getAdminStats }   from "@/lib/supabase/admin-queries";
 import { getAdminUser }    from "@/lib/supabase/get-user";
 import { Topbar }          from "@/components/portals/Topbar";
+import {
+  SkeletonPageHeader,
+  SkeletonStatRow,
+  SkeletonContentBlock,
+} from "@/components/ui/Skeleton";
 
 const AdminDashClient = nextDynamic(() => import("./DashboardClient").then(m => ({ default: m.AdminDashClient })), {
-  loading: () => <div className="p-6"><div className="animate-pulse space-y-4"><div className="h-8 bg-[var(--elevated)] rounded w-48" /><div className="grid grid-cols-2 lg:grid-cols-4 gap-3"><div className="h-24 bg-[var(--elevated)] rounded-xl" /><div className="h-24 bg-[var(--elevated)] rounded-xl" /><div className="h-24 bg-[var(--elevated)] rounded-xl" /><div className="h-24 bg-[var(--elevated)] rounded-xl" /></div></div></div>,
+  loading: () => (
+    <div className="p-4 sm:p-6 space-y-4">
+      <SkeletonPageHeader />
+      <SkeletonStatRow count={4} />
+      <SkeletonContentBlock height={200} />
+    </div>
+  ),
 });
 
 export default async function AdminDashboard() {

@@ -110,7 +110,7 @@ a, button, input, select, textarea,
     animation: marquee 40s linear infinite;
   }
   .animate-marquee-slow {
-    animation: marquee 50s linear infinite;
+    animation: marquee 45s linear infinite;
   }
   .animate-marquee-slow:hover {
     animation-play-state: paused;

@@ -48,6 +48,7 @@ function LoginForm() {
   const [magicSent, setMagicSent] = useState(false);
   const [loading,   setLoading]   = useState(false);
   const [fieldErr,  setFieldErr]  = useState({ email: "", password: "" });
+  const [transitioning, setTransitioning] = useState(false);
 
   function validate() {
     const e = { email: "", password: "" };
@@ -90,8 +91,9 @@ function LoginForm() {
       toast.success("Signed in!");
       // Request notification permission while we have user gesture from form submit
       requestNotificationPermission(data.user.id).catch(() => {});
-      router.push(dest);
-      router.refresh();
+      setTransitioning(true);
+      // Brief pause so user sees the loading screen before navigation starts
+      setTimeout(() => { router.push(dest); router.refresh(); }, 600);
     } catch {
       toast.error("Unexpected error. Please try again.");
     } finally {
@@ -139,6 +141,25 @@ function LoginForm() {
             >
               Use a different email
             </button>
+          </div>
+        </div>
+        <RegisterLink />
+      </div>
+    );
+  }
+
+  if (transitioning) {
+    return (
+      <div>
+        <Logo />
+        <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-2xl p-6">
+          <div className="flex flex-col items-center py-6 gap-4">
+            <img src="/images/black_logo.png" alt="GENX DIGITIZING" className="h-8 w-auto animate-pulse" />
+            <div className="w-7 h-7 border-[3px] border-[#2563EB] border-t-transparent rounded-full animate-spin" />
+            <div className="text-center">
+              <p className="font-syne font-bold text-[16px] text-[var(--txt)] mb-1">Loading your portal</p>
+              <p className="text-[12px] text-[var(--txt3)]">Preparing your dashboard…</p>
+            </div>
           </div>
         </div>
         <RegisterLink />

@@ -147,8 +147,6 @@ function MobileSidebarDrawer({ user }: { user: AuthUser }) {
             <div className="flex items-center justify-between px-4 pt-5 pb-3">
               <div className="flex items-center gap-2.5">
                 <Image src="/images/black_logo.png" alt="genxdigitizing" width={2000} height={1000} className="h-7 w-auto" />
-                <span className="font-syne font-bold text-[13px]"
-                  style={{ background: "linear-gradient(135deg,#2FA4D7,#E76F2E)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>GENX</span>
               </div>
               <button onClick={handleClose} className="p-2 rounded-lg hover:bg-[var(--elevated)]" style={{ color: "var(--txt2)" }}>
                 <X size={18} />

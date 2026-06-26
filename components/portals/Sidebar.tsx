@@ -37,13 +37,6 @@ export function Sidebar({ user, badgeCounts = {}, subscriptionStatus }: SidebarP
       <div className="px-4 pt-5 pb-4">
         <Link href={`/${user.role}`} className="flex items-center gap-2.5 mb-3.5">
           <Image src="/images/black_logo.png" alt="genxdigitizing" width={2000} height={1000} className="h-8 w-auto" />
-          <div>
-            <div className="font-syne font-bold text-[14px] tracking-wide"
-              style={{ background: "linear-gradient(135deg,#2FA4D7,#E76F2E)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              GENX
-            </div>
-            <div className="text-[9px] text-[var(--txt3)] tracking-[0.3px]">Digitizing Platform</div>
-          </div>
         </Link>
         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.5px]"
           style={{ background: portal.light, color: portal.color }}>
