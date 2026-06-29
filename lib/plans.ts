@@ -18,8 +18,8 @@ export interface PlanConfig {
 export const PLAN_CONFIG: Record<string, PlanConfig> = {
   starter: {
     designs: 10,
-    price: 55,
-    priceAnnual: 550,
+    price: 59,
+    priceAnnual: 590,
     label: "Starter",
     emoji: "🧵",
     features: [
@@ -51,8 +51,8 @@ export const PLAN_CONFIG: Record<string, PlanConfig> = {
   },
   pro: {
     designs: 50,
-    price: 279,
-    priceAnnual: 2790,
+    price: 289,
+    priceAnnual: 2890,
     label: "Pro",
     emoji: "🧶",
     features: [
@@ -68,8 +68,8 @@ export const PLAN_CONFIG: Record<string, PlanConfig> = {
   },
   pro_max: {
     designs: 80,
-    price: 499,
-    priceAnnual: 4990,
+    price: 489,
+    priceAnnual: 4890,
     label: "Pro Max",
     emoji: "👕",
     features: [

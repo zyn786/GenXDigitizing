@@ -18,6 +18,35 @@ function PlanPricingGrid() {
     for (const [k, v] of Object.entries(PLAN_CONFIG)) init[k] = v.price;
     return init;
   });
+  const [loaded, setLoaded] = useState(false);
+
+  // Load saved prices from DB on mount
+  useEffect(() => {
+    async function load() {
+      const keys = ["starter","business","pro","pro_max"].map(p => `plan_${p}_price`);
+      const { data } = await supabase
+        .from("platform_settings")
+        .select("key, value")
+        .in("key", keys);
+      if (data?.length) {
+        setPrices(prev => {
+          const next = { ...prev };
+          for (const row of data as any[]) {
+            const plan = (row.key as string).replace("plan_", "").replace("_price", "");
+            const val = parseInt(row.value);
+            if (plan && !isNaN(val) && val > 0) {
+              next[plan] = val;
+              // Also update the live PLAN_CONFIG so all components see the override
+              if (PLAN_CONFIG[plan]) PLAN_CONFIG[plan].price = val;
+            }
+          }
+          return next;
+        });
+      }
+      setLoaded(true);
+    }
+    load();
+  }, []);
 
   async function updatePrice(plan: string, val: number) {
     setPrices(prev => ({ ...prev, [plan]: val }));
@@ -27,6 +56,8 @@ function PlanPricingGrid() {
       .upsert({ key: `plan_${plan}_price`, value: String(val) }, { onConflict: "key" });
     toast.success(`${PLAN_CONFIG[plan].label}: $${val}/mo`);
   }
+
+  if (!loaded) return <div className="text-center py-4"><div className="w-5 h-5 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin mx-auto" /></div>;
 
   return (
     <div className="grid grid-cols-4 gap-2 mb-3">

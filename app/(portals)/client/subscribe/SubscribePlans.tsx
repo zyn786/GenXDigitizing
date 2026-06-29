@@ -66,6 +66,22 @@ export function SubscribePlans() {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push("/login"); return; }
+
+      // Load plan price overrides from platform_settings (admin may have customized prices)
+      const { data: settings } = await supabase
+        .from("platform_settings")
+        .select("key, value")
+        .in("key", ["plan_starter_price","plan_business_price","plan_pro_price","plan_pro_max_price"]);
+      if (settings?.length) {
+        for (const row of settings) {
+          const plan = row.key.replace("plan_", "").replace("_price", "");
+          const val = parseInt(row.value);
+          if (plan && !isNaN(val) && val > 0 && PLAN_CONFIG[plan]) {
+            PLAN_CONFIG[plan].price = val;
+          }
+        }
+      }
+
       const { data: client } = await supabase.from("clients").select("id, tier, company_name, credit_balance").eq("user_id", user.id).single();
       setProfile({ id: client?.id, email: user.email, company: client?.company_name, tier: client?.tier, credit_balance: client?.credit_balance ?? 0 });
       if (client?.id) {

@@ -63,6 +63,22 @@ export function SubscribeContent() {
       setIsLoggedIn(!!user);
       setAuthChecked(true);
     });
+    // Load plan price overrides from platform_settings
+    supabase
+      .from("platform_settings")
+      .select("key, value")
+      .in("key", ["plan_starter_price","plan_business_price","plan_pro_price","plan_pro_max_price"])
+      .then(({ data: settings }) => {
+        if (settings?.length) {
+          for (const row of settings as any[]) {
+            const plan = row.key.replace("plan_", "").replace("_price", "");
+            const val = parseInt(row.value);
+            if (plan && !isNaN(val) && val > 0 && PLAN_CONFIG[plan]) {
+              PLAN_CONFIG[plan].price = val;
+            }
+          }
+        }
+      });
   }, []);
 
   function getPlanHref(planId: string): string {
