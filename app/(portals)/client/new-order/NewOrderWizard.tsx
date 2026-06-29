@@ -71,6 +71,8 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
   const fileRef = useRef<any>(null);
   const [busy,setBusy]=useState(false);
   const [done,setDone]=useState<any>(null);
+  const [uploadProgress,setUploadProgress]=useState(0);
+  const abortRef = useRef<AbortController|null>(null);
   const [stitchCount,setStitchCount]=useState("");
   const [quantity,setQuantity]=useState("1");
   const [instructions,setInstructions]=useState("");
@@ -107,6 +109,9 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
     if(files.length===0){toast.error("Upload at least one reference image");return;}
     if((w&&!h)||(!w&&h)){toast.error("Enter both width and height, or leave both");return;}
     setBusy(true);
+    setUploadProgress(0);
+    const controller = new AbortController();
+    abortRef.current = controller;
     try{
       const {data:order,error:oErr}=await supabase.from("orders").insert({
         client_id:clientId,service_tier_id:sel.id,output_format:fmt,
@@ -117,6 +122,9 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
         design_name:designName.trim()||null,sla_deadline:calcDeadline(turn,isBig),
       }).select().single();
       if(oErr||!order){toast.error("Failed: "+(oErr?.message||"error"));setBusy(false);return;}
+
+      if (controller.signal.aborted) return;
+
       // Attach coupon if applied
       if (appliedCoupon) {
         await supabase.from("orders").update({
@@ -125,14 +133,49 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
           discount_amount: discount,
         }).eq("id", order.id);
       }
-      const fd=new FormData();fd.append("orderId",order.id);for(const f of files)fd.append("files",f);
-      const upRes=await fetch("/api/upload/artwork",{method:"POST",body:fd});
-      if(!upRes.ok){await supabase.from("orders").update({status:"cancelled"}).eq("id",order.id);const e=await upRes.json().catch(()=>({}));toast.error(e.error||"Upload failed");setBusy(false);return;}
+
+      // Upload with progress via XHR
+      const uploadResult = await new Promise<{ok:boolean;error?:string}>((resolve) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST","/api/upload/artwork");
+        const onAbort = () => { xhr.abort(); resolve({ok:false,error:"Upload cancelled"}); };
+        controller.signal.addEventListener("abort",onAbort,{once:true});
+        xhr.upload.addEventListener("progress",(e) => {
+          if(e.lengthComputable) setUploadProgress(Math.round((e.loaded/e.total)*100));
+        });
+        xhr.addEventListener("load",() => {
+          controller.signal.removeEventListener("abort",onAbort);
+          if(xhr.status>=200&&xhr.status<300) resolve({ok:true});
+          else {
+            let msg = "Upload failed";
+            try{const e=JSON.parse(xhr.responseText);msg=e.error||msg;}catch{}
+            resolve({ok:false,error:msg});
+          }
+        });
+        xhr.addEventListener("error",() => {
+          controller.signal.removeEventListener("abort",onAbort);
+          resolve({ok:false,error:"Network error — check your connection"});
+        });
+        xhr.addEventListener("abort",() => {
+          controller.signal.removeEventListener("abort",onAbort);
+          resolve({ok:false,error:"Upload cancelled"});
+        });
+        const fd=new FormData();fd.append("orderId",order.id);for(const f of files)fd.append("files",f);
+        xhr.send(fd);
+      });
+
+      if(!uploadResult.ok){
+        await supabase.from("orders").update({status:"cancelled"}).eq("id",order.id);
+        toast.error(uploadResult.error||"Upload failed");
+        setBusy(false);
+        return;
+      }
+
       fetch("/api/order-confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId,orderNumber:order.order_number,service:sel.label,price:totalPrice,turnaround:turn})}).catch(()=>{});
       toast.success("Order placed! Redirecting...");
       router.push(`/client/my-orders/${order.id}`);
     }catch(err:any){toast.error(err?.message||"Error");}
-    finally{setBusy(false);}
+    finally{setBusy(false);setUploadProgress(0);abortRef.current=null;}
   }
 
   if(done) return <DoneScreen done={done} totalPrice={totalPrice} qty={qty} sel={sel} serviceName={serviceName} selTurn={selTurn} router={router} setDone={setDone} setStep={setStep} setSel={setSel} setFiles={setFiles} setNotes={setNotes} setDesignName={setDesignName} setW={setW} setH={setH} setCol={setCol} setQuantity={setQuantity} setStitchCount={setStitchCount} setInstructions={setInstructions}/>;
@@ -170,7 +213,7 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
         {step===1&&<Step1Tier grouped={grouped} sel={sel} serviceName={serviceName} setSel={setSel} designName={designName} setDesignName={setDesignName} fmt={fmt} setFmt={setFmt} extras={extras} setExtras={setExtras} qty={qty} totalPrice={totalPrice} setStep={setStep}/>}
         {step===2&&<Step2Turnaround turn={turn} setTurn={setTurn} isBig={isBig} setStep={setStep}/>}
         {step===3&&<Step3Upload files={files} fileRef={fileRef} setFiles={setFiles} w={w} setW={setW} h={h} setH={setH} col={col} setCol={setCol} notes={notes} setNotes={setNotes} stitchCount={stitchCount} setStitchCount={setStitchCount} quantity={quantity} setQuantity={setQuantity} instructions={instructions} setInstructions={setInstructions} setStep={setStep}/>}
-        {step===4&&<Step4Confirm sel={sel} serviceName={serviceName} selTurn={selTurn} fmt={fmt} extras={extras} designName={designName} files={files} w={w} h={h} col={col} notes={notes} qty={qty} stitchCount={stitchCount} instructions={instructions} totalPrice={totalPrice} busy={busy} placeOrder={placeOrder} setStep={setStep} couponCode={couponCode} setCouponCode={setCouponCode} appliedCoupon={appliedCoupon} discount={discount} isApplying={isApplying} couponError={couponError} applyCoupon={applyCoupon} removeCoupon={removeCoupon}/>}
+        {step===4&&<Step4Confirm sel={sel} serviceName={serviceName} selTurn={selTurn} fmt={fmt} extras={extras} designName={designName} files={files} w={w} h={h} col={col} notes={notes} qty={qty} stitchCount={stitchCount} instructions={instructions} totalPrice={totalPrice} busy={busy} placeOrder={placeOrder} setStep={setStep} couponCode={couponCode} setCouponCode={setCouponCode} appliedCoupon={appliedCoupon} discount={discount} isApplying={isApplying} couponError={couponError} applyCoupon={applyCoupon} removeCoupon={removeCoupon} uploadProgress={uploadProgress} abortRef={abortRef}/>}
       </div>
     </div>
   );

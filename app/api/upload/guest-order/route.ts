@@ -33,9 +33,19 @@ export async function POST(req: NextRequest) {
 
     const admin = createAdminClient();
 
-    // Upload files to S3
+    // Upload files to S3 (max 25MB each, max 5 files)
+    const MAX_FILE_SIZE = 25 * 1024 * 1024;
+    const MAX_FILES = 5;
+
+    if (files.length > MAX_FILES) {
+      return NextResponse.json({ error: `Maximum ${MAX_FILES} files allowed` }, { status: 413 });
+    }
+
     const uploadedFiles: { name: string; key: string; size: number }[] = [];
     for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json({ error: `File ${file.name} exceeds 25MB limit` }, { status: 413 });
+      }
       const buffer = Buffer.from(await file.arrayBuffer());
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const key = `guest-uploads/${Date.now()}-${safeName}`;

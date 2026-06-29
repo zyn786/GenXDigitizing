@@ -75,18 +75,36 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const validFiles: File[] = [];
-      for (const f of Array.from(e.target.files)) {
-        if (f.size > 250 * 1024 * 1024) {
-          toast.error(`${f.name} is too large. Maximum 250MB per file.`);
-        } else {
-          validFiles.push(f);
-        }
-      }
-      if (validFiles.length > 0) {
-        setFiles((prev) => [...prev, ...validFiles]);
-      }
+      addIncomingFiles(Array.from(e.target.files));
       e.target.value = "";
+    }
+  };
+
+  const addIncomingFiles = (incoming: File[]) => {
+    const existingPrints = new Set(files.map(f => `${f.name}::${f.size}::${f.lastModified}`));
+    const validFiles: File[] = [];
+    for (const f of incoming) {
+      if (f.size > 250 * 1024 * 1024) {
+        toast.error(`${f.name} is too large. Maximum 250MB per file.`);
+        continue;
+      }
+      const fp = `${f.name}::${f.size}::${f.lastModified}`;
+      if (existingPrints.has(fp)) {
+        toast.error(`${f.name} already added`);
+        continue;
+      }
+      existingPrints.add(fp);
+      validFiles.push(f);
+    }
+    if (validFiles.length > 0) {
+      setFiles((prev) => [...prev, ...validFiles]);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer.files?.length) {
+      addIncomingFiles(Array.from(e.dataTransfer.files));
     }
   };
 
@@ -306,7 +324,9 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
       </AnimatePresence>
 
       {/* Input bar */}
-      <div className="flex items-center gap-1 px-1 sm:px-2 py-0.5 sm:py-1 min-w-0">
+      <div className="flex items-center gap-1 px-1 sm:px-2 py-0.5 sm:py-1 min-w-0"
+        onDragOver={(e) => { e.preventDefault(); }}
+        onDrop={handleDrop}>
         {/* Toolbar */}
         <div className="flex items-center gap-0.5">
           <input

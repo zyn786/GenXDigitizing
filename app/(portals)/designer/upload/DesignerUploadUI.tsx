@@ -3,11 +3,22 @@
 import { useState, useRef, useTransition } from "react";
 import { useRouter }    from "next/navigation";
 import { toast }        from "sonner";
-import { Upload, FileText, CheckCircle, X, ClipboardList } from "lucide-react";
+import { Upload, FileText, CheckCircle, X, ClipboardList, Image as ImageIcon, Loader2, AlertTriangle } from "lucide-react";
 
 const OUTPUT_FORMATS = ["DST","PES","EMB","JEF","XXX","VIP","HUS","EXP","VP3","SEW","AI","SVG","EPS","PDF"];
 
 const ALLOWED_ACCEPT = ".dst,.pes,.emb,.jef,.xxx,.vip,.hus,.exp,.vp3,.cnd,.tap,.png,.jpg,.jpeg,.webp,.pdf,.svg,.ai,.eps,.zip";
+
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+const MAX_FILES = 20;
+
+function formatSize(bytes: number): string {
+  if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  if (bytes >= 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${bytes} B`;
+}
+
+function fileFingerprint(f: File): string { return `${f.name}::${f.size}::${f.lastModified}`; }
 
 const txt  = "var(--txt)";
 const txt2 = "var(--txt2)";
@@ -52,6 +63,9 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
   const [notes,     setNotes]     = useState("");
   const [uploading, setUploading] = useState(false);
   const [done,      setDone]      = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const fileRefs = useRef<Map<string, HTMLInputElement>>(new Map());
 
@@ -60,12 +74,30 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
   const selTask = tasks.find((t: any) => t.id === selOrder);
 
   function addFiles(files: FileList | File[]) {
-    const newEntries: FileEntry[] = Array.from(files).map(f => ({
-      id: crypto.randomUUID(),
-      file: f,
-      format: getFormatFromName(f.name),
-    }));
-    setEntries(prev => [...prev, ...newEntries]);
+    const arr = Array.from(files);
+    const existingPrints = new Set(entries.map(e => fileFingerprint(e.file)));
+    const newEntries: FileEntry[] = [];
+    for (const f of arr) {
+      if (f.size > MAX_FILE_SIZE) { toast.error(`${f.name} exceeds ${formatSize(MAX_FILE_SIZE)}`); continue; }
+      const fp = fileFingerprint(f);
+      if (existingPrints.has(fp)) { toast.error(`${f.name} already added`); continue; }
+      existingPrints.add(fp);
+      newEntries.push({
+        id: crypto.randomUUID(),
+        file: f,
+        format: getFormatFromName(f.name),
+      });
+    }
+    if (newEntries.length) {
+      setEntries(prev => {
+        const combined = [...prev, ...newEntries];
+        if (combined.length > MAX_FILES) {
+          toast.error(`Max ${MAX_FILES} files; extra skipped`);
+          return combined.slice(0, MAX_FILES);
+        }
+        return combined;
+      });
+    }
   }
 
   function getFormatFromName(name: string): string {
@@ -90,6 +122,10 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
     if (!selOrder) { toast.error("Select an order"); return; }
 
     setUploading(true);
+    setUploadProgress(0);
+    setUploadError(null);
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       const fd = new FormData();
       fd.append("orderId", selOrder);
@@ -98,10 +134,39 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
         fd.append("files", entries[i].file);
         fd.append("formats", entries[i].format);
       }
-      const res = await fetch("/api/upload/output", { method: "POST", body: fd });
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}));
-        toast.error(e.error || "Upload failed");
+
+      // XHR for progress + abort
+      const result = await new Promise<{ok:boolean;error?:string}>((resolve) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/upload/output");
+        const onAbort = () => { xhr.abort(); resolve({ok:false,error:"Upload cancelled"}); };
+        controller.signal.addEventListener("abort", onAbort, { once: true });
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
+        });
+        xhr.addEventListener("load", () => {
+          controller.signal.removeEventListener("abort", onAbort);
+          if (xhr.status >= 200 && xhr.status < 300) resolve({ok: true});
+          else {
+            let msg = "Upload failed";
+            try { const e = JSON.parse(xhr.responseText); msg = e.error || msg; } catch {}
+            resolve({ok: false, error: msg});
+          }
+        });
+        xhr.addEventListener("error", () => {
+          controller.signal.removeEventListener("abort", onAbort);
+          resolve({ok: false, error: "Network error — check your connection"});
+        });
+        xhr.addEventListener("abort", () => {
+          controller.signal.removeEventListener("abort", onAbort);
+          resolve({ok: false, error: "Upload cancelled"});
+        });
+        xhr.send(fd);
+      });
+
+      if (!result.ok) {
+        setUploadError(result.error || "Upload failed");
+        toast.error(result.error || "Upload failed");
         return;
       }
 
@@ -109,7 +174,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
       startTx(() => { router.push("/designer/tasks"); router.refresh(); });
       // Notifications handled server-side by /api/upload/output
       setDone(true);
-    } finally { setUploading(false); }
+    } finally { setUploading(false); setUploadProgress(0); abortRef.current = null; }
   }
 
   const counts = {
@@ -351,14 +416,19 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
         {/* ── File list ── */}
         {entries.length > 0 && (
           <div className="space-y-2 mb-4 max-h-[300px] overflow-y-auto">
-            {entries.map((entry, idx) => (
+            {entries.map((entry, idx) => {
+              const isImage = entry.file.type.startsWith("image/") || /\.(png|jpg|jpeg|webp|gif|svg)$/i.test(entry.file.name);
+              return (
               <div key={entry.id} className="flex items-center gap-3 rounded-xl p-3"
                 style={{ background: "var(--elevated)", border: "1px solid var(--border)" }}>
                 <span className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
                   style={{ background: "linear-gradient(135deg, #7C3AED, #D946EF)" }}>{idx + 1}</span>
-                <FileText size={14} style={{ color: txt3, flexShrink: 0 }} />
+                {/* Thumbnail or icon */}
+                <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center border" style={{background:"var(--bg)",borderColor:"var(--border2)"}}>
+                  {isImage ? <ImageIcon size={14} style={{color:txt3}}/> : <FileText size={14} style={{color:txt3}}/>}
+                </div>
                 <span className="text-[12px] font-medium flex-1 min-w-0 truncate" style={{ color: txt }}>{entry.file.name}</span>
-                <span className="text-[10px] flex-shrink-0" style={{ color: txt3 }}>{(entry.file.size / 1024).toFixed(0)} KB</span>
+                <span className="text-[10px] flex-shrink-0" style={{ color: txt3 }}>{formatSize(entry.file.size)}</span>
                 <select
                   value={entry.format}
                   onChange={e => updateEntry(entry.id, { format: e.target.value })}
@@ -372,13 +442,13 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
                   <X size={14} />
                 </button>
               </div>
-            ))}
+            )})}
           </div>
         )}
 
         {/* Clear all */}
         {entries.length > 0 && (
-          <button onClick={() => setEntries([])}
+          <button onClick={() => { setEntries([]); setUploadError(null); }}
             className="w-full py-2 mb-4 rounded-xl text-[11px] font-medium cursor-pointer transition-all inline-flex items-center justify-center gap-1"
             style={{ background: "rgba(239,68,68,0.06)", color: "#B91C1C", border: "1px solid rgba(239,68,68,0.15)" }}>
             <X size={12} /> Remove all files
@@ -398,6 +468,32 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
             style={{ ...inpBase, resize: "none", background: "var(--elevated)" }}
           />
         </div>
+
+        {/* Upload progress + cancel */}
+        {uploading && uploadProgress > 0 && (
+          <div className="mb-3 p-3 rounded-xl border" style={{background:"rgba(124,58,237,0.04)",borderColor:"rgba(124,58,237,0.2)"}}>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[12px] font-semibold flex items-center gap-1.5" style={{color:"#7C3AED"}}>
+                <Loader2 size={12} className="animate-spin"/> Uploading… {uploadProgress}%
+              </span>
+              <button onClick={() => abortRef.current?.abort()}
+                className="text-[11px] font-semibold cursor-pointer border-none bg-transparent px-2 py-1 rounded" style={{color:"#B91C1C"}}>
+                Cancel
+              </button>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{background:"var(--elevated)"}}>
+              <div className="h-full rounded-full transition-all duration-300" style={{width:`${uploadProgress}%`,background:"linear-gradient(90deg, #7C3AED, #D946EF)"}}/>
+            </div>
+          </div>
+        )}
+
+        {/* Error + retry */}
+        {uploadError && !uploading && (
+          <div className="mb-3 p-3 rounded-xl border flex items-center justify-between" style={{background:"rgba(239,68,68,0.06)",borderColor:"rgba(239,68,68,0.2)"}}>
+            <span className="text-[12px] flex items-center gap-1.5" style={{color:"#B91C1C"}}><AlertTriangle size={12}/> {uploadError}</span>
+            <button onClick={submit} className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border-none text-white" style={{background:"linear-gradient(135deg, #7C3AED, #D946EF)"}}>Retry</button>
+          </div>
+        )}
 
         {/* Submit button */}
         <button onClick={submit}

@@ -33,6 +33,28 @@ export async function uploadToS3(
   return `${S3_PREFIX}${key}`;
 }
 
+/** Generate a presigned POST URL + fields for direct browser→S3 upload (no server memory buffer) */
+export async function createPresignedPost(
+  key: string,
+  contentType: string = "application/octet-stream",
+  maxSizeBytes: number = 50 * 1024 * 1024, // 50MB default
+  expiresIn: number = 600 // 10 minutes
+): Promise<{ url: string; fields: Record<string, string> }> {
+  // Use presigned URL approach — generate a PUT presigned URL for direct upload
+  const command = new PutObjectCommand({
+    Bucket: S3_BUCKET,
+    Key: key,
+    ContentType: contentType,
+    ContentLength: maxSizeBytes, // upper bound; S3 will reject if actual exceeds
+  });
+  const url = await getSignedUrl(s3Client, command, { expiresIn });
+  // Return as POST-compatible format (the frontend can PUT directly to this URL)
+  return {
+    url,
+    fields: { key, "Content-Type": contentType },
+  };
+}
+
 export async function getS3SignedUrl(key: string, expiresIn: number = 86400): Promise<string> {
   const command = new GetObjectCommand({
     Bucket: S3_BUCKET,

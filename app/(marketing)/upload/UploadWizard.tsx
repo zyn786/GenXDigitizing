@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Upload, X, ArrowRight, Check, Shield, Zap, Star, Sparkles, Building2, Minus, Plus, Image as ImageIcon } from "lucide-react";
+import { Upload, X, ArrowRight, Check, Shield, Zap, Star, Sparkles, Building2, Minus, Plus, Image as ImageIcon, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TieredPricingTable } from "@/components/marketing/TieredPricingTable";
 
@@ -50,7 +50,7 @@ function SectionHeading({ emoji, title }: { emoji: string; title: string }) {
 
 /* ── Upload Page ───────────────────────────────────── */
 export function UploadWizard() {
-  const [files, setFiles] = useState<{ file: File; preview: string }[]>([]);
+  const [files, setFiles] = useState<{ file: File; preview: string; fmt: string }[]>([]);
   const [designName, setDesignName] = useState("");
   const [width, setWidth] = useState("");
   const [height, setHeight] = useState("");
@@ -66,19 +66,13 @@ export function UploadWizard() {
   const [done, setDone] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [showPostSubmit, setShowPostSubmit] = useState(false);
+  const [submitProgress, setSubmitProgress] = useState(0);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [reference] = useState(genRef);
   const fileRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
-  const isB2B = company.trim() !== "" || files.length >= 3 || (email && !/@(gmail|yahoo|hotmail|outlook)\./i.test(email));
-
-  // Live timeline progress
-  const timelineDone = [
-    files.length > 0,                           // Upload
-    designName.trim() !== "" && placement !== "", // Review
-    name.trim() !== "" && email.includes("@"),   // Digitize (contact ready)
-    false,                                       // QC Check
-    false,                                       // Delivery
-  ];
+  const isB2B = company.trim() !== "" || (email && !/@(gmail|yahoo|hotmail|outlook)\./i.test(email));
 
   // Hide footer & nudge BackToTop above sticky submit (mobile only)
   useEffect(() => {
@@ -105,11 +99,18 @@ export function UploadWizard() {
   /* ── File handling ──────────────────────────────── */
   function handleFiles(fl: FileList | null) {
     if (!fl) return;
-    const incoming: { file: File; preview: string }[] = [];
+    const existingPrints = new Set(files.map(f => `${f.file.name}::${f.file.size}::${f.file.lastModified}`));
+    const incoming: { file: File; preview: string; fmt: string }[] = [];
     for (let i = 0; i < fl.length; i++) {
       const f = fl[i];
       if (f.size > 25 * 1024 * 1024) { toast.error(`${f.name} exceeds 25MB`); continue; }
-      incoming.push({ file: f, preview: URL.createObjectURL(f) });
+      const fp = `${f.name}::${f.size}::${f.lastModified}`;
+      if (existingPrints.has(fp)) { toast.error(`${f.name} already added`); continue; }
+      existingPrints.add(fp);
+      // Detect format from extension
+      const ext = f.name.split(".").pop()?.toUpperCase();
+      const detectedFmt = ext && FORMATS.includes(ext as any) ? ext : format;
+      incoming.push({ file: f, preview: URL.createObjectURL(f), fmt: detectedFmt });
     }
     setFiles(prev => [...prev, ...incoming].slice(0, 5));
   }
@@ -132,6 +133,10 @@ export function UploadWizard() {
       return;
     }
     setSubmitting(true);
+    setSubmitProgress(0);
+    setSubmitError(null);
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       const fd = new FormData();
       fd.append("design_name", designName);
@@ -139,19 +144,54 @@ export function UploadWizard() {
       fd.append("placement", placement); fd.append("format", format); fd.append("speed", speed);
       fd.append("notes", notes); fd.append("name", name); fd.append("email", email);
       fd.append("company", company);
-      files.forEach(f => fd.append("files", f.file));
-      const res = await fetch("/api/upload/guest-order", { method: "POST", body: fd });
-      if (!res.ok) { const e = await res.json().catch(() => ({})); toast.error(e.error || "Upload failed"); return; }
+      files.forEach(f => { fd.append("files", f.file); fd.append("file_formats", f.fmt); });
+
+      // XHR for progress + abort
+      const result = await new Promise<{ok:boolean;error?:string}>((resolve) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST","/api/upload/guest-order");
+        const onAbort = () => { xhr.abort(); resolve({ok:false,error:"Upload cancelled"}); };
+        controller.signal.addEventListener("abort",onAbort,{once:true});
+        xhr.upload.addEventListener("progress",(e) => {
+          if(e.lengthComputable) setSubmitProgress(Math.round((e.loaded/e.total)*100));
+        });
+        xhr.addEventListener("load",() => {
+          controller.signal.removeEventListener("abort",onAbort);
+          if(xhr.status>=200&&xhr.status<300) resolve({ok:true});
+          else {
+            let msg = "Upload failed";
+            try{const e=JSON.parse(xhr.responseText);msg=e.error||msg;}catch{}
+            resolve({ok:false,error:msg});
+          }
+        });
+        xhr.addEventListener("error",() => {
+          controller.signal.removeEventListener("abort",onAbort);
+          resolve({ok:false,error:"Network error — please check connection"});
+        });
+        xhr.addEventListener("abort",() => {
+          controller.signal.removeEventListener("abort",onAbort);
+          resolve({ok:false,error:"Upload cancelled"});
+        });
+        xhr.send(fd);
+      });
+
+      if (!result.ok) {
+        setSubmitError(result.error || "Upload failed");
+        toast.error(result.error || "Upload failed");
+        return;
+      }
+
       setDone(true);
       toast.success("Quote request submitted! We reply within 1 hour.");
     } catch { toast.error("Network error — please try again"); }
-    finally { setSubmitting(false); }
+    finally { setSubmitting(false); abortRef.current = null; }
   }
 
   function resetForm() {
     setDone(false); setFiles([]);
     setDesignName(""); setPlacement(""); setCompany(""); setName(""); setEmail("");
     setWidth(""); setHeight(""); setColors(""); setNotes("");
+    setSubmitError(null); setSubmitProgress(0);
   }
 
   /* ── Done screen ─────────────────────────────────── */
@@ -283,7 +323,19 @@ export function UploadWizard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] font-semibold text-[var(--txt)] truncate">{f.file.name}</p>
-                      <p className="text-[11px] text-[var(--txt3)]">{fmtSize(f.file.size)}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-[11px] text-[var(--txt3)]">{fmtSize(f.file.size)}</p>
+                        <select
+                          value={f.fmt}
+                          onChange={e => {
+                            setFiles(prev => { const n = [...prev]; n[i] = { ...n[i], fmt: e.target.value }; return n; });
+                          }}
+                          onClick={e => e.stopPropagation()}
+                          className="text-[10px] font-semibold rounded-md px-1.5 py-0.5 border cursor-pointer"
+                          style={{background:"var(--elevated)",borderColor:"var(--border2)",color:"var(--txt)"}}>
+                          {FORMATS.map(fm => <option key={fm} value={fm}>{fm}</option>)}
+                        </select>
+                      </div>
                     </div>
                     <button onClick={e => { e.stopPropagation(); removeFile(i); }}
                       className="p-2 rounded-lg hover:bg-red-50 hover:text-red-500 text-[var(--txt3)] opacity-0 group-hover:opacity-100 transition-all">
@@ -433,29 +485,10 @@ export function UploadWizard() {
               </div>
             )}
 
-            {/* Timeline — live status */}
-            <div className="p-3 sm:p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] mb-3 sm:mb-4">
-              <div className="flex items-center gap-0.5 sm:gap-1">
-                {["Upload", "Review", "Digitize", "QC", "Delivery"].map((l, i, arr) => (
-                  <div key={l} className="flex items-center flex-1 last:flex-none">
-                    <div className="flex flex-col items-center gap-0.5 sm:gap-1">
-                      <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-500 ${
-                        timelineDone[i] ? "bg-[#16A34A] shadow-[0_0_6px_rgba(22,163,74,0.3)]" : "bg-[var(--border2)]"
-                      }`} />
-                      <span className={`text-[9px] sm:text-[10px] font-semibold whitespace-nowrap transition-colors duration-500 ${
-                        timelineDone[i] ? "text-[#16A34A]" : "text-[var(--txt3)]"
-                      }`}>{l}</span>
-                    </div>
-                    {i < arr.length - 1 && (
-                      <div className={`flex-1 h-px mx-0.5 sm:mx-1 transition-colors duration-500 ${
-                        timelineDone[i] ? "bg-[#16A34A]/40" : "bg-[var(--border)]"
-                      }`} />
-                    )}
-                  </div>
-                ))}
-              </div>
-              <p className="text-center text-[11px] text-[var(--txt3)] mt-2 sm:mt-3">
-                Estimated: <strong className="text-[var(--txt)]">{SPEEDS.find(s => s.id === speed)?.time}</strong>
+            {/* Delivery estimate */}
+            <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] mb-3 sm:mb-4 text-center">
+              <p className="text-[12px] text-[var(--txt2)]">
+                Estimated delivery: <strong className="text-[var(--txt)]">{SPEEDS.find(s => s.id === speed)?.time}</strong>
               </p>
             </div>
 
@@ -513,6 +546,30 @@ export function UploadWizard() {
 
           {/* Desktop submit (inline) */}
           <div className="hidden sm:block">
+            {/* Upload progress + cancel */}
+            {submitting && submitProgress > 0 && (
+              <div className="mb-3 p-3 rounded-xl border" style={{background:"rgba(124,58,237,0.04)",borderColor:"rgba(124,58,237,0.2)"}}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[12px] font-semibold flex items-center gap-1.5" style={{color:"#7C3AED"}}>
+                    <Loader2 size={12} className="animate-spin"/> Uploading… {submitProgress}%
+                  </span>
+                  <button onClick={() => abortRef.current?.abort()}
+                    className="text-[11px] font-semibold cursor-pointer border-none bg-transparent px-2 py-1 rounded" style={{color:"#B91C1C"}}>
+                    Cancel
+                  </button>
+                </div>
+                <div className="h-2 rounded-full overflow-hidden" style={{background:"var(--elevated)"}}>
+                  <div className="h-full rounded-full transition-all duration-300" style={{width:`${submitProgress}%`,background:"linear-gradient(90deg, #7C3AED, #D946EF)"}}/>
+                </div>
+              </div>
+            )}
+            {/* Error + retry */}
+            {submitError && !submitting && (
+              <div className="mb-3 p-3 rounded-xl border flex items-center justify-between" style={{background:"rgba(239,68,68,0.06)",borderColor:"rgba(239,68,68,0.2)"}}>
+                <span className="text-[12px] flex items-center gap-1.5" style={{color:"#B91C1C"}}><AlertTriangle size={12}/> {submitError}</span>
+                <button onClick={handleSubmit} className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border-none text-white" style={{background:"linear-gradient(135deg, #7C3AED, #D946EF)"}}>Retry</button>
+              </div>
+            )}
             <button onClick={handleSubmit} disabled={submitting} type="button"
               className="w-full py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] text-white font-bold text-[14px] sm:text-[15px] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.35)]">
               {submitting ? (
@@ -531,6 +588,28 @@ export function UploadWizard() {
       {/* Sticky submit (mobile) */}
       <div className="fixed bottom-0 inset-x-0 z-30 bg-[var(--bg)]/95  border-t border-[var(--border)] px-4 pt-2 pb-[max(8px,env(safe-area-inset-bottom))] sm:hidden">
         <div className="max-w-[560px] mx-auto">
+          {/* Upload progress + cancel (mobile) */}
+          {submitting && submitProgress > 0 && (
+            <div className="mb-1.5 p-2 rounded-lg border" style={{background:"rgba(124,58,237,0.04)",borderColor:"rgba(124,58,237,0.2)"}}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-semibold flex items-center gap-1" style={{color:"#7C3AED"}}>
+                  <Loader2 size={10} className="animate-spin"/> Uploading… {submitProgress}%
+                </span>
+                <button onClick={() => abortRef.current?.abort()}
+                  className="text-[10px] font-semibold cursor-pointer border-none bg-transparent" style={{color:"#B91C1C"}}>Cancel</button>
+              </div>
+              <div className="h-1.5 rounded-full overflow-hidden" style={{background:"var(--elevated)"}}>
+                <div className="h-full rounded-full transition-all duration-300" style={{width:`${submitProgress}%`,background:"linear-gradient(90deg, #7C3AED, #D946EF)"}}/>
+              </div>
+            </div>
+          )}
+          {/* Error + retry (mobile) */}
+          {submitError && !submitting && (
+            <div className="mb-1.5 p-2 rounded-lg border flex items-center justify-between" style={{background:"rgba(239,68,68,0.06)",borderColor:"rgba(239,68,68,0.2)"}}>
+              <span className="text-[10px] flex items-center gap-1" style={{color:"#B91C1C"}}><AlertTriangle size={10}/> {submitError}</span>
+              <button onClick={handleSubmit} className="px-2 py-1 rounded-md text-[10px] font-semibold cursor-pointer border-none text-white" style={{background:"linear-gradient(135deg, #7C3AED, #D946EF)"}}>Retry</button>
+            </div>
+          )}
           <button onClick={handleSubmit} disabled={submitting} type="button"
             className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] text-white font-bold text-[13px] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(37,99,235,0.3)]">
             {submitting ? "Sending…" : <>Send My Design <ArrowRight size={14} /></>}
