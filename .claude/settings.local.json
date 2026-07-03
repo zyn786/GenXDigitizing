@@ -36,7 +36,8 @@
       "Bash(sed -i 's/description: .Production-ready embroidery digitizing, vector art, and custom patches. Clean proofs, fast turnaround, free revisions. Trusted by .*/description: \"Professional embroidery digitizing services. Fast turnaround, machine-ready files, unlimited revisions. Trusted by embroidery businesses worldwide. Get a free quote today.\"/' \"app/\\(marketing\\)/home/page.tsx\")",
       "WebFetch(domain:www.genxdigitizing.com)",
       "Bash(sort -k5 -rn)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(S3_ENDPOINT='' node *)"
     ]
   }
 }
