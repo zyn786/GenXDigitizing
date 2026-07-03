@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Upload, X, ArrowRight, Check, Shield, Zap, Star, Sparkles, Building2, Minus, Plus, Image as ImageIcon, Loader2, AlertTriangle } from "lucide-react";
+import { Upload, X, ArrowRight, ArrowLeft, Check, Shield, Zap, Star, Sparkles, Building2, Minus, Plus, Image as ImageIcon, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TieredPricingTable } from "@/components/marketing/TieredPricingTable";
 
@@ -48,8 +48,16 @@ function SectionHeading({ emoji, title }: { emoji: string; title: string }) {
   );
 }
 
+/* ── Step config ────────────────────────────────────── */
+const STEPS = [
+  { num: 1, label: "Upload",   emoji: "📤" },
+  { num: 2, label: "Details",  emoji: "📝" },
+  { num: 3, label: "Review",   emoji: "✅" },
+] as const;
+
 /* ── Upload Page ───────────────────────────────────── */
 export function UploadWizard() {
+  const [step, setStep] = useState(1);
   const [files, setFiles] = useState<{ file: File; preview: string; fmt: string }[]>([]);
   const [designName, setDesignName] = useState("");
   const [width, setWidth] = useState("");
@@ -107,7 +115,6 @@ export function UploadWizard() {
       const fp = `${f.name}::${f.size}::${f.lastModified}`;
       if (existingPrints.has(fp)) { toast.error(`${f.name} already added`); continue; }
       existingPrints.add(fp);
-      // Detect format from extension
       const ext = f.name.split(".").pop()?.toUpperCase();
       const detectedFmt = ext && FORMATS.includes(ext as any) ? ext : format;
       incoming.push({ file: f, preview: URL.createObjectURL(f), fmt: detectedFmt });
@@ -119,16 +126,34 @@ export function UploadWizard() {
     setFiles(prev => { const n = [...prev]; URL.revokeObjectURL(n[idx].preview); n.splice(idx, 1); return n; });
   }
 
-  /* ── Validation ──────────────────────────────────── */
+  /* ── Step validation ─────────────────────────────── */
+  function canAdvance(target: number): boolean {
+    if (target === 2) {
+      if (files.length === 0) { toast.error("Upload at least 1 design file"); return false; }
+      return true;
+    }
+    if (target === 3) {
+      if (!designName.trim()) { toast.error("Enter a design name"); return false; }
+      if (!placement) { toast.error("Select a placement"); return false; }
+      return true;
+    }
+    return true;
+  }
+
+  function nextStep() {
+    const next = step + 1;
+    if (canAdvance(next)) setStep(next);
+  }
+
+  function prevStep() { if (step > 1) setStep(step - 1); }
+
+  /* ── Submit ──────────────────────────────────────── */
   function canSubmit(): boolean {
     return files.length > 0 && designName.trim() !== "" && placement !== "" && name.trim() !== "" && email.trim() !== "" && email.includes("@");
   }
 
-  /* ── Submit ──────────────────────────────────────── */
   async function handleSubmit() {
     if (!canSubmit()) {
-      if (files.length === 0) { toast.error("Upload at least 1 design file"); return; }
-      if (!designName.trim() || !placement) { toast.error("Fill in design name and placement"); return; }
       if (!name.trim() || !email.trim() || !email.includes("@")) { toast.error("Fill in your name and email"); return; }
       return;
     }
@@ -146,7 +171,6 @@ export function UploadWizard() {
       fd.append("company", company);
       files.forEach(f => { fd.append("files", f.file); fd.append("file_formats", f.fmt); });
 
-      // XHR for progress + abort
       const result = await new Promise<{ok:boolean;error?:string}>((resolve) => {
         const xhr = new XMLHttpRequest();
         xhr.open("POST","/api/upload/guest-order");
@@ -188,7 +212,7 @@ export function UploadWizard() {
   }
 
   function resetForm() {
-    setDone(false); setFiles([]);
+    setDone(false); setFiles([]); setStep(1);
     setDesignName(""); setPlacement(""); setCompany(""); setName(""); setEmail("");
     setWidth(""); setHeight(""); setColors(""); setNotes("");
     setSubmitError(null); setSubmitProgress(0);
@@ -271,7 +295,376 @@ export function UploadWizard() {
   }
 
   /* ════════════════════════════════════════════════════
-     SINGLE-PAGE FORM
+     STEP INDICATOR
+     ════════════════════════════════════════════════════ */
+  function StepIndicator() {
+    return (
+      <div className="flex items-center justify-center gap-0 mb-6 sm:mb-8">
+        {STEPS.map((s, i) => {
+          const isActive = step === s.num;
+          const isDone = step > s.num;
+          return (
+            <div key={s.num} className="flex items-center">
+              {/* Circle */}
+              <div className="flex flex-col items-center">
+                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[13px] sm:text-[14px] font-bold transition-all ${
+                  isDone ? "bg-[#16A34A] text-white" :
+                  isActive ? "bg-[#2563EB] text-white shadow-[0_0_12px_rgba(37,99,235,0.4)]" :
+                  "bg-[var(--elevated)] text-[var(--txt3)] border border-[var(--border2)]"
+                }`}>
+                  {isDone ? <Check size={16} className="sm:w-[18px] sm:h-[18px]" /> : s.num}
+                </div>
+                <span className={`text-[10px] sm:text-[11px] font-semibold mt-1.5 ${
+                  isActive ? "text-[#2563EB]" : isDone ? "text-[#16A34A]" : "text-[var(--txt3)]"
+                }`}>{s.label}</span>
+              </div>
+              {/* Line */}
+              {i < STEPS.length - 1 && (
+                <div className={`w-10 sm:w-16 h-0.5 mx-1 sm:mx-2 mt-[-14px] rounded-full transition-all ${
+                  step > s.num ? "bg-[#16A34A]" : "bg-[var(--border2)]"
+                }`} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  /* ════════════════════════════════════════════════════
+     STEP 1: UPLOAD FILES
+     ════════════════════════════════════════════════════ */
+  function StepUpload() {
+    return (
+      <section className="mb-6 sm:mb-8">
+        <SectionHeading emoji="📤" title="Upload Your Files" />
+
+        <div onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={e => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
+          onClick={() => fileRef.current?.click()}
+          className={`border-2 border-dashed rounded-2xl px-4 py-5 sm:p-7 lg:p-9 text-center cursor-pointer transition-all duration-300 bg-[var(--surface)] ${
+            dragOver ? "border-[#2563EB] bg-[#2563EB]/5 scale-[1.02] shadow-[0_0_48px_rgba(37,99,235,0.12)]"
+                     : files.length > 0 ? "border-[#16A34A]/30 bg-[#16A34A]/3"
+                     : "border-[#2563EB]/25 hover:border-[#2563EB]/50 hover:bg-[#2563EB]/2"}`}>
+          <motion.div animate={{ scale: dragOver ? 1.12 : 1 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+            {files.length > 0
+              ? <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#16A34A]/10 flex items-center justify-center mx-auto mb-2"><Check size={22} className="text-[#16A34A]" /></div>
+              : <Upload size={26} className="sm:w-[30px] sm:h-[30px] text-[#2563EB] mx-auto mb-2" />}
+          </motion.div>
+          <p className="font-semibold text-[15px] sm:text-[16px] text-[var(--txt)] mb-1">
+            {files.length > 0 ? `${files.length} file${files.length > 1 ? "s" : ""} selected` : dragOver ? "Drop your files here" : "Tap to upload or drag files"}
+          </p>
+          <p className="text-[11px] sm:text-xs text-[var(--txt3)]">
+            JPG · PNG · PDF · AI · EPS · SVG <span className="mx-1.5 text-[var(--border3)]">|</span> Up to 5 files · 25MB each
+          </p>
+          <input ref={fileRef} type="file" multiple accept="image/*,.pdf,.ai,.eps,.svg,.dst" className="hidden" onChange={e => handleFiles(e.target.files)} />
+        </div>
+
+        {files.length > 0 && (
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {files.map((f, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] group hover:border-[#2563EB]/30 hover:shadow-sm transition-all">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-[var(--elevated)] flex-shrink-0 border border-[var(--border)]">
+                  {f.file.type.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(f.file.name)
+                    ? <img src={f.preview} alt={f.file.name} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex items-center justify-center"><ImageIcon size={16} className="text-[var(--txt3)]" /></div>}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-semibold text-[var(--txt)] truncate">{f.file.name}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-[11px] text-[var(--txt3)]">{fmtSize(f.file.size)}</p>
+                    <select
+                      value={f.fmt}
+                      onChange={e => {
+                        setFiles(prev => { const n = [...prev]; n[i] = { ...n[i], fmt: e.target.value }; return n; });
+                      }}
+                      onClick={e => e.stopPropagation()}
+                      className="text-[10px] font-semibold rounded-md px-1.5 py-0.5 border cursor-pointer"
+                      style={{background:"var(--elevated)",borderColor:"var(--border2)",color:"var(--txt)"}}>
+                      {FORMATS.map(fm => <option key={fm} value={fm}>{fm}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <button onClick={e => { e.stopPropagation(); removeFile(i); }}
+                  className="p-2 rounded-lg hover:bg-red-50 hover:text-red-500 text-[var(--txt3)] opacity-0 group-hover:opacity-100 transition-all">
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Trust badges */}
+        <div className="flex items-center justify-center gap-3 sm:gap-4 mt-3 sm:mt-4 text-[11px] sm:text-[12px] text-[var(--txt3)]">
+          {[
+            [Shield, "Secure upload"],
+            [Check, "No payment required"],
+            [Zap, "Fast turnaround"],
+          ].map(([Icon, text]) => (
+            <span key={text as string} className="flex items-center gap-1">
+              <Icon size={12} className="text-[#16A34A] flex-shrink-0" />
+              <span>{text as string}</span>
+            </span>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  /* ════════════════════════════════════════════════════
+     STEP 2: DESIGN DETAILS + SPEED
+     ════════════════════════════════════════════════════ */
+  function StepDetails() {
+    return (
+      <>
+        <section className="mb-6 sm:mb-8">
+          <SectionHeading emoji="📝" title="Design Details" />
+
+          <div className="space-y-3 sm:space-y-4">
+            <div>
+              <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1">Design Name *</label>
+              <input value={designName} onChange={e => setDesignName(e.target.value)}
+                placeholder="e.g. Company Logo" className={inputCls} />
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <StepperField label="Width (in)" value={width} onChange={setWidth} placeholder="Not sure" step={0.5} />
+              <StepperField label="Height (in)" value={height} onChange={setHeight} placeholder="Not sure" step={0.5} />
+              <StepperField label="Colors" value={colors} onChange={setColors} placeholder="Auto" step={1} />
+            </div>
+
+            <div>
+              <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1.5 sm:mb-2">Placement *</label>
+              <div className="grid grid-cols-3 gap-2">
+                {PLACEMENTS.map(p => (
+                  <button key={p.id} type="button" onClick={() => setPlacement(p.id)}
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border text-[11px] sm:text-[12px] font-medium transition-all ${
+                      placement === p.id
+                        ? "border-[#2563EB] bg-[#2563EB]/5 text-[#2563EB] shadow-[0_0_0_1px_rgba(37,99,235,0.15)]"
+                        : "border-[var(--border2)] text-[var(--txt2)] hover:border-[var(--border3)] hover:bg-[var(--surface)]"}`}>
+                    <span className="text-base sm:text-lg">{p.emoji}</span> {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1">Format</label>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                {FORMATS.map(f => (
+                  <button key={f} type="button" onClick={() => setFormat(f)}
+                    className={`px-3 sm:px-4 py-2 rounded-xl text-[11px] sm:text-[12px] font-semibold transition-all ${
+                      format === f ? "bg-[#2563EB] text-white shadow-sm" : "bg-[var(--surface)] border border-[var(--border2)] text-[var(--txt2)] hover:border-[var(--border3)]"}`}>
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1">Notes (optional)</label>
+              <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+                placeholder="Fabric type, special instructions..." className={inputCls + " resize-none"} />
+            </div>
+          </div>
+        </section>
+
+        {/* Speed */}
+        <section className="mb-6 sm:mb-8">
+          <SectionHeading emoji="⚡" title="Delivery Speed" />
+
+          <div className="space-y-2 sm:space-y-3">
+            {SPEEDS.map((s, i) => (
+              <button key={s.id} type="button" onClick={() => setSpeed(s.id)}
+                className={`w-full flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border text-left transition-all relative ${
+                  speed === s.id
+                    ? "border-[#2563EB] bg-[#2563EB]/3 shadow-[0_0_0_1px_rgba(37,99,235,0.2)] shadow-md"
+                    : "border-[var(--border2)] hover:border-[var(--border3)] hover:bg-[var(--surface)]"}`}>
+                {s.badge && (
+                  <span className="absolute -top-2 right-3 sm:right-4 bg-[#2563EB] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">{s.badge}</span>
+                )}
+                <span className="text-xl sm:text-2xl">{s.icon}</span>
+                <div className="flex-1">
+                  <div className="font-syne font-bold text-[14px] sm:text-[15px] text-[var(--txt)]">{s.label}</div>
+                  <div className="text-[11px] sm:text-[12px] text-[var(--txt2)]">{s.time}</div>
+                </div>
+                {speed === s.id && (i === 0
+                  ? <Sparkles size={14} className="text-[#2563EB]" />
+                  : <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#2563EB] flex items-center justify-center"><Check size={10} className="text-white" /></div>)}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-3 p-3 rounded-xl bg-[#16A34A]/5 border border-[#16A34A]/15 text-center">
+            <p className="text-[12px] text-[#16A34A] font-semibold">
+              <Shield size={12} className="inline mr-1" />
+              All delivery speeds are <strong>FREE</strong>. No hidden fees. No rush charges. Ever.
+            </p>
+          </div>
+        </section>
+      </>
+    );
+  }
+
+  /* ════════════════════════════════════════════════════
+     STEP 3: REVIEW & SEND
+     ════════════════════════════════════════════════════ */
+  function StepReview() {
+    return (
+      <section className="mb-6 sm:mb-8">
+        <SectionHeading emoji="✅" title="Review & Send" />
+
+        {/* Pricing */}
+        <div className="mb-4 sm:mb-6">
+          <TieredPricingTable fileCount={files.length} />
+        </div>
+
+        {/* Trust inline */}
+        <div className="flex items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-4 text-[11px] sm:text-[12px] text-[var(--txt3)]">
+          <span className="flex items-center gap-1"><Shield size={11} className="text-[#16A34A]" /> Free revisions</span>
+          <span className="flex items-center gap-1"><Star size={11} className="text-[#F59E0B]" /> 4.9/5 rated</span>
+          <span className="flex items-center gap-1"><Zap size={11} className="text-[#F97316]" /> 1h response</span>
+        </div>
+
+        {/* Order summary */}
+        <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-3 sm:p-4 mb-3 sm:mb-4">
+          <h3 className="font-syne font-bold text-[12px] sm:text-sm mb-2 sm:mb-3 text-[var(--txt)]">Your Order</h3>
+          {[
+            ["Design", designName || "—"],
+            ["Files", `${files.length} uploaded`],
+            ["Placement", PLACEMENTS.find(p => p.id === placement)?.label || "—"],
+            ["Format", format],
+            ["Speed", SPEEDS.find(s => s.id === speed)?.label],
+            width && ["Size", `${width}" × ${height}"`],
+            colors && ["Colors", colors],
+          ].filter(Boolean).map(([k, v]) => (
+            <div key={k as string} className="flex justify-between py-1.5 text-[12px] sm:text-[13px] border-b border-[var(--border)] last:border-0">
+              <span className="text-[var(--txt3)]">{k}</span>
+              <span className="font-semibold text-[var(--txt)]">{v}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Delivery estimate */}
+        <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] mb-3 sm:mb-4 text-center">
+          <p className="text-[12px] text-[var(--txt2)]">
+            Estimated delivery: <strong className="text-[var(--txt)]">{SPEEDS.find(s => s.id === speed)?.time}</strong>
+          </p>
+        </div>
+
+        {/* B2B banner */}
+        {isB2B && (
+          <div className="mb-3 sm:mb-4 p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-[#7C3AED]/8 to-[#2563EB]/8 border border-[#7C3AED]/20">
+            <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+              <Building2 size={14} className="text-[#7C3AED]" />
+              <span className="font-syne font-bold text-[13px] sm:text-[14px] text-[#7C3AED]">Business Account</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1 text-[10px] sm:text-[11px] text-[var(--txt2)]">
+              <span className="flex items-center gap-1"><Check size={9} className="text-[#7C3AED]" /> Volume pricing</span>
+              <span className="flex items-center gap-1"><Check size={9} className="text-[#7C3AED]" /> Account manager</span>
+              <span className="flex items-center gap-1"><Check size={9} className="text-[#7C3AED]" /> Priority queue</span>
+              <span className="flex items-center gap-1"><Check size={9} className="text-[#7C3AED]" /> Monthly billing</span>
+            </div>
+          </div>
+        )}
+
+        {/* Guarantees */}
+        <div className="grid grid-cols-3 gap-2 mb-3 sm:mb-4">
+          {[
+            [Shield, "Free Revisions"],
+            [Zap, "Fast Delivery"],
+            [Check, "Pay When Satisfied"],
+          ].map(([Icon, label]) => (
+            <div key={label as string} className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
+              <Icon size={13} className="text-[#16A34A]" />
+              <span className="text-[10px] font-semibold text-[var(--txt)] text-center">{label as string}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Contact fields */}
+        <div className="space-y-2 sm:space-y-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <div>
+              <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1">Name *</label>
+              <input value={name} onChange={e => setName(e.target.value)}
+                placeholder="John Doe" className={inputCls} />
+            </div>
+            <div>
+              <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1">Email *</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                placeholder="john@example.com" className={inputCls} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1">Company (optional)</label>
+            <input value={company} onChange={e => setCompany(e.target.value)}
+              placeholder="Your business name" className={inputCls} />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  /* ════════════════════════════════════════════════════
+     NAVIGATION BUTTONS
+     ════════════════════════════════════════════════════ */
+  function NavButtons() {
+    return (
+      <div className="flex gap-2 sm:gap-3">
+        {step > 1 && (
+          <button onClick={prevStep} type="button"
+            className="flex-1 py-3 sm:py-3.5 rounded-2xl border border-[var(--border2)] bg-[var(--surface)] text-[var(--txt)] font-semibold text-[13px] sm:text-[14px] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all">
+            <ArrowLeft size={15} /> Back
+          </button>
+        )}
+        {step < 3 ? (
+          <button onClick={nextStep} type="button"
+            className="flex-1 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] text-white font-bold text-[13px] sm:text-[14px] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all shadow-[0_4px_16px_rgba(37,99,235,0.3)]">
+            Continue <ArrowRight size={15} />
+          </button>
+        ) : (
+          /* Submit on step 3 */
+          <div className="flex-1">
+            {submitting && submitProgress > 0 && (
+              <div className="mb-3 p-3 rounded-xl border" style={{background:"rgba(124,58,237,0.04)",borderColor:"rgba(124,58,237,0.2)"}}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[12px] font-semibold flex items-center gap-1.5" style={{color:"#7C3AED"}}>
+                    <Loader2 size={12} className="animate-spin"/> Uploading… {submitProgress}%
+                  </span>
+                  <button onClick={() => abortRef.current?.abort()}
+                    className="text-[11px] font-semibold cursor-pointer border-none bg-transparent px-2 py-1 rounded" style={{color:"#B91C1C"}}>
+                    Cancel
+                  </button>
+                </div>
+                <div className="h-2 rounded-full overflow-hidden" style={{background:"var(--elevated)"}}>
+                  <div className="h-full rounded-full transition-all duration-300" style={{width:`${submitProgress}%`,background:"linear-gradient(90deg, #7C3AED, #D946EF)"}}/>
+                </div>
+              </div>
+            )}
+            {submitError && !submitting && (
+              <div className="mb-3 p-3 rounded-xl border flex items-center justify-between" style={{background:"rgba(239,68,68,0.06)",borderColor:"rgba(239,68,68,0.2)"}}>
+                <span className="text-[12px] flex items-center gap-1.5" style={{color:"#B91C1C"}}><AlertTriangle size={12}/> {submitError}</span>
+                <button onClick={handleSubmit} className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border-none text-white" style={{background:"linear-gradient(135deg, #7C3AED, #D946EF)"}}>Retry</button>
+              </div>
+            )}
+            <button onClick={handleSubmit} disabled={submitting} type="button"
+              className="w-full py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] text-white font-bold text-[13px] sm:text-[14px] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(37,99,235,0.3)]">
+              {submitting ? (
+                <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Sending…</>
+              ) : (
+                <>Send My Design <ArrowRight size={15} /></>
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ════════════════════════════════════════════════════
+     MAIN RENDER
      ════════════════════════════════════════════════════ */
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden">
@@ -295,335 +688,33 @@ export function UploadWizard() {
             </p>
           </div>
 
-          {/* ═══ SECTION 1: UPLOAD ══════════════ */}
-          <section className="mb-6 sm:mb-8">
-            <SectionHeading emoji="📤" title="Files" />
+          {/* ═══ STEP INDICATOR ════════════════ */}
+          <StepIndicator />
 
-            <div onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={e => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
-              onClick={() => fileRef.current?.click()}
-              className={`border-2 border-dashed rounded-2xl px-4 py-5 sm:p-7 lg:p-9 text-center cursor-pointer transition-all duration-300 bg-[var(--surface)] ${
-                dragOver ? "border-[#2563EB] bg-[#2563EB]/5 scale-[1.02] shadow-[0_0_48px_rgba(37,99,235,0.12)]"
-                         : files.length > 0 ? "border-[#16A34A]/30 bg-[#16A34A]/3"
-                         : "border-[#2563EB]/25 hover:border-[#2563EB]/50 hover:bg-[#2563EB]/2"}`}>
-              <motion.div animate={{ scale: dragOver ? 1.12 : 1 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-                {files.length > 0
-                  ? <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#16A34A]/10 flex items-center justify-center mx-auto mb-2"><Check size={22} className="text-[#16A34A]" /></div>
-                  : <Upload size={26} className="sm:w-[30px] sm:h-[30px] text-[#2563EB] mx-auto mb-2" />}
-              </motion.div>
-              <p className="font-semibold text-[15px] sm:text-[16px] text-[var(--txt)] mb-1">
-                {files.length > 0 ? `${files.length} file${files.length > 1 ? "s" : ""} selected` : dragOver ? "Drop your files here" : "Tap to upload or drag files"}
-              </p>
-              <p className="text-[11px] sm:text-xs text-[var(--txt3)]">
-                JPG · PNG · PDF · AI · EPS · SVG <span className="mx-1.5 text-[var(--border3)]">|</span> Up to 5 files · 25MB each
-              </p>
-              <input ref={fileRef} type="file" multiple accept="image/*,.pdf,.ai,.eps,.svg,.dst" className="hidden" onChange={e => handleFiles(e.target.files)} />
-            </div>
+          {/* ═══ STEP CONTENT ══════════════════ */}
+          {step === 1 && <StepUpload />}
+          {step === 2 && <StepDetails />}
+          {step === 3 && <StepReview />}
 
-            {files.length > 0 && (
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {files.map((f, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] group hover:border-[#2563EB]/30 hover:shadow-sm transition-all">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-[var(--elevated)] flex-shrink-0 border border-[var(--border)]">
-                      {f.file.type.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(f.file.name)
-                        ? <img src={f.preview} alt={f.file.name} className="w-full h-full object-cover" />
-                        : <div className="w-full h-full flex items-center justify-center"><ImageIcon size={16} className="text-[var(--txt3)]" /></div>}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-semibold text-[var(--txt)] truncate">{f.file.name}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-[11px] text-[var(--txt3)]">{fmtSize(f.file.size)}</p>
-                        <select
-                          value={f.fmt}
-                          onChange={e => {
-                            setFiles(prev => { const n = [...prev]; n[i] = { ...n[i], fmt: e.target.value }; return n; });
-                          }}
-                          onClick={e => e.stopPropagation()}
-                          className="text-[10px] font-semibold rounded-md px-1.5 py-0.5 border cursor-pointer"
-                          style={{background:"var(--elevated)",borderColor:"var(--border2)",color:"var(--txt)"}}>
-                          {FORMATS.map(fm => <option key={fm} value={fm}>{fm}</option>)}
-                        </select>
-                      </div>
-                    </div>
-                    <button onClick={e => { e.stopPropagation(); removeFile(i); }}
-                      className="p-2 rounded-lg hover:bg-red-50 hover:text-red-500 text-[var(--txt3)] opacity-0 group-hover:opacity-100 transition-all">
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Trust badges */}
-            <div className="flex items-center justify-center gap-3 sm:gap-4 mt-3 sm:mt-4 text-[11px] sm:text-[12px] text-[var(--txt3)]">
-              {[
-                [Shield, "Secure upload"],
-                [Check, "No payment required"],
-                [Zap, "Fast turnaround"],
-              ].map(([Icon, text]) => (
-                <span key={text as string} className="flex items-center gap-1">
-                  <Icon size={12} className="text-[#16A34A] flex-shrink-0" />
-                  <span>{text as string}</span>
-                </span>
-              ))}
-            </div>
-          </section>
-
-          {/* ═══ SECTION 2: DETAILS ══════════════ */}
-          <section className="mb-6 sm:mb-8">
-            <SectionHeading emoji="📝" title="Design Details" />
-
-            <div className="space-y-3 sm:space-y-4">
-              <div>
-                <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1">Design Name *</label>
-                <input value={designName} onChange={e => setDesignName(e.target.value)}
-                  placeholder="e.g. Company Logo" className={inputCls} />
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                <StepperField label="Width (in)" value={width} onChange={setWidth} placeholder="Not sure" step={0.5} />
-                <StepperField label="Height (in)" value={height} onChange={setHeight} placeholder="Not sure" step={0.5} />
-                <StepperField label="Colors" value={colors} onChange={setColors} placeholder="Auto" step={1} />
-              </div>
-
-              <div>
-                <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1.5 sm:mb-2">Placement *</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {PLACEMENTS.map(p => (
-                    <button key={p.id} type="button" onClick={() => setPlacement(p.id)}
-                      className={`flex flex-col items-center gap-1 p-3 rounded-xl border text-[11px] sm:text-[12px] font-medium transition-all ${
-                        placement === p.id
-                          ? "border-[#2563EB] bg-[#2563EB]/5 text-[#2563EB] shadow-[0_0_0_1px_rgba(37,99,235,0.15)]"
-                          : "border-[var(--border2)] text-[var(--txt2)] hover:border-[var(--border3)] hover:bg-[var(--surface)]"}`}>
-                      <span className="text-base sm:text-lg">{p.emoji}</span> {p.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1">Format</label>
-                <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                  {FORMATS.map(f => (
-                    <button key={f} type="button" onClick={() => setFormat(f)}
-                      className={`px-3 sm:px-4 py-2 rounded-xl text-[11px] sm:text-[12px] font-semibold transition-all ${
-                        format === f ? "bg-[#2563EB] text-white shadow-sm" : "bg-[var(--surface)] border border-[var(--border2)] text-[var(--txt2)] hover:border-[var(--border3)]"}`}>
-                      {f}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1">Notes (optional)</label>
-                <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
-                  placeholder="Fabric type, special instructions..." className={inputCls + " resize-none"} />
-              </div>
-            </div>
-          </section>
-
-          {/* ═══ SECTION 3: SPEED ════════════════ */}
-          <section className="mb-6 sm:mb-8">
-            <SectionHeading emoji="⚡" title="Delivery Speed" />
-
-            <div className="space-y-2 sm:space-y-3">
-              {SPEEDS.map((s, i) => (
-                <button key={s.id} type="button" onClick={() => setSpeed(s.id)}
-                  className={`w-full flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border text-left transition-all relative ${
-                    speed === s.id
-                      ? "border-[#2563EB] bg-[#2563EB]/3 shadow-[0_0_0_1px_rgba(37,99,235,0.2)] shadow-md"
-                      : "border-[var(--border2)] hover:border-[var(--border3)] hover:bg-[var(--surface)]"}`}>
-                  {s.badge && (
-                    <span className="absolute -top-2 right-3 sm:right-4 bg-[#2563EB] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">{s.badge}</span>
-                  )}
-                  <span className="text-xl sm:text-2xl">{s.icon}</span>
-                  <div className="flex-1">
-                    <div className="font-syne font-bold text-[14px] sm:text-[15px] text-[var(--txt)]">{s.label}</div>
-                    <div className="text-[11px] sm:text-[12px] text-[var(--txt2)]">{s.time}</div>
-                  </div>
-                  {speed === s.id && (i === 0
-                    ? <Sparkles size={14} className="text-[#2563EB]" />
-                    : <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#2563EB] flex items-center justify-center"><Check size={10} className="text-white" /></div>)}
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-3 p-3 rounded-xl bg-[#16A34A]/5 border border-[#16A34A]/15 text-center">
-              <p className="text-[12px] text-[#16A34A] font-semibold">
-                <Shield size={12} className="inline mr-1" />
-                All delivery speeds are <strong>FREE</strong>. No hidden fees. No rush charges. Ever.
-              </p>
-            </div>
-          </section>
-
-          {/* ═══ PRICING ═════════════════ */}
-          <section className="mb-4 sm:mb-6">
-            <TieredPricingTable fileCount={files.length} />
-          </section>
-
-          {/* ═══ SECTION 4: REVIEW & SEND ═══════ */}
-          <section className="mb-6 sm:mb-8">
-            <SectionHeading emoji="✅" title="Review & Send" />
-
-            {/* Trust inline */}
-            <div className="flex items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-4 text-[11px] sm:text-[12px] text-[var(--txt3)]">
-              <span className="flex items-center gap-1"><Shield size={11} className="text-[#16A34A]" /> Free revisions</span>
-              <span className="flex items-center gap-1"><Star size={11} className="text-[#F59E0B]" /> 4.9/5 rated</span>
-              <span className="flex items-center gap-1"><Zap size={11} className="text-[#F97316]" /> 1h response</span>
-            </div>
-
-            {/* Order summary */}
-            {files.length > 0 && (
-              <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-3 sm:p-4 mb-3 sm:mb-4">
-                <h3 className="font-syne font-bold text-[12px] sm:text-sm mb-2 sm:mb-3 text-[var(--txt)]">Your Order</h3>
-                {[
-                  ["Design", designName || "—"],
-                  ["Files", `${files.length} uploaded`],
-                  ["Placement", PLACEMENTS.find(p => p.id === placement)?.label || "—"],
-                  ["Format", format],
-                  ["Speed", SPEEDS.find(s => s.id === speed)?.label],
-                  width && ["Size", `${width}" × ${height}"`],
-                  colors && ["Colors", colors],
-                ].filter(Boolean).map(([k, v]) => (
-                  <div key={k as string} className="flex justify-between py-1.5 text-[12px] sm:text-[13px] border-b border-[var(--border)] last:border-0">
-                    <span className="text-[var(--txt3)]">{k}</span>
-                    <span className="font-semibold text-[var(--txt)]">{v}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Delivery estimate */}
-            <div className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] mb-3 sm:mb-4 text-center">
-              <p className="text-[12px] text-[var(--txt2)]">
-                Estimated delivery: <strong className="text-[var(--txt)]">{SPEEDS.find(s => s.id === speed)?.time}</strong>
-              </p>
-            </div>
-
-            {/* B2B banner */}
-            {isB2B && (
-              <div className="mb-3 sm:mb-4 p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-[#7C3AED]/8 to-[#2563EB]/8 border border-[#7C3AED]/20">
-                <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                  <Building2 size={14} className="text-[#7C3AED]" />
-                  <span className="font-syne font-bold text-[13px] sm:text-[14px] text-[#7C3AED]">Business Account</span>
-                </div>
-                <div className="grid grid-cols-2 gap-1 text-[10px] sm:text-[11px] text-[var(--txt2)]">
-                  <span className="flex items-center gap-1"><Check size={9} className="text-[#7C3AED]" /> Volume pricing</span>
-                  <span className="flex items-center gap-1"><Check size={9} className="text-[#7C3AED]" /> Account manager</span>
-                  <span className="flex items-center gap-1"><Check size={9} className="text-[#7C3AED]" /> Priority queue</span>
-                  <span className="flex items-center gap-1"><Check size={9} className="text-[#7C3AED]" /> Monthly billing</span>
-                </div>
-              </div>
-            )}
-
-            {/* Guarantees */}
-            <div className="grid grid-cols-3 gap-2 mb-3 sm:mb-4">
-              {[
-                [Shield, "Free Revisions"],
-                [Zap, "Fast Delivery"],
-                [Check, "Pay When Satisfied"],
-              ].map(([Icon, label]) => (
-                <div key={label as string} className="flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
-                  <Icon size={13} className="text-[#16A34A]" />
-                  <span className="text-[10px] font-semibold text-[var(--txt)] text-center">{label as string}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Contact fields */}
-            <div className="space-y-2 sm:space-y-3">
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <div>
-                  <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1">Name *</label>
-                  <input value={name} onChange={e => setName(e.target.value)}
-                    placeholder="John Doe" className={inputCls} />
-                </div>
-                <div>
-                  <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1">Email *</label>
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                    placeholder="john@example.com" className={inputCls} />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[11px] sm:text-xs font-semibold text-[var(--txt2)] mb-1">Company (optional)</label>
-                <input value={company} onChange={e => setCompany(e.target.value)}
-                  placeholder="Your business name" className={inputCls} />
-              </div>
-            </div>
-          </section>
-
-          {/* Desktop submit (inline) */}
+          {/* ═══ NAVIGATION (desktop) ═════════ */}
           <div className="hidden sm:block">
-            {/* Upload progress + cancel */}
-            {submitting && submitProgress > 0 && (
-              <div className="mb-3 p-3 rounded-xl border" style={{background:"rgba(124,58,237,0.04)",borderColor:"rgba(124,58,237,0.2)"}}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[12px] font-semibold flex items-center gap-1.5" style={{color:"#7C3AED"}}>
-                    <Loader2 size={12} className="animate-spin"/> Uploading… {submitProgress}%
-                  </span>
-                  <button onClick={() => abortRef.current?.abort()}
-                    className="text-[11px] font-semibold cursor-pointer border-none bg-transparent px-2 py-1 rounded" style={{color:"#B91C1C"}}>
-                    Cancel
-                  </button>
-                </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{background:"var(--elevated)"}}>
-                  <div className="h-full rounded-full transition-all duration-300" style={{width:`${submitProgress}%`,background:"linear-gradient(90deg, #7C3AED, #D946EF)"}}/>
-                </div>
-              </div>
+            <NavButtons />
+            {step === 3 && (
+              <p className="text-[11px] text-[var(--txt3)] text-center mt-2 sm:mt-3">
+                Free quote in ~1 hour. No payment required. Pay only after you approve the preview.
+              </p>
             )}
-            {/* Error + retry */}
-            {submitError && !submitting && (
-              <div className="mb-3 p-3 rounded-xl border flex items-center justify-between" style={{background:"rgba(239,68,68,0.06)",borderColor:"rgba(239,68,68,0.2)"}}>
-                <span className="text-[12px] flex items-center gap-1.5" style={{color:"#B91C1C"}}><AlertTriangle size={12}/> {submitError}</span>
-                <button onClick={handleSubmit} className="px-3 py-1.5 rounded-lg text-[11px] font-semibold cursor-pointer border-none text-white" style={{background:"linear-gradient(135deg, #7C3AED, #D946EF)"}}>Retry</button>
-              </div>
-            )}
-            <button onClick={handleSubmit} disabled={submitting} type="button"
-              className="w-full py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] text-white font-bold text-[14px] sm:text-[15px] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.35)]">
-              {submitting ? (
-                <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Sending…</>
-              ) : (
-                <>Send My Design <ArrowRight size={16} /></>
-              )}
-            </button>
-            <p className="text-[11px] text-[var(--txt3)] text-center mt-2 sm:mt-3">
-              Free quote in ~1 hour. No payment required. Pay only after you approve the preview.
-            </p>
           </div>
         </div>
       </div>
 
-      {/* Sticky submit (mobile) */}
-      <div className="fixed bottom-0 inset-x-0 z-30 bg-[var(--bg)]/95  border-t border-[var(--border)] px-4 pt-2 pb-[max(8px,env(safe-area-inset-bottom))] sm:hidden">
+      {/* ═══ STICKY NAV (mobile) ══════════════ */}
+      <div className="fixed bottom-0 inset-x-0 z-30 bg-[var(--bg)]/95 border-t border-[var(--border)] px-4 pt-2 pb-[max(8px,env(safe-area-inset-bottom))] sm:hidden">
         <div className="max-w-[560px] mx-auto">
-          {/* Upload progress + cancel (mobile) */}
-          {submitting && submitProgress > 0 && (
-            <div className="mb-1.5 p-2 rounded-lg border" style={{background:"rgba(124,58,237,0.04)",borderColor:"rgba(124,58,237,0.2)"}}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-semibold flex items-center gap-1" style={{color:"#7C3AED"}}>
-                  <Loader2 size={10} className="animate-spin"/> Uploading… {submitProgress}%
-                </span>
-                <button onClick={() => abortRef.current?.abort()}
-                  className="text-[10px] font-semibold cursor-pointer border-none bg-transparent" style={{color:"#B91C1C"}}>Cancel</button>
-              </div>
-              <div className="h-1.5 rounded-full overflow-hidden" style={{background:"var(--elevated)"}}>
-                <div className="h-full rounded-full transition-all duration-300" style={{width:`${submitProgress}%`,background:"linear-gradient(90deg, #7C3AED, #D946EF)"}}/>
-              </div>
-            </div>
+          <NavButtons />
+          {step === 3 && (
+            <p className="text-[10px] text-[var(--txt3)] text-center mt-1">Free quote in ~1 hour · Pay after preview</p>
           )}
-          {/* Error + retry (mobile) */}
-          {submitError && !submitting && (
-            <div className="mb-1.5 p-2 rounded-lg border flex items-center justify-between" style={{background:"rgba(239,68,68,0.06)",borderColor:"rgba(239,68,68,0.2)"}}>
-              <span className="text-[10px] flex items-center gap-1" style={{color:"#B91C1C"}}><AlertTriangle size={10}/> {submitError}</span>
-              <button onClick={handleSubmit} className="px-2 py-1 rounded-md text-[10px] font-semibold cursor-pointer border-none text-white" style={{background:"linear-gradient(135deg, #7C3AED, #D946EF)"}}>Retry</button>
-            </div>
-          )}
-          <button onClick={handleSubmit} disabled={submitting} type="button"
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] text-white font-bold text-[13px] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(37,99,235,0.3)]">
-            {submitting ? "Sending…" : <>Send My Design <ArrowRight size={14} /></>}
-          </button>
-          <p className="text-[10px] text-[var(--txt3)] text-center mt-1">Free quote in ~1 hour · Pay after preview</p>
         </div>
       </div>
     </div>
