@@ -9,11 +9,13 @@ import { SITE_INFO } from "@/lib/site-config";
 export function WhatsAppWidget() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  // Hide on mobile home page (bottom bar has its own WhatsApp button)
+  // Hide on mobile for home & upload pages (sticky bottom nav conflicts)
   const isHome = pathname === "/home" || pathname === "/";
+  const isUpload = pathname === "/upload";
+  const hideMobile = isHome || isUpload;
 
   return (
-    <div className={`fixed bottom-8 sm:bottom-6 right-4 sm:right-6 z-[60] flex flex-col items-end gap-2 ${isHome ? "hidden sm:flex" : ""}`}>
+    <div className={`fixed bottom-8 sm:bottom-6 right-4 sm:right-6 z-[60] flex flex-col items-end gap-2 ${hideMobile ? "hidden sm:flex" : ""}`}>
       <AnimatePresence>
         {open && (
           <motion.div
