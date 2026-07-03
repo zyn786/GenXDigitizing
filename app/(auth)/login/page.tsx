@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { requestNotificationPermission } from "@/lib/notify";
+// requestNotificationPermission replaced by inline sync call — see handleLogin()
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
@@ -62,6 +62,19 @@ function LoginForm() {
   async function handleLogin(ev: React.FormEvent) {
     ev.preventDefault();
     if (!validate()) { return; }
+
+    // Request notification permission NOW — before any await.
+    // Browsers only show the permission dialog during a user gesture.
+    // Calling it after await breaks the gesture chain → dialog never appears.
+    let notifGranted = false;
+    if ("Notification" in window && Notification.permission === "default") {
+      try {
+        notifGranted = (await Notification.requestPermission()) === "granted";
+      } catch { /* browser doesn't support */ }
+    } else if ("Notification" in window && Notification.permission === "granted") {
+      notifGranted = true;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
@@ -89,8 +102,11 @@ function LoginForm() {
       const role = (profile as any)?.role ?? "client";
       const dest = redirectTo || PORTAL_HOME[role] || "/client";
       toast.success("Signed in!");
-      // Request notification permission while we have user gesture from form submit
-      requestNotificationPermission(data.user.id).catch(() => {});
+      // Subscribe to push if notification permission was granted above
+      if (notifGranted) {
+        const { subscribeToPush } = await import("@/lib/push-notifications");
+        subscribeToPush(data.user.id).catch(() => {});
+      }
       setTransitioning(true);
       // Brief pause so user sees the loading screen before navigation starts
       setTimeout(() => { router.push(dest); router.refresh(); }, 600);

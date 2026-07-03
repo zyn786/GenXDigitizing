@@ -286,6 +286,15 @@ export function UploadWizard() {
             Free quote in ~1 hour — no payment required
           </p>
 
+          <div className="text-center mb-5 sm:mb-6">
+            <p className="text-[13px] sm:text-[14px] font-semibold text-[#2563EB] mb-0.5">
+              🎁 New clients get <strong>one FREE sample digitizing</strong>
+            </p>
+            <p className="text-[11px] sm:text-[12px] text-[var(--txt3)]">
+              No credit card — just upload and we'll prove our quality
+            </p>
+          </div>
+
           {/* ═══ SECTION 1: UPLOAD ══════════════ */}
           <section className="mb-6 sm:mb-8">
             <SectionHeading emoji="📤" title="Files" />
