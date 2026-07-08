@@ -14,7 +14,7 @@ function getResend() {
 const FROM    = `${process.env.RESEND_FROM_NAME ?? "genxdigitizing"} <${process.env.RESEND_FROM_EMAIL || "support@genxdigitizing.com"}>`;
 const REPLY   = process.env.RESEND_REPLY_TO || "support@genxdigitizing.com";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.genxdigitizing.com";
-const LOGO_URL = `${APP_URL}/images/white_logo.png`;
+const LOGO_URL = `${APP_URL}/images/black_logo.png`;
 const TRUSTPILOT_BCC = "genxdigitizing.com+a5c28d839b@invite.trustpilot.com";
 
 // ── Types ──────────────────────────────────────────────────────
@@ -67,7 +67,7 @@ async function sendEmail(params: SendParams) {
 
 // ── Base layout with logo ──────────────────────────────────────
 
-function baseLayout(content: string, title: string): string {
+export function baseLayout(content: string, title: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,62 +78,36 @@ function baseLayout(content: string, title: string): string {
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Arial, sans-serif;
-      background: #E2E8F0;
+      background: #FFFFFF;
       margin: 0;
       padding: 0;
       -webkit-font-smoothing: antialiased;
     }
 
-    .wrapper { padding: 40px 20px; }
-
     .container {
-      max-width: 560px;
+      max-width: 600px;
       margin: 0 auto;
       background: #FFFFFF;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
     }
 
     /* ── Header ─────────────────────────────── */
     .header {
-      background: linear-gradient(160deg, #020617 0%, #0F172A 40%, #1E3A5F 75%, #1E40AF 100%);
-      padding: 40px 32px 36px;
-      text-align: center;
-    }
-    .header .logo-wrap {
-      display: inline-block;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 16px;
-      padding: 18px 32px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+      padding: 36px 32px 0;
+      text-align: left;
     }
     .header img {
-      height: 36px;
+      height: 28px;
       width: auto;
-      display: block;
     }
-    .header .accent-line {
-      width: 60px;
-      height: 4px;
-      background: linear-gradient(90deg, #3B82F6, #F97316);
-      border-radius: 2px;
-      margin: 16px auto 0;
-    }
-    .header .tagline {
-      color: rgba(255,255,255,0.60);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      margin: 12px 0 0;
+    .header-line {
+      height: 1px;
+      background: #E2E8F0;
+      margin: 20px 0 0;
     }
 
     /* ── Body ────────────────────────────────── */
     .body {
-      padding: 32px 32px 28px;
+      padding: 24px 32px 20px;
       color: #1E293B;
       font-size: 15px;
       line-height: 1.8;
@@ -152,28 +126,28 @@ function baseLayout(content: string, title: string): string {
 
     /* ── Detail card ──────────────────────────── */
     .detail-card {
-      background: #F1F5F9;
-      border: 1px solid #CBD5E1;
-      border-radius: 14px;
-      padding: 20px 22px;
-      margin: 20px 0;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin: 18px 0;
     }
     .detail-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #E2E8F0;
+      padding: 8px 0;
+      border-bottom: 1px solid #F1F5F9;
       font-size: 14px;
     }
     .detail-row:last-child { border-bottom: none; }
-    .detail-label { color: #475569; font-size: 13px; font-weight: 600; }
+    .detail-label { color: #64748B; font-size: 13px; font-weight: 600; }
     .detail-value { font-weight: 700; color: #0F172A; font-size: 14px; }
     .order-num {
       color: #1D4ED8;
       font-family: 'SF Mono', 'Courier New', monospace;
       font-weight: 800;
-      font-size: 14px;
+      font-size: 13px;
       letter-spacing: 0.5px;
       background: #DBEAFE;
       padding: 2px 8px;
@@ -182,18 +156,18 @@ function baseLayout(content: string, title: string): string {
 
     /* ── Status / info cards ──────────────────── */
     .info-card {
-      border-radius: 14px;
-      padding: 18px 22px;
-      margin: 18px 0;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 16px 0;
       font-size: 14px;
       line-height: 1.8;
       font-weight: 500;
     }
-    .info-card-green  { background: #DCFCE7; border: 2px solid #86EFAC; color: #14532D; }
-    .info-card-amber  { background: #FEF3C7; border: 2px solid #FCD34D; color: #78350F; }
-    .info-card-blue   { background: #DBEAFE; border: 2px solid #93C5FD; color: #1E3A8A; }
-    .info-card-red    { background: #FEE2E2; border: 2px solid #FCA5A5; color: #7F1D1D; }
-    .info-card-purple { background: #EDE9FE; border: 2px solid #C4B5FD; color: #4C1D95; }
+    .info-card-green  { background: #F0FDF4; border: 1px solid #BBF7D0; color: #14532D; }
+    .info-card-amber  { background: #FFFBEB; border: 1px solid #FDE68A; color: #78350F; }
+    .info-card-blue   { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E3A8A; }
+    .info-card-red    { background: #FEF2F2; border: 1px solid #FECACA; color: #7F1D1D; }
+    .info-card-purple { background: #F5F3FF; border: 1px solid #DDD6FE; color: #4C1D95; }
 
     /* ── Badges ───────────────────────────────── */
     .badge-free {
@@ -218,89 +192,113 @@ function baseLayout(content: string, title: string): string {
     }
 
     /* ── CTA button ───────────────────────────── */
-    .cta-wrap { text-align: center; margin: 28px 0 8px; }
+    .cta-wrap { text-align: center; margin: 24px 0 8px; }
     .cta {
       display: inline-block;
-      background: linear-gradient(135deg, #2563EB, #1D4ED8);
+      background: #2563EB;
       color: #FFFFFF !important;
-      padding: 16px 40px;
-      border-radius: 14px;
+      padding: 14px 36px;
+      border-radius: 8px;
       text-decoration: none;
-      font-weight: 800;
-      font-size: 16px;
-      box-shadow: 0 6px 20px rgba(37,99,235,0.35);
-      letter-spacing: 0.2px;
+      font-weight: 700;
+      font-size: 15px;
     }
 
     /* ── Feature grid ─────────────────────────── */
     .feature-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 20px 0;
+      gap: 10px;
+      margin: 18px 0;
     }
     .feature-item {
-      background: #EFF6FF;
-      border: 2px solid #BFDBFE;
-      border-radius: 12px;
-      padding: 14px 16px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 12px 14px;
       text-align: center;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       color: #1E40AF;
     }
-    .feature-item .icon { font-size: 22px; display: block; margin-bottom: 6px; }
+    .feature-item .icon { font-size: 20px; display: block; margin-bottom: 4px; }
 
     /* ── Footer ───────────────────────────────── */
     .footer {
-      background: #1E293B;
-      padding: 24px 32px;
-      font-size: 12px;
-      color: #94A3B8;
+      background: #F8FAFC;
+      border-top: 1px solid #E2E8F0;
+      padding: 28px 32px 22px;
       text-align: center;
-      line-height: 2.2;
+      font-size: 11px;
+      color: #94A3B8;
+      line-height: 2;
     }
-    .footer a { color: #60A5FA; text-decoration: none; font-weight: 600; }
-    .footer .brand { font-weight: 800; color: #E2E8F0; font-size: 14px; }
+    .footer img {
+      height: 20px;
+      width: auto;
+      margin-bottom: 8px;
+    }
+    .footer-tagline {
+      margin: 0;
+      font-size: 11px;
+      color: #94A3B8;
+      font-weight: 500;
+    }
+    .footer-divider {
+      width: 24px;
+      height: 1px;
+      background: #E2E8F0;
+      margin: 14px auto;
+    }
+    .footer a {
+      color: #475569;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 11px;
+    }
+    .footer-copy {
+      font-size: 10px;
+      color: #CBD5E1;
+      margin-top: 10px;
+    }
 
     /* ── Mobile ───────────────────────────────── */
     @media (max-width: 540px) {
-      .wrapper { padding: 16px 8px; }
-      .header { padding: 30px 20px 26px; }
-      .header .logo-wrap { padding: 14px 22px; }
-      .header img { height: 28px; }
-      .body { padding: 24px 18px 22px; font-size: 14px; }
+      .header { padding: 24px 18px 0; }
+      .header img { height: 24px; }
+      .body { padding: 18px 18px 16px; font-size: 14px; }
       .footer { padding: 18px 18px; }
       .detail-row { flex-direction: column; align-items: flex-start; gap: 3px; }
-      .cta { padding: 14px 28px; font-size: 15px; display: block; }
+      .cta { padding: 12px 24px; font-size: 14px; display: block; }
       .feature-grid { grid-template-columns: 1fr; }
       .greeting { font-size: 18px; }
     }
   </style>
 </head>
 <body>
-  <div class="wrapper">
-    <div class="container">
-      <div class="header">
-        <div class="logo-wrap">
-          <img src="${LOGO_URL}" alt="genxdigitizing" width="180" height="34" />
-        </div>
-        <div class="accent-line"></div>
-        <p class="tagline">Professional Embroidery Digitizing</p>
-      </div>
-      <div class="body">${content}</div>
-      <div class="footer">
-        <p class="brand">genxdigitizing</p>
-        <p>support@genxdigitizing.com</p>
-        <p>
-          <a href="${APP_URL}/client">Client Portal</a>
-          &nbsp;·&nbsp;
-          <a href="${APP_URL}/pricing">Pricing</a>
-          &nbsp;·&nbsp;
-          <a href="${APP_URL}">Website</a>
-        </p>
-        <p style="margin-top:8px;font-size:11px;color:#CBD5E1;">Production-ready embroidery digitizing. Free revisions, always.</p>
-      </div>
+  <div class="container">
+    <div class="header">
+      <img src="${LOGO_URL}" alt="genxdigitizing" width="150" height="26" />
+      <div class="header-line"></div>
+    </div>
+    <div class="body">${content}</div>
+    <div class="footer">
+      <img src="${LOGO_URL}" alt="genxdigitizing" width="130" height="20" />
+      <p class="footer-tagline">Professional Embroidery Digitizing</p>
+      <div class="footer-divider"></div>
+      <p style="margin:0;">
+        <a href="mailto:support@genxdigitizing.com">support@genxdigitizing.com</a>
+        &nbsp;·&nbsp;
+        <a href="${APP_URL}">genxdigitizing.com</a>
+      </p>
+      <p style="margin:2px 0 0;">
+        <a href="${APP_URL}/client">Client Portal</a>
+        &nbsp;·&nbsp;
+        <a href="${APP_URL}/pricing">Pricing</a>
+        &nbsp;·&nbsp;
+        <a href="${APP_URL}">Website</a>
+      </p>
+      <p class="footer-copy">&copy; ${new Date().getFullYear()} GenXdigitizing. All rights reserved.</p>
     </div>
   </div>
 </body>
@@ -548,7 +546,7 @@ export async function emailNewOrderAlert(params: {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  7. Welcome email
+//  7. Welcome email — professional onboarding
 // ═══════════════════════════════════════════════════════════════
 
 export async function emailWelcome(params: {
@@ -556,28 +554,98 @@ export async function emailWelcome(params: {
   clientName: string;
   companyName: string;
 }) {
-  const html = baseLayout(`
-    <p class="greeting">Welcome, ${params.clientName}!</p>
-    <p>Your account for <strong>${params.companyName}</strong> is ready. You now have access to professional embroidery digitizing services backed by real guarantees.</p>
+  var firstName = params.clientName.split(" ")[0] || params.clientName;
+  var html = baseLayout(`
+    <p class="greeting">Welcome to the family, ${firstName}! 👋</p>
 
-    <div class="feature-grid">
-      <div class="feature-item"><span class="icon">🔄</span> Free Format Conversion</div>
-      <div class="feature-item"><span class="icon">♾️</span> Unlimited Revisions</div>
-      <div class="feature-item"><span class="icon">⚡</span> Rush 6h Delivery</div>
-      <div class="feature-item"><span class="icon">🧵</span> Stitch-Perfect Files</div>
+    <p>Thanks for creating your account with <strong>GenXdigitizing</strong>. You've just joined <strong>2,500+ businesses</strong> who trust us for professional embroidery digitizing — backed by the industry's strongest guarantees.</p>
+
+    <div class="info-card info-card-green">
+      <div style="font-size:18px;margin-bottom:8px;font-weight:700;">✅ Your Account is Ready</div>
+      <strong>${params.companyName}</strong> now has full access to:<br/>
+      • Professional digitizing starting at just <strong>$7</strong><br/>
+      • <strong>Unlimited free revisions</strong> on every order<br/>
+      • <strong>Free file format conversion</strong> to any machine format<br/>
+      • <strong>Free rush turnaround</strong> — 6-hour delivery available<br/>
+      • <strong>Pay when satisfied</strong> — no upfront payment required
     </div>
 
-    <div class="info-card info-card-blue">
-      <strong>Starting Prices:</strong> Digitizing from $7 · Vector Redraw from $8 · Custom Patches from $5<br/>
-      <span style="font-size:12px;opacity:0.8;">All turnaround speeds included free. Pay when satisfied.</span>
+    <!-- How it works -->
+    <p style="font-size:16px;font-weight:700;color:#0F172A;margin:24px 0 12px;">🚀 How to Place Your First Order</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0;">
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:#2563EB;margin-bottom:4px;">1</div>
+        <div style="font-size:13px;font-weight:700;color:#0F172A;">Upload Your Artwork</div>
+        <div style="font-size:11px;color:#64748B;margin-top:4px;">JPG, PNG, PDF, or any format — we handle it all</div>
+      </div>
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:#2563EB;margin-bottom:4px;">2</div>
+        <div style="font-size:13px;font-weight:700;color:#0F172A;">Choose Your Options</div>
+        <div style="font-size:11px;color:#64748B;margin-top:4px;">Select turnaround, size, placement & special instructions</div>
+      </div>
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:#2563EB;margin-bottom:4px;">3</div>
+        <div style="font-size:13px;font-weight:700;color:#0F172A;">We Digitize It</div>
+        <div style="font-size:11px;color:#64748B;margin-top:4px;">Expert designers optimize every stitch path for perfection</div>
+      </div>
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:#2563EB;margin-bottom:4px;">4</div>
+        <div style="font-size:13px;font-weight:700;color:#0F172A;">Download & Stitch</div>
+        <div style="font-size:11px;color:#64748B;margin-top:4px;">Get your ready-to-stitch file — pay only when satisfied</div>
+      </div>
     </div>
 
+    <!-- Pricing at a glance -->
+    <p style="font-size:16px;font-weight:700;color:#0F172A;margin:24px 0 4px;">💎 Services You Can Order Today</p>
+    <p style="font-size:12px;color:#64748B;margin:0 0 12px;">All prices include free revisions, free format conversion & free standard turnaround</p>
+
+    <div class="detail-card">
+      <div class="detail-row"><span class="detail-label">🧵 Embroidery Digitizing</span><span class="detail-value" style="color:#16A34A;">from $7</span></div>
+      <div class="detail-row"><span class="detail-label">✏️ Vector Art Redraw</span><span class="detail-value" style="color:#16A34A;">from $8</span></div>
+      <div class="detail-row"><span class="detail-label">🏷️ Custom Patch Design</span><span class="detail-value" style="color:#16A34A;">from $5</span></div>
+      <div class="detail-row"><span class="detail-label">⚡ Rush Delivery (6h)</span><span class="detail-value"><span class="badge-free">FREE</span></span></div>
+      <div class="detail-row"><span class="detail-label">📁 Format Conversion</span><span class="detail-value"><span class="badge-free">FREE</span></span></div>
+    </div>
+
+    <!-- Trust badges -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0;">
+      <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:18px;font-weight:800;color:#16A34A;">4.9/5</div>
+        <div style="font-size:11px;color:#047857;font-weight:600;">Average Rating</div>
+      </div>
+      <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:18px;font-weight:800;color:#16A34A;">2,500+</div>
+        <div style="font-size:11px;color:#047857;font-weight:600;">Happy Clients</div>
+      </div>
+      <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:18px;font-weight:800;color:#16A34A;">10k+</div>
+        <div style="font-size:11px;color:#047857;font-weight:600;">Designs Delivered</div>
+      </div>
+      <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:18px;font-weight:800;color:#16A34A;">100%</div>
+        <div style="font-size:11px;color:#047857;font-weight:600;">Satisfaction Guarantee</div>
+      </div>
+    </div>
+
+    <!-- Guarantee -->
+    <div class="info-card info-card-purple">
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px;">🛡️ The GenX Guarantee</div>
+      Not 100% satisfied with your digitized file? We'll revise it until you are — unlimited revisions, <strong>completely free</strong>. No questions, no deadlines, no extra charges. Your satisfaction is the foundation of our reputation.
+    </div>
+
+    <!-- CTA -->
     <div class="cta-wrap">
-      <a href="${APP_URL}/client" class="cta">Go to Your Portal →</a>
+      <a href="${APP_URL}/client" class="cta">Place Your First Order →</a>
     </div>
-  `, "Welcome to genxdigitizing");
 
-  return sendEmail({ to: params.to, subject: `Welcome to genxdigitizing, ${params.clientName}!`, html });
+    <p style="margin-top:16px;color:#64748B;font-size:13px;text-align:center;">
+      Questions? Reply to this email or reach us at <a href="mailto:support@genxdigitizing.com" style="color:#2563EB;">support@genxdigitizing.com</a> — we respond within minutes during business hours.
+    </p>
+  `, "Welcome to GenXdigitizing");
+
+  return sendEmail({ to: params.to, subject: `Welcome to GenXdigitizing, ${firstName}! Here's how to get started 🎉`, html, bcc: TRUSTPILOT_BCC });
+}
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -27,6 +27,7 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/api/webhooks") ||
     pathname.startsWith("/api/cron")     ||  // cron endpoints secured by x-cron-secret
+    pathname.startsWith("/api/admin/email-inbound") || // Resend webhook — unauthenticated
     pathname.startsWith("/_next")        ||
     pathname.startsWith("/favicon")      ||
     pathname.match(/\.(ico|png|jpg|jpeg|svg|css|js|woff|woff2|ttf|map)$/)
@@ -45,6 +46,7 @@ export async function middleware(request: NextRequest) {
   const isCrmApiRoute = pathname.startsWith("/api/crm/");
   // Auth/chat endpoints that need at minimum authentication
   const isProtectedApi = pathname.startsWith("/api/auth/auto-confirm") ||
+                         pathname.startsWith("/api/auth/send-welcome") ||
                          pathname.startsWith("/api/chat/upload") ||
                          pathname.startsWith("/api/review-notify") ||
                          pathname.startsWith("/api/message-notify") ||

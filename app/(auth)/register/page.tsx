@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Eye, EyeOff, Mail, Lock, User, Building2,
-  Globe, ArrowRight, CheckCircle2, ChevronLeft, Check,
+  Globe, ArrowRight, ChevronLeft, Check,
   Shield, ShieldCheck, Star, Clock, RefreshCw, Users,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -65,7 +65,6 @@ export default function RegisterPage() {
   const [showPw,       setShowPw]       = useState(false);
   const [showConfirm,  setShowConfirm]  = useState(false);
   const [loading,      setLoading]      = useState(false);
-  const [success,      setSuccess]      = useState(false);
   const [password,     setPassword]     = useState("");
 
   const strength = getPasswordStrength(password);
@@ -95,8 +94,7 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterInput) => {
     setLoading(true);
     try {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
-
+      // 1. Create account (no email redirect needed — we auto-confirm + sign in directly)
       const { error: signUpError } = await supabase.auth.signUp({
         email:    data.email,
         password: data.password,
@@ -107,7 +105,6 @@ export default function RegisterPage() {
             country:      data.country,
             role:         "client",
           },
-          emailRedirectTo: `${appUrl}/auth/callback?redirect=/client`,
         },
       });
 
@@ -117,10 +114,11 @@ export default function RegisterPage() {
         } else {
           toast.error(signUpError.message);
         }
+        setLoading(false);
         return;
       }
 
-      // Auto-confirm email so user can log in immediately
+      // 2. Auto-confirm email — skip verification email entirely
       try {
         await fetch("/api/auth/auto-confirm", {
           method: "POST",
@@ -131,53 +129,42 @@ export default function RegisterPage() {
         // Confirmation may fail silently — user still created
       }
 
-      setSuccess(true);
+      // 3. Auto sign-in — go directly to client portal
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (signInError) {
+        // Sign-in failed (rare — user exists and is confirmed). Fall back to login page.
+        toast.error("Account created! Please sign in.");
+        router.push("/login");
+        return;
+      }
+
+      // 4. Send professional welcome email (fire-and-forget)
+      fetch("/api/auth/send-welcome", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: data.email,
+          name: data.full_name,
+          company: data.company_name,
+        }),
+      }).catch(function () {
+        // Welcome email is nice-to-have — don't block registration if it fails
+      });
+
+      // 5. Redirect to client portal
+      toast.success("Welcome, " + data.full_name + "!");
+      router.push("/client");
+      router.refresh();
+    } catch {
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-
-  // ── Success state ──────────────────────────────────────────────
-  if (success) {
-    return (
-      <div className="animate-fade-in text-center">
-        <div className="w-16 h-16 rounded-full mx-auto mb-5 flex items-center justify-center
-          bg-gradient-to-br from-[#16A34A]/15 to-[#2563EB]/15">
-          <CheckCircle2 size={28} className="text-[#16A34A]" />
-        </div>
-        <h2 className="font-syne font-bold text-xl text-[var(--txt)] mb-3">
-          Account created! 🎉
-        </h2>
-        <p className="text-sm text-[var(--txt2)] leading-relaxed mb-6">
-          Your account is ready. Sign in now to access your portal.
-        </p>
-        <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-xl p-4 mb-5 text-left">
-          <p className="text-xs font-medium text-[#16A34A] mb-2">
-            What's included on every order:
-          </p>
-          {[
-            "🔄 File format conversion — FREE",
-            "♾️ Unlimited revisions — FREE",
-            "⚡ Rush (6h) & Urgent (3h) turnaround — FREE",
-            "🧵 Starting from just $7",
-          ].map((item) => (
-            <p key={item} className="text-xs text-[var(--txt2)] py-1 border-b border-[var(--border)] last:border-0">
-              {item}
-            </p>
-          ))}
-        </div>
-        <Button
-          variant="grad"
-          size="lg"
-          className="w-full"
-          onClick={() => router.push("/login")}
-          rightIcon={<ArrowRight size={15} />}
-        >
-          Sign In Now
-        </Button>
-      </div>
-    );
-  }
 
   // ── Summary data for step 3 ────────────────────────────────────
   const summaryRows = [

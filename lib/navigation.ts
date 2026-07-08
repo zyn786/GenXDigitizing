@@ -53,6 +53,7 @@ export const NAV_SECTIONS: Record<UserRole, NavSection[]> = {
     ]},
     { title: "Engagement", items: [
       { label: "Support Inbox", href: "/admin/messages", iconName: "MessageSquare", badgeKey: "messages" },
+      { label: "Send Email", href: "/admin/email", iconName: "Mail" },
       { label: "Reviews", href: "/admin/reviews", iconName: "Star" },
       { label: "Leads", href: "/admin/leads", iconName: "TrendingUp" },
       { label: "Notifications", href: "/admin/notifications", iconName: "Bell", badgeKey: "notifications" },
