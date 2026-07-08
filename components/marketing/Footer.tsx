@@ -40,7 +40,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr] gap-6 md:gap-8 lg:gap-12 mb-6 md:mb-8">
           {/* Brand */}
           <div className="text-center md:text-left">
-            <Link href="/home" className="inline-flex items-center gap-2 mb-2 md:mb-3 no-underline">
+            <Link href="/" className="inline-flex items-center gap-2 mb-2 md:mb-3 no-underline">
               <Image src="/images/black_logo.png" alt="genxdigitizing" width={200} height={100} className="h-7 md:h-8 w-auto" />
             </Link>
             <p className="text-xs md:text-[13px] text-[var(--txt3)] leading-relaxed max-w-[240px] md:max-w-[260px] mx-auto md:mx-0 mb-3 md:mb-4">

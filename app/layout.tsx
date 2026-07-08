@@ -64,9 +64,8 @@ export const metadata: Metadata = {
     index:  true,
     follow: true,
   },
-  alternates: {
-    canonical: process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com",
-  },
+  // Per-page canonical set individually. No global default — wrong default
+  // tells Google every page is a duplicate of the homepage.
 };
 
 export const viewport: Viewport = {

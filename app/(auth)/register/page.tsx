@@ -95,7 +95,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       // 1. Create account (no email redirect needed — we auto-confirm + sign in directly)
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email:    data.email,
         password: data.password,
         options: {
@@ -118,12 +118,14 @@ export default function RegisterPage() {
         return;
       }
 
-      // 2. Auto-confirm email — skip verification email entirely
+      const newUserId = signUpData?.user?.id;
+
+      // 2. Auto-confirm email — pass userId for direct lookup (no pagination issue)
       try {
         await fetch("/api/auth/auto-confirm", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: data.email }),
+          body: JSON.stringify({ email: data.email, userId: newUserId }),
         });
       } catch {
         // Confirmation may fail silently — user still created
@@ -155,10 +157,9 @@ export default function RegisterPage() {
         // Welcome email is nice-to-have — don't block registration if it fails
       });
 
-      // 5. Redirect to client portal
+      // 5. Redirect to client portal (no refresh — push already fetches fresh data)
       toast.success("Welcome, " + data.full_name + "!");
       router.push("/client");
-      router.refresh();
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {

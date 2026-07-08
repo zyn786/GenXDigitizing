@@ -207,7 +207,7 @@ export function Nav({ topOffset }: { topOffset?: string }) {
     >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 flex items-center justify-between h-16 lg:h-[68px]">
         {/* Logo */}
-        <Link href="/home" className="flex items-center gap-2 no-underline flex-shrink-0">
+        <Link href="/" className="flex items-center gap-2 no-underline flex-shrink-0">
           <Image
             src="/images/black_logo.png"
             alt="GenX Digitizing — home"

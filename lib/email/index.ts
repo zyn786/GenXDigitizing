@@ -646,7 +646,6 @@ export async function emailWelcome(params: {
 
   return sendEmail({ to: params.to, subject: `Welcome to GenXdigitizing, ${firstName}! Here's how to get started 🎉`, html, bcc: TRUSTPILOT_BCC });
 }
-}
 
 // ═══════════════════════════════════════════════════════════════
 //  8. SLA warning
