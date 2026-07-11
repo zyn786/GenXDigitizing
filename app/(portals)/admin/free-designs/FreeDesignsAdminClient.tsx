@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
 import type { FreeDesign, FreeDesignImage } from "@/types";
+import Image from "next/image";
 
 const CARD_COLORS = [
   { bg: "#3B82F6", bgSoft: "rgba(59,130,246,0.08)", border: "rgba(59,130,246,0.25)", icon: "#2563EB", text: "#1D4ED8" },
@@ -80,7 +81,7 @@ function ImageUploader({ images, onAdd, onRemove, uploading, onUploadingChange }
       <div className="grid grid-cols-4 gap-2 mb-2">
         {images.map((img, i) => (
           <div key={i} className="relative aspect-square rounded-lg overflow-hidden group/img" style={{ background: "var(--elevated)" }}>
-            <img src={img.thumbnailUrl || img.url} alt={img.alt || `Preview ${i + 1}`} className="w-full h-full object-cover" />
+            <Image src={img.thumbnailUrl || img.url} alt={img.alt || `Preview ${i + 1}`} className="w-full h-full object-cover" />
             <button onClick={() => onRemove(i)}
               className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
               <X className="w-3 h-3" />
@@ -365,7 +366,7 @@ export function FreeDesignsAdminClient() {
               {/* Thumbnail */}
               <div className="aspect-[4/3] flex items-center justify-center relative" style={{ background: "var(--elevated)" }}>
                 {design.images?.[0] ? (
-                  <img src={design.images[0].thumbnailUrl || design.images[0].url} alt={design.title} className="w-full h-full object-cover" />
+                  <Image src={design.images[0].thumbnailUrl || design.images[0].url} alt={design.title} className="w-full h-full object-cover" />
                 ) : <span className="text-3xl">🧵</span>}
                 <div className="absolute top-2 left-2 flex gap-1">
                   {design.featured && (

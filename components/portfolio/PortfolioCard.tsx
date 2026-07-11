@@ -47,7 +47,7 @@ export function PortfolioCard({ item, index, onClick, onCategoryClick }: Portfol
 
         {firstImage && !imgError ? (
           <>
-            <img
+            <Image
               src={firstImage.url}
               alt={item.title}
               loading="lazy"

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
@@ -64,7 +65,7 @@ export default function ResetPasswordPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="no-underline">
-            <img src="/images/black_logo.png" alt="GENX DIGITIZING" className="h-10 w-auto mx-auto" />
+            <Image src="/images/black_logo.png" alt="GENX DIGITIZING" width={150} height={40} className="w-auto mx-auto" />
           </Link>
         </div>
 

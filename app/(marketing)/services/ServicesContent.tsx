@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { fetchPortfolio } from "@/components/portfolio/data";
 import type { PortfolioItem } from "@/components/portfolio/data";
 import { PortfolioModal } from "@/components/portfolio/PortfolioModal";
+import Image from "next/image";
 
 /* ── Service definitions (no pricing displayed) ──────────── */
 const SERVICES = [
@@ -86,7 +87,7 @@ function PortfolioThumb({ item, onClick }: { item: PortfolioItem; onClick: () =>
     <button onClick={onClick} className="group block w-full text-left bg-transparent border-none p-0 cursor-pointer">
       <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[var(--elevated)] border border-[var(--border)] group-hover:border-[var(--border3)] transition-all duration-200">
         {firstImage && !imgError ? (
-          <img
+          <Image
             src={firstImage.url}
             alt={item.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -313,7 +314,7 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
                   <div className={`hidden sm:block ${isReversed ? "lg:order-1" : "lg:order-2"}`}>
                     <div className="relative rounded-3xl overflow-hidden aspect-[4/3] flex items-center justify-center bg-[var(--elevated)] border border-[var(--border)]">
                       {portfolioForService[0]?.images?.[0] ? (
-                        <img
+                        <Image
                           src={portfolioForService[0].images[0].url}
                           alt={svc.title}
                           className="w-full h-full object-cover"

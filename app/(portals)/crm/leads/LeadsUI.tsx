@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { Plus, X, DollarSign, Send, Image, Loader2, Mail, Globe, Calendar, Building2, FileText, ChevronRight, TrendingUp, Target, Trophy, Download, ShoppingCart } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/utils";
+import Image from "next/image";
 
 const CARD_COLORS = [
   { bg: "#3B82F6", bgSoft: "rgba(59,130,246,0.08)", border: "rgba(59,130,246,0.25)", icon: "#2563EB", text: "#1D4ED8" },
@@ -251,7 +252,7 @@ function LeadDetailModal({ lead, onClose, onContact, onConvertToOrder }: { lead:
                 <span className="text-[11px] uppercase tracking-wider font-bold" style={{ color: txt3 }}>Artwork Preview</span>
               </div>
               <a href={artworkUrl} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
-                <img
+                <Image
                   src={artworkUrl}
                   alt={artworkInfo?.name || "Artwork"}
                   className="w-full h-auto max-h-[300px] object-contain"

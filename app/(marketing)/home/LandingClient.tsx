@@ -221,7 +221,7 @@ const HEADLINES = {
   primary: {
     line1: "Real Digitizers.",
     gradient: "Just Quality.",
-    sub: "Every file hand-digitized by experienced professionals. Clean sew-outs. Zero thread breaks. Production-ready in 12 hours — or it's free.",
+    sub: "",
     line1Weight: "font-light",
     gradientWeight: "font-bold",
     line1Tracking: "tracking-wide",
@@ -376,7 +376,7 @@ function SewoutGifShowcase({
   return (
     <div className="relative aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden bg-[var(--elevated)] border border-[var(--border)] shadow-lg">
       {/* Static poster (webp) — always shown, fades out when GIF loads */}
-      <img
+      <Image
         src={webpUrl}
         alt={alt}
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${gifLoaded && hasGif ? "opacity-0" : "opacity-100"}`}
@@ -388,7 +388,7 @@ function SewoutGifShowcase({
 
       {/* Animated GIF overlay */}
       {hasGif && !gifError && (
-        <img
+        <Image
           src={gifUrl!}
           alt={`${alt} — animated sew-out`}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${gifLoaded ? "opacity-100" : "opacity-0"}`}
@@ -1460,9 +1460,9 @@ function BeforeAfterShowcaseSection() {
                 onMouseDown={handleDown}
                 onTouchStart={handleDown}
               >
-                <img src={current.beforeUrl} alt={current.beforeAlt} className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+                <Image src={current.beforeUrl} alt={current.beforeAlt} fill className="object-cover" draggable={false} sizes="(max-width: 768px) 100vw, 800px" />
                 <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 0 0 ${sliderPos}%)` }}>
-                  <img src={current.afterUrl} alt={current.afterAlt} className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+                  <Image src={current.afterUrl} alt={current.afterAlt} fill className="object-cover" draggable={false} sizes="(max-width: 768px) 100vw, 800px" />
                 </div>
                 {/* Handle */}
                 <div className="absolute top-0 bottom-0 w-[3px] pointer-events-none" style={{ left: `${sliderPos}%`, background: "linear-gradient(180deg, transparent 0%, #F97316 30%, #F97316 70%, transparent 100%)", boxShadow: "0 0 12px rgba(249,115,22,0.5)" }} />

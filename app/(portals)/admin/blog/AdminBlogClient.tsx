@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import BlogContent from "@/components/blog/BlogContent";
 import type { BlogPost as BlogPostType } from "@/lib/blog-data";
+import Image from "next/image";
 
 interface BlogPost {
   id: string;
@@ -710,7 +711,7 @@ export default function AdminBlogPage() {
                       </label>
                     </div>
                     {form.heroImage && (
-                      <img src={form.heroImage} alt="Preview" className="mt-2 w-full max-h-36 object-cover rounded-xl border border-[var(--border)]" />
+                      <Image src={form.heroImage} alt="Preview" className="mt-2 w-full max-h-36 object-cover rounded-xl border border-[var(--border)]" />
                     )}
                   </div>
                   {/* Publish toggle */}
@@ -793,7 +794,7 @@ export default function AdminBlogPage() {
                               </label>
                             </div>
                             {s.image && (
-                              <img src={s.image} alt={`Section ${i + 1}`}
+                              <Image src={s.image} alt={`Section ${i + 1}`}
                                 className="mt-2 w-full max-h-32 object-cover rounded-lg border border-[var(--border)]" />
                             )}
                           </div>

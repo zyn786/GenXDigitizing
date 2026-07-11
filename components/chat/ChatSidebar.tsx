@@ -6,6 +6,7 @@ import { MessageSquare, Trash2 } from "lucide-react";
 import { useChat } from "./ChatProvider";
 import { UnifiedSearch } from "./NewChatSearch";
 import type { Conversation } from "./types";
+import Image from "next/image";
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All" },
@@ -67,7 +68,7 @@ function ConversationItem({ conv }: { conv: Conversation }) {
       {/* Avatar */}
       <div className="relative flex-shrink-0">
         {conv.clientAvatar ? (
-          <img src={conv.clientAvatar} alt={conv.clientName} className="w-9 h-9 rounded-full object-cover" />
+          <Image src={conv.clientAvatar} alt={conv.clientName} className="w-9 h-9 rounded-full object-cover" />
         ) : (
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-xs"

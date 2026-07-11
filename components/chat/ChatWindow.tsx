@@ -7,6 +7,7 @@ import { useChat } from "./ChatProvider";
 import { MessageBubble } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
 import type { OrderStatus } from "./types";
+import Image from "next/image";
 
 function ClientInfoBanner() {
   const [dismissed, setDismissed] = useState(false);
@@ -182,7 +183,7 @@ export function ChatWindow() {
         {/* Avatar + online dot */}
         <div className="relative flex-shrink-0">
           {activeConversation.clientAvatar ? (
-            <img src={activeConversation.clientAvatar} alt={activeConversation.clientName} className="w-10 h-10 rounded-full object-cover" />
+            <Image src={activeConversation.clientAvatar} alt={activeConversation.clientName} className="w-10 h-10 rounded-full object-cover" />
           ) : (
             <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs"
               style={{ background: "linear-gradient(135deg, #7C3AED, #0E7490)" }}>

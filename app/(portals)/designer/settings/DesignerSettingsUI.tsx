@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast }    from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { Star, Settings, BarChart3, User, Award, Clock, CheckCircle2, RotateCcw } from "lucide-react";
+import Image from "next/image";
 
 const txt  = "var(--txt)";
 const txt2 = "var(--txt2)";
@@ -71,7 +72,7 @@ export function DesignerSettingsUI({ user, profile }: any) {
           <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
             style={{ background: "linear-gradient(135deg, #7C3AED, #D946EF)" }}>
             {designerAvatar
-              ? <img src={designerAvatar} alt={designerName} className="w-full h-full rounded-full object-cover" />
+              ? <Image src={designerAvatar} alt={designerName} className="w-full h-full rounded-full object-cover" />
               : designerName?.charAt(0)?.toUpperCase() || "D"}
           </div>
           <div className="flex-1 min-w-0">

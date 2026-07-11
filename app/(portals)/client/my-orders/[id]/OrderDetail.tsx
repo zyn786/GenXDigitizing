@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowLeft, CheckCircle, Download, RefreshCw, Star, Image as ImageIcon, FileText, Upload, ChevronDown, Settings, MessageSquare } from "lucide-react";
 import { formatDate, formatFileSize, formatStitchCount, formatCurrency, STATUS_LABEL, STATUS_CLASS, TURNAROUND_OPTIONS, hoursUntilDeadline, slaStatusColor } from "@/lib/utils";
+import Image from "next/image";
 
 const FMTS = ["DST","PES","EMB","JEF","XXX","VIP","HUS","EXP","VP3","SEW","AI","SVG","EPS","PDF"];
 const EDITABLE_STATUSES = ["submitted","assigned","in_progress","review","approved","revision"];
@@ -46,7 +47,7 @@ function FileCard({ file, icon, onPreview, onDownload }: any) {
         {isArtwork ? (
           <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer" style={{background:"var(--elevated2)"}}
             onClick={()=>onPreview?.(url)}>
-            <img src={url} alt={file.file_name} className="w-full h-full object-cover" onError={(e:any)=>{e.target.style.display="none";}}/>
+            <Image src={url} alt={file.file_name} className="w-full h-full object-cover" onError={(e:any)=>{e.target.style.display="none";}}/>
           </div>
         ) : (
           <span className="flex-shrink-0" style={{color:txt2}}>{icon}</span>
@@ -327,7 +328,7 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
           <button onClick={() => setPreviewImage(null)}
             className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-white text-xl z-10"
             style={{ background:"rgba(255,255,255,0.1)", border:"none", cursor:"pointer" }}>×</button>
-          <img src={previewImage} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-xl"
+          <Image src={previewImage} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-xl"
             onClick={e => e.stopPropagation()}/>
         </div>
       )}

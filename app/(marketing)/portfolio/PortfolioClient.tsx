@@ -28,6 +28,7 @@ import { PortfolioModal } from "@/components/portfolio/PortfolioModal";
 import { fetchPortfolio, DEFAULT_CATEGORIES, SUB_CATEGORIES } from "@/components/portfolio/data";
 import { SITE_STATS, fmt, fmtPlus } from "@/lib/site-config";
 import type { PortfolioItem, PortfolioCategory } from "@/components/portfolio/data";
+import Image from "next/image";
 
 /* ─────────────────────────────────────────────────────────────
    Sub-components
@@ -147,7 +148,7 @@ function GalleryCard({
       <div className="relative aspect-[4/5] sm:aspect-[3/4] overflow-hidden" style={{ background: `${accent}06` }}>
         {firstImage && !imgError ? (
           <>
-            <img
+            <Image
               src={firstImage.url}
               alt={item.title}
               loading="lazy"
@@ -245,7 +246,7 @@ function BeforeAfterCard({
       <div className="grid grid-cols-2 gap-[2px]">
         {/* Before */}
         <div className="relative aspect-square overflow-hidden">
-          <img
+          <Image
             src={beforeImg.url}
             alt="Before digitizing"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -260,7 +261,7 @@ function BeforeAfterCard({
         </div>
         {/* After */}
         <div className="relative aspect-square overflow-hidden">
-          <img
+          <Image
             src={afterImg.url}
             alt="After digitizing"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -308,7 +309,7 @@ function ClientResultCard({ item }: { item: PortfolioItem }) {
         style={{ borderColor: `${accent}25` }}
       >
         {firstImg ? (
-          <img src={firstImg.url} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
+          <Image src={firstImg.url} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div
             className="w-full h-full flex items-center justify-center text-xl"

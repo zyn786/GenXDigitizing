@@ -63,10 +63,8 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
           {data.emoji} Professional Service
         </span>
         <h1 className="font-syne text-[clamp(30px,7vw,56px)] leading-[1.1] mb-3">
-          <span className="block font-light tracking-wide">Real Digitizers.</span>
-          <span className="block font-bold tracking-tight bg-gradient-to-r from-[#38BDF8] via-[#C084FC] to-[#FBBF24] bg-clip-text text-transparent">
-            No Auto-Trace.
-          </span>
+          <span className="block font-bold tracking-tight">{data.title}</span>
+          <span className="block font-light tracking-wide text-[var(--txt2)]">{data.shortName}</span>
         </h1>
         <p className="text-base sm:text-lg text-[var(--txt2)] max-w-2xl mx-auto mb-2">{data.subtitle}</p>
         <p className="text-sm text-[var(--txt3)] max-w-xl mx-auto mb-6">{data.description}</p>

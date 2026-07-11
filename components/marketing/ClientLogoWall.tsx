@@ -1,6 +1,7 @@
 "use client";
 
 import { Building2 } from "lucide-react";
+import Image from "next/image";
 
 // Replace placeholders with real logo images when available
 const CLIENTS = [
@@ -31,7 +32,7 @@ export function ClientLogoWall() {
               key={client.name}
               className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--border3)] transition-all duration-200"
             >
-              {/* Logo placeholder — replace with <img> when logos available */}
+              {/* Logo placeholder — replace with <Image> when logos available */}
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2563EB]/10 to-[#7C3AED]/10 border border-[#2563EB]/15 flex items-center justify-center">
                 <Building2 size={18} className="text-[var(--txt3)]" />
               </div>

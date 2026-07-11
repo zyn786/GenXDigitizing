@@ -9,6 +9,7 @@ import {
   FileText, Image as ImageIcon, Package, Clock, User, Building2,
   Copy, Trash2, Upload,
 } from "lucide-react";
+import Image from "next/image";
 import {
   formatDate, formatDateTime, formatFileSize, formatStitchCount,
   STATUS_LABEL, STATUS_CLASS, TURNAROUND_OPTIONS,
@@ -105,7 +106,7 @@ function FileCard({ file, onPreview, onDelete }: { file: any; onPreview?: (url: 
         {isArtwork ? (
           <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer" style={{ background:"var(--elevated2)" }}
             onClick={() => onPreview?.(url)}>
-            <img src={url} alt={file.file_name} className="w-full h-full object-cover"
+            <Image src={url} alt={file.file_name} className="w-full h-full object-cover"
               onError={(e:any)=>{ e.target.style.display="none"; }}/>
           </div>
         ) : (
@@ -877,7 +878,7 @@ export function AdminOrderDetail({
           <button onClick={() => setPreviewImage(null)}
             className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-white text-xl z-10"
             style={{ background:"rgba(255,255,255,0.1)", border:"none", cursor:"pointer" }}>×</button>
-          <img src={previewImage} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-xl"
+          <Image src={previewImage} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-xl"
             onClick={e => e.stopPropagation()}/>
         </div>
       )}

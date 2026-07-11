@@ -6,6 +6,7 @@ import { toast }                   from "sonner";
 import { createClient }            from "@/lib/supabase/client";
 import { Download, ChevronDown, ChevronUp, Trash2, Clock, AlertTriangle, CheckCircle2, ClipboardList, Star, DollarSign, RotateCcw, ChevronRight, Upload, FileText, X } from "lucide-react";
 import { formatDate, formatCurrency, hoursUntilDeadline, TURNAROUND_OPTIONS } from "@/lib/utils";
+import Image from "next/image";
 
 const PC = {
   urgent:   { bg: "#EF4444", bgSoft: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.25)", icon: "#DC2626", text: "#B91C1C", glow: "rgba(239,68,68,0.20)" },
@@ -152,7 +153,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
           <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
             style={{ background:"linear-gradient(135deg, #7C3AED, #D946EF)" }}>
             {designerAvatar
-              ? <img src={designerAvatar} alt={designerName} className="w-full h-full rounded-full object-cover" />
+              ? <Image src={designerAvatar} alt={designerName} className="w-full h-full rounded-full object-cover" />
               : designerName?.charAt(0)?.toUpperCase() || "D"}
           </div>
           <div className="flex-1 min-w-0">
@@ -323,7 +324,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer" style={{ background:"var(--elevated2)" }}
                                   onClick={(e)=>{ e.stopPropagation(); setPreviewImage(f.signed_url||f.file_url); }}>
-                                  <img src={f.signed_url||f.file_url} alt={f.file_name} className="w-full h-full object-cover"
+                                  <Image src={f.signed_url||f.file_url} alt={f.file_name} className="w-full h-full object-cover"
                                     onError={(e:any)=>{ e.target.style.display="none"; }}/>
                                 </div>
                                 <div className="min-w-0">
@@ -569,7 +570,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer" style={{ background:"var(--elevated2)" }}
                                 onClick={() => setPreviewImage(f.signed_url||f.file_url)}>
-                                <img src={f.signed_url||f.file_url} alt={f.file_name} className="w-full h-full object-cover"
+                                <Image src={f.signed_url||f.file_url} alt={f.file_name} className="w-full h-full object-cover"
                                   onError={(e:any)=>{ e.target.style.display="none"; }}/>
                               </div>
                               <p className="text-[12px] truncate font-medium" style={{ color:txt }}>{f.file_name}</p>
@@ -646,7 +647,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
           <button onClick={() => setPreviewImage(null)}
             className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-white text-xl z-10"
             style={{ background:"rgba(255,255,255,0.1)", border:"none", cursor:"pointer" }}>×</button>
-          <img src={previewImage} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-xl"
+          <Image src={previewImage} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-xl"
             onClick={e => e.stopPropagation()}/>
         </div>
       )}

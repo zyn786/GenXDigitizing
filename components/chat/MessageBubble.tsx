@@ -5,6 +5,7 @@ import { Check, CheckCheck, FileText, Image, FileArchive, Play, Pause, Trash2, D
 import { useState, useRef, useCallback, memo } from "react";
 import { useChat } from "./ChatProvider";
 import type { Message, Attachment } from "./types";
+import NextImage from "next/image";
 
 const IMG_EXTENSIONS = /\.(png|jpe?g|webp|gif|svg|avif)$/i;
 
@@ -130,7 +131,7 @@ const FilePreview = memo(function FilePreview({ att }: { att: Attachment }) {
         {showFull ? (
           <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4"
             onClick={() => setShowFull(false)}>
-            <img src={url} alt={name} className="max-w-full max-h-full object-contain rounded-lg" />
+            <NextImage src={url} alt={name} fill className="object-contain rounded-lg" />
           </div>
         ) : null}
         <div
@@ -142,11 +143,12 @@ const FilePreview = memo(function FilePreview({ att }: { att: Attachment }) {
           onTouchEnd={handleTouchEnd}
           onClick={() => !longPress && setShowFull(true)}
         >
-          <img
+          <NextImage
             src={url}
             alt={name}
+            width={240}
+            height={240}
             className="w-full max-w-[240px] max-h-[240px] object-cover"
-            loading="lazy"
           />
           {/* Download button on hover/long press */}
           <button

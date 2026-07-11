@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { SUB_CATEGORIES } from "@/components/portfolio/data";
+import Image from "next/image";
 
 const CARD_COLORS = [
   { bg: "#3B82F6", bgSoft: "rgba(59,130,246,0.08)", border: "rgba(59,130,246,0.25)", icon: "#2563EB", text: "#1D4ED8" },
@@ -267,7 +268,7 @@ export function PortfolioAdminClient() {
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden"
               style={{ background: `linear-gradient(135deg, ${p.accent}20, ${p.accent}08)`, border: `1px solid ${p.accent}30` }}>
               {(p.images.find((i: any) => i.isThumbnail || i.sortOrder === -1) || p.images[0]) ? (
-                <img src={(p.images.find((i: any) => i.isThumbnail || i.sortOrder === -1) || p.images[0]).url} alt={p.title} className="w-full h-full object-cover" loading="lazy" />
+                <Image src={(p.images.find((i: any) => i.isThumbnail || i.sortOrder === -1) || p.images[0]).url} alt={p.title} className="w-full h-full object-cover" loading="lazy" />
               ) : <Palette size={18} style={{ color: p.accent }} />}
             </div>
 
@@ -420,7 +421,7 @@ export function PortfolioAdminClient() {
                     style={{ background: `${form.accent}10`, borderColor: "var(--border2)" }}>
                     {form.images.filter((i) => i.isThumbnail)[0] ? (
                       <>
-                        <img src={form.images.filter((i) => i.isThumbnail)[0].url} alt="Thumbnail" className="w-full h-full object-cover" />
+                        <Image src={form.images.filter((i) => i.isThumbnail)[0].url} alt="Thumbnail" className="w-full h-full object-cover" />
                         <button onClick={() => setForm((f) => ({ ...f, images: f.images.filter((i) => !i.isThumbnail) }))}
                           className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white"><X size={10} /></button>
                       </>
@@ -460,7 +461,7 @@ export function PortfolioAdminClient() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
                     {form.images.filter((i) => !i.isThumbnail).map((img, idx) => (
                       <div key={idx} className="relative aspect-[3/2] rounded-xl overflow-hidden border group" style={{ borderColor: "var(--border2)" }}>
-                        <img src={img.url} alt={img.alt || `Image ${idx + 1}`} className="w-full h-full object-cover" />
+                        <Image src={img.url} alt={img.alt || `Image ${idx + 1}`} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                           <button onClick={() => toggleImageBefore(form.images.findIndex((i) => i === img))}
                             title={img.isBefore ? "Set as after" : "Set as before"}

@@ -6,6 +6,7 @@ import { Download, ArrowRight, Loader2, Zap, Palette, Ruler, FileText } from "lu
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { FreeDesign } from "@/types";
+import Image from "next/image";
 
 const GRADIENT = "from-[#2563EB] via-[#7C3AED] to-[#F97316]";
 
@@ -41,7 +42,7 @@ function PreviewCard({ design, index }: { design: FreeDesign; index: number }) {
       {/* Preview image */}
       <div className="relative aspect-[16/10] sm:aspect-[4/3] overflow-hidden bg-[var(--elevated)]">
         {currentImg ? (
-          <img
+          <Image
             src={currentImg.thumbnailUrl || currentImg.url}
             alt={currentImg.alt || design.title}
             className="w-full h-full object-cover"

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import type { PortfolioItem } from "./data";
+import Image from "next/image";
 
 export function PortfolioModal({
   item,
@@ -97,7 +98,7 @@ export function PortfolioModal({
           {current && (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={current.url}
                 alt={current.alt || item.title}
                 className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg"
@@ -187,7 +188,7 @@ export function PortfolioModal({
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img.thumbnailUrl || img.url} alt="" className="w-full h-full object-cover" />
+                  <Image src={img.thumbnailUrl || img.url} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>

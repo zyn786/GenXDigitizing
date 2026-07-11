@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -179,7 +180,7 @@ export default function RegisterPage() {
     <div className="animate-fade-in">
       {/* Logo */}
       <div className="flex flex-col items-center gap-3 mb-6">
-        <img src="/images/black_logo.png" alt="GENX DIGITIZING" className="h-10 w-auto" />
+        <Image src="/images/black_logo.png" alt="GENX DIGITIZING" width={150} height={40} className="w-auto" />
         <div className="text-[11px] text-[var(--txt3)]">Create your client account</div>
       </div>
 

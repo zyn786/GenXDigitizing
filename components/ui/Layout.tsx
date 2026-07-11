@@ -7,6 +7,7 @@
  */
 
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 // ═══════════════════════════════════════════════════════════════
 //  PageShell — scrollable container, centered, padded
@@ -73,7 +74,7 @@ export function PageHeader({
             <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
               style={{ background: grad }}>
               {avatar
-                ? <img src={avatar} alt={name} className="w-full h-full rounded-full object-cover" />
+                ? <Image src={avatar} alt={name} className="w-full h-full rounded-full object-cover" />
                 : (name?.charAt(0)?.toUpperCase() || "U")}
             </div>
             <div className="flex-1 min-w-0">

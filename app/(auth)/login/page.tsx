@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -18,7 +19,7 @@ const PORTAL_HOME: Record<string, string> = {
 function Logo() {
   return (
     <div className="flex flex-col items-center gap-3 mb-7">
-      <img src="/images/black_logo.png" alt="GENX DIGITIZING" className="h-10 w-auto" />
+      <Image src="/images/black_logo.png" alt="GENX DIGITIZING" width={150} height={40} className="w-auto" />
       <div className="text-[11px] text-[var(--txt3)]">Sign in to your portal</div>
     </div>
   );
@@ -170,7 +171,7 @@ function LoginForm() {
         <Logo />
         <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-2xl p-6">
           <div className="flex flex-col items-center py-6 gap-4">
-            <img src="/images/black_logo.png" alt="GENX DIGITIZING" className="h-8 w-auto animate-pulse" />
+            <Image src="/images/black_logo.png" alt="GENX DIGITIZING" width={120} height={32} className="w-auto animate-pulse" />
             <div className="w-7 h-7 border-[3px] border-[#2563EB] border-t-transparent rounded-full animate-spin" />
             <div className="text-center">
               <p className="font-syne font-bold text-[16px] text-[var(--txt)] mb-1">Loading your portal</p>

@@ -213,11 +213,6 @@ export function MobileHeroScroll() {
             </span>
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-[13px] text-white/80 leading-relaxed mb-5 px-2">
-            Every file hand-digitized by experienced professionals. Clean sew-outs. Zero thread breaks. Production-ready in 12 hours — or it&apos;s free.
-          </p>
-
           {/* CTA buttons */}
           <div className="flex flex-row gap-2 w-full mb-3">
             <Link href="/register" className="flex-1">

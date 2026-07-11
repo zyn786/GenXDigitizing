@@ -7,6 +7,7 @@ import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { GradientOrb } from "@/components/shared/GradientOrb";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { Button } from "@/components/ui/Button";
+import Image from "next/image";
 
 export const revalidate = 60;
 
@@ -52,7 +53,7 @@ export default async function BlogPage() {
                     >
                       {post.hero.image ? (
                         <div className="w-full aspect-[16/9] overflow-hidden flex-shrink-0">
-                          <img src={post.hero.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                          <Image src={post.hero.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                         </div>
                       ) : (
                         <div

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { GradientOrb } from "@/components/shared/GradientOrb";
 import { cn } from "@/lib/utils";
 import type { FreeDesign } from "@/types";
+import Image from "next/image";
 
 // ── Helpers ──────────────────────────────────────────────────
 function formatNumber(n: number) {
@@ -75,7 +76,7 @@ function ImageCarousel({
           onClick={() => onEnlarge(current)}
         >
           {loaded.has(current) ? (
-            <img
+            <Image
               src={images[current].url}
               alt={images[current].alt || "Design preview"}
               className="w-full h-full object-cover"
@@ -83,7 +84,7 @@ function ImageCarousel({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <img
+              <Image
                 src={images[current].thumbnailUrl || images[current].url}
                 alt=""
                 className="w-full h-full object-cover blur-lg scale-105"
@@ -522,7 +523,7 @@ export function FreeDesignsClient() {
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
             className="absolute left-[18%] top-[28%] w-[220px] xl:w-[250px]"
           >
-            <img
+            <Image
               src="https://res.cloudinary.com/djoixgojj/image/upload/v1779204050/cap-embroidery_sjxoep.webp"
               alt="Cap embroidery"
               className="w-full h-auto rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.05)] border border-white/20"
@@ -533,7 +534,7 @@ export function FreeDesignsClient() {
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
             className="absolute right-[18%] top-[26%] w-[220px] xl:w-[250px]"
           >
-            <img
+            <Image
               src="https://res.cloudinary.com/djoixgojj/image/upload/v1779207170/jacket-embroidery_ycfnqh.webp"
               alt="Jacket embroidery"
               className="w-full h-auto rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.05)] border border-white/20"
