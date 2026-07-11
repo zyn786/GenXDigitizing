@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
@@ -141,25 +142,28 @@ export function MobileHeroScroll() {
   return (
     <div className="relative overflow-x-hidden">
       {/* ══════ STICKY BUTTON — slides up, sticks below Nav ══════ */}
-      <motion.div
-        className="fixed left-0 right-0 z-[999] flex justify-center px-4"
-        style={{
-          top: btnTop,
-          scale: btnScale,
-          willChange: "transform, top",
-        } as React.CSSProperties}
-      >
-        <Link href="/upload" className="block w-full max-w-[360px]">
-          <Button
-            variant="grad"
-            size="md"
-            className="w-full !rounded-2xl !font-bold !text-sm !py-3"
-            rightIcon={<Upload size={14} />}
-          >
-            Upload Design — Get Free Quote
-          </Button>
-        </Link>
-      </motion.div>
+      {typeof document !== "undefined" && createPortal(
+        <motion.div
+          className="fixed left-0 right-0 z-[999] flex justify-center px-4"
+          style={{
+            top: btnTop,
+            scale: btnScale,
+            willChange: "transform, top",
+          } as any}
+        >
+          <Link href="/upload" className="block w-full max-w-[360px]">
+            <Button
+              variant="grad"
+              size="md"
+              className="w-full !rounded-2xl !font-bold !text-sm !py-3"
+              rightIcon={<Upload size={14} />}
+            >
+              Upload Design — Get Free Quote
+            </Button>
+          </Link>
+        </motion.div>,
+        document.body
+      )}
 
       {/* ══════ HERO ══════ */}
       <div className="relative z-10 h-[100dvh] flex flex-col items-center justify-center overflow-hidden">
