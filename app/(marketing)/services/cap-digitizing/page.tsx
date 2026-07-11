@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Cap Digitizing Service",
+  shortName: "Cap Digitizing",
   subtitle: "Curve-Compensated Stitch Paths | Clean Sew-Outs | All Formats",
   description: "Specialized cap and hat digitizing with structural underlay, curve compensation, and optimized stitch angles for clean sew-outs on curved surfaces. Perfect for 6-panel, 5-panel, snapbacks, and fitted caps.",
   emoji: "🧢", color: "#F97316",

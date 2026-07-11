@@ -37,7 +37,8 @@
       "WebFetch(domain:www.genxdigitizing.com)",
       "Bash(sort -k5 -rn)",
       "Bash(git stash *)",
-      "Bash(S3_ENDPOINT='' node *)"
+      "Bash(S3_ENDPOINT='' node *)",
+      "Bash(dir /b)"
     ]
   }
 }

@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Corporate Apparel Embroidery Digitizing Service",
+  shortName: "Corporate Apparel",
   subtitle: "Brand-Perfect Files | Multi-Garment | All Formats",
   description: "Professional corporate apparel digitizing for polos, dress shirts, jackets, vests, and accessories. Brand-consistent embroidery across entire corporate wardrobe programs. Precise logo reproduction for professional environments.",
   emoji: "🏢", color: "#1E3A5F",

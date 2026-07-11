@@ -54,25 +54,6 @@ export function ExitIntent() {
     };
   }, [dismissed]);
 
-  // Return visitor banner — shown inline at top of page
-  if (returnMsg && !dismissed) {
-    return (
-      <div className="fixed top-[100px] lg:top-[104px] inset-x-0 z-[45] bg-white border-b border-gray-200">
-        <div className="max-w-[800px] mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
-          <p className="text-[13px] font-semibold text-gray-700">
-            👋 Welcome back! You visited {returnMsg}. Ready to continue?
-          </p>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <Link href="/upload">
-              <Button variant="grad" size="sm" rightIcon={<ArrowRight size={12} />}>Upload Design</Button>
-            </Link>
-            <button onClick={() => setDismissed(true)} className="p-1.5 rounded-lg hover:bg-[var(--elevated)] text-[var(--txt3)]"><X size={14} /></button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (!show || dismissed) return null;
 
   return (

@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Beanie Embroidery Digitizing Service",
+  shortName: "Beanies",
   subtitle: "Stretch-Optimized Files | Clean Knit Sew-Outs | All Formats",
   description: "Professional beanie and knit cap digitizing with stretch compensation, optimized underlay, and clean stitch paths for beanies, toques, and knit headwear. Files that run clean on stretchy fabrics.",
   emoji: "🧣", color: "#DC2626",

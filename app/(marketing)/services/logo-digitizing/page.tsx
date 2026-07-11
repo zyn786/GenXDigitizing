@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Logo Digitizing Service",
+  shortName: "Logo Digitizing",
   subtitle: "Stitch-Perfect Logos | All Formats | From $7",
   description: "Professional logo digitizing for corporate branding, team uniforms, promotional products, and retail apparel. Clean stitch paths, accurate color matching, and production-ready files for any embroidery machine.",
   emoji: "✨", color: "#2563EB",

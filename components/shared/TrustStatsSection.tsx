@@ -23,7 +23,7 @@ function TrustStat({
 
 export function TrustStatsSection() {
   return (
-    <AnimatedSection className="pt-16 md:pt-20 pb-0">
+    <AnimatedSection className="pt-6 md:pt-20 pb-0">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
         <div className="relative bg-gradient-to-br from-[#2563EB] via-[#1D4ED8] to-[#0F3460] rounded-3xl p-8 sm:p-10 md:p-14 overflow-hidden">
           {/* Glow orb */}

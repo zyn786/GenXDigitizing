@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Left Chest Logo Digitizing Service",
+  shortName: "Left Chest",
   subtitle: "Sharp Detail | Perfect Placement | Polo & Shirt Logos",
   description: "Professional left chest digitizing for polo shirts, dress shirts, uniforms, and corporate apparel. Optimized for small-format embroidery with sharp text, clean lines, and perfect registration.",
   emoji: "👕", color: "#06B6D4",

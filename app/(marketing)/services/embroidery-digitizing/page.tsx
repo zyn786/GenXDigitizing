@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Professional Embroidery Digitizing Service",
+  shortName: "Digitizing",
   subtitle: "Fast Turnaround | Free Edits | DST, PES, EMB Files",
   description: "Production-ready embroidery digitizing for caps, jackets, polos, left chest logos, and more. Manual digitizing by experienced professionals. Free unlimited revisions included.",
   emoji: "🧵", color: "#2563EB",

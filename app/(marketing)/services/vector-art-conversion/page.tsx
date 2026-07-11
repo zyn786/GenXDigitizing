@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Vector Art Conversion Service",
+  shortName: "Vector Art",
   subtitle: "AI, SVG, EPS, PDF Output | Manual Redraw | From $8",
   description: "Professional vector art conversion from any source. JPGs, PNGs, hand sketches, and old artwork converted into clean, scalable vector files for screen printing, DTF, heat transfer, and large-format production.",
   emoji: "✏️", color: "#F97316",

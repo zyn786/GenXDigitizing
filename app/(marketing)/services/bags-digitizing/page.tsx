@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Bag Embroidery Digitizing Service",
+  shortName: "Bags",
   subtitle: "Multi-Material Files | Totes, Backpacks & Duffels | All Formats",
   description: "Professional digitizing for tote bags, backpacks, duffel bags, and promotional bags. Multi-material optimization for canvas, nylon, polyester, and leather. Clean sew-outs on thick and thin bag fabrics.",
   emoji: "🎒", color: "#8B5CF6",

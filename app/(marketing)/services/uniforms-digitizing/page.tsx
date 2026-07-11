@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Uniform Embroidery Digitizing Service",
+  shortName: "Uniforms",
   subtitle: "Production-Ready Files | Bulk-Optimized | All Formats",
   description: "Professional uniform digitizing for corporate, school, medical, hospitality, and industrial uniforms. Production-optimized files for high-volume runs. Consistent quality across hundreds of pieces.",
   emoji: "👔", color: "#2563EB",

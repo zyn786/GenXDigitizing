@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "3D Puff Embroidery Digitizing Service",
+  shortName: "3D Puff",
   subtitle: "Raised Stitch Finish | Foam-Ready Files | Professional Results",
   description: "Specialized 3D puff digitizing for caps, jackets, and apparel. Proper foam underlay settings, satin stitch optimization, and density adjustments for raised, dimensional embroidery that stands out.",
   emoji: "🎩", color: "#7C3AED",

@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Jacket Back Digitizing Service",
+  shortName: "Jacket Back",
   subtitle: "Clean Stitch Paths | Optimized Density | Full Back Designs",
   description: "Professional large-format digitizing for jacket backs, varsity jackets, and oversized embroidery. Optimized density, smart path planning for efficient production, and stitch-perfect results on large designs.",
   emoji: "🧥", color: "#DC2626",

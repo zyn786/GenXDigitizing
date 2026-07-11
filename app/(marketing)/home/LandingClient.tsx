@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   ChevronDown,
@@ -37,6 +37,7 @@ import { SectionHeading } from "@/components/shared/SectionHeading";
 import { TrustStatsSection } from "@/components/shared/TrustStatsSection";
 import { FreeDesignsPreview } from "@/components/free-designs/FreeDesignsPreview";
 import { SewOutGuarantee } from "@/components/marketing/SewOutGuarantee";
+import { MobileHeroScroll } from "@/components/marketing/MobileHeroScroll";
 
 
 import dynamic from "next/dynamic";
@@ -217,9 +218,9 @@ const PROCESS_STEPS = [
 /* ── Hero Headline Variants (for A/B testing) ──────────── */
 const HEADLINES = {
   primary: {
-    line1: "Files That Run Clean,",
-    gradient: "First Time, Every Time",
-    sub: "Hand-digitized by experienced professionals. Cleaner sew-outs. Fewer thread breaks. Production-ready in 12 hours — or it's free.",
+    line1: "Real Digitizers.",
+    gradient: "Just Quality.",
+    sub: "Every file hand-digitized by experienced professionals. Clean sew-outs. Zero thread breaks. Production-ready in 12 hours — or it's free.",
     line1Weight: "font-light",
     gradientWeight: "font-bold",
     line1Tracking: "tracking-wide",
@@ -412,11 +413,20 @@ function SewoutGifShowcase({
   );
 }
 
+const ROTATING_WORDS = ["Just Quality.", "No Auto-Trace.", "Pure Craft."];
+
 function HeroSection() {
   const headline = HEADLINES.primary;
+  const [wordIndex, setWordIndex] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % ROTATING_WORDS.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <section className="relative flex flex-col items-center justify-start pt-2 pb-6 sm:pt-4 min-h-[80vh] sm:h-[85vh] overflow-hidden" aria-labelledby="hero-heading">
+    <section className="relative flex flex-col items-center justify-center pb-6 sm:pb-8 min-h-screen overflow-hidden -mt-[100px] pt-[100px]" aria-labelledby="hero-heading">
       <div className="absolute inset-0 z-0">
         {/* Poster image loads immediately; video deferred until idle */}
         <Image
@@ -508,10 +518,10 @@ function HeroSection() {
 </div>
 
       {/* Service cards slider */}
-      <div className="relative z-10 max-w-[1400px] mx-auto px-0 sm:px-6 md:px-12 mb-6 sm:mb-8">
-        <div className="relative overflow-hidden py-2" aria-label="Our services">
+      <div className="relative z-10 w-full mb-6 sm:mb-8">
+        <div className="relative overflow-hidden py-2 sm:pt-6" aria-label="Our services">
           <div className="flex gap-2 sm:gap-3 animate-marquee w-max">
-            {[...SERVICE_CARDS, ...SERVICE_CARDS].map((card, i) => (
+            {[...SERVICE_CARDS, ...SERVICE_CARDS, ...SERVICE_CARDS, ...SERVICE_CARDS].map((card, i) => (
               <div key={`${card.title}-${i}`} className="flex items-center gap-2 sm:gap-3 bg-white/15 border border-white/10 rounded-xl px-2.5 sm:px-4 py-1.5 sm:py-2.5 flex-shrink-0 min-w-[135px] sm:min-w-[220px]">
                 <span className="text-base sm:text-xl flex-shrink-0">{card.emoji}</span>
                 <div className="min-w-0">
@@ -525,7 +535,7 @@ function HeroSection() {
       </div>
 
       {/* Center-aligned hero content */}
-      <div className="relative z-10 w-full max-w-[900px] mx-auto px-4 sm:px-6 text-center flex-1 flex flex-col">
+      <div className="relative z-10 w-full max-w-[900px] mx-auto px-4 sm:px-6 text-center">
         {/* Mini trust bar */}
         <div className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 mb-2.5 sm:mb-6 text-[11px] sm:text-[13px] font-medium bg-white/10 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full border border-white/15 w-auto max-w-full">
           <span className="flex items-center gap-0.5" aria-label={`${SITE_STATS.avgRating} out of 5 stars`}>
@@ -554,14 +564,26 @@ function HeroSection() {
           id="hero-heading"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="font-syne text-[clamp(28px,7vw,68px)] sm:text-[clamp(38px,7vw,68px)] leading-[1.1] mb-3 sm:mb-5 text-white cursor-default group"
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
+          className="font-syne text-[clamp(34px,8vw,64px)] sm:text-[clamp(48px,8vw,96px)] leading-[1.05] mb-3 sm:mb-5 text-white cursor-default group"
         >
           <span className={`block whitespace-nowrap ${headline.line1Weight || "font-light"} ${headline.line1Tracking || "tracking-wide"}`}>
             {headline.line1}
           </span>
-          <span className={`block whitespace-nowrap bg-gradient-to-r from-[#38BDF8] via-[#C084FC] to-[#FBBF24] bg-clip-text text-transparent ${headline.gradientWeight || "font-bold"} ${headline.gradientTracking || "tracking-tight"} group-hover:from-[#FBBF24] group-hover:via-[#38BDF8] group-hover:to-[#C084FC] transition-all duration-700`}>
-            {headline.gradient}
+          <span className="relative block font-bold tracking-tight" style={{ minHeight: "1.1em" }}>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={wordIndex}
+                initial={{ opacity: 0, y: 16, filter: "blur(3px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, y: -16, filter: "blur(3px)" }}
+                transition={{ duration: 0.35, ease: "easeInOut" }}
+                className="block bg-gradient-to-r from-[#38BDF8] via-[#C084FC] to-[#FBBF24] bg-clip-text text-transparent whitespace-nowrap"
+                style={{ backgroundSize: "200% auto", animation: "gradient-shimmer 3s ease-in-out infinite" } as React.CSSProperties}
+              >
+                {ROTATING_WORDS[wordIndex]}
+              </motion.span>
+            </AnimatePresence>
           </span>
         </motion.h1>
 
@@ -598,26 +620,8 @@ function HeroSection() {
           ✓ Free quote · ✓ No payment required · ✓ Pay only after preview approval
         </p>
 
-        {/* Trust checks */}
-        <div className="flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-6 gap-y-1 sm:gap-y-2">
-          {[
-            { text: "Free revisions", sub: "Forever" },
-            { text: "All file formats", sub: "8+ formats" },
-            { text: "Pay when satisfied", sub: "No risk" },
-            { text: "12h delivery", sub: "Guaranteed" },
-          ].map((item) => (
-            <span key={item.text} className="inline-flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-sm text-white/60">
-              <Check size={12} className="sm:size-[13px] text-[#4ADE80] flex-shrink-0" />
-              <span>
-                <span className="font-medium text-white/90">{item.text}</span>
-                <span className="text-white/40 ml-0.5 hidden sm:inline">— {item.sub}</span>
-              </span>
-            </span>
-          ))}
-        </div>
-
         {/* Hero stats — 6 separate cards */}
-        <div className="mt-5 sm:mt-6 w-full grid grid-cols-2 md:grid-cols-6 gap-3 sm:gap-4">
+        <div className="hidden sm:grid mt-5 sm:mt-6 w-full grid-cols-2 md:grid-cols-6 gap-3 sm:gap-4">
           {[
             { value: `${SITE_STATS.avgRating}/5`, sub: `${fmtPlus(SITE_STATS.verifiedReviews)} verified reviews`, icon: Star },
             { value: fmtPlus(SITE_STATS.ordersCompleted), sub: "Orders completed", icon: FileCheck },
@@ -1496,8 +1500,9 @@ export function LandingClient({ services, process, testimonials, faqs }: Props) 
 
   return (
     <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden pb-24 sm:pb-0">
-      {/* 1. HERO */}
-      <HeroSection />
+      {/* 1. HERO — scroll-morph on mobile, static on desktop */}
+      <div className="block md:hidden -mt-[100px]"><MobileHeroScroll /></div>
+      <div className="hidden md:block"><HeroSection /></div>
 
       {/* 4. STATISTICS / OPERATIONS LIVE */}
       <TrustStatsSection />

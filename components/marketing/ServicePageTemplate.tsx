@@ -25,11 +25,12 @@ export interface ServicePageData {
   startingPrice: number;
   formats: string;
   turnaround: string;
+  shortName?: string; // e.g. "Digitizing", "Vector Art", "Patches" — for "The Art of Perfect ___" heading
   benefits: { icon: string; title: string; desc: string }[];
   faqs: { q: string; a: string }[];
   testimonials: { name: string; company: string; text: string }[];
-  portfolioSlug?: string; // category slug for portfolio filtering
-  portfolioTag?: string;  // optional: filter by specific tag (e.g. "Cap", "Jacket Back")
+  portfolioSlug?: string;
+  portfolioTag?: string;
   cta: { text: string; href: string };
 }
 
@@ -61,7 +62,12 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
           style={{ background: `${data.color}15`, color: data.color, border: `1px solid ${data.color}25` }}>
           {data.emoji} Professional Service
         </span>
-        <h1 className="font-syne font-bold text-[clamp(30px,7vw,56px)] leading-[1.06] mb-3">{data.title}</h1>
+        <h1 className="font-syne text-[clamp(30px,7vw,56px)] leading-[1.1] mb-3">
+          <span className="block font-light tracking-wide">Real Digitizers.</span>
+          <span className="block font-bold tracking-tight bg-gradient-to-r from-[#38BDF8] via-[#C084FC] to-[#FBBF24] bg-clip-text text-transparent">
+            No Auto-Trace.
+          </span>
+        </h1>
         <p className="text-base sm:text-lg text-[var(--txt2)] max-w-2xl mx-auto mb-2">{data.subtitle}</p>
         <p className="text-sm text-[var(--txt3)] max-w-xl mx-auto mb-6">{data.description}</p>
         <div className="flex flex-col sm:flex-row gap-2.5 justify-center">

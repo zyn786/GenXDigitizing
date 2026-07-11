@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 
 const DATA: ServicePageData = {
   title: "Appliqué Digitizing",
+  shortName: "Appliqué",
   subtitle: "Clean placement lines, precise tack-down, flawless cover stitches",
   description:
     "Appliqué digitizing requires precise placement lines, secure tack-down stitches, and clean cover stitches. Our experienced digitizers create production-ready appliqué files that save fabric and reduce waste.",

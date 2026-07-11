@@ -143,13 +143,14 @@ const config: Config = {
       },
 
       animation: {
-        "marquee":      "marquee 20s linear infinite",
-        "marquee-rev":  "marqueeReverse 20s linear infinite",
+        "marquee":      "marquee 35s linear infinite",
+        "marquee-rev":  "marqueeReverse 35s linear infinite",
         "float":        "float 8s ease-in-out infinite",
         "fade-in-up":   "fade-in-up 0.4s ease-out both",
         "pulse-success": "pulse-success 0.6s ease-out",
-        shimmer:        "shimmer 2s ease-in-out infinite",
-        "scale-in":     "scale-in 0.2s ease-out both",
+        shimmer:          "shimmer 2s ease-in-out infinite",
+        "gradient-shimmer": "gradient-shimmer 3s ease-in-out infinite",
+        "scale-in":       "scale-in 0.2s ease-out both",
       },
       keyframes: {
         marquee:      { from: { transform: "translateX(0)" }, to: { transform: "translateX(-50%)" } },
@@ -158,6 +159,7 @@ const config: Config = {
         "fade-in-up":   { from: { opacity: "0", transform: "translateY(30px)" }, to: { opacity: "1", transform: "translateY(0)" } },
         "pulse-success":{ "0%": { transform: "scale(1)", boxShadow: "0 0 0 0 rgba(16,185,129,0.5)" }, "50%": { transform: "scale(1.02)", boxShadow: "0 0 0 8px rgba(16,185,129,0)" }, "100%": { transform: "scale(1)", boxShadow: "0 0 0 0 rgba(16,185,129,0)" } },
         shimmer:        { "100%": { transform: "translateX(100%)" } },
+        "gradient-shimmer": { "0%, 100%": { backgroundPosition: "0% 50%" }, "50%": { backgroundPosition: "100% 50%" } },
         "scale-in":     { from: { opacity: "0", transform: "scale(0.9)" }, to: { opacity: "1", transform: "scale(1)" } },
       },
 

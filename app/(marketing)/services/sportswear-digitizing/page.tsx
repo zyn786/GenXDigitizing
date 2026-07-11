@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Sportswear Embroidery Digitizing Service",
+  shortName: "Sportswear",
   subtitle: "Performance-Fabric Files | Stretch-Ready | All Formats",
   description: "Professional sportswear digitizing for jerseys, performance wear, activewear, and team uniforms. Optimized for polyester, mesh, spandex, and moisture-wicking fabrics. Clean sew-outs on technical materials.",
   emoji: "⚽", color: "#F97316",

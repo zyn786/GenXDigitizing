@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Custom Patch Design Service",
+  shortName: "Patches",
   subtitle: "Bulk Discounts | Free Shipping | From $5 Per Design",
   description: "Professional custom patch digitizing for embroidered, PVC, woven, chenille, and leather patches. Merrow borders, iron-on backing, and bulk order discounts. 500+ patches up to 50% off.",
   emoji: "🏷️", color: "#16A34A",

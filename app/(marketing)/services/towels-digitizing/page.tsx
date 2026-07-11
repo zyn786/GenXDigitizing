@@ -5,6 +5,7 @@ import { ServicePageTemplate, type ServicePageData } from "@/components/marketin
 
 const DATA: ServicePageData = {
   title: "Towel Embroidery Digitizing Service",
+  shortName: "Towels",
   subtitle: "Terry-Cloth Optimized Files | Clean Sew-Outs | All Formats",
   description: "Professional towel digitizing for bath towels, golf towels, gym towels, and promotional towels. Terry-cloth optimized stitch settings — proper underlay, density, and pull compensation for looped fabrics.",
   emoji: "🪣", color: "#06B6D4",
