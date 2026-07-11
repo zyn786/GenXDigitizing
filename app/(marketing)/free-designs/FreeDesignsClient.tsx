@@ -571,9 +571,10 @@ export function FreeDesignsClient() {
             transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
             className="font-syne font-bold text-[clamp(30px,6vw,60px)] leading-[1.08] mb-3 sm:mb-4"
           >
-            Free{" "}
+            Free Sample
+            <br />
             <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
-              Sample Digitizing
+              Digitizing
             </span>
           </motion.h1>
 

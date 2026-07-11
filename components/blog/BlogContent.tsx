@@ -157,7 +157,7 @@ export default function BlogContent({ post, showBack = true, children }: { post:
           <span className="flex items-center gap-1"><Clock size={12} /> {post.readTime || "6 min read"}</span>
         </div>
         {post.hero.image && (
-          <div className="max-w-[760px] mx-auto rounded-2xl overflow-hidden aspect-[16/9] border border-[var(--border)]">
+          <div className="max-w-[760px] mx-auto relative rounded-2xl overflow-hidden aspect-[16/9] border border-[var(--border)]">
             <Image fill src={post.hero.image} alt={post.title} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
           </div>
         )}
@@ -181,7 +181,7 @@ export default function BlogContent({ post, showBack = true, children }: { post:
 
                   {/* Layout: image-top (single full-width image) */}
                   {(section.layout === "image-top" || (!section.layout && section.image)) && section.image && (
-                    <div className="rounded-2xl overflow-hidden aspect-[16/9] border border-[var(--border)] mb-5">
+                    <div className="relative rounded-2xl overflow-hidden aspect-[16/9] border border-[var(--border)] mb-5">
                       <Image fill src={section.image} alt={section.heading} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
                     </div>
                   )}
@@ -208,7 +208,7 @@ export default function BlogContent({ post, showBack = true, children }: { post:
                           <SectionBlock key={j} block={block} />
                         ))}
                       </div>
-                      <div className="rounded-xl overflow-hidden aspect-[4/3] border border-[var(--border)] order-1 sm:order-2">
+                      <div className="relative rounded-xl overflow-hidden aspect-[4/3] border border-[var(--border)] order-1 sm:order-2">
                         <Image fill src={section.image} alt={section.heading} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
                       </div>
                     </div>
@@ -219,13 +219,13 @@ export default function BlogContent({ post, showBack = true, children }: { post:
                     <div className="grid grid-cols-2 gap-3 mb-5">
                       <div className="rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--surface)]">
                         <div className="px-3 py-2 border-b border-[var(--border)] text-[10px] font-bold uppercase tracking-wider text-[var(--txt2)] text-center">Before</div>
-                        <div className="aspect-[4/3]">
+                        <div className="relative aspect-[4/3]">
                           <Image fill src={(section.images || [])[0]} alt="Before" className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
                         </div>
                       </div>
                       <div className="rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--surface)]">
                         <div className="px-3 py-2 border-b border-[var(--border)] text-[10px] font-bold uppercase tracking-wider text-[var(--txt2)] text-center">After</div>
-                        <div className="aspect-[4/3]">
+                        <div className="relative aspect-[4/3]">
                           <Image fill src={(section.images || [])[1]} alt="After" className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
                         </div>
                       </div>
@@ -236,7 +236,7 @@ export default function BlogContent({ post, showBack = true, children }: { post:
                   {section.layout === "image-grid-2" && (section.images || []).length > 0 && (
                     <div className="grid grid-cols-2 gap-3 mb-5">
                       {(section.images || []).map((url, imgIdx) => (
-                        <div key={imgIdx} className="rounded-xl overflow-hidden aspect-[4/3] border border-[var(--border)]">
+                        <div key={imgIdx} className="relative rounded-xl overflow-hidden aspect-[4/3] border border-[var(--border)]">
                           <Image fill src={url} alt={`${section.heading} — image ${imgIdx + 1}`} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
                         </div>
                       ))}
@@ -247,7 +247,7 @@ export default function BlogContent({ post, showBack = true, children }: { post:
                   {section.layout === "image-grid-3" && (section.images || []).length > 0 && (
                     <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5">
                       {(section.images || []).map((url, imgIdx) => (
-                        <div key={imgIdx} className="rounded-xl overflow-hidden aspect-square border border-[var(--border)]">
+                        <div key={imgIdx} className="relative rounded-xl overflow-hidden aspect-square border border-[var(--border)]">
                           <Image fill src={url} alt={`${section.heading} — image ${imgIdx + 1}`} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
                         </div>
                       ))}
@@ -258,7 +258,7 @@ export default function BlogContent({ post, showBack = true, children }: { post:
                   {section.layout === "image-grid-4" && (section.images || []).length > 0 && (
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-5">
                       {(section.images || []).map((url, imgIdx) => (
-                        <div key={imgIdx} className="rounded-xl overflow-hidden aspect-square border border-[var(--border)]">
+                        <div key={imgIdx} className="relative rounded-xl overflow-hidden aspect-square border border-[var(--border)]">
                           <Image fill src={url} alt={`${section.heading} — image ${imgIdx + 1}`} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
                         </div>
                       ))}
