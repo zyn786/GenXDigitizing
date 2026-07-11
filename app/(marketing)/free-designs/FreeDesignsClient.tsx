@@ -530,6 +530,7 @@ export function FreeDesignsClient() {
             <Image
               src="https://res.cloudinary.com/djoixgojj/image/upload/v1779204050/cap-embroidery_sjxoep.webp"
               alt="Cap embroidery"
+              width={250} height={250}
               className="w-full h-auto rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.05)] border border-white/20"
             />
           </motion.div>
