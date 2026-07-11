@@ -16,7 +16,7 @@ async function getEmailHistory() {
       .limit(50),
     supabase
       .from("received_emails")
-      .select("id, from_email, to_email, subject, body_html, body_text, received_at")
+      .select("id, from_email, to_email, cc_emails, subject, body_html, body_text, received_at, attachments_meta")
       .order("received_at", { ascending: false })
       .limit(50),
   ]);

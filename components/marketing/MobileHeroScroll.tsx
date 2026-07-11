@@ -14,7 +14,7 @@ function usePrefs() {
   useEffect(() => {
     const mem = (navigator as any).deviceMemory;
     const cores = navigator.hardwareConcurrency || 4;
-    const tier = (mem && mem <= 4) || cores <= 4 ? "low" : "high";
+    const tier = (mem && mem <= 3) || cores <= 3 ? "low" : "high";
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setState({ tier, reduced: mq.matches, mounted: true });
     const h = (e: MediaQueryListEvent) => setState((s) => ({ ...s, reduced: e.matches }));

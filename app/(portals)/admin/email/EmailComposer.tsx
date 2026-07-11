@@ -46,8 +46,8 @@ type SentEmail = {
   sent_at: string; resend_id?: string; attachments?: string;
 };
 type ReceivedEmail = {
-  id: string; from_email: string; to_email: string; subject: string;
-  body_html?: string; body_text?: string; received_at: string;
+  id: string; from_email: string; to_email: string; cc_emails?: string; subject: string;
+  body_html?: string; body_text?: string; received_at: string; attachments_meta?: string;
 };
 type AttachFile = {
   name: string; size: number; type: string; data: string; // base64
@@ -478,7 +478,14 @@ function EmailDetail({ email, folder, onBack, onReply }: {
           </div>
           <div style={{ display: "flex", gap: 16, fontSize: 11, color: cTxt2, flexWrap: "wrap" }}>
             <span><strong style={{ color: cTxt3 }}>From:</strong> {email.from_email || (folder === "inbox" ? email.from_email : "support@genxdigitizing.com")}</span>
-            <span><strong style={{ color: cTxt3 }}>To:</strong> {folder === "inbox" ? email.to_email : email.to_email}</span>
+            <span><strong style={{ color: cTxt3 }}>To:</strong> {email.to_email}</span>
+            {email.cc_emails && <span><strong style={{ color: cTxt3 }}>CC:</strong> {email.cc_emails}</span>}
+            {email.attachments_meta && <span><strong style={{ color: cTxt3 }}>Attachments:</strong> {
+              (function(){
+                try { return JSON.parse(email.attachments_meta).map(function(a){return a.filename;}).join(", "); }
+                catch(e){ return email.attachments_meta; }
+              })()
+            }</span>}
             {email.attachments && <span><strong style={{ color: cTxt3 }}>Attachments:</strong> {email.attachments}</span>}
           </div>
         </div>

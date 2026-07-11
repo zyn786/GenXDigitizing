@@ -4,25 +4,24 @@
  * Receives emails forwarded to your Resend inbound address and stores them.
  *
  * SETUP:
- * 1. In Resend dashboard → Domains → your domain → Inbound
- * 2. Configure MX records as instructed by Resend
- * 3. Set webhook URL to: https://yourdomain.com/api/admin/email-inbound
- * 4. Create an inbound email address (e.g. admin@genxdigitizing.com)
- * 5. Set RESEND_WEBHOOK_SECRET env var (from Resend → Webhooks → Signing Secret)
+ * 1. Resend dashboard → Domains → genxdigitizing.com → Inbound → configure MX records
+ * 2. Resend dashboard → Webhooks → Add → event: email.received
+ *    URL: https://www.genxdigitizing.com/api/admin/email-inbound
+ * 3. Copy Signing Secret → set as RESEND_WEBHOOK_SECRET in Vercel env vars
+ * 4. Create inbound addresses (e.g. support@, orders@, billing@)
  *
- * Resend sends JSON with: from, to, subject, html, text, headers, etc.
  * Docs: https://resend.com/docs/dashboard/emails/inbound
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { notifyUsers } from "@/lib/notify-server";
 import { createHmac } from "crypto";
 
 var WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET || "";
 
 function verifyResendSignature(rawBody: string, signatureHeader: string | null): boolean {
   if (!WEBHOOK_SECRET) {
-    // Secret not configured — allow but warn
     console.warn("[email-inbound] RESEND_WEBHOOK_SECRET not set — skipping signature verification");
     return true;
   }
@@ -63,7 +62,6 @@ function verifyResendSignature(rawBody: string, signatureHeader: string | null):
 
 export async function POST(request: NextRequest) {
   try {
-    // Clone request to read raw body for signature verification
     var rawBody = await request.text();
 
     // Verify webhook signature
@@ -74,16 +72,26 @@ export async function POST(request: NextRequest) {
 
     var payload = JSON.parse(rawBody);
 
+    console.log("[email-inbound] Received webhook:", JSON.stringify({
+      from: payload.from,
+      to: payload.to,
+      subject: payload.subject,
+      resend_id: payload.resend_id,
+    }));
+
     // Resend inbound webhook format
     var fromEmail  = payload.from || "";
     var toEmail    = (Array.isArray(payload.to) ? payload.to.join(", ") : payload.to) || "";
+    var ccEmails   = (Array.isArray(payload.cc) ? payload.cc.join(", ") : payload.cc) || null;
     var subject    = payload.subject || "(no subject)";
     var bodyHtml   = payload.html || "";
     var bodyText   = payload.text || "";
     var resendId   = payload.resend_id || payload.id || null;
+    var headers    = payload.headers || null;
+    var attachments = payload.attachments || [];
 
     if (!fromEmail || !toEmail) {
-      console.warn("[email-inbound] Missing from/to fields:", JSON.stringify(payload).slice(0, 200));
+      console.warn("[email-inbound] Missing from/to fields:", JSON.stringify(payload).slice(0, 300));
       return NextResponse.json({ error: "Missing from/to fields" }, { status: 400 });
     }
 
@@ -103,21 +111,61 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    var { error } = await supabase.from("received_emails").insert({
-      from_email: fromEmail,
-      to_email: toEmail,
-      subject,
-      body_html: bodyHtml,
-      body_text: bodyText,
-      resend_id: resendId,
-    });
+    // Store attachment metadata as JSON
+    var attachmentMeta = attachments.length > 0
+      ? JSON.stringify(attachments.map(function (a: any) {
+          return { filename: a.filename, content_type: a.content_type, size: a.size };
+        }))
+      : null;
+
+    var { error, data: inserted } = await supabase
+      .from("received_emails")
+      .insert({
+        from_email: fromEmail,
+        to_email: toEmail,
+        cc_emails: ccEmails,
+        subject,
+        body_html: bodyHtml,
+        body_text: bodyText,
+        resend_id: resendId,
+        headers: headers ? JSON.stringify(headers) : null,
+        attachments_meta: attachmentMeta,
+      })
+      .select("id")
+      .single();
 
     if (error) {
       console.error("[email-inbound] DB insert error:", error);
       return NextResponse.json({ error: "Failed to store email" }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true });
+    // Notify admins about new inbound email
+    try {
+      var { data: admins } = await supabase
+        .from("users")
+        .select("id")
+        .eq("role", "admin")
+        .eq("is_active", true);
+
+      if (admins && admins.length > 0) {
+        var snippet = (bodyText || subject).slice(0, 120);
+        await notifyUsers(
+          admins.map(function (a: any) { return a.id; }),
+          {
+            type: "system",
+            title: "New email from " + fromEmail,
+            body: subject + " — " + snippet,
+            action_url: "/admin/email",
+          }
+        );
+      }
+    } catch (notifyErr) {
+      console.error("[email-inbound] Notification error:", notifyErr);
+      // Non-fatal — email already stored
+    }
+
+    console.log("[email-inbound] Stored email id:", inserted?.id, "from:", fromEmail);
+    return NextResponse.json({ success: true, id: inserted?.id });
   } catch (err: any) {
     console.error("[email-inbound] Unexpected error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -126,5 +174,10 @@ export async function POST(request: NextRequest) {
 
 // Resend verifies webhook with GET
 export async function GET() {
-  return NextResponse.json({ status: "ok", service: "GenXdigitizing inbound email webhook" });
+  return NextResponse.json({
+    status: "ok",
+    service: "GenXdigitizing inbound email webhook",
+    webhook_secret_configured: !!process.env.RESEND_WEBHOOK_SECRET,
+    time: new Date().toISOString(),
+  });
 }
