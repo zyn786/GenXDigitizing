@@ -647,7 +647,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
           <button onClick={() => setPreviewImage(null)}
             className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-white text-xl z-10"
             style={{ background:"rgba(255,255,255,0.1)", border:"none", cursor:"pointer" }}>×</button>
-          <Image src={previewImage} alt="Preview" className="max-w-full max-h-[90vh] object-contain rounded-xl"
+          <Image src={previewImage} alt="Preview" width={1200} height={900} className="max-w-full max-h-[90vh] object-contain rounded-xl"
             onClick={e => e.stopPropagation()}/>
         </div>
       )}

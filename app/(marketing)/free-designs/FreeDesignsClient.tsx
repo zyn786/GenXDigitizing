@@ -79,15 +79,19 @@ function ImageCarousel({
             <Image
               src={images[current].url}
               alt={images[current].alt || "Design preview"}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
               loading="lazy"
+              sizes="(max-width: 768px) 100vw, 800px"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Image
                 src={images[current].thumbnailUrl || images[current].url}
                 alt=""
-                className="w-full h-full object-cover blur-lg scale-105"
+                fill
+                className="object-cover blur-lg scale-105"
+                sizes="(max-width: 768px) 100vw, 800px"
                 onLoad={() => setLoaded((prev) => new Set([...prev, current]))}
               />
             </div>

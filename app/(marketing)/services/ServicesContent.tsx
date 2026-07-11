@@ -90,8 +90,10 @@ function PortfolioThumb({ item, onClick }: { item: PortfolioItem; onClick: () =>
           <Image
             src={firstImage.url}
             alt={item.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
+            sizes="(max-width: 768px) 100vw, 50vw"
             onError={() => setImgError(true)}
           />
         ) : (
@@ -317,7 +319,9 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
                         <Image
                           src={portfolioForService[0].images[0].url}
                           alt={svc.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 50vw"
                         />
                       ) : (
                         <div className="text-center p-8">

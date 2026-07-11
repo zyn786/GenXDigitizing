@@ -190,7 +190,7 @@ export function PortfolioModal({
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <Image fill src={img.thumbnailUrl || img.url} alt="" width={80} height={60} className="object-cover"  sizes="(max-width: 768px) 100vw, 800px" />
+                  <Image src={img.thumbnailUrl || img.url} alt="" width={80} height={60} className="object-cover" />
                 </button>
               ))}
             </div>

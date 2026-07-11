@@ -151,9 +151,11 @@ function GalleryCard({
             <Image
               src={firstImage.url}
               alt={item.title}
+              fill
               loading="lazy"
               onError={() => setImgError(true)}
-              className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
+              className="object-cover transition-all duration-500"
+              sizes="(max-width: 768px) 50vw, 33vw"
               style={{
                 transform: isHovered ? "scale(1.06)" : "scale(1)",
               }}
@@ -249,8 +251,10 @@ function BeforeAfterCard({
           <Image
             src={beforeImg.url}
             alt="Before digitizing"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
+            sizes="50vw"
           />
           <span
             className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full"
@@ -264,8 +268,10 @@ function BeforeAfterCard({
           <Image
             src={afterImg.url}
             alt="After digitizing"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
+            sizes="50vw"
           />
           <span
             className="absolute top-2 right-2 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full"

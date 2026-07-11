@@ -795,6 +795,7 @@ export default function AdminBlogPage() {
                             </div>
                             {s.image && (
                               <Image src={s.image} alt={`Section ${i + 1}`}
+                                width={400} height={128}
                                 className="mt-2 w-full max-h-32 object-cover rounded-lg border border-[var(--border)]" />
                             )}
                           </div>

@@ -45,8 +45,10 @@ function PreviewCard({ design, index }: { design: FreeDesign; index: number }) {
           <Image
             src={currentImg.thumbnailUrl || currentImg.url}
             alt={currentImg.alt || design.title}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
             loading="lazy"
+            sizes="(max-width: 768px) 100vw, 600px"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-4xl sm:text-5xl">🧵</div>
