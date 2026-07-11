@@ -38,7 +38,8 @@
       "Bash(sort -k5 -rn)",
       "Bash(git stash *)",
       "Bash(S3_ENDPOINT='' node *)",
-      "Bash(dir /b)"
+      "Bash(dir /b)",
+      "mcp__plugin_supabase_supabase__execute_sql"
     ]
   }
 }
