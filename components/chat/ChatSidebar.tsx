@@ -68,7 +68,7 @@ function ConversationItem({ conv }: { conv: Conversation }) {
       {/* Avatar */}
       <div className="relative flex-shrink-0">
         {conv.clientAvatar ? (
-          <Image src={conv.clientAvatar} alt={conv.clientName} className="w-9 h-9 rounded-full object-cover" />
+          <Image width={36} height={36} src={conv.clientAvatar} alt={conv.clientName} className="w-9 h-9 rounded-full object-cover" />
         ) : (
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-xs"

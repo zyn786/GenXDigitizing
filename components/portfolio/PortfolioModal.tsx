@@ -101,6 +101,8 @@ export function PortfolioModal({
               <Image
                 src={current.url}
                 alt={current.alt || item.title}
+                width={1200}
+                height={900}
                 className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg"
                 draggable={false}
                 onClick={(e) => e.stopPropagation()}
@@ -188,7 +190,7 @@ export function PortfolioModal({
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <Image src={img.thumbnailUrl || img.url} alt="" className="w-full h-full object-cover" />
+                  <Image fill src={img.thumbnailUrl || img.url} alt="" width={80} height={60} className="object-cover"  sizes="(max-width: 768px) 100vw, 800px" />
                 </button>
               ))}
             </div>

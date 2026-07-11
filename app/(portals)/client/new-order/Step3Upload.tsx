@@ -132,7 +132,7 @@ export function Step3Upload({files,fileRef,setFiles,w,setW,h,setH,col,setCol,not
                 {/* Thumbnail */}
                 <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center border" style={{background:"var(--bg)",borderColor:"var(--border2)"}}>
                   {previewUrl ? (
-                    <Image src={previewUrl} alt={f.name} className="w-full h-full object-cover" onLoad={() => URL.revokeObjectURL(previewUrl)} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    <Image fill src={previewUrl} alt={f.name} className="object-cover" onLoad={() => URL.revokeObjectURL(previewUrl)} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}  sizes="(max-width: 768px) 100vw, 800px" />
                   ) : (
                     <ImageIcon size={14} style={{color:txt3}} />
                   )}

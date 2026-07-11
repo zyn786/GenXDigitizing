@@ -81,7 +81,7 @@ export function ClientDashboard({ user, stats, recentOrders, tiers, pendingRevie
             className="w-[60px] h-[60px] sm:w-[88px] sm:h-[88px] rounded-2xl flex items-center justify-center cursor-pointer relative overflow-hidden border-[3px] transition-all flex-shrink-0 active:scale-95"
             style={{ borderColor: clr[4].border, boxShadow: `0 8px 24px ${clr[4].bgSoft}` }}>
             {avatarUrl ? (
-              <Image src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              <Image fill src={avatarUrl} alt="Avatar" className="object-cover"  sizes="(max-width: 768px) 100vw, 800px" />
             ) : (
               <span className="text-xl sm:text-3xl font-bold text-white font-syne w-full h-full flex items-center justify-center"
                 style={{ background: `linear-gradient(135deg,${clr[4].bg},${clr[5].bg})` }}>{initials}</span>

@@ -74,7 +74,7 @@ export function PageHeader({
             <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
               style={{ background: grad }}>
               {avatar
-                ? <Image src={avatar} alt={name} className="w-full h-full rounded-full object-cover" />
+                ? <Image fill src={avatar} alt={name} className="rounded-full object-cover"  sizes="(max-width: 768px) 100vw, 800px" />
                 : (name?.charAt(0)?.toUpperCase() || "U")}
             </div>
             <div className="flex-1 min-w-0">

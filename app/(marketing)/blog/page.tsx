@@ -53,7 +53,7 @@ export default async function BlogPage() {
                     >
                       {post.hero.image ? (
                         <div className="w-full aspect-[16/9] overflow-hidden flex-shrink-0">
-                          <Image src={post.hero.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                          <Image fill src={post.hero.image} alt={post.title} className="object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
                         </div>
                       ) : (
                         <div

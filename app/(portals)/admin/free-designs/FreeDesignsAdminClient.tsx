@@ -81,7 +81,7 @@ function ImageUploader({ images, onAdd, onRemove, uploading, onUploadingChange }
       <div className="grid grid-cols-4 gap-2 mb-2">
         {images.map((img, i) => (
           <div key={i} className="relative aspect-square rounded-lg overflow-hidden group/img" style={{ background: "var(--elevated)" }}>
-            <Image src={img.thumbnailUrl || img.url} alt={img.alt || `Preview ${i + 1}`} className="w-full h-full object-cover" />
+            <Image fill src={img.thumbnailUrl || img.url} alt={img.alt || `Preview ${i + 1}`} className="object-cover"  sizes="(max-width: 768px) 100vw, 800px" />
             <button onClick={() => onRemove(i)}
               className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
               <X className="w-3 h-3" />
@@ -366,7 +366,7 @@ export function FreeDesignsAdminClient() {
               {/* Thumbnail */}
               <div className="aspect-[4/3] flex items-center justify-center relative" style={{ background: "var(--elevated)" }}>
                 {design.images?.[0] ? (
-                  <Image src={design.images[0].thumbnailUrl || design.images[0].url} alt={design.title} className="w-full h-full object-cover" />
+                  <Image fill src={design.images[0].thumbnailUrl || design.images[0].url} alt={design.title} className="object-cover"  sizes="(max-width: 768px) 100vw, 800px" />
                 ) : <span className="text-3xl">🧵</span>}
                 <div className="absolute top-2 left-2 flex gap-1">
                   {design.featured && (

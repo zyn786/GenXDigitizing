@@ -439,7 +439,7 @@ export function UploadWizard() {
               <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] group hover:border-[#2563EB]/30 hover:shadow-sm transition-all">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-[var(--elevated)] flex-shrink-0 border border-[var(--border)]">
                   {f.file.type.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(f.file.name)
-                    ? <Image src={f.preview} alt={f.file.name} className="w-full h-full object-cover" />
+                    ? <Image fill src={f.preview} alt={f.file.name} className="object-cover"  sizes="(max-width: 768px) 100vw, 800px" />
                     : <div className="w-full h-full flex items-center justify-center"><ImageIcon size={18} className="text-[var(--txt3)]" /></div>}
                 </div>
                 <div className="flex-1 min-w-0">

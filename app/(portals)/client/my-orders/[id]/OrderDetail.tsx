@@ -47,7 +47,7 @@ function FileCard({ file, icon, onPreview, onDownload }: any) {
         {isArtwork ? (
           <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer" style={{background:"var(--elevated2)"}}
             onClick={()=>onPreview?.(url)}>
-            <Image src={url} alt={file.file_name} className="w-full h-full object-cover" onError={(e:any)=>{e.target.style.display="none";}}/>
+            <Image fill src={url} alt={file.file_name} className="object-cover" onError={(e:any)=>{e.target.style.display="none";}} sizes="(max-width: 768px) 100vw, 800px" />
           </div>
         ) : (
           <span className="flex-shrink-0" style={{color:txt2}}>{icon}</span>

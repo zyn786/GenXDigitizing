@@ -50,9 +50,11 @@ export function PortfolioCard({ item, index, onClick, onCategoryClick }: Portfol
             <Image
               src={firstImage.url}
               alt={item.title}
+              fill
               loading="lazy"
               onError={() => setImgError(true)}
-              className="absolute inset-0 w-full h-full object-cover transition-all duration-700"
+              className="object-cover transition-all duration-700"
+              sizes="(max-width: 768px) 50vw, 33vw"
               style={{ transform: isHovered ? "scale(1.06)" : "scale(1)", filter: isHovered ? "brightness(1.05)" : "brightness(1)" }}
             />
             {/* Hover overlay */}

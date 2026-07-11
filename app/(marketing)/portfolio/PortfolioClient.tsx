@@ -309,7 +309,7 @@ function ClientResultCard({ item }: { item: PortfolioItem }) {
         style={{ borderColor: `${accent}25` }}
       >
         {firstImg ? (
-          <Image src={firstImg.url} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
+          <Image fill src={firstImg.url} alt={item.title} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
         ) : (
           <div
             className="w-full h-full flex items-center justify-center text-xl"

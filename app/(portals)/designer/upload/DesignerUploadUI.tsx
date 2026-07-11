@@ -249,7 +249,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
           <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
             style={{ background: "linear-gradient(135deg, #7C3AED, #D946EF)" }}>
             {designerAvatar
-              ? <Image src={designerAvatar} alt={designerName} className="w-full h-full rounded-full object-cover" />
+              ? <Image fill src={designerAvatar} alt={designerName} className="rounded-full object-cover"  sizes="(max-width: 768px) 100vw, 800px" />
               : designerName?.charAt(0)?.toUpperCase() || "D"}
           </div>
           <div className="flex-1 min-w-0">

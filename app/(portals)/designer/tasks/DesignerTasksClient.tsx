@@ -153,7 +153,7 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
           <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
             style={{ background:"linear-gradient(135deg, #7C3AED, #D946EF)" }}>
             {designerAvatar
-              ? <Image src={designerAvatar} alt={designerName} className="w-full h-full rounded-full object-cover" />
+              ? <Image fill src={designerAvatar} alt={designerName} className="rounded-full object-cover"  sizes="(max-width: 768px) 100vw, 800px" />
               : designerName?.charAt(0)?.toUpperCase() || "D"}
           </div>
           <div className="flex-1 min-w-0">
@@ -324,8 +324,8 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer" style={{ background:"var(--elevated2)" }}
                                   onClick={(e)=>{ e.stopPropagation(); setPreviewImage(f.signed_url||f.file_url); }}>
-                                  <Image src={f.signed_url||f.file_url} alt={f.file_name} className="w-full h-full object-cover"
-                                    onError={(e:any)=>{ e.target.style.display="none"; }}/>
+                                  <Image fill src={f.signed_url||f.file_url} alt={f.file_name} className="object-cover"
+                                    onError={(e:any)=>{ e.target.style.display="none"; }} sizes="(max-width: 768px) 100vw, 800px" />
                                 </div>
                                 <div className="min-w-0">
                                   <p className="text-[12px] truncate font-medium" style={{ color:txt }}>{f.file_name}</p>
@@ -570,8 +570,8 @@ export function DesignerTasksClient({ tasks, completedOrders, userId, designerId
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer" style={{ background:"var(--elevated2)" }}
                                 onClick={() => setPreviewImage(f.signed_url||f.file_url)}>
-                                <Image src={f.signed_url||f.file_url} alt={f.file_name} className="w-full h-full object-cover"
-                                  onError={(e:any)=>{ e.target.style.display="none"; }}/>
+                                <Image fill src={f.signed_url||f.file_url} alt={f.file_name} className="object-cover"
+                                  onError={(e:any)=>{ e.target.style.display="none"; }} sizes="(max-width: 768px) 100vw, 800px" />
                               </div>
                               <p className="text-[12px] truncate font-medium" style={{ color:txt }}>{f.file_name}</p>
                             </div>

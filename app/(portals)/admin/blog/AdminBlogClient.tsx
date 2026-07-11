@@ -711,7 +711,7 @@ export default function AdminBlogPage() {
                       </label>
                     </div>
                     {form.heroImage && (
-                      <Image src={form.heroImage} alt="Preview" className="mt-2 w-full max-h-36 object-cover rounded-xl border border-[var(--border)]" />
+                      <Image fill src={form.heroImage} alt="Preview" className="mt-2 w-full max-h-36 object-cover rounded-xl border border-[var(--border)]"  sizes="(max-width: 768px) 100vw, 800px" />
                     )}
                   </div>
                   {/* Publish toggle */}
