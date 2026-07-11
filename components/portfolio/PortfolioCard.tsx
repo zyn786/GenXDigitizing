@@ -60,11 +60,10 @@ export function PortfolioCard({ item, index, onClick, onCategoryClick }: Portfol
               className="absolute inset-0 flex items-center justify-center transition-all duration-500 sm:opacity-0 sm:group-hover:opacity-100"
               style={{ background: `linear-gradient(180deg, transparent 40%, ${accent}25 100%)` }}
             >
-              <span
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105"
+              <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105"
                 style={{ background: `${accent}90`, backdropFilter: "blur(12px)", boxShadow: `0 4px 20px ${accent}40` }}
               >
-                <Eye size={15} /> View Details
+                <Eye size={15} />
               </span>
             </div>
           </>

@@ -121,9 +121,6 @@ export function PortfolioPreview() {
                 <div className="sm:hidden relative pt-2 pb-6">
                   {/* Ambient glow */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[250px] rounded-full blur-[100px] opacity-[0.07] pointer-events-none" style={{ background: `radial-gradient(circle, ${filtered[0]?.accent || "#2563EB"} 0%, transparent 70%)` }} />
-                  {/* Edge fades */}
-                  <div className="absolute left-0 top-0 bottom-0 w-10 z-10 pointer-events-none" style={{ background: "linear-gradient(to right, var(--bg) 0%, transparent 100%)" }} />
-                  <div className="absolute right-0 top-0 bottom-0 w-10 z-10 pointer-events-none" style={{ background: "linear-gradient(to left, var(--bg) 0%, transparent 100%)" }} />
                   {/* Cards */}
                   <div className="flex gap-4 overflow-x-auto scrollbar-none snap-x snap-mandatory scroll-smooth pl-5 pr-5"
                     style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
@@ -147,9 +144,6 @@ export function PortfolioPreview() {
                   {/* Ambient glow */}
                   <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[400px] h-[200px] rounded-full blur-[120px] opacity-8 pointer-events-none" style={{ background: `radial-gradient(circle, ${filtered[0]?.accent || "#2563EB"} 0%, transparent 70%)` }} />
                   <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[400px] h-[200px] rounded-full blur-[120px] opacity-6 pointer-events-none" style={{ background: `radial-gradient(circle, #7C3AED 0%, transparent 70%)` }} />
-                  {/* Edge fades */}
-                  <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none" style={{ background: "linear-gradient(to right, var(--bg) 20%, transparent 100%)" }} />
-                  <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none" style={{ background: "linear-gradient(to left, var(--bg) 20%, transparent 100%)" }} />
                   {/* Marquee */}
                   <div className="flex gap-5 animate-marquee-slow w-max px-8">
                     {filtered.length > 0 ? (

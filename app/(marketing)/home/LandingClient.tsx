@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import {
   Search,
   ChevronDown,
@@ -418,12 +419,20 @@ const ROTATING_WORDS = ["Just Quality.", "No Auto-Trace.", "Pure Craft."];
 function HeroSection() {
   const headline = HEADLINES.primary;
   const [wordIndex, setWordIndex] = useState(0);
+  const [portalReady, setPortalReady] = useState(false);
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
   useEffect(() => {
     const interval = setInterval(() => {
       setWordIndex((prev) => (prev + 1) % ROTATING_WORDS.length);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  // Desktop sticky CTA — appears on scroll
+  const { scrollY } = useScroll();
+  const stickyBtnAlpha = useTransform(scrollY, [300, 600], [0, 1], { clamp: true });
 
   return (
     <section className="relative flex flex-col items-center justify-center pb-6 sm:pb-8 min-h-screen overflow-hidden -mt-[100px] pt-[100px]" aria-labelledby="hero-heading">
@@ -593,14 +602,14 @@ function HeroSection() {
 
         {/* Primary CTAs — side by side on all screens */}
         <div className="flex flex-row gap-2 sm:gap-4 justify-center mb-3 sm:mb-4">
-          <Link href="/upload" className="flex-1 sm:flex-none">
+          <Link href="/register" className="flex-1 sm:flex-none">
             <Button
               variant="grad"
               size="xl"
               className="w-full sm:w-auto !px-5 sm:!px-10 !py-3.5 sm:!py-4 !text-sm sm:!text-lg !rounded-2xl !font-bold !shadow-[0_8px_32px_rgba(37,99,235,0.45)] hover:!shadow-[0_12px_40px_rgba(37,99,235,0.55)] hover:-translate-y-0.5 transition-all duration-300"
-              rightIcon={<Upload size={15} className="sm:size-[20px]" />}
+              rightIcon={<ArrowRight size={15} className="sm:size-[20px]" />}
             >
-              Get Free Quote
+              Sign In / Register
             </Button>
           </Link>
           <a href="https://wa.me/18302102135" target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-none no-underline">
@@ -642,6 +651,26 @@ function HeroSection() {
         </div>
 
       </div>
+
+      {/* Desktop sticky CTA — hidden initially, appears on scroll */}
+      {portalReady && createPortal(
+        <motion.div
+          className="fixed top-[120px] left-0 right-0 z-[999] flex justify-center pointer-events-none"
+          style={{ opacity: stickyBtnAlpha }}
+        >
+          <Link href="/upload" className="pointer-events-auto">
+            <Button
+              variant="grad"
+              size="md"
+              className="!rounded-2xl !font-bold !text-sm !py-3 !px-8 shadow-[0_8px_32px_rgba(37,99,235,0.45)]"
+              rightIcon={<Upload size={14} />}
+            >
+              Upload Design — Get Free Quote
+            </Button>
+          </Link>
+        </motion.div>,
+        document.body
+      )}
     </section>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
@@ -123,10 +122,6 @@ export function MobileHeroScroll() {
   // Bottom edge blend
   const bottomFadeAlpha = useTransform(p, [0.05, 0.35], [0, 1]);
 
-  // Button: slides from bottom of hero to below Nav (viewport-relative)
-  const btnTop = useTransform(p, [0, 0.8], [SCROLL_RANGE * 0.88, 108]);
-  const btnScale = useTransform(p, [0, 0.8], [1, 0.85]);
-
   // Rotating words
   const [wordIndex, setWordIndex] = useState(0);
   useEffect(() => {
@@ -141,30 +136,6 @@ export function MobileHeroScroll() {
 
   return (
     <div className="relative overflow-x-hidden">
-      {/* ══════ STICKY BUTTON — slides up, sticks below Nav ══════ */}
-      {typeof document !== "undefined" && createPortal(
-        <motion.div
-          className="fixed left-0 right-0 z-[999] flex justify-center px-4"
-          style={{
-            top: btnTop,
-            scale: btnScale,
-            willChange: "transform, top",
-          } as any}
-        >
-          <Link href="/upload" className="block w-full max-w-[360px]">
-            <Button
-              variant="grad"
-              size="md"
-              className="w-full !rounded-2xl !font-bold !text-sm !py-3"
-              rightIcon={<Upload size={14} />}
-            >
-              Upload Design — Get Free Quote
-            </Button>
-          </Link>
-        </motion.div>,
-        document.body
-      )}
-
       {/* ══════ HERO ══════ */}
       <div className="relative z-10 h-[100dvh] flex flex-col items-center justify-center overflow-hidden">
         {/* Background video + poster */}
@@ -176,11 +147,9 @@ export function MobileHeroScroll() {
           {!isLowEnd && (
             <video
               className="absolute inset-0 w-full h-full object-cover"
-              muted loop playsInline
-              preload="none"
+              muted loop playsInline autoPlay
               poster="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:low,so_0,w_600/v1781040748/hero-bg-desktop_ogydtd.jpg"
               width={1080} height={1920}
-              ref={(el) => { if (el) { el.load(); el.play().catch(() => {}); } }}
             >
               <source src="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:good,w_750/v1781040746/hero-bg-mobile_yz4bkh.webm" type="video/webm" />
               <source src="https://res.cloudinary.com/djoixgojj/video/upload/vc_h264,q_auto:good,w_750/v1781040746/hero-bg-mobile_yz4bkh.mp4" type="video/mp4" />

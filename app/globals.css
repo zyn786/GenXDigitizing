@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* ═══════════════════════════════
    CSS VARIABLES — Light mode
    Brand: Blue #2563EB | Orange #F97316 | Green #16A34A
