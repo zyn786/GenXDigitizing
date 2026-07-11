@@ -29,7 +29,7 @@ export default function ResetPasswordPage() {
       if (session) setReady(true);
     });
     return () => subscription.unsubscribe();
-  }, []);
+  }, [supabase.auth]);
 
   async function handleReset(e: React.FormEvent) {
     e.preventDefault();

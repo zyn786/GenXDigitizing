@@ -46,7 +46,7 @@ function PlanPricingGrid() {
       setLoaded(true);
     }
     load();
-  }, []);
+  }, [supabase]);
 
   async function updatePrice(plan: string, val: number) {
     setPrices(prev => ({ ...prev, [plan]: val }));

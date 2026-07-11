@@ -366,7 +366,7 @@ export function PortfolioClient() {
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [searchParams]);
+  }, [searchParams, validSlugs]);
 
   const mainCategories = [
     { slug: "all", name: "All Work", emoji: "✦", color: "#2563EB" },
