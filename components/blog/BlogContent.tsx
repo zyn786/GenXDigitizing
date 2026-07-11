@@ -189,7 +189,7 @@ export default function BlogContent({ post, showBack = true, children }: { post:
                   {/* Layout: image-left — image beside text */}
                   {section.layout === "image-left" && section.image && (
                     <div className="grid sm:grid-cols-2 gap-4 sm:gap-5 mb-5 items-start">
-                      <div className="rounded-xl overflow-hidden aspect-[4/3] border border-[var(--border)]">
+                      <div className="relative rounded-xl overflow-hidden aspect-[4/3] border border-[var(--border)]">
                         <Image fill src={section.image} alt={section.heading} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
                       </div>
                       <div className="text-[15px] sm:text-base text-[var(--txt2)] leading-relaxed">
