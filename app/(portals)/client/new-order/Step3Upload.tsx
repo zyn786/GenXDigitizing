@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState, useRef, useCallback } from "react";
 import { Upload, FileText, ArrowRight, ArrowLeft, ChevronDown, Settings, X, Image as ImageIcon, AlertTriangle } from "lucide-react";
-import Image from "next/image";
+import NextImage from "next/image";
 
 const txt = "var(--txt)", txt2 = "var(--txt2)", txt3 = "var(--txt3)";
 const GREEN = {bgSoft:"rgba(16,185,129,0.08)",border:"rgba(16,185,129,0.25)",icon:"#059669",text:"#047857"};
@@ -132,7 +132,7 @@ export function Step3Upload({files,fileRef,setFiles,w,setW,h,setH,col,setCol,not
                 {/* Thumbnail */}
                 <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center border" style={{background:"var(--bg)",borderColor:"var(--border2)"}}>
                   {previewUrl ? (
-                    <Image fill src={previewUrl} alt={f.name} className="object-cover" onLoad={() => URL.revokeObjectURL(previewUrl)} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}  sizes="(max-width: 768px) 100vw, 800px" />
+                    <NextImage fill src={previewUrl} alt={f.name} className="object-cover" onLoad={() => URL.revokeObjectURL(previewUrl)} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}  sizes="(max-width: 768px) 100vw, 800px" />
                   ) : (
                     <ImageIcon size={14} style={{color:txt3}} />
                   )}

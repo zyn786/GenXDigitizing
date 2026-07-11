@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowLeft, CheckCircle, Download, RefreshCw, Star, Image as ImageIcon, FileText, Upload, ChevronDown, Settings, MessageSquare } from "lucide-react";
 import { formatDate, formatFileSize, formatStitchCount, formatCurrency, STATUS_LABEL, STATUS_CLASS, TURNAROUND_OPTIONS, hoursUntilDeadline, slaStatusColor } from "@/lib/utils";
-import Image from "next/image";
+import NextImage from "next/image";
 
 const FMTS = ["DST","PES","EMB","JEF","XXX","VIP","HUS","EXP","VP3","SEW","AI","SVG","EPS","PDF"];
 const EDITABLE_STATUSES = ["submitted","assigned","in_progress","review","approved","revision"];
