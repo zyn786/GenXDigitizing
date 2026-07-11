@@ -111,35 +111,20 @@ export function MobileHeroScroll() {
   const { tier, reduced, mounted } = usePrefs();
   const isLowEnd = tier === "low";
 
-  const [heroPx, setHeroPx] = useState(0);
-  useEffect(() => {
-    const update = () => setHeroPx(window.innerHeight);
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-
-  // Scroll progress
+  // Device-agnostic: use vh for scroll range
+  const SCROLL_RANGE = typeof window !== "undefined" ? window.innerHeight : 800;
   const { scrollY } = useScroll();
-  const p = useTransform(scrollY, [0, heroPx || 600], [0, 1], { clamp: true });
+  const p = useTransform(scrollY, [0, SCROLL_RANGE], [0, 1], { clamp: true });
 
-  // Hero fades
-  const heroAlpha = useTransform(p, [0, 0.6], [1, 0]);
-  const headingAlpha = useTransform(p, [0, 0.5], [1, 0]);
-  const headingY = useTransform(p, [0, 0.5], [0, -30]);
-  const subAlpha = useTransform(p, [0, 0.4], [1, 0]);
-  const trustAlpha = useTransform(p, [0, 0.3], [1, 0]);
-  const cardsAlpha = useTransform(p, [0, 0.2], [1, 0]);
-  const reasAlpha = useTransform(p, [0, 0.35], [1, 0]);
-  const bgAlpha = useTransform(p, [0, 1], [1, 0.04]);
+  // Background fades to transparent as user scrolls
+  const bgAlpha = useTransform(p, [0, 0.7], [1, 0.04]);
 
-  // Bottom fade — appears on scroll only
-  const bottomFadeAlpha = useTransform(p, [0.05, 0.4], [0, 1]);
+  // Bottom edge blend
+  const bottomFadeAlpha = useTransform(p, [0.05, 0.35], [0, 1]);
 
-  // Sticky button: slides from hero CTA to just below the Nav
-  // Nav is at top:36px (TopBar) + 64px (Nav height) = 100px
-  const btnTop = useTransform(p, [0, 0.87], [heroPx * 0.76, 108]);
-  const btnScale = useTransform(p, [0, 0.87], [1, 0.85]);
+  // Button: slides from bottom of hero to below Nav (viewport-relative)
+  const btnTop = useTransform(p, [0, 0.8], [SCROLL_RANGE * 0.88, 108]);
+  const btnScale = useTransform(p, [0, 0.8], [1, 0.85]);
 
   // Rotating words
   const [wordIndex, setWordIndex] = useState(0);
@@ -150,18 +135,19 @@ export function MobileHeroScroll() {
     return () => clearInterval(interval);
   }, []);
 
-  if (!mounted || !heroPx) return null;
+  if (!mounted) return null;
   if (reduced) return <SimpleHero />;
 
   return (
-    <div style={{ height: heroPx + 40 }} className="relative overflow-x-hidden">
+    <div className="relative overflow-x-hidden">
       {/* ══════ STICKY BUTTON — slides up, sticks below Nav ══════ */}
       <motion.div
-        className="fixed left-0 right-0 z-[45] flex justify-center px-4"
+        className="fixed left-0 right-0 z-[999] flex justify-center px-4"
         style={{
           top: btnTop,
           scale: btnScale,
-        }}
+          willChange: "transform, top",
+        } as React.CSSProperties}
       >
         <Link href="/upload" className="block w-full max-w-[360px]">
           <Button
@@ -205,13 +191,10 @@ export function MobileHeroScroll() {
           style={{ opacity: bottomFadeAlpha, background: "linear-gradient(to bottom, transparent, var(--bg, #0f0f0f))" }}
         />
 
-        {/* Content */}
-        <motion.div
-          className="relative z-10 flex flex-col items-center text-center px-4 pt-8 w-full max-w-[500px] mx-auto"
-          style={{ opacity: heroAlpha }}
-        >
+        {/* Content — always visible, no fade */}
+        <div className="relative z-10 flex flex-col items-center text-center px-4 pt-8 w-full max-w-[500px] mx-auto">
           {/* Service cards */}
-          <motion.div className="w-screen -mx-4 overflow-hidden mb-2 pt-8" style={{ opacity: cardsAlpha }}>
+          <div className="w-screen -mx-4 overflow-hidden mb-2 pt-8">
             <div className="flex gap-2 animate-marquee w-max pl-4">
               {[...SERVICE_CARDS, ...SERVICE_CARDS].map((card, i) => (
                 <div key={`${card.title}-${i}`} className="flex items-center gap-2 bg-white/15 border border-white/10 rounded-xl px-2.5 py-1.5 flex-shrink-0">
@@ -223,13 +206,10 @@ export function MobileHeroScroll() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
 
           {/* Trust bar */}
-          <motion.div
-            className="inline-flex flex-wrap items-center justify-center gap-1.5 mt-2 mb-3 text-[11px] font-medium bg-white/10 px-3 py-1.5 rounded-full border border-white/15 text-white"
-            style={{ opacity: trustAlpha }}
-          >
+          <div className="inline-flex flex-wrap items-center justify-center gap-1.5 mt-2 mb-3 text-[11px] font-medium bg-white/10 px-3 py-1.5 rounded-full border border-white/15 text-white">
             <span className="flex items-center gap-0.5">
               <span className="font-bold">{SITE_STATS.avgRating}</span>
               {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={10} fill="#F59E0B" stroke="none" />)}
@@ -238,16 +218,10 @@ export function MobileHeroScroll() {
             <span className="text-white/85"><span className="font-semibold">{fmtPlus(SITE_STATS.ordersCompleted)}</span> Orders</span>
             <span className="text-white/25">|</span>
             <span className="text-[#4ADE80] flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-[#4ADE80] animate-pulse" />Free Revisions</span>
-          </motion.div>
+          </div>
 
           {/* Heading */}
-          <motion.h1
-            className="font-syne text-[clamp(38px,10vw,66px)] leading-[1.08] mb-3 text-white"
-            style={{
-              opacity: headingAlpha,
-              y: headingY,
-            }}
-          >
+          <h1 className="font-syne text-[clamp(38px,10vw,66px)] leading-[1.08] mb-3 text-white">
             <span className="block font-light tracking-wide">Real Digitizers.</span>
             <span className="relative block font-bold tracking-tight" style={{ minHeight: "1.1em" }}>
               <AnimatePresence mode="wait">
@@ -264,15 +238,15 @@ export function MobileHeroScroll() {
                 </motion.span>
               </AnimatePresence>
             </span>
-          </motion.h1>
+          </h1>
 
           {/* Subtitle */}
-          <motion.p className="text-[13px] text-white/80 leading-relaxed mb-5 px-2" style={{ opacity: subAlpha }}>
+          <p className="text-[13px] text-white/80 leading-relaxed mb-5 px-2">
             Every file hand-digitized by experienced professionals. Clean sew-outs. Zero thread breaks. Production-ready in 12 hours — or it&apos;s free.
-          </motion.p>
+          </p>
 
           {/* CTA buttons */}
-          <motion.div className="flex flex-row gap-2 w-full mb-3" style={{ opacity: subAlpha }}>
+          <div className="flex flex-row gap-2 w-full mb-3">
             <Link href="/register" className="flex-1">
               <Button variant="grad" size="md" className="w-full !h-[44px] !rounded-2xl !font-semibold !text-sm !bg-white/10 hover:!bg-white/20 !border !border-white/20 !text-white">Sign Up / Login</Button>
             </Link>
@@ -281,13 +255,13 @@ export function MobileHeroScroll() {
                 <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
               }>WhatsApp</Button>
             </a>
-          </motion.div>
+          </div>
 
           {/* Reassurance */}
-          <motion.p className="text-[11px] text-white/50" style={{ opacity: reasAlpha }}>
+          <p className="text-[11px] text-white/50">
             ✓ Free quote · ✓ No payment required · ✓ Pay only after preview approval
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
       </div>
     </div>
   );
