@@ -407,6 +407,31 @@ export function PortfolioAdminClient() {
                 );
               })()}
 
+              {/* ── Keywords ── */}
+              <div>
+                <label className="text-xs font-semibold mb-1.5 block" style={{ color: txt2 }}>
+                  Keywords <span className="font-normal" style={{ color: txt3 }}>— comma-separated, for SEO</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.keywords.join(", ")}
+                  onChange={(e) => setForm((f) => ({ ...f, keywords: e.target.value.split(",").map((k) => k.trim()).filter(Boolean) }))}
+                  placeholder="embroidery digitizing, custom patches, vector art..."
+                  className="input text-xs"
+                  style={{ background: "var(--elevated)", border: "1px solid var(--border2)", borderRadius: 8, color: "var(--txt)", padding: "8px 12px", width: "100%", outline: "none" }}
+                />
+                {form.keywords.length > 0 && (
+                  <div className="flex gap-1.5 flex-wrap mt-2">
+                    {form.keywords.map((kw) => (
+                      <span key={kw} className="px-2 py-0.5 rounded-full text-[10px] font-medium"
+                        style={{ background: clr[0].bgSoft, color: clr[0].text, border: `1px solid ${clr[0].border}` }}>
+                        {kw}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* ── Images ── */}
               <div className="space-y-4">
                 <h3 className="font-syne font-bold text-sm flex items-center gap-2" style={{ color: txt }}>
