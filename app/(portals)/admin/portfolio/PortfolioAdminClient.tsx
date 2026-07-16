@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { SUB_CATEGORIES } from "@/components/portfolio/data";
+import { PortfolioModal } from "@/components/portfolio/PortfolioModal";
 import Image from "next/image";
 
 const CARD_COLORS = [
@@ -73,6 +74,7 @@ export function PortfolioAdminClient() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [selectedPreview, setSelectedPreview] = useState<Portfolio | null>(null);
 
   const fetchData = useCallback(async () => {
     const [pRes, cRes] = await Promise.all([
@@ -265,10 +267,11 @@ export function PortfolioAdminClient() {
             <div className="cursor-grab flex-shrink-0" style={{ color: txt3 }}><GripVertical size={16} /></div>
 
             {/* Thumbnail */}
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden"
-              style={{ background: `linear-gradient(135deg, ${p.accent}20, ${p.accent}08)`, border: `1px solid ${p.accent}30` }}>
+            <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden cursor-pointer"
+              style={{ background: `linear-gradient(135deg, ${p.accent}20, ${p.accent}08)`, border: `1px solid ${p.accent}30` }}
+              onClick={() => setSelectedPreview(p)}>
               {(p.images.find((i: any) => i.isThumbnail || i.sortOrder === -1) || p.images[0]) ? (
-                <Image fill src={(p.images.find((i: any) => i.isThumbnail || i.sortOrder === -1) || p.images[0]).url} alt={p.title} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
+                <Image fill src={(p.images.find((i: any) => i.isThumbnail || i.sortOrder === -1) || p.images[0]).url} alt={p.title} className="object-cover" loading="lazy" sizes="64px" />
               ) : <Palette size={18} style={{ color: p.accent }} />}
             </div>
 
@@ -512,6 +515,7 @@ export function PortfolioAdminClient() {
           </div>
         </div>
       )}
+      <PortfolioModal item={selectedPreview as any} onClose={() => setSelectedPreview(null)} />
     </div>
   );
 }
