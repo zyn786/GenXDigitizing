@@ -118,7 +118,7 @@ export async function PortalLayout({ children, requiredRole }: PortalLayoutProps
   return (
     <PortalProviders userId={user.id} role={user.role} userName={user.full_name} userEmail={user.email}>
       <div className="portal-layout">
-        <div className="hidden lg:block"><Sidebar user={user} badgeCounts={badgeCounts} subscriptionStatus={subscriptionStatus} /></div>
+        <div className="hidden lg:flex flex-shrink-0"><Sidebar user={user} badgeCounts={badgeCounts} subscriptionStatus={subscriptionStatus} /></div>
         <main className="portal-main">
           <Suspense fallback={<PortalContentSkeleton />}>
             {children}
