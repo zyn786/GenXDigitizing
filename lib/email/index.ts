@@ -115,7 +115,10 @@ async function sendEmail(params: SendParams, retries: number = 2) {
 
 // ── Base layout with logo ──────────────────────────────────────
 
-export function baseLayout(content: string, title: string): string {
+export function baseLayout(content: string, title: string, utm?: SendParams["utm"]): string {
+  var url = withUtm(APP_URL, utm);
+  // Replace bare APP_URL references in content with UTM-appended version
+  var processed = content.replace(new RegExp(APP_URL.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?!\\?)", "g"), url);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -337,14 +340,14 @@ export function baseLayout(content: string, title: string): string {
       <p style="margin:0;">
         <a href="mailto:support@genxdigitizing.com">support@genxdigitizing.com</a>
         &nbsp;·&nbsp;
-        <a href="${APP_URL}">genxdigitizing.com</a>
+        <a href="${url}">genxdigitizing.com</a>
       </p>
       <p style="margin:2px 0 0;">
-        <a href="${APP_URL}/client">Client Portal</a>
+        <a href="${url}/client">Client Portal</a>
         &nbsp;·&nbsp;
-        <a href="${APP_URL}/pricing">Pricing</a>
+        <a href="${url}/pricing">Pricing</a>
         &nbsp;·&nbsp;
-        <a href="${APP_URL}">Website</a>
+        <a href="${url}">Website</a>
       </p>
       <p class="footer-copy">&copy; ${new Date().getFullYear()} GenXdigitizing. All rights reserved.</p>
     </div>
@@ -366,6 +369,7 @@ export async function emailOrderSubmitted(params: {
   turnaround: string;
   estimatedDelivery: string;
 }) {
+  var utm = { campaign: "order_submitted" };
   const html = baseLayout(`
     <p class="greeting">Hi ${params.clientName},</p>
     <p>Your digitizing order has been <strong>received</strong> and is now being processed by our team.</p>
