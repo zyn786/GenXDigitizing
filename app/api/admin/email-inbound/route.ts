@@ -72,23 +72,26 @@ export async function POST(request: NextRequest) {
 
     var payload = JSON.parse(rawBody);
 
+    // Resend webhook wraps email data inside "data" field
+    // Outer: { type: "email.received", data: { from, to, subject, ... } }
+    var email = payload.data || payload;
+
     console.log("[email-inbound] Received webhook:", JSON.stringify({
-      from: payload.from,
-      to: payload.to,
-      subject: payload.subject,
-      resend_id: payload.resend_id,
+      from: email.from,
+      to: email.to,
+      subject: email.subject,
     }));
 
     // Resend inbound webhook format
-    var fromEmail  = payload.from || "";
-    var toEmail    = (Array.isArray(payload.to) ? payload.to.join(", ") : payload.to) || "";
-    var ccEmails   = (Array.isArray(payload.cc) ? payload.cc.join(", ") : payload.cc) || null;
-    var subject    = payload.subject || "(no subject)";
-    var bodyHtml   = payload.html || "";
-    var bodyText   = payload.text || "";
-    var resendId   = payload.resend_id || payload.id || null;
-    var headers    = payload.headers || null;
-    var attachments = payload.attachments || [];
+    var fromEmail  = email.from || "";
+    var toEmail    = (Array.isArray(email.to) ? email.to.join(", ") : email.to) || "";
+    var ccEmails   = (Array.isArray(email.cc) ? email.cc.join(", ") : email.cc) || null;
+    var subject    = email.subject || "(no subject)";
+    var bodyHtml   = email.html || "";
+    var bodyText   = email.text || "";
+    var resendId   = email.email_id || email.resend_id || email.id || null;
+    var headers    = email.headers || null;
+    var attachments = email.attachments || [];
 
     if (!fromEmail || !toEmail) {
       console.warn("[email-inbound] Missing from/to fields:", JSON.stringify(payload).slice(0, 300));
