@@ -49,7 +49,7 @@ export function Sidebar({ user, badgeCounts = {}, subscriptionStatus }: SidebarP
       <div className="mx-4 border-t border-[var(--border)]" />
 
       {/* Nav */}
-      <nav className="flex-1 py-2 overflow-y-auto" style={{ minHeight: 0 }}>
+      <nav className="flex-1 min-h-0 py-2 overflow-y-auto">
         {sections.map((section, si) => (
           <div key={section.title} className={cn(si > 0 && "mt-3")}>
             <p className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-[var(--txt3)]">
