@@ -218,13 +218,24 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
      ═══════════════════════════════════════════════════ */
   return (
     <div className="email-client">
-      <style dangerouslySetInnerHTML={{ __html: "\n.email-client { display:flex; height:calc(100vh - 140px); min-height:560px; border-radius:16px; overflow:hidden; background:" + cSurf + "; border:1px solid " + cBord + "; }\n.email-sidebar { width:200px; flex-shrink:0; border-right:1px solid " + cBord + "; display:flex; flex-direction:column; background:rgba(0,0,0,0.01); }\n.email-main { flex:1; display:flex; flex-direction:column; min-width:0; }\n.email-list-panel { width:380px; flex-shrink:0; border-right:1px solid " + cBord + "; display:flex; flex-direction:column; }\n.email-detail-panel { flex:1; display:flex; flex-direction:column; min-width:0; }\n\n@media (max-width: 768px) {\n  .email-client { flex-direction:column; height:calc(100vh - 100px); border-radius:12px; }\n  .email-sidebar { display:none; }\n  .email-sidebar.open { display:flex; position:absolute; z-index:30; top:0; left:0; bottom:0; width:220px; box-shadow:4px 0 20px rgba(0,0,0,0.2); }\n  .email-list-panel { width:100%; border-right:none; }\n  .email-detail-panel { width:100%; }\n}\n@media (min-width: 769px) and (max-width: 1100px) {\n  .email-list-panel { width:280px; }\n}\n" }} />
+      <style dangerouslySetInnerHTML={{ __html: "\n.email-client { display:flex; height:calc(100vh - 140px); position:relative; min-height:560px; border-radius:16px; overflow:hidden; background:" + cSurf + "; border:1px solid " + cBord + "; }\n.email-sidebar { width:200px; flex-shrink:0; border-right:1px solid " + cBord + "; display:flex; flex-direction:column; background:rgba(0,0,0,0.01); }\n.email-main { flex:1; display:flex; flex-direction:column; min-width:0; }\n.email-list-panel { width:380px; flex-shrink:0; border-right:1px solid " + cBord + "; display:flex; flex-direction:column; }\n.email-detail-panel { flex:1; display:flex; flex-direction:column; min-width:0; }\n\n@media (max-width: 768px) {\n  .email-client { flex-direction:column; height:calc(100dvh - 100px); border-radius:12px; }\n  .email-sidebar { display:none; }\n  .email-sidebar.open { display:flex; position:fixed; z-index:40; top:0; left:0; bottom:0; width:240px; box-shadow:4px 0 20px rgba(0,0,0,0.2); }\n  .email-list-panel { width:100%; border-right:none; }\n  .email-detail-panel { width:100%; position:absolute; inset:0; z-index:10; background:" + cSurf + "; }\n}\n@media (min-width: 769px) and (max-width: 1100px) {\n  .email-list-panel { width:280px; }\n}\n" }} />
+
+      {/* ═══ SIDEBAR BACKDROP (mobile) ═══ */}
+      {sidebarOpen && (
+        <div className="email-sidebar-backdrop" onClick={function(){setSidebarOpen(false)}}
+          style={{ display: "none", position: "fixed", inset: 0, zIndex: 35, background: "rgba(0,0,0,0.3)" }} />
+      )}
 
       {/* ═══ MOBILE HEADER ═══════════════════════ */}
       <div className="email-mobile-header" style={{ display: "none", padding: "8px 12px", borderBottom: "1px solid " + cBord, alignItems: "center", gap: 8 }}>
         <button type="button" onClick={function(){setSidebarOpen(!sidebarOpen)}} style={{ background: "none", border: "none", cursor: "pointer", color: cTxt, padding: 4, display: "flex" }}><Menu size={20} /></button>
         <span style={{ fontSize: 15, fontWeight: 700, color: cTxt, fontFamily: "Syne, sans-serif" }}>
           {showCompose ? "Compose" : folder === "inbox" ? "Inbox" : "Sent"}
+        {!showCompose && showList && (
+          <button type="button" onClick={startCompose} style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 4, background: CLR.blue.icon, border: "none", cursor: "pointer", color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "Inter, sans-serif", padding: "6px 12px", borderRadius: 8 }}>
+            <Mail size={13} /> Compose
+          </button>
+        )}
         </span>
         {!showCompose && !showList && (
           <button type="button" onClick={goToList} style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", color: CLR.blue.icon, fontSize: 12, fontWeight: 600, fontFamily: "Inter, sans-serif", padding: 0 }}>
@@ -232,7 +243,7 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
           </button>
         )}
       </div>
-      <style dangerouslySetInnerHTML={{ __html: "@media (max-width: 768px) { .email-mobile-header { display:flex !important; } .email-sidebar { display:none !important; } .email-sidebar.open { display:flex !important; } }\n" }} />
+      <style dangerouslySetInnerHTML={{ __html: "@media (max-width: 768px) { .email-mobile-header { display:flex !important; } .email-sidebar { display:none !important; } .email-sidebar.open { display:flex !important; } .email-sidebar-backdrop { display:block !important; } }\n" }} />
 
       {/* ═══ SIDEBAR ══════════════════════════════ */}
       <div className={"email-sidebar" + (sidebarOpen ? " open" : "")}>

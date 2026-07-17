@@ -29,40 +29,88 @@ interface SendParams {
   to: string | string[];
   subject: string;
   html: string;
+  text?: string;
   reply_to?: string;
   attachments?: Attachment[];
   bcc?: string | string[];
+  utm?: { source?: string; medium?: string; campaign?: string };
 }
 
-// ── Send helper ────────────────────────────────────────────────
+// ── HTML-to-text helper ────────────────────────────────────────
 
-async function sendEmail(params: SendParams) {
-  try {
-    const { data, error } = await getResend().emails.send({
-      from: FROM,
-      to: Array.isArray(params.to) ? params.to : [params.to],
-      subject: params.subject,
-      html: params.html,
-      reply_to: params.reply_to ?? REPLY,
-      bcc: params.bcc ? (Array.isArray(params.bcc) ? params.bcc : [params.bcc]) : undefined,
-      attachments: params.attachments?.map(a => ({
-        filename: a.filename,
-        content: a.content instanceof Buffer
-          ? a.content.toString("base64")
-          : Buffer.from(a.content).toString("base64"),
-      })),
-    });
+function stripHtml(html: string): string {
+  return html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .replace(/\n\s*\n/g, "\n\n")
+    .trim();
+}
 
-    if (error) {
-      console.error("[email] Resend error:", error);
-      return { success: false, error };
+// ── UTM helper ──────────────────────────────────────────────────
+
+function withUtm(url: string, utm?: SendParams["utm"]): string {
+  if (!utm) return url;
+  var params = [];
+  if (utm.source) params.push("utm_source=" + encodeURIComponent(utm.source));
+  if (utm.medium) params.push("utm_medium=" + encodeURIComponent(utm.medium));
+  if (utm.campaign) params.push("utm_campaign=" + encodeURIComponent(utm.campaign));
+  if (params.length === 0) return url;
+  return url + (url.indexOf("?") === -1 ? "?" : "&") + params.join("&");
+}
+
+// ── Send helper (with retry) ────────────────────────────────────
+
+async function sendEmail(params: SendParams, retries: number = 2) {
+  var text = params.text || stripHtml(params.html).slice(0, 1000);
+
+  for (var attempt = 0; attempt <= retries; attempt++) {
+    try {
+      var { data, error } = await getResend().emails.send({
+        from: FROM,
+        to: Array.isArray(params.to) ? params.to : [params.to],
+        subject: params.subject,
+        html: params.html,
+        text: text,
+        reply_to: params.reply_to ?? REPLY,
+        bcc: params.bcc ? (Array.isArray(params.bcc) ? params.bcc : [params.bcc]) : undefined,
+        attachments: params.attachments?.map(function(a) { return {
+          filename: a.filename,
+          content: a.content instanceof Buffer
+            ? a.content.toString("base64")
+            : Buffer.from(a.content).toString("base64"),
+        }; }),
+      });
+
+      if (error) {
+        if (attempt < retries) {
+          console.warn("[email] Retry " + (attempt + 1) + "/" + retries + ":", error.message);
+          await new Promise(function(r) { return setTimeout(r, 1000 * (attempt + 1)); });
+          continue;
+        }
+        console.error("[email] Resend error after " + retries + " retries:", error);
+        return { success: false, error: error };
+      }
+
+      return { success: true, id: data?.id };
+    } catch (err: any) {
+      if (attempt < retries) {
+        console.warn("[email] Retry " + (attempt + 1) + "/" + retries + ":", err.message);
+        await new Promise(function(r) { return setTimeout(r, 1000 * (attempt + 1)); });
+        continue;
+      }
+      console.error("[email] Unexpected error after " + retries + " retries:", err);
+      return { success: false, error: err };
     }
-
-    return { success: true, id: data?.id };
-  } catch (err) {
-    console.error("[email] Unexpected error:", err);
-    return { success: false, error: err };
   }
+
+  return { success: false, error: new Error("sendEmail: unreachable") };
 }
 
 // ── Base layout with logo ──────────────────────────────────────

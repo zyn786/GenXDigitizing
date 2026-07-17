@@ -39,7 +39,8 @@
       "Bash(git stash *)",
       "Bash(S3_ENDPOINT='' node *)",
       "Bash(dir /b)",
-      "mcp__plugin_supabase_supabase__execute_sql"
+      "mcp__plugin_supabase_supabase__execute_sql",
+      "Bash(nslookup -type=TXT resend._domainkey.genxdigitizing.com)"
     ]
   }
 }
