@@ -1,12 +1,14 @@
 // @ts-nocheck
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
 import {
   Send, Loader2, CheckCircle2, X, Mail, Inbox, ChevronDown, ChevronUp,
   Clock, User, Search, ArrowLeft, Reply, Paperclip, Trash2, Menu,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 
 /* ── tokens ─────────────────────────────────────────── */
@@ -100,14 +102,67 @@ function fmtSize(bytes: number) {
   return (bytes / 1048576).toFixed(1) + " MB";
 }
 
+/* ── Pagination ──────────────────────────────────────── */
+function Pagination({ page, total, pageSize, onPage }: {
+  page: number; total: number; pageSize: number; onPage: (p: number) => void;
+}) {
+  var totalPages = Math.max(1, Math.ceil(total / pageSize));
+  if (totalPages <= 1) return null;
+
+  var pages: number[] = [];
+  var start = Math.max(1, page - 3);
+  var end = Math.min(totalPages, page + 3);
+  if (start > 1) { pages.push(1); if (start > 2) pages.push(-1); }
+  for (var i = start; i <= end; i++) pages.push(i);
+  if (end < totalPages) { if (end < totalPages - 1) pages.push(-1); pages.push(totalPages); }
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, padding: "10px 12px", borderTop: "1px solid " + cBord, flexWrap: "wrap" }}>
+      <button type="button" disabled={page <= 1} onClick={function(){onPage(page-1);}}
+        style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 8, border: "none", background: "transparent", color: page <= 1 ? cBord2 : cTxt2, cursor: page <= 1 ? "default" : "pointer", fontSize: 13 }}>
+        <ChevronLeft size={15} />
+      </button>
+      {pages.map(function(p, idx){
+        if (p === -1) return <span key={"dots"+idx} style={{ width: 30, textAlign: "center", color: cTxt3, fontSize: 12 }}>…</span>;
+        var active = p === page;
+        return (
+          <button key={p} type="button" onClick={function(){onPage(p);}}
+            style={{ minWidth: 30, height: 30, borderRadius: 8, border: "none",
+              background: active ? CLR.blue.icon : "transparent",
+              color: active ? "#fff" : cTxt2, cursor: "pointer",
+              fontSize: 12, fontWeight: active ? 700 : 500, fontFamily: "Inter, sans-serif",
+              padding: "0 6px", transition: "all 0.1s" }}>
+            {p}
+          </button>
+        );
+      })}
+      <button type="button" disabled={page >= totalPages} onClick={function(){onPage(page+1);}}
+        style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 8, border: "none", background: "transparent", color: page >= totalPages ? cBord2 : cTxt2, cursor: page >= totalPages ? "default" : "pointer", fontSize: 13 }}>
+        <ChevronRight size={15} />
+      </button>
+      <span style={{ fontSize: 10, color: cTxt3, marginLeft: 8 }}>
+        {total} total · {(page-1)*pageSize+1}–{Math.min(page*pageSize, total)}
+      </span>
+    </div>
+  );
+}
+
 /* ── component ──────────────────────────────────────── */
 interface Props {
   userId: string;
   sentEmails: SentEmail[];
   receivedEmails: ReceivedEmail[];
+  sentTotal: number;
+  receivedTotal: number;
+  sentPage: number;
+  inboxPage: number;
+  pageSize: number;
 }
 
-export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: initRecv }: Props) {
+export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: initRecv, sentTotal, receivedTotal, sentPage, inboxPage, pageSize }: Props) {
+  var router = useRouter();
+  var searchParams = useSearchParams();
+
   /* state */
   var [folder, setFolder] = useState("inbox");
   var [selectedId, setSelectedId] = useState(null);
@@ -210,6 +265,16 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
 
   function startCompose() { setFolder("compose"); setSentOk(false); setShowList(false); setSidebarOpen(false); }
 
+  /* pagination */
+  var curPage = folder === "inbox" ? inboxPage : sentPage;
+  var curTotal = folder === "inbox" ? receivedTotal : sentTotal;
+  var goPage = useCallback(function(p: number) {
+    var params = new URLSearchParams(searchParams.toString());
+    var key = folder === "inbox" ? "inboxPage" : "sentPage";
+    if (p <= 1) params.delete(key); else params.set(key, String(p));
+    router.push("?" + params.toString(), { scroll: false });
+  }, [folder, searchParams, router]);
+
   var showDetail = !showList && selected && folder !== "compose";
   var showCompose = folder === "compose";
 
@@ -258,8 +323,8 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
         </div>
         <div style={{ flex: 1, padding: "0 8px" }}>
           {[
-            { key: "inbox", label: "Inbox", count: inboxList.length, icon: <Inbox size={16} /> },
-            { key: "sent",  label: "Sent",  count: sentList.length,  icon: <Send size={16} /> },
+            { key: "inbox", label: "Inbox", count: receivedTotal, icon: <Inbox size={16} /> },
+            { key: "sent",  label: "Sent",  count: sentTotal,  icon: <Send size={16} /> },
           ].map(function (f) {
             var act = folder === f.key;
             return (
@@ -431,6 +496,11 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
                   );
                 })}
               </div>
+
+              {/* Pagination — only when not searching (search filters client-side across current page) */}
+              {!search && (
+                <Pagination page={curPage} total={curTotal} pageSize={pageSize} onPage={goPage} />
+              )}
             </div>
 
             {/* Detail panel */}
