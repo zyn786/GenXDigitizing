@@ -181,6 +181,7 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
 
   var [sentList, setSentList] = useState(initSent);
   var [inboxList] = useState(initRecv);
+  var [sentOffset, setSentOffset] = useState(0);
   var fileRef = useRef(null);
 
   /* filter */
@@ -237,6 +238,7 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
         if (!d.success && d.error) { toast.error(d.error); return; }
         var entry = { id: d.id || crypto.randomUUID(), to_email: to.trim(), from_email: from.trim(), subject: subject.trim(), body: message.trim(), sent_at: new Date().toISOString(), resend_id: d.id, attachments: attachments.map(function(a){return a.name;}).join(", ") };
         setSentList(function (p) { return [entry].concat(p); });
+        setSentOffset(function (o) { return o + 1; });
         setSentOk(true);
         toast.success("Email sent");
       })
@@ -267,7 +269,7 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
 
   /* pagination */
   var curPage = folder === "inbox" ? inboxPage : sentPage;
-  var curTotal = folder === "inbox" ? receivedTotal : sentTotal;
+  var curTotal = folder === "inbox" ? receivedTotal : (sentTotal + sentOffset);
   var goPage = useCallback(function(p: number) {
     var params = new URLSearchParams(searchParams.toString());
     var key = folder === "inbox" ? "inboxPage" : "sentPage";
@@ -324,7 +326,7 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
         <div style={{ flex: 1, padding: "0 8px" }}>
           {[
             { key: "inbox", label: "Inbox", count: receivedTotal, icon: <Inbox size={16} /> },
-            { key: "sent",  label: "Sent",  count: sentTotal,  icon: <Send size={16} /> },
+            { key: "sent",  label: "Sent",  count: sentTotal + sentOffset,  icon: <Send size={16} /> },
           ].map(function (f) {
             var act = folder === f.key;
             return (
