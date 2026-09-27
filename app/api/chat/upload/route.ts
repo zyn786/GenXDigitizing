@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
-import { s3Client, uploadToS3, getS3SignedUrl, S3_BUCKET } from "@/lib/s3";
+import { uploadToStorage, signStorageUrl } from "@/lib/storage";
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,9 +19,9 @@ export async function POST(req: NextRequest) {
     const key = `chat/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
     const contentType = file.type || "application/octet-stream";
 
-    await uploadToS3(buffer, key, contentType);
+    await uploadToStorage(buffer, key, contentType);
 
-    // Permanent URL — resolves via this API to a fresh presigned URL
+    // Permanent URL — resolves via this API to a fresh signed URL
     const permanentUrl = `/api/chat/upload?key=${encodeURIComponent(key)}`;
 
     return NextResponse.json({ url: permanentUrl, path: key, fileName: file.name, size: file.size });
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET — resolve presigned URL for a stored key
+// GET — resolve signed URL for a stored key (chat, guest-uploads, or requests paths)
 export async function GET(req: NextRequest) {
   try {
     const key = req.nextUrl.searchParams.get("key");
@@ -38,7 +38,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Missing key param" }, { status: 400 });
     }
 
-    const signedUrl = await getS3SignedUrl(key, 86400);
+    const signedUrl = await signStorageUrl(key, undefined, 86400);
+    if (!signedUrl) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    }
     return NextResponse.redirect(signedUrl);
   } catch (err: any) {
     return NextResponse.json({ error: err?.message ?? "Failed" }, { status: 500 });

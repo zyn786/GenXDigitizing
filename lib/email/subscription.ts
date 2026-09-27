@@ -4,6 +4,7 @@
  * Called from API routes — fire-and-forget (non-blocking).
  */
 import { Resend } from "resend";
+import { createAdminClient } from "@/lib/supabase/server";
 
 let _resend: Resend | null = null;
 function getResend() {
@@ -17,7 +18,23 @@ function getResend() {
 const FROM = `${process.env.RESEND_FROM_NAME || "GenXdigitizing"} <${process.env.RESEND_FROM_EMAIL || "noreply@genxdigitizing.com"}>`;
 
 function send(options: { to: string; subject: string; html: string }) {
-  return getResend().emails.send({ from: FROM, ...options }).catch(e => console.error(`[email/subscription] Failed to send "${options.subject}":`, e));
+  return getResend().emails.send({ from: FROM, ...options })
+    .then(async (result) => {
+      // Log to sent_emails so the admin /email page shows full send history
+      try {
+        await createAdminClient().from("sent_emails").insert({
+          to_email: options.to,
+          from_email: process.env.RESEND_FROM_EMAIL || "noreply@genxdigitizing.com",
+          subject: options.subject,
+          body: options.html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 2000),
+          resend_id: result?.data?.id || null,
+        });
+      } catch (logErr) {
+        console.error("[email/subscription] sent_emails log error:", logErr);
+      }
+      return result;
+    })
+    .catch(e => console.error(`[email/subscription] Failed to send "${options.subject}":`, e));
 }
 
 export function emailSubscriptionRequested(to: string, planLabel: string, price: number, designs: number) {

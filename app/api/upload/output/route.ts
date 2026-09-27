@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { uploadToS3 } from "@/lib/s3";
+import { uploadToStorage } from "@/lib/storage";
 import { notifyUsers } from "@/lib/notify-server";
 
 const VALID_FORMATS = new Set(["DST","PES","EMB","JEF","XXX","VIP","HUS","EXP","VP3","SEW","AI","SVG","EPS","PDF"]);
@@ -49,11 +49,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: `File ${file.name} exceeds 100MB limit` }, { status: 413 });
       }
 
-      // Upload to S3
+      // Upload to Supabase Storage
       const buffer = Buffer.from(await file.arrayBuffer());
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const key = `orders/${orderId}/output/${now}-${i}-${safeName}`;
-      const fileUrl = await uploadToS3(buffer, key, file.type || "application/octet-stream");
+      const fileUrl = await uploadToStorage(buffer, key, file.type || "application/octet-stream");
 
       // Get next version
       const { data: existing } = await db

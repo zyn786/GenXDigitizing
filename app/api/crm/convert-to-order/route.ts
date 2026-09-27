@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
 
     const orderNumber = order.order_number || `OD-GX${String(Date.now() % 100000).padStart(5, '0')}`;
 
-    // 6. Copy artwork from lead's S3 upload to order_files table
+    // 6. Copy artwork from lead's upload to order_files table (storage path stored in file_url)
     const artworkMatch = (lead.notes || "").match(/Artwork:\s*(.+?)\s*\(([^)]+)\)/);
     const artworkKeyMatch = (lead.notes || "").match(/Download:\s*\/api\/chat\/upload\?key=([^\s]+)/);
     if (artworkKeyMatch) {

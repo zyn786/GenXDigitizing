@@ -4,50 +4,31 @@
  * All functions use the server Supabase client (respects RLS).
  * Called from Server Components — no "use client".
  */
-import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { isS3Key, extractS3Key, getS3SignedUrl } from "@/lib/s3";
+import { createClient } from "@/lib/supabase/server";
+import { extractS3Key, isS3Key, normalizeStoragePath, signLegacyS3, signStorageUrl } from "@/lib/storage";
 
 // ── Shared helper ────────────────────────────────────────────
 
-async function signFileUrl(supabase: ReturnType<typeof createAdminClient>, f: any): Promise<any> {
+async function signFileUrl(f: any): Promise<any> {
   if (!f?.file_url) return { ...f, signed_url: f?.file_url };
 
-  // S3 keys — generate S3 signed URL
+  // Legacy S3 rows — sign via the S3 fallback until data is migrated
   if (isS3Key(f.file_url)) {
     try {
       const key = extractS3Key(f.file_url);
-      const signed = await getS3SignedUrl(key, 86400);
-      return { ...f, signed_url: signed };
-    } catch { return { ...f, signed_url: f.file_url }; }
+      const signed = await signLegacyS3(key, 86400);
+      if (signed) return { ...f, signed_url: signed };
+    } catch { /* fall through */ }
+    return { ...f, signed_url: f.file_url };
   }
 
+  // New rows store raw storage paths; old rows may store full public/signed URLs
+  const storagePath = normalizeStoragePath(f.file_url);
   let signedUrl = f.file_url;
+
   try {
-    const bucket = f.file_type === "output" ? "outputs" : "artwork";
-    let storagePath = "";
-
-    if (f.file_url.startsWith("http")) {
-      const urlObj = new URL(f.file_url);
-      const marker = `/object/public/${bucket}/`;
-      const markerSign = `/object/sign/${bucket}/`;
-      if (urlObj.pathname.includes(marker)) {
-        storagePath = decodeURIComponent(urlObj.pathname.split(marker)[1].split("?")[0]);
-      } else if (urlObj.pathname.includes(markerSign)) {
-        storagePath = decodeURIComponent(urlObj.pathname.split(markerSign)[1].split("?")[0]);
-      }
-    } else {
-      storagePath = f.file_url;
-    }
-
-    if (storagePath) {
-      const { data, error } = await supabase.storage
-        .from(bucket)
-        .createSignedUrl(storagePath, 3600);
-      if (error) {
-        console.error("[signFileUrl] Signed URL failed:", error.message, "bucket:", bucket, "path:", storagePath);
-      }
-      if (data?.signedUrl) signedUrl = data.signedUrl;
-    }
+    const signed = await signStorageUrl(storagePath, f.file_type, 3600);
+    if (signed) signedUrl = signed;
   } catch (err: any) {
     console.error("[signFileUrl] Exception:", err?.message ?? err, "file:", f.file_name);
   }
@@ -166,10 +147,9 @@ export async function getAdminOrderById(id: string) {
 
   if (error || !order) return { data: null, error };
 
-  // Generate signed URLs using admin client (bypasses RLS on storage)
-  const adminSupabase = createAdminClient();
+  // Generate signed URLs (service-role storage client bypasses RLS)
   const files = (order.order_files ?? []) as any[];
-  const signedFiles = await Promise.all(files.map((f: any) => signFileUrl(adminSupabase, f)));
+  const signedFiles = await Promise.all(files.map((f: any) => signFileUrl(f)));
 
   return { data: { ...order, order_files: signedFiles }, error: null };
 }

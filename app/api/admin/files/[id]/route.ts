@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { deleteFromS3 } from "@/lib/s3";
+import { deleteFromStorage, deleteLegacyS3, extractS3Key, isS3Key, normalizeStoragePath } from "@/lib/storage";
 
 export async function DELETE(
   _req: NextRequest,
@@ -27,18 +27,15 @@ export async function DELETE(
 
     if (!file) return NextResponse.json({ error: "File not found" }, { status: 404 });
 
-    // Delete from S3
+    // Delete from storage (legacy S3 rows use the fallback path)
     try {
-      const { extractS3Key, S3_PREFIX } = await import("@/lib/s3");
-      let key: string;
-      if (file.file_url.startsWith(S3_PREFIX)) {
-        key = extractS3Key(file.file_url);
+      if (isS3Key(file.file_url)) {
+        await deleteLegacyS3(extractS3Key(file.file_url));
       } else {
-        key = new URL(file.file_url).pathname.slice(1);
+        await deleteFromStorage(normalizeStoragePath(file.file_url), file.file_type);
       }
-      await deleteFromS3(key);
     } catch {
-      // S3 delete failure is non-fatal
+      // Storage delete failure is non-fatal
     }
 
     // Delete DB record

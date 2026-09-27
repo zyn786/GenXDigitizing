@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { uploadToS3 } from "@/lib/s3";
+import { uploadToStorage } from "@/lib/storage";
 import { notifyUsers } from "@/lib/notify-server";
 
 const ALLOWED_TYPES = [
@@ -67,13 +67,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File must be under 20MB" }, { status: 400 });
     }
 
-    // Upload artwork to S3 — folder: requests/
+    // Upload artwork to Supabase Storage — folder: requests/
     const buffer = Buffer.from(await artwork.arrayBuffer());
     const safeName = artwork.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const key = `requests/${Date.now()}-${safeName}`;
     const contentType = artwork.type || "application/octet-stream";
 
-    await uploadToS3(buffer, key, contentType);
+    await uploadToStorage(buffer, key, contentType);
 
     // Generate view URL via the chat upload API (presigned URL)
     const artworkViewUrl = `/api/chat/upload?key=${encodeURIComponent(key)}`;

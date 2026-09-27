@@ -9,38 +9,16 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { createHmac } from "crypto";
-
-var WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET || "";
-
-function verifySignature(rawBody: string, header: string | null): boolean {
-  if (!WEBHOOK_SECRET) {
-    console.warn("[resend-webhook] RESEND_WEBHOOK_SECRET not set — skipping verification");
-    return true;
-  }
-  if (!header) {
-    console.warn("[resend-webhook] Missing resend-signature header");
-    return false;
-  }
-  var parts: Record<string, string> = {};
-  header.split(",").forEach(function (p) {
-    var eq = p.indexOf("=");
-    if (eq > 0) parts[p.slice(0, eq)] = p.slice(eq + 1);
-  });
-  var ts = parts["t"], sig = parts["v1"];
-  if (!ts || !sig) return false;
-  var now = Math.floor(Date.now() / 1000);
-  if (Math.abs(now - parseInt(ts, 10)) > 300) return false;
-  var computed = createHmac("sha256", WEBHOOK_SECRET).update(ts + "." + rawBody).digest("hex");
-  return computed === sig;
-}
+import { verifyResendWebhook } from "@/lib/resend-webhook";
 
 export async function POST(request: NextRequest) {
   try {
     var rawBody = await request.text();
-    var sigHeader = request.headers.get("resend-signature");
 
-    if (!verifySignature(rawBody, sigHeader)) {
+    // Shared Svix verification — this route previously used a `resend-signature`
+    // / hex scheme Resend never sends, so every delivery was rejected with 401
+    // and the email_events table stayed empty.
+    if (!verifyResendWebhook(rawBody, request.headers)) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 

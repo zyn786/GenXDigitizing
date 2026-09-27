@@ -44,7 +44,7 @@ export default async function BlogPage() {
         {/* Posts grid */}
         <section className="pb-16 sm:pb-20">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-12">
-            <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {BLOG_POSTS.map((post) => (
                 <AnimatedSection key={post.slug}>
                   <Link href={`/blog/${post.slug}`} className="group block no-underline">
@@ -53,7 +53,7 @@ export default async function BlogPage() {
                     >
                       {post.hero.image ? (
                         <div className="relative w-full aspect-[16/9] overflow-hidden flex-shrink-0">
-                          <Image fill src={post.hero.image} alt={post.title} className="object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
+                          <Image fill src={post.hero.image} alt={post.title} className="object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px" />
                         </div>
                       ) : (
                         <div

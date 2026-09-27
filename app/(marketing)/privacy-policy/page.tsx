@@ -61,7 +61,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-3">4. Data Storage &amp; Security</h2>
             <p>
-              Your data is stored on Supabase (encrypted at rest and in transit) and AWS S3 for file storage.
+              Your data is stored on Supabase (encrypted at rest and in transit), including file storage.
               We use industry-standard security practices including TLS encryption, API authentication, and
               row-level security on our database. Payment processing is handled by Payoneer — we never see
               or store your full payment details.

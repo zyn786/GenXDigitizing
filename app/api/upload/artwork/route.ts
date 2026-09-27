@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { uploadToS3 } from "@/lib/s3";
+import { uploadToStorage } from "@/lib/storage";
 
 export async function POST(req: NextRequest) {
   const supabase = createClient();
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const key = `orders/${orderId}/artwork/${Date.now()}-${safeName}`;
 
-      const fileUrl = await uploadToS3(buffer, key, file.type || "image/png");
+      const fileUrl = await uploadToStorage(buffer, key, file.type || "image/png");
 
       const { data: fileRecord, error } = await db
         .from("order_files")

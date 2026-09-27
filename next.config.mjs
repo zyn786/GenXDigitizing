@@ -33,11 +33,11 @@ const nextConfig = {
     }];
   },
 
-  async redirects() {
-    return [
-      { source: "/home", destination: "/", permanent: true },
-    ];
-  },
+  // NOTE: no `/home` -> `/` redirect here. app/page.tsx redirects anonymous
+  // visitors to /home, and middleware rewrites `/` -> `/home` when there is no
+  // session cookie. A permanent /home -> / redirect closes that into a loop
+  // (ERR_TOO_MANY_REDIRECTS) whenever a stale `sb-*` cookie is present.
+  // Canonical URL is declared by metadata in app/(marketing)/home/page.tsx.
 };
 
 export default nextConfig;

@@ -5,10 +5,11 @@ import { useState, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
+import { stripTags, bodyTextOf as bodyText, buildQuote as buildQuoteText } from "@/lib/email-text";
 import {
-  Send, Loader2, CheckCircle2, X, Mail, Inbox, ChevronDown, ChevronUp,
-  Clock, User, Search, ArrowLeft, Reply, Paperclip, Trash2, Menu,
-  ChevronLeft, ChevronRight,
+  Send, Loader2, CheckCircle2, X, Mail, Inbox, Search,
+  ArrowLeft, Reply, Paperclip, Menu, ChevronLeft, ChevronRight,
+  RefreshCw, MailOpen, AlertTriangle, Download, ChevronDown, ChevronUp,
 } from "lucide-react";
 
 /* ── tokens ─────────────────────────────────────────── */
@@ -28,12 +29,17 @@ var FROM_OPTIONS = [
   { email: "billing@genxdigitizing.com", label: "Billing" },
 ];
 
+/** Must match MAX_BYTES in app/api/admin/email/upload. */
+var MAX_ATTACHMENT_BYTES = 4 * 1024 * 1024;
+
 /* ── color palette ──────────────────────────────────── */
 var CLR = {
   blue:   { bg: "rgba(59,130,246,0.1)",   icon: "#3B82F6", text: "#1D4ED8" },
   green:  { bg: "rgba(16,185,129,0.1)",   icon: "#10B981", text: "#047857" },
   purple: { bg: "rgba(139,92,246,0.1)",   icon: "#8B5CF6", text: "#6D28D9" },
   orange: { bg: "rgba(249,115,22,0.1)",   icon: "#F97316", text: "#C2410C" },
+  red:    { bg: "rgba(239,68,68,0.1)",    icon: "#EF4444", text: "#B91C1C" },
+  amber:  { bg: "rgba(245,158,11,0.12)",  icon: "#F59E0B", text: "#B45309" },
 };
 
 var inpStyle: React.CSSProperties = {
@@ -45,14 +51,23 @@ var inpStyle: React.CSSProperties = {
 /* ── types ──────────────────────────────────────────── */
 type SentEmail = {
   id: string; to_email: string; from_email?: string; subject: string; body: string;
-  sent_at: string; resend_id?: string; attachments?: string;
+  sent_at: string; resend_id?: string; attachments_meta?: string;
+  message_id?: string; thread_id?: string; in_reply_to?: string; references?: string;
 };
 type ReceivedEmail = {
   id: string; from_email: string; to_email: string; cc_emails?: string; subject: string;
   body_html?: string; body_text?: string; received_at: string; attachments_meta?: string;
+  is_read?: boolean; sender_name?: string; message_id?: string; resend_id?: string;
+  thread_id?: string; in_reply_to?: string; references?: string;
 };
+type ThreadRow = {
+  thread_id: string; last_at: string; first_at: string;
+  message_count: number; unread_count: number;
+};
+type AnyMessage = ReceivedEmail & SentEmail & { direction: "in" | "out"; at: string };
 type AttachFile = {
-  name: string; size: number; type: string; data: string; // base64
+  key: string; filename: string; size: number; content_type: string;
+  path?: string; status: "uploading" | "ready" | "error"; error?: string;
 };
 
 /* ── helpers ────────────────────────────────────────── */
@@ -75,32 +90,95 @@ function fmtFullDate(iso: string) {
   });
 }
 
-function stripTags(html?: string) {
-  if (!html) return "";
-  var div = document.createElement("div");
-  div.innerHTML = html;
-  return div.textContent || div.innerText || "";
-}
+// Kept in lib/email-text.ts: these run during render, including the server-side
+// pass, so they must not touch the DOM.
 
 function trunc(s: string, n: number) { return s.length > n ? s.slice(0, n) + "…" : s; }
 
 function avLetter(email: string) {
-  var name = email.split("@")[0] || "";
+  var name = (email || "").split("@")[0] || "";
   return (name[0] || "?").toUpperCase();
 }
 
 function avColor(email: string) {
   var colors = ["#3B82F6","#10B981","#8B5CF6","#F97316","#EC4899","#06B6D4","#EF4444","#6366F1"];
   var hash = 0;
-  for (var i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
+  for (var i = 0; i < (email || "").length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
   return colors[Math.abs(hash) % colors.length];
 }
 
 function fmtSize(bytes: number) {
+  if (!bytes && bytes !== 0) return "";
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
   return (bytes / 1048576).toFixed(1) + " MB";
 }
+
+function senderLabel(m: any) {
+  if (!m) return "";
+  if (m.direction === "out") return "You";
+  return m.sender_name || m.from_email || "";
+}
+
+/** The address of the other party in a message. */
+function counterparty(m: any) {
+  return m.direction === "out" ? (m.to_email || "") : (m.from_email || "");
+}
+
+/**
+ * Attachments are stored two ways:
+ *  - inbound: JSON metadata from Resend (id + filename + size)
+ *  - sent: JSON written at send time (filename + storage path + size)
+ * Older sent rows may hold a plain comma-separated list — handle both.
+ */
+function parseAttachments(raw?: string): Array<{ filename: string; size?: number; id?: string; path?: string }> {
+  if (!raw) return [];
+  var text = String(raw).trim();
+  if (text.charAt(0) === "[") {
+    try {
+      var parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) return parsed;
+    } catch (e) { /* fall through */ }
+  }
+  return text.split(",").map(function (n) { return { filename: n.trim() }; }).filter(function (a) { return a.filename; });
+}
+
+function AttachmentChips({ message }: { message: any }) {
+  var files = parseAttachments(message.attachments_meta);
+  if (files.length === 0) return null;
+
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+      {files.map(function (f, i) {
+        var href = null;
+        if (message.direction === "in" && message.resend_id && f.id) {
+          href = "/api/admin/email/attachment?email=" + encodeURIComponent(message.resend_id) + "&id=" + encodeURIComponent(f.id);
+        } else if (f.path) {
+          href = "/api/admin/email/attachment?path=" + encodeURIComponent(f.path);
+        }
+        var inner = (
+          <>
+            <Paperclip size={12} />
+            <span style={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.filename}</span>
+            {f.size ? <span style={{ color: cTxt3, fontWeight: 400 }}>{fmtSize(f.size)}</span> : null}
+            {href ? <Download size={12} style={{ opacity: 0.7 }} /> : null}
+          </>
+        );
+        var style: React.CSSProperties = {
+          display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 11px",
+          background: CLR.blue.bg, borderRadius: 8, border: "1px solid rgba(59,130,246,0.2)",
+          fontSize: 11, color: CLR.blue.text, fontWeight: 600, textDecoration: "none",
+        };
+        return href
+          ? <a key={i} href={href} style={style}>{inner}</a>
+          : <span key={i} style={style}>{inner}</span>;
+      })}
+    </div>
+  );
+}
+
+/** Gmail-style quoted reply — see lib/email-text.ts. */
+const buildQuote = buildQuoteText;
 
 /* ── Pagination ──────────────────────────────────────── */
 function Pagination({ page, total, pageSize, onPage }: {
@@ -152,21 +230,36 @@ interface Props {
   userId: string;
   sentEmails: SentEmail[];
   receivedEmails: ReceivedEmail[];
+  threads?: ThreadRow[];
+  threadMessages?: AnyMessage[];
+  /** Addresses that actually receive mail, discovered from the data. */
+  addresses?: string[];
   sentTotal: number;
   receivedTotal: number;
+  unreadCount?: number;
+  migrationMissing?: boolean;
+  loadError?: string | null;
   sentPage: number;
   inboxPage: number;
   pageSize: number;
 }
 
-export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: initRecv, sentTotal, receivedTotal, sentPage, inboxPage, pageSize }: Props) {
+export function EmailComposer({
+  userId, sentEmails: initSent, receivedEmails: initRecv,
+  threads: initThreads = [], threadMessages: initMessages = [], addresses = [],
+  sentTotal, receivedTotal, unreadCount: initUnread = 0,
+  migrationMissing = false, loadError = null,
+  sentPage, inboxPage, pageSize,
+}: Props) {
   var router = useRouter();
   var searchParams = useSearchParams();
 
   /* state */
   var [folder, setFolder] = useState("inbox");
-  var [selectedId, setSelectedId] = useState(null);
+  var [openThreadId, setOpenThreadId] = useState<string | null>(null);
+  var [openSentId, setOpenSentId] = useState<string | null>(null);
   var [search, setSearch] = useState("");
+  var [addressFilter, setAddressFilter] = useState<string | null>(null);
   var [showList, setShowList] = useState(true);
   var [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -177,53 +270,180 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
   var [message, setMessage] = useState("");
   var [sending, setSending] = useState(false);
   var [sentOk, setSentOk] = useState(false);
-  var [attachments, setAttachments] = useState([]);
+  var [attachments, setAttachments] = useState<AttachFile[]>([]);
+
+  /* inline reply — lives inside the conversation, never the compose tab */
+  var [replyText, setReplyText] = useState("");
+  var [replyAttachments, setReplyAttachments] = useState<AttachFile[]>([]);
+  var [replySending, setReplySending] = useState(false);
+  var [showQuote, setShowQuote] = useState(false);
+  var replyFileRef = useRef(null);
 
   var [sentList, setSentList] = useState(initSent);
-  var [inboxList] = useState(initRecv);
+  var [threadList, setThreadList] = useState(initThreads);
+  var [messages, setMessages] = useState(initMessages);
+  var [unread, setUnread] = useState(initUnread);
   var [sentOffset, setSentOffset] = useState(0);
+  var [syncing, setSyncing] = useState(false);
   var fileRef = useRef(null);
 
-  /* filter */
-  var list = folder === "inbox" ? inboxList : sentList;
-  var filtered = list.filter(function (e) {
-    if (!search) return true;
-    var q = search.toLowerCase();
-    var body = folder === "inbox" ? (e.body_text || stripTags(e.body_html) || "") : (e.body || "");
-    var sender = folder === "inbox" ? e.from_email : e.to_email;
-    return (e.subject||"").toLowerCase().indexOf(q) !== -1 ||
-           sender.toLowerCase().indexOf(q) !== -1 ||
-           body.toLowerCase().indexOf(q) !== -1;
+  /* ── derived: which conversations exist, and their display fields ── */
+  var threadsById: Record<string, AnyMessage[]> = {};
+  messages.forEach(function (m) {
+    var key = m.thread_id || "solo-" + m.id;
+    (threadsById[key] = threadsById[key] || []).push(m);
   });
 
-  var selected = list.find(function (e) { return e.id === selectedId; }) || null;
+  var conversations = threadList.map(function (t) {
+    var msgs = threadsById[t.thread_id] || [];
+    var last = msgs[msgs.length - 1];
+    var inbound = msgs.filter(function (m) { return m.direction === "in"; });
+    var firstInbound = inbound[0] || msgs[0];
 
-  /* ── attach ─────────────────────────────────────── */
-  function handleAttach(e) {
-    var files = e.target.files;
+    // Which of our addresses this conversation arrived at. Replies go out from
+    // it, so mail to orders@ is answered from orders@ rather than support@.
+    var threadAddresses: string[] = [];
+    inbound.forEach(function (m) {
+      String(m.to_email || "").split(",").forEach(function (part) {
+        var addr = part.trim().toLowerCase();
+        if (addr && threadAddresses.indexOf(addr) === -1) threadAddresses.push(addr);
+      });
+    });
+
+    return {
+      thread_id: t.thread_id,
+      addresses: threadAddresses,
+      address: threadAddresses[0] || null,
+      last_at: t.last_at,
+      count: t.message_count,
+      unread: t.unread_count,
+      subject: firstInbound?.subject || last?.subject || "(no subject)",
+      // Who the conversation is with: the other party of the first inbound message.
+      party: firstInbound ? (firstInbound.sender_name || firstInbound.from_email) : (last ? last.to_email : ""),
+      partyEmail: firstInbound ? firstInbound.from_email : (last ? last.to_email : ""),
+      preview: last ? bodyText(last) : "",
+      lastFrom: last ? senderLabel(last) : "",
+      messages: msgs,
+    };
+  });
+
+  // Which addresses to offer as filters — from the data, so a new Resend
+  // address appears here on its own.
+  var knownAddresses = addresses.length > 0
+    ? addresses
+    : Array.from(new Set(conversations.map(function (c) { return c.address; }).filter(Boolean)));
+
+  // Composer sender choices: the standard four, plus anything discovered, so a
+  // newly added address is immediately usable without a code change.
+  var fromChoices = FROM_OPTIONS.concat(
+    knownAddresses
+      .filter(function (a: string) { return !FROM_OPTIONS.some(function (f) { return f.email === a; }); })
+      .map(function (a: string) { return { email: a, label: a.split("@")[0] }; })
+  );
+
+  var filteredThreads = conversations.filter(function (c) {
+    if (addressFilter && c.addresses.indexOf(addressFilter) === -1) return false;
+    if (!search) return true;
+    var q = search.toLowerCase();
+    return (c.subject || "").toLowerCase().indexOf(q) !== -1 ||
+           (c.party || "").toLowerCase().indexOf(q) !== -1 ||
+           (c.partyEmail || "").toLowerCase().indexOf(q) !== -1 ||
+           c.messages.some(function (m) { return bodyText(m).toLowerCase().indexOf(q) !== -1; });
+  });
+
+  var filteredSent = sentList.filter(function (e) {
+    if (!search) return true;
+    var q = search.toLowerCase();
+    return (e.subject || "").toLowerCase().indexOf(q) !== -1 ||
+           (e.to_email || "").toLowerCase().indexOf(q) !== -1 ||
+           (e.body || "").toLowerCase().indexOf(q) !== -1;
+  });
+
+  var openThread = conversations.find(function (c) { return c.thread_id === openThreadId; }) || null;
+  var openSent = sentList.find(function (e) { return e.id === openSentId; }) || null;
+
+  /* ── attachments ────────────────────────────────── */
+  /** Upload files to storage; `setList` is the compose or inline-reply list. */
+  function uploadFiles(files: FileList, setList: any) {
     if (!files || files.length === 0) return;
+
     for (var i = 0; i < files.length; i++) {
-      var f = files[i];
-      if (f.size > 10 * 1024 * 1024) { toast.error(f.name + " is too large (max 10MB)"); continue; }
-      var reader = new FileReader();
-      reader.onload = (function (file) {
-        return function (ev) {
-          var base64 = (ev.target.result || "").split(",")[1] || "";
-          setAttachments(function (prev) { return prev.concat([{ name: file.name, size: file.size, type: file.type, data: base64 }]); });
-        };
-      })(f);
-      reader.readAsDataURL(f);
+      (function (file) {
+        var key = file.name + "-" + file.size + "-" + Date.now() + "-" + i;
+
+        if (file.size > MAX_ATTACHMENT_BYTES) {
+          toast.error("\"" + file.name + "\" is " + fmtSize(file.size) + " — the limit is 4MB per file.");
+          return;
+        }
+
+        setList(function (prev) {
+          return prev.concat([{
+            key: key, filename: file.name, size: file.size,
+            content_type: file.type || "application/octet-stream",
+            status: "uploading",
+          }]);
+        });
+
+        var form = new FormData();
+        form.append("file", file);
+
+        fetch("/api/admin/email/upload", { method: "POST", body: form })
+          .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+          .then(function (res) {
+            setList(function (prev) {
+              return prev.map(function (a) {
+                if (a.key !== key) return a;
+                if (!res.ok || !res.d.path) {
+                  return { ...a, status: "error", error: res.d.error || ("Upload failed (" + res.status + ")") };
+                }
+                return { ...a, status: "ready", path: res.d.path };
+              });
+            });
+            if (!res.ok) toast.error(res.d.error || "Upload failed");
+          })
+          .catch(function () {
+            setList(function (prev) {
+              return prev.map(function (a) {
+                return a.key === key ? { ...a, status: "error", error: "Upload failed" } : a;
+              });
+            });
+            toast.error("Upload failed for \"" + file.name + "\"");
+          });
+      })(files[i]);
     }
+  }
+
+  function handleAttach(e) {
+    uploadFiles(e.target.files, setAttachments);
     e.target.value = "";
   }
 
-  function removeAttach(idx: number) {
-    setAttachments(function (prev) { return prev.filter(function (_, i) { return i !== idx; }); });
+  function handleReplyAttach(e) {
+    uploadFiles(e.target.files, setReplyAttachments);
+    e.target.value = "";
+  }
+
+  function removeAttach(key: string) {
+    setAttachments(function (prev) { return prev.filter(function (a) { return a.key !== key; }); });
+  }
+
+  function removeReplyAttach(key: string) {
+    setReplyAttachments(function (prev) { return prev.filter(function (a) { return a.key !== key; }); });
   }
 
   /* ── send ───────────────────────────────────────── */
   function doSend() {
     if (!to.trim() || !subject.trim() || !message.trim()) { toast.error("Fill all fields"); return; }
+
+    if (attachments.some(function (a) { return a.status === "uploading"; })) {
+      toast.error("Still uploading — one moment"); return;
+    }
+    if (attachments.some(function (a) { return a.status === "error"; })) {
+      toast.error("Remove the failed attachment first"); return;
+    }
+
+    var ready = attachments.filter(function (a) { return a.status === "ready"; });
+
     setSending(true);
     fetch("/api/admin/send-email", {
       method: "POST",
@@ -231,41 +451,237 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
       body: JSON.stringify({
         to: to.trim(), subject: subject.trim(), message: message.trim(),
         userId: userId, from: from.trim(),
-        attachments: attachments.map(function (a) { return { filename: a.name, content: a.data, content_type: a.type }; }),
+        // New mail starts its own conversation server-side.
+        attachments: ready.map(function (a) {
+          return { path: a.path, filename: a.filename, content_type: a.content_type, size: a.size };
+        }),
       }),
-    }).then(function (r) { return r.json(); })
-      .then(function (d) {
-        if (!d.success && d.error) { toast.error(d.error); return; }
-        var entry = { id: d.id || crypto.randomUUID(), to_email: to.trim(), from_email: from.trim(), subject: subject.trim(), body: message.trim(), sent_at: new Date().toISOString(), resend_id: d.id, attachments: attachments.map(function(a){return a.name;}).join(", ") };
+    })
+      .then(function (r) {
+        return r.text().then(function (text) {
+          var data = null;
+          try { data = JSON.parse(text); } catch (e) {}
+          return { ok: r.ok, status: r.status, data: data, text: text };
+        });
+      })
+      .then(function (res) {
+        if (!res.ok) {
+          var reason = (res.data && res.data.error) || res.text || ("Request failed (" + res.status + ")");
+          toast.error(res.status === 413 ? "Too large to send — attachments are limited to 4MB each." : reason);
+          return;
+        }
+        if (res.data && res.data.error) { toast.error(res.data.error); return; }
+
+        var entry = {
+          id: (res.data && res.data.id) || crypto.randomUUID(),
+          to_email: to.trim(), from_email: from.trim(), subject: subject.trim(),
+          body: message.trim(), sent_at: new Date().toISOString(),
+          resend_id: res.data && res.data.id,
+          attachments_meta: ready.length
+            ? JSON.stringify(ready.map(function (a) {
+                return { filename: a.filename, path: a.path, size: a.size };
+              }))
+            : null,
+        };
         setSentList(function (p) { return [entry].concat(p); });
         setSentOffset(function (o) { return o + 1; });
         setSentOk(true);
         toast.success("Email sent");
       })
-      .catch(function () { toast.error("Network error"); })
+      .catch(function (err) { toast.error(err?.message || "Network error"); })
       .finally(function () { setSending(false); });
   }
 
   function resetCompose() {
     setTo(""); setFrom(FROM_OPTIONS[0].email); setSubject(""); setMessage("");
     setAttachments([]); setSentOk(false); setFolder("inbox"); setShowList(true);
+    setOpenThreadId(null); setOpenSentId(null);
   }
 
-  function replyTo(email: string, subj: string) {
-    setTo(email); setSubject("Re: " + subj); setMessage(""); setAttachments([]);
-    setFolder("compose"); setShowList(false); setSentOk(false);
+  /** The message a reply in this conversation answers. */
+  function replyTarget(c: any) {
+    if (!c) return null;
+    var inbound = c.messages.filter(function (m: any) { return m.direction === "in"; });
+    return inbound[inbound.length - 1] || c.messages[c.messages.length - 1] || null;
   }
 
-  function openEmail(id: string) { setSelectedId(id); setShowList(false); }
+  /**
+   * Send a reply from inside the conversation — no compose tab.
+   *
+   * The box starts empty (like Gmail's inline reply) and the original is
+   * appended as a quote at send time, so the recipient still gets context.
+   */
+  function sendInlineReply(c: any) {
+    var target = replyTarget(c);
+    if (!target) { toast.error("Nothing to reply to"); return; }
+    if (!replyText.trim()) { toast.error("Write a message first"); return; }
 
-  function goToList() { setShowList(true); setSelectedId(null); }
+    if (replyAttachments.some(function (a) { return a.status === "uploading"; })) {
+      toast.error("Still uploading — one moment"); return;
+    }
+    if (replyAttachments.some(function (a) { return a.status === "error"; })) {
+      toast.error("Remove the failed attachment first"); return;
+    }
+
+    var ready = replyAttachments.filter(function (a) { return a.status === "ready"; });
+    var subj = target.subject || c.subject || "";
+    var body = replyText.trim() + buildQuote(target);
+
+    // Thread the outgoing reply: locally via threadId, and for the recipient's
+    // client via In-Reply-To / References.
+    var refs = target.references
+      ? target.references + " " + (target.message_id || "")
+      : (target.message_id || "");
+
+    // Reply from the address this conversation arrived at, so mail to orders@
+    // is answered from orders@. Falls back to the compose default.
+    var replyFrom = c.address || from.trim();
+
+    setReplySending(true);
+    fetch("/api/admin/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: counterparty(target),
+        subject: /^re:/i.test(subj) ? subj : "Re: " + subj,
+        message: body,
+        userId: userId,
+        from: replyFrom,
+        inReplyTo: target.message_id || undefined,
+        references: refs.trim() || undefined,
+        threadId: c.thread_id,
+        attachments: ready.map(function (a) {
+          return { path: a.path, filename: a.filename, content_type: a.content_type, size: a.size };
+        }),
+      }),
+    })
+      .then(function (r) {
+        return r.text().then(function (text) {
+          var data = null;
+          try { data = JSON.parse(text); } catch (e) {}
+          return { ok: r.ok, status: r.status, data: data, text: text };
+        });
+      })
+      .then(function (res) {
+        if (!res.ok) {
+          var reason = (res.data && res.data.error) || res.text || ("Request failed (" + res.status + ")");
+          toast.error(res.status === 413 ? "Too large to send — attachments are limited to 4MB each." : reason);
+          return;
+        }
+        if (res.data && res.data.error) { toast.error(res.data.error); return; }
+
+        var entry = {
+          id: (res.data && res.data.id) || crypto.randomUUID(),
+          to_email: counterparty(target),
+          from_email: replyFrom,
+          subject: /^re:/i.test(subj) ? subj : "Re: " + subj,
+          body: body,
+          sent_at: new Date().toISOString(),
+          resend_id: res.data && res.data.id,
+          thread_id: c.thread_id,
+          attachments_meta: ready.length
+            ? JSON.stringify(ready.map(function (a) {
+                return { filename: a.filename, path: a.path, size: a.size };
+              }))
+            : null,
+        };
+
+        // Show it in the conversation immediately.
+        setMessages(function (prev) {
+          return prev.concat([{ ...entry, direction: "out", at: entry.sent_at }]);
+        });
+        setThreadList(function (prev) {
+          return prev.map(function (t) {
+            return t.thread_id === c.thread_id
+              ? { ...t, message_count: (t.message_count || 0) + 1, last_at: entry.sent_at }
+              : t;
+          });
+        });
+        setSentList(function (p) { return [entry].concat(p); });
+        setSentOffset(function (o) { return o + 1; });
+
+        setReplyText("");
+        setReplyAttachments([]);
+        setShowQuote(false);
+        toast.success("Reply sent");
+      })
+      .catch(function (err) { toast.error(err?.message || "Network error"); })
+      .finally(function () { setReplySending(false); });
+  }
+
+  function openThreadById(id: string) {
+    setOpenThreadId(id);
+    setOpenSentId(null);
+    setShowList(false);
+    markThreadRead(id, true);
+  }
+
+  function markThreadRead(threadId: string, isRead: boolean) {
+    var t = threadList.find(function (x) { return x.thread_id === threadId; });
+    if (!t) return;
+    if (isRead && !t.unread_count) return;
+
+    setThreadList(function (prev) {
+      return prev.map(function (x) {
+        return x.thread_id === threadId ? { ...x, unread_count: isRead ? 0 : x.message_count } : x;
+      });
+    });
+    setUnread(function (u) { return Math.max(0, u + (isRead ? -1 : 1)); });
+
+    fetch("/api/admin/email/read", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ threadId: threadId, is_read: isRead }),
+    }).catch(function () { /* optimistic — a refresh resyncs */ });
+  }
+
+  function markAllRead() {
+    if (unread === 0) return;
+    setThreadList(function (prev) { return prev.map(function (t) { return { ...t, unread_count: 0 }; }); });
+    setUnread(0);
+    fetch("/api/admin/email/read", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ all: true }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.error) { toast.error(d.error); return; }
+        toast.success("All conversations marked read");
+      })
+      .catch(function () { toast.error("Could not mark all read"); });
+  }
+
+  function syncFromResend() {
+    if (syncing) return;
+    setSyncing(true);
+    fetch("/api/admin/email/sync", { method: "POST" })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        var d = res.d || {};
+        if (!res.ok || d.error) { toast.error(d.error || "Sync failed"); return; }
+        if (d.imported > 0) {
+          toast.success("Imported " + d.imported + " email" + (d.imported === 1 ? "" : "s"));
+          router.refresh();
+        } else {
+          toast.success("Already up to date — " + d.seen + " checked");
+        }
+      })
+      .catch(function () { toast.error("Sync failed"); })
+      .finally(function () { setSyncing(false); });
+  }
+
+  function goToList() { setShowList(true); setOpenThreadId(null); setOpenSentId(null); }
 
   function navFolder(f: string) {
-    setFolder(f); setSelectedId(null); setSearch(""); setShowList(true);
+    setFolder(f); setOpenThreadId(null); setOpenSentId(null); setSearch(""); setShowList(true);
     setSentOk(false); setSidebarOpen(false);
   }
 
-  function startCompose() { setFolder("compose"); setSentOk(false); setShowList(false); setSidebarOpen(false); }
+  function startCompose() {
+    setFolder("compose"); setSentOk(false); setShowList(false); setSidebarOpen(false);
+    setTo(""); setSubject(""); setMessage(""); setAttachments([]);
+  }
 
   /* pagination */
   var curPage = folder === "inbox" ? inboxPage : sentPage;
@@ -277,15 +693,17 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
     router.push("?" + params.toString(), { scroll: false });
   }, [folder, searchParams, router]);
 
-  var showDetail = !showList && selected && folder !== "compose";
   var showCompose = folder === "compose";
+  var showThreadDetail = !showList && !!openThread && folder === "inbox";
+  var showSentDetail = !showList && !!openSent && folder === "sent";
+  var showDetail = showThreadDetail || showSentDetail;
 
   /* ═══════════════════════════════════════════════════
      RENDER
      ═══════════════════════════════════════════════════ */
   return (
     <div className="email-client">
-      <style dangerouslySetInnerHTML={{ __html: "\n.email-client { display:flex; height:calc(100vh - 140px); position:relative; min-height:560px; border-radius:16px; overflow:hidden; background:" + cSurf + "; border:1px solid " + cBord + "; }\n.email-sidebar { width:200px; flex-shrink:0; border-right:1px solid " + cBord + "; display:flex; flex-direction:column; background:rgba(0,0,0,0.01); }\n.email-main { flex:1; display:flex; flex-direction:column; min-width:0; }\n.email-list-panel { width:380px; flex-shrink:0; border-right:1px solid " + cBord + "; display:flex; flex-direction:column; }\n.email-detail-panel { flex:1; display:flex; flex-direction:column; min-width:0; }\n\n@media (max-width: 768px) {\n  .email-client { flex-direction:column; height:calc(100dvh - 100px); border-radius:12px; }\n  .email-sidebar { display:none; }\n  .email-sidebar.open { display:flex; position:fixed; z-index:40; top:0; left:0; bottom:0; width:240px; box-shadow:4px 0 20px rgba(0,0,0,0.2); }\n  .email-list-panel { width:100%; border-right:none; }\n  .email-detail-panel { width:100%; position:absolute; inset:0; z-index:10; background:" + cSurf + "; }\n}\n@media (min-width: 769px) and (max-width: 1100px) {\n  .email-list-panel { width:280px; }\n}\n" }} />
+      <style dangerouslySetInnerHTML={{ __html: "\n.email-client { display:flex; height:calc(100vh - 140px); position:relative; min-height:560px; border-radius:16px; overflow:hidden; background:" + cSurf + "; border:1px solid " + cBord + "; }\n.email-sidebar { width:200px; flex-shrink:0; border-right:1px solid " + cBord + "; display:flex; flex-direction:column; background:rgba(0,0,0,0.01); }\n.email-main { flex:1; display:flex; flex-direction:column; min-width:0; }\n.email-list-panel { width:400px; flex-shrink:0; border-right:1px solid " + cBord + "; display:flex; flex-direction:column; }\n.email-detail-panel { flex:1; display:flex; flex-direction:column; min-width:0; }\n.email-body img { max-width:100%; height:auto; }\n.email-body table { max-width:100%; }\n.email-body a { word-break:break-word; }\n.email-body { overflow-wrap:anywhere; }\n\n@media (max-width: 768px) {\n  .email-client { flex-direction:column; height:calc(100dvh - 100px); border-radius:12px; }\n  .email-sidebar { display:none; }\n  .email-sidebar.open { display:flex; position:fixed; z-index:40; top:0; left:0; bottom:0; width:240px; box-shadow:4px 0 20px rgba(0,0,0,0.2); }\n  .email-list-panel { width:100%; border-right:none; }\n  .email-detail-panel { width:100%; position:absolute; inset:0; z-index:10; background:" + cSurf + "; }\n}\n@media (min-width: 769px) and (max-width: 1100px) {\n  .email-list-panel { width:300px; }\n}\n" }} />
 
       {/* ═══ SIDEBAR BACKDROP (mobile) ═══ */}
       {sidebarOpen && (
@@ -325,8 +743,8 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
         </div>
         <div style={{ flex: 1, padding: "0 8px" }}>
           {[
-            { key: "inbox", label: "Inbox", count: receivedTotal, icon: <Inbox size={16} /> },
-            { key: "sent",  label: "Sent",  count: sentTotal + sentOffset,  icon: <Send size={16} /> },
+            { key: "inbox", label: "Inbox", count: unread, icon: <Inbox size={16} />, accent: unread > 0 },
+            { key: "sent",  label: "Sent",  count: sentTotal + sentOffset, icon: <Send size={16} />, accent: false },
           ].map(function (f) {
             var act = folder === f.key;
             return (
@@ -339,7 +757,13 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
               }}>
                 <span style={{ color: act ? CLR.blue.icon : cTxt3, display: "flex" }}>{f.icon}</span>
                 <span style={{ flex: 1, textAlign: "left" }}>{f.label}</span>
-                {f.count > 0 && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 20, background: act ? CLR.blue.icon : cBord2, color: act ? "#fff" : cTxt3, minWidth: 20, textAlign: "center" }}>{f.count}</span>}
+                {f.count > 0 && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 20,
+                    background: (act || f.accent) ? CLR.blue.icon : cBord2,
+                    color: (act || f.accent) ? "#fff" : cTxt3, minWidth: 20, textAlign: "center",
+                  }}>{f.count}</span>
+                )}
               </button>
             );
           })}
@@ -353,6 +777,22 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
 
       {/* ═══ MAIN ════════════════════════════════ */}
       <div className="email-main">
+        {(loadError || migrationMissing) && (
+          <div style={{
+            padding: "10px 16px", borderBottom: "1px solid " + cBord,
+            background: migrationMissing ? CLR.amber.bg : CLR.red.bg,
+            color: migrationMissing ? CLR.amber.text : CLR.red.text,
+            fontSize: 12, display: "flex", alignItems: "center", gap: 8,
+          }}>
+            <AlertTriangle size={14} style={{ flexShrink: 0 }} />
+            <span>
+              {migrationMissing
+                ? "Conversation threading needs database migration 038. Until it's applied the inbox stays a flat list. Run supabase/migrations/038_email_threading.sql."
+                : "Could not load mail: " + loadError}
+            </span>
+          </div>
+        )}
+
         {/* ── COMPOSE VIEW ──────────────────────── */}
         {showCompose && (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "auto" }}>
@@ -360,7 +800,9 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
               <button type="button" onClick={function(){navFolder("inbox");}} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", color: cTxt2, fontSize: 12, fontWeight: 600, fontFamily: "Inter, sans-serif", padding: 0 }}>
                 <ArrowLeft size={14} /> Back
               </button>
-              <span style={{ fontSize: 15, fontWeight: 700, color: cTxt, fontFamily: "Syne, sans-serif" }}>New Message</span>
+              <span style={{ fontSize: 15, fontWeight: 700, color: cTxt, fontFamily: "Syne, sans-serif" }}>
+                New Message
+              </span>
             </div>
 
             {sentOk ? (
@@ -373,66 +815,68 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
                   <p style={{ fontSize: 13, color: cTxt2, margin: "0 0 24px" }}>Delivered to <strong>{to}</strong></p>
                   <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
                     <button type="button" onClick={resetCompose} style={{ padding: "10px 20px", borderRadius: 10, border: "1px solid " + cBord, background: cSurf, color: cTxt, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>Back to Inbox</button>
-                    <button type="button" onClick={function(){setSentOk(false);setTo("");setSubject("");setMessage("");setAttachments([]);}} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg, #2563EB, #7C3AED)", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>Send Another</button>
+                    <button type="button" onClick={function(){setSentOk(false);setTo("");setSubject("");setMessage("");setAttachments([]);setReplyContext(null);}} style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: "linear-gradient(135deg, #2563EB, #7C3AED)", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>Send Another</button>
                   </div>
                 </div>
               </div>
             ) : (
               <div style={{ flex: 1, overflow: "auto", padding: "16px 20px" }}>
                 <div style={{ maxWidth: 700 }}>
-                  {/* From */}
                   <div style={{ marginBottom: 14 }}>
                     <label className="efld">From</label>
                     <select style={{ ...inpStyle, cursor: "pointer", appearance: "auto" }} value={from} onChange={function(e){setFrom(e.target.value);}}>
-                      {FROM_OPTIONS.map(function(f){return <option key={f.email} value={f.email}>{f.label} &lt;{f.email}&gt;</option>;})}
+                      {fromChoices.map(function(f){return <option key={f.email} value={f.email}>{f.label} &lt;{f.email}&gt;</option>;})}
                     </select>
                   </div>
 
-                  {/* To */}
                   <div style={{ marginBottom: 12 }}>
                     <label className="efld">To</label>
                     <input style={inpStyle} type="text" placeholder="recipient@example.com — commas for multiple" value={to} onChange={function(e){setTo(e.target.value);}} />
                   </div>
 
-                  {/* Subject */}
                   <div style={{ marginBottom: 12 }}>
                     <label className="efld">Subject</label>
                     <input style={inpStyle} type="text" placeholder="Email subject..." value={subject} onChange={function(e){setSubject(e.target.value);}} />
                   </div>
 
-                  {/* Body */}
                   <div style={{ marginBottom: 12 }}>
-                    <textarea style={{ ...inpStyle, minHeight: 220, resize: "vertical", lineHeight: 1.7 }}
+                    <textarea style={{ ...inpStyle, minHeight: 260, resize: "vertical", lineHeight: 1.7, fontFamily: "Inter, monospace" }}
                       placeholder="Write your message...&#10;Supports HTML for rich formatting." value={message}
                       onChange={function(e){setMessage(e.target.value);}} />
                     <div style={{ display: "flex", justifyContent: "space-between", marginTop: 5 }}>
-                      <span style={{ fontSize: 10, color: cTxt3 }}>HTML supported</span>
+                      <span style={{ fontSize: 10, color: cTxt3 }}>
+                        HTML supported
+                      </span>
                       <span style={{ fontSize: 10, color: cTxt3 }}>{message.length} chars</span>
                     </div>
                   </div>
 
-                  {/* Attachments */}
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                       <input ref={fileRef} type="file" multiple onChange={handleAttach} style={{ display: "none" }} />
                       <button type="button" onClick={function(){fileRef.current && fileRef.current.click();}} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 8, border: "1px dashed " + cBord2, background: "transparent", color: cTxt2, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
                         <Paperclip size={13} /> Attach files
                       </button>
-                      <span style={{ fontSize: 11, color: cTxt3 }}>Max 10MB each</span>
+                      <span style={{ fontSize: 11, color: cTxt3 }}>Max 4MB each</span>
                     </div>
                     {attachments.length > 0 && (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                        {attachments.map(function(a, i){return(
-                          <div key={i} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 10px", background: CLR.blue.bg, borderRadius: 8, border: "1px solid rgba(59,130,246,0.2)", fontSize: 11, color: CLR.blue.text, fontWeight: 600 }}>
-                            <Paperclip size={11} /> {a.name} <span style={{ color: cTxt3, fontWeight: 400 }}>({fmtSize(a.size)})</span>
-                            <button type="button" onClick={function(){removeAttach(i);}} style={{ background: "none", border: "none", cursor: "pointer", color: cTxt3, padding: "0 2px", display: "flex" }}><X size={12} /></button>
-                          </div>
-                        );})}
+                        {attachments.map(function(a){
+                          var tint = a.status === "error" ? CLR.red : (a.status === "uploading" ? CLR.amber : CLR.blue);
+                          return (
+                            <div key={a.key} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 10px", background: tint.bg, borderRadius: 8, border: "1px solid " + tint.icon + "33", fontSize: 11, color: tint.text, fontWeight: 600 }}>
+                              {a.status === "uploading" ? <Loader2 size={11} className="animate-spin" /> : <Paperclip size={11} />}
+                              {a.filename}
+                              <span style={{ color: cTxt3, fontWeight: 400 }}>({fmtSize(a.size)})</span>
+                              {a.status === "error" && <span style={{ fontWeight: 700 }}>{a.error}</span>}
+                              <button type="button" onClick={function(){removeAttach(a.key);}} style={{ background: "none", border: "none", cursor: "pointer", color: cTxt3, padding: "0 2px", display: "flex" }}><X size={12} /></button>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
 
-                  {/* Actions */}
                   <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
                     <button type="button" onClick={function(){navFolder("inbox");}} style={{ padding: "10px 18px", borderRadius: 10, border: "1px solid " + cBord, background: "transparent", color: cTxt2, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", display: "inline-flex", alignItems: "center", gap: 6 }}>
                       <X size={14} /> Discard
@@ -447,91 +891,397 @@ export function EmailComposer({ userId, sentEmails: initSent, receivedEmails: in
           </div>
         )}
 
-        {/* ── INBOX / SENT LIST + DETAIL ─────────── */}
+        {/* ── LIST + DETAIL ──────────────────────── */}
         {!showCompose && (
           <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
-            {/* List panel */}
-            <div className="email-list-panel" style={{ display: (showList || (!showList && !selected)) ? "flex" : "none" }}>
-              {/* Search */}
-              <div style={{ padding: "10px 12px", borderBottom: "1px solid " + cBord }}>
-                <div style={{ position: "relative" }}>
+            <div className="email-list-panel" style={{ display: (showList || !showDetail) ? "flex" : "none" }}>
+              {/* Search + actions */}
+              <div style={{ padding: "10px 12px", borderBottom: "1px solid " + cBord, display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
                   <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: cTxt3, pointerEvents: "none" }} />
                   <input style={{ ...inpStyle, paddingLeft: 34, paddingTop: 7, paddingBottom: 7, fontSize: 12 }}
                     placeholder={"Search " + folder + "..."} value={search}
                     onChange={function(e){setSearch(e.target.value);}} />
                 </div>
+                {folder === "inbox" && (
+                  <>
+                    {unread > 0 && (
+                      <button type="button" onClick={markAllRead} title="Mark all read"
+                        style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "7px 9px", borderRadius: 9, border: "1px solid " + cBord2, background: "transparent", color: cTxt2, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+                        <MailOpen size={13} /> {unread}
+                      </button>
+                    )}
+                    <button type="button" onClick={syncFromResend} disabled={syncing} title="Import received mail from Resend"
+                      style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "7px 10px", borderRadius: 9, border: "1px solid " + cBord2, background: "transparent", color: syncing ? cTxt3 : CLR.blue.text, fontSize: 11, fontWeight: 600, cursor: syncing ? "default" : "pointer", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+                      <RefreshCw size={13} className={syncing ? "animate-spin" : ""} /> Sync
+                    </button>
+                  </>
+                )}
               </div>
+
+              {/* Address filter — only meaningful with more than one address */}
+              {folder === "inbox" && knownAddresses.length > 1 && (
+                <div style={{ display: "flex", gap: 6, padding: "8px 12px", borderBottom: "1px solid " + cBord, overflowX: "auto" }} className="scrollbar-none">
+                  {[null].concat(knownAddresses).map(function (addr: any) {
+                    var active = addressFilter === addr;
+                    return (
+                      <button key={addr || "all"} type="button"
+                        onClick={function(){ setAddressFilter(addr); }}
+                        style={{
+                          flexShrink: 0, padding: "4px 10px", borderRadius: 20,
+                          fontSize: 11, fontWeight: 600, cursor: "pointer",
+                          fontFamily: "Inter, sans-serif",
+                          border: "1px solid " + (active ? "transparent" : cBord2),
+                          background: active ? CLR.blue.icon : "transparent",
+                          color: active ? "#fff" : cTxt2,
+                          whiteSpace: "nowrap",
+                        }}>
+                        {addr ? addr.split("@")[0] + "@" : "All"}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* List */}
               <div style={{ flex: 1, overflow: "auto" }}>
-                {filtered.length === 0 ? (
-                  <div style={{ padding: 32, textAlign: "center" }}>
-                    <div style={{ width: 48, height: 48, borderRadius: "50%", background: CLR.blue.bg, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
-                      {folder === "inbox" ? <Inbox size={22} style={{ color: CLR.blue.icon }} /> : <Send size={22} style={{ color: CLR.blue.icon }} />}
+                {folder === "inbox" ? (
+                  filteredThreads.length === 0 ? (
+                    <div style={{ padding: 32, textAlign: "center" }}>
+                      <div style={{ width: 48, height: 48, borderRadius: "50%", background: CLR.blue.bg, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+                        <Inbox size={22} style={{ color: CLR.blue.icon }} />
+                      </div>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: cTxt, margin: "0 0 4px" }}>{search ? "No matches" : "Inbox empty"}</p>
+                      <p style={{ fontSize: 12, color: cTxt3, margin: 0 }}>
+                        {search ? "Try different search" : (loadError ? "Mail could not be loaded — see the notice above" : "No mail yet — try Sync to import from Resend")}
+                      </p>
+                      {!search && (
+                        <button type="button" onClick={syncFromResend} disabled={syncing}
+                          style={{ marginTop: 14, display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 9, border: "none", background: CLR.blue.icon, color: "#fff", fontSize: 12, fontWeight: 700, cursor: syncing ? "default" : "pointer", fontFamily: "Inter, sans-serif" }}>
+                          <RefreshCw size={13} className={syncing ? "animate-spin" : ""} /> {syncing ? "Syncing…" : "Sync from Resend"}
+                        </button>
+                      )}
                     </div>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: cTxt, margin: "0 0 4px" }}>{search ? "No matches" : folder === "inbox" ? "Inbox empty" : "No sent emails"}</p>
-                    <p style={{ fontSize: 12, color: cTxt3, margin: 0 }}>{search ? "Try different search" : folder === "inbox" ? "Configure inbound webhook to receive emails" : "Send your first email"}</p>
-                  </div>
-                ) : filtered.map(function(email){
-                  var isSel = selectedId === email.id;
-                  var preview = folder === "inbox" ? (email.body_text || stripTags(email.body_html) || "") : (email.body || "");
-                  var sender = folder === "inbox" ? email.from_email : email.to_email;
-                  var dateField = folder === "inbox" ? email.received_at : email.sent_at;
-                  return (
-                    <div key={email.id} onClick={function(){openEmail(email.id);}} style={{
-                      padding: "12px 14px", borderBottom: "1px solid " + cBord,
-                      background: isSel ? CLR.blue.bg : "transparent", cursor: "pointer",
-                      borderLeft: isSel ? "3px solid " + CLR.blue.icon : "3px solid transparent", transition: "background 0.1s",
-                    }}>
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                        <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, background: avColor(sender), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700 }}>{avLetter(sender)}</div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                            <span style={{ fontSize: 13, fontWeight: isSel ? 700 : 600, color: cTxt, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sender}</span>
-                            <span style={{ fontSize: 10, color: cTxt3, flexShrink: 0, marginLeft: 8 }}>{fmtDate(dateField)}</span>
+                  ) : filteredThreads.map(function(c){
+                    var isSel = openThreadId === c.thread_id;
+                    var isUnread = c.unread > 0;
+                    return (
+                      <div key={c.thread_id} onClick={function(){openThreadById(c.thread_id);}} style={{
+                        padding: "12px 14px", borderBottom: "1px solid " + cBord,
+                        background: isSel ? CLR.blue.bg : (isUnread ? "rgba(59,130,246,0.035)" : "transparent"),
+                        cursor: "pointer",
+                        borderLeft: isSel ? "3px solid " + CLR.blue.icon : "3px solid transparent", transition: "background 0.1s",
+                      }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                          <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, background: avColor(c.partyEmail), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700 }}>{avLetter(c.partyEmail)}</div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                              <span style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+                                {isUnread && <span style={{ width: 7, height: 7, borderRadius: "50%", background: CLR.blue.icon, flexShrink: 0 }} />}
+                                <span style={{ fontSize: 13, fontWeight: (isSel || isUnread) ? 700 : 600, color: cTxt, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.party}</span>
+                                {c.count > 1 && (
+                                  <span style={{ fontSize: 10, fontWeight: 700, color: cTxt3, background: cBord2, borderRadius: 20, padding: "1px 6px", flexShrink: 0 }}>{c.count}</span>
+                                )}
+                                {knownAddresses.length > 1 && c.address && (
+                                  <span title={"Sent to " + c.address}
+                                    style={{ fontSize: 9, fontWeight: 700, color: CLR.blue.text, background: CLR.blue.bg, borderRadius: 20, padding: "1px 6px", flexShrink: 0, textTransform: "lowercase" }}>
+                                    {c.address.split("@")[0]}@
+                                  </span>
+                                )}
+                              </span>
+                              <span style={{ fontSize: 10, color: cTxt3, flexShrink: 0 }}>{fmtDate(c.last_at)}</span>
+                            </div>
+                            <div style={{ fontSize: 12, fontWeight: isUnread ? 700 : 600, color: isSel ? CLR.blue.text : cTxt, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.subject}</div>
+                            <div style={{ fontSize: 11, color: cTxt3, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {c.lastFrom === "You" ? <span style={{ color: cTxt3 }}>You: </span> : null}
+                              {trunc(c.preview, 70)}
+                            </div>
                           </div>
-                          <div style={{ fontSize: 12, fontWeight: 600, color: isSel ? CLR.blue.text : cTxt, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.subject || "(no subject)"}</div>
-                          <div style={{ fontSize: 11, color: cTxt3, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{trunc(preview, 80)}</div>
                         </div>
                       </div>
+                    );
+                  })
+                ) : (
+                  filteredSent.length === 0 ? (
+                    <div style={{ padding: 32, textAlign: "center" }}>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: cTxt, margin: "0 0 4px" }}>{search ? "No matches" : "No sent emails"}</p>
                     </div>
-                  );
-                })}
+                  ) : filteredSent.map(function(email){
+                    var isSel = openSentId === email.id;
+                    return (
+                      <div key={email.id} onClick={function(){setOpenSentId(email.id); setOpenThreadId(null); setShowList(false);}} style={{
+                        padding: "12px 14px", borderBottom: "1px solid " + cBord,
+                        background: isSel ? CLR.blue.bg : "transparent", cursor: "pointer",
+                        borderLeft: isSel ? "3px solid " + CLR.blue.icon : "3px solid transparent",
+                      }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                          <span style={{ fontSize: 13, fontWeight: isSel ? 700 : 600, color: cTxt, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.to_email}</span>
+                          <span style={{ fontSize: 10, color: cTxt3, flexShrink: 0 }}>{fmtDate(email.sent_at)}</span>
+                        </div>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: cTxt, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.subject || "(no subject)"}</div>
+                        <div style={{ fontSize: 11, color: cTxt3, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{trunc(stripTags(email.body) || "", 70)}</div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
 
-              {/* Pagination — only when not searching (search filters client-side across current page) */}
-              {!search && (
-                <Pagination page={curPage} total={curTotal} pageSize={pageSize} onPage={goPage} />
-              )}
+              {!search && <Pagination page={curPage} total={curTotal} pageSize={pageSize} onPage={goPage} />}
             </div>
 
             {/* Detail panel */}
             <div className="email-detail-panel" style={{ display: showDetail ? "flex" : "none" }}>
-              {showDetail && selected && (
-                <EmailDetail
-                  email={selected}
-                  folder={folder}
+              {showThreadDetail && openThread && (
+                <ThreadDetail
+                  thread={openThread}
                   onBack={goToList}
-                  onReply={function(){replyTo(folder==="inbox"?selected.from_email:selected.to_email, selected.subject);}}
+                  onUnread={function(){ markThreadRead(openThread.thread_id, false); goToList(); }}
+                  replySlot={
+                    <InlineReply
+                      thread={openThread}
+                      target={replyTarget(openThread)}
+                      text={replyText}
+                      onText={setReplyText}
+                      attachments={replyAttachments}
+                      onPickFiles={function(){ replyFileRef.current && replyFileRef.current.click(); }}
+                      onRemoveAttachment={removeReplyAttach}
+                      fileInput={
+                        <input ref={replyFileRef} type="file" multiple onChange={handleReplyAttach} style={{ display: "none" }} />
+                      }
+                      showQuote={showQuote}
+                      onToggleQuote={function(){ setShowQuote(!showQuote); }}
+                      sending={replySending}
+                      onSend={function(){ sendInlineReply(openThread); }}
+                    />
+                  }
                 />
+              )}
+              {showSentDetail && openSent && (
+                <SentDetail email={openSent} onBack={goToList} />
               )}
             </div>
           </div>
         )}
       </div>
 
-      {/* Global label styles */}
-      <style dangerouslySetInnerHTML={{ __html: ".efld{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:" + cTxt3 + ";margin-bottom:5px;}\n@media (max-width: 768px) {\n  .email-list-panel { width:100% !important; border-right:none !important; }\n  .email-detail-panel { width:100% !important; }\n}\n@media (min-width: 769px) and (max-width: 1100px) {\n  .email-list-panel { width:280px !important; }\n}\n" }} />
+      <style dangerouslySetInnerHTML={{ __html: ".efld{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:" + cTxt3 + ";margin-bottom:5px;}\n@media (max-width: 768px) {\n  .email-list-panel { width:100% !important; border-right:none !important; }\n  .email-detail-panel { width:100% !important; }\n}\n@media (min-width: 769px) and (max-width: 1100px) {\n  .email-list-panel { width:300px !important; }\n}\n" }} />
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════
-   Email Detail Sub-Component
+   Thread detail — the whole conversation, oldest → newest
    ═══════════════════════════════════════════════════════ */
-function EmailDetail({ email, folder, onBack, onReply }: {
-  email: any; folder: string; onBack: () => void; onReply: () => void;
+function ThreadDetail({ thread, onBack, onUnread, replySlot }: {
+  thread: any; onBack: () => void; onUnread: () => void; replySlot?: React.ReactNode;
 }) {
+  // Newest expanded; earlier messages collapsed, Gmail-style.
+  var [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  return (
+    <>
+      <div style={{ padding: "12px 18px", borderBottom: "1px solid " + cBord, display: "flex", alignItems: "center", gap: 10 }}>
+        <button type="button" onClick={onBack} style={{ display: "inline-flex", alignItems: "center", background: "none", border: "none", cursor: "pointer", color: cTxt2, padding: 0 }}><ArrowLeft size={16} /></button>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: cTxt, fontFamily: "Syne, sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{thread.subject}</div>
+          <div style={{ fontSize: 11, color: cTxt3, marginTop: 1 }}>
+            {thread.count} message{thread.count === 1 ? "" : "s"} · {thread.partyEmail}
+          </div>
+        </div>
+        <button type="button" onClick={onUnread} title="Mark as unread"
+          style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid " + cBord, background: cSurf, color: cTxt2, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+          <MailOpen size={12} /> Unread
+        </button>
+      </div>
+
+      <div style={{ flex: 1, overflow: "auto", padding: "16px 20px" }}>
+        {thread.messages.map(function (m: any, idx: number) {
+          var isOut = m.direction === "out";
+          var isLast = idx === thread.messages.length - 1;
+          var isOpen = isLast || expanded[m.id];
+          var who = isOut ? "You" : (m.sender_name || m.from_email);
+          var address = isOut ? m.from_email : m.from_email;
+
+          return (
+            <div key={m.id} style={{
+              marginBottom: 12, borderRadius: 12, border: "1px solid " + (isOpen ? cBord2 : cBord),
+              background: isOut ? "rgba(59,130,246,0.04)" : cElev, overflow: "hidden",
+            }}>
+              <button type="button"
+                onClick={function(){ if (!isLast) setExpanded(function(p){ return { ...p, [m.id]: !p[m.id] }; }); }}
+                style={{
+                  width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 10,
+                  padding: "12px 14px", background: "none", border: "none",
+                  cursor: isLast ? "default" : "pointer", fontFamily: "Inter, sans-serif",
+                }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, background: avColor(isOut ? (m.from_email || "") : m.from_email), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700 }}>
+                  {isOut ? "Y" : avLetter(m.from_email)}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: cTxt, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{who}</span>
+                    <span style={{ fontSize: 11, color: cTxt3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{isOut ? "to " + m.to_email : ""}</span>
+                  </div>
+                  {!isOpen && (
+                    <div style={{ fontSize: 11, color: cTxt3, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {trunc(bodyText(m), 90)}
+                    </div>
+                  )}
+                </div>
+                <span style={{ fontSize: 10, color: cTxt3, flexShrink: 0 }}>{fmtFullDate(m.at)}</span>
+                {!isLast && (isOpen ? <ChevronUp size={14} style={{ color: cTxt3 }} /> : <ChevronDown size={14} style={{ color: cTxt3 }} />)}
+              </button>
+
+              {isOpen && (
+                <div style={{ padding: "0 14px 14px" }}>
+                  {!isOut && m.to_email && (
+                    <div style={{ fontSize: 11, color: cTxt3, marginBottom: 8 }}>
+                      From: {address} · To: {m.to_email}{m.cc_emails ? " · CC: " + m.cc_emails : ""}
+                    </div>
+                  )}
+                  <div className="email-body" style={{ fontSize: 14, color: cTxt, lineHeight: 1.75 }}>
+                    {isOut ? (
+                      /<[a-z][\s\S]*>/i.test(m.body || "")
+                        ? <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(m.body) }} />
+                        : <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{m.body}</div>
+                    ) : m.body_html ? (
+                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(m.body_html) }} />
+                    ) : m.body_text ? (
+                      <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{m.body_text}</div>
+                    ) : (
+                      <p style={{ color: cTxt3, fontSize: 13 }}>No body available for this message.</p>
+                    )}
+                  </div>
+                  <AttachmentChips message={m} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {replySlot}
+    </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   Inline reply — Gmail style, inside the conversation.
+   The box starts empty; the original is appended as a quote at send time.
+   ═══════════════════════════════════════════════════════ */
+function InlineReply({
+  thread, target, text, onText, attachments, onPickFiles, onRemoveAttachment,
+  fileInput, showQuote, onToggleQuote, sending, onSend,
+}: {
+  thread: any; target: any; text: string; onText: (v: string) => void;
+  attachments: AttachFile[]; onPickFiles: () => void;
+  onRemoveAttachment: (key: string) => void; fileInput: React.ReactNode;
+  showQuote: boolean; onToggleQuote: () => void; sending: boolean; onSend: () => void;
+}) {
+  if (!target) return null;
+
+  var who = target.sender_name || target.from_email || "this conversation";
+  var quote = buildQuote(target).replace(/^\n+/, "");
+
+  function onKeyDown(e: React.KeyboardEvent) {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      onSend();
+    }
+  }
+
+  return (
+    <div style={{ borderTop: "1px solid " + cBord, padding: "12px 16px", background: cSurf, flexShrink: 0 }}>
+      {fileInput}
+
+      <div style={{ border: "1px solid " + cBord2, borderRadius: 12, background: cElev, overflow: "hidden" }}>
+        <div style={{ padding: "8px 12px", borderBottom: "1px solid " + cBord, fontSize: 11, color: cTxt3, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+          <span>Reply to <strong style={{ color: cTxt2 }}>{who}</strong></span>
+          <span style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 5 }}>
+            <span>from</span>
+            <strong style={{ color: CLR.blue.text, background: CLR.blue.bg, borderRadius: 20, padding: "2px 8px", fontWeight: 700 }}>
+              {thread.address || "default sender"}
+            </strong>
+          </span>
+        </div>
+
+        <textarea
+          value={text}
+          onChange={function(e){ onText(e.target.value); }}
+          onKeyDown={onKeyDown}
+          placeholder={"Write your reply…"}
+          style={{
+            width: "100%", minHeight: 92, maxHeight: 320, resize: "vertical",
+            border: "none", outline: "none", background: "transparent",
+            padding: "12px 14px", color: cTxt, fontSize: 13, lineHeight: 1.7,
+            fontFamily: "Inter, sans-serif", boxSizing: "border-box",
+          }}
+        />
+
+        {showQuote && quote && (
+          <div style={{
+            margin: "0 12px 10px", padding: "10px 12px", borderRadius: 8,
+            background: "rgba(0,0,0,0.03)", border: "1px solid " + cBord,
+            fontSize: 11.5, color: cTxt3, whiteSpace: "pre-wrap", wordBreak: "break-word",
+            maxHeight: 180, overflow: "auto", fontFamily: "Inter, monospace",
+          }}>
+            {quote}
+          </div>
+        )}
+
+        {attachments.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: "0 12px 10px" }}>
+            {attachments.map(function (a) {
+              var tint = a.status === "error" ? CLR.red : (a.status === "uploading" ? CLR.amber : CLR.blue);
+              return (
+                <div key={a.key} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 9px", background: tint.bg, borderRadius: 8, border: "1px solid " + tint.icon + "33", fontSize: 11, color: tint.text, fontWeight: 600 }}>
+                  {a.status === "uploading" ? <Loader2 size={11} className="animate-spin" /> : <Paperclip size={11} />}
+                  {a.filename}
+                  <span style={{ color: cTxt3, fontWeight: 400 }}>({fmtSize(a.size)})</span>
+                  {a.status === "error" && <span style={{ fontWeight: 700 }}>{a.error}</span>}
+                  <button type="button" onClick={function(){ onRemoveAttachment(a.key); }} style={{ background: "none", border: "none", cursor: "pointer", color: cTxt3, padding: "0 2px", display: "flex" }}><X size={12} /></button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", borderTop: "1px solid " + cBord }}>
+          <button type="button" onClick={onPickFiles}
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 8, border: "1px dashed " + cBord2, background: "transparent", color: cTxt2, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+            <Paperclip size={12} /> Attach
+          </button>
+
+          {quote && (
+            <button type="button" onClick={onToggleQuote}
+              style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "6px 8px", borderRadius: 8, border: "none", background: "transparent", color: cTxt3, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+              {showQuote ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+              {showQuote ? "Hide quoted text" : "Show quoted text"}
+            </button>
+          )}
+
+          <span style={{ marginLeft: "auto", fontSize: 10, color: cTxt3 }}>⌘/Ctrl + ↵</span>
+
+          <button type="button" onClick={onSend} disabled={sending || !text.trim()}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 18px", borderRadius: 9,
+              border: "none", color: "#fff", fontSize: 12, fontWeight: 700,
+              cursor: (sending || !text.trim()) ? "not-allowed" : "pointer",
+              background: (sending || !text.trim()) ? "#94A3B8" : "linear-gradient(135deg, #2563EB, #7C3AED)",
+              fontFamily: "Inter, sans-serif",
+            }}>
+            {sending ? <><Loader2 size={13} className="animate-spin" /> Sending…</> : <><Reply size={13} /> Send</>}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   Sent detail — one outbound message from the flat log
+   ═══════════════════════════════════════════════════════ */
+function SentDetail({ email, onBack }: { email: any; onBack: () => void }) {
   return (
     <>
       <div style={{ padding: "12px 18px", borderBottom: "1px solid " + cBord, display: "flex", alignItems: "center", gap: 10 }}>
@@ -539,47 +1289,18 @@ function EmailDetail({ email, folder, onBack, onReply }: {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: cTxt, fontFamily: "Syne, sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.subject || "(no subject)"}</div>
         </div>
-        <button type="button" onClick={onReply} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 8, border: "1px solid " + cBord, background: cSurf, color: cTxt2, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
-          <Reply size={12} /> Reply
-        </button>
       </div>
       <div style={{ flex: 1, overflow: "auto", padding: "16px 20px" }}>
-        {/* Meta card */}
         <div style={{ marginBottom: 20, padding: "14px 16px", background: cElev, borderRadius: 12, border: "1px solid " + cBord2 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
-            <div style={{ width: 40, height: 40, borderRadius: "50%", background: avColor(folder === "inbox" ? email.from_email : email.to_email), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, flexShrink: 0 }}>
-              {avLetter(folder === "inbox" ? email.from_email : email.to_email)}
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: cTxt, overflow: "hidden", textOverflow: "ellipsis" }}>
-                {folder === "inbox" ? email.from_email : email.to_email}
-              </div>
-              <div style={{ fontSize: 11, color: cTxt3, marginTop: 1 }}>
-                {fmtFullDate(folder === "inbox" ? email.received_at : email.sent_at)}
-              </div>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 16, fontSize: 11, color: cTxt2, flexWrap: "wrap" }}>
-            <span><strong style={{ color: cTxt3 }}>From:</strong> {email.from_email || (folder === "inbox" ? email.from_email : "support@genxdigitizing.com")}</span>
-            <span><strong style={{ color: cTxt3 }}>To:</strong> {email.to_email}</span>
-            {email.cc_emails && <span><strong style={{ color: cTxt3 }}>CC:</strong> {email.cc_emails}</span>}
-            {email.attachments_meta && <span><strong style={{ color: cTxt3 }}>Attachments:</strong> {
-              (function(){
-                try { return JSON.parse(email.attachments_meta).map(function(a){return a.filename;}).join(", "); }
-                catch(e){ return email.attachments_meta; }
-              })()
-            }</span>}
-            {email.attachments && <span><strong style={{ color: cTxt3 }}>Attachments:</strong> {email.attachments}</span>}
-          </div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: cTxt }}>To: {email.to_email}</div>
+          <div style={{ fontSize: 11, color: cTxt3, marginTop: 2 }}>{fmtFullDate(email.sent_at)}</div>
+          {email.from_email && <div style={{ fontSize: 11, color: cTxt3, marginTop: 6 }}>From: {email.from_email}</div>}
+          <AttachmentChips message={{ ...email, direction: "out" }} />
         </div>
-
-        {/* Body */}
-        <div style={{ fontSize: 14, color: cTxt, lineHeight: 1.8 }}>
-          {folder === "inbox" ? (
-            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(email.body_html || email.body_text || "(empty)") }} />
-          ) : (
-            <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{email.body}</div>
-          )}
+        <div className="email-body" style={{ fontSize: 14, color: cTxt, lineHeight: 1.75 }}>
+          {/<[a-z][\s\S]*>/i.test(email.body || "")
+            ? <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(email.body) }} />
+            : <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{email.body}</div>}
         </div>
       </div>
     </>

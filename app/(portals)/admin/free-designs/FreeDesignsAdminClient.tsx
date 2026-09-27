@@ -108,7 +108,7 @@ function ImageUploader({ images, onAdd, onRemove, uploading, onUploadingChange }
   );
 }
 
-// ── File Uploader (S3) ──────────────────────────────────────
+// ── File Uploader (Supabase Storage) ─────────────────────────
 function FileUploader({ url, onUpload, uploading, onUploadingChange }: {
   url: string; onUpload: (url: string) => void; uploading: boolean; onUploadingChange: (v: boolean) => void;
 }) {

@@ -20,7 +20,60 @@ const PORTAL_HOME: Record<string, string> = {
 const PORTAL_PREFIXES = ["/admin", "/crm", "/client", "/designer"];
 const AUTH_PAGES      = ["/login", "/register", "/forgot-password"];
 
+// ── Stale session cookie cleanup ───────────────────────────
+// Project ref of the configured Supabase instance. @supabase/ssr stores its
+// session as `sb-<ref>-auth-token` (+ .0/.1 chunks, -code-verifier), so any
+// other `sb-*` cookie is a leftover from a different Supabase project.
+// localhost accumulates those across projects.
+const SUPABASE_REF = (() => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return null;
+  try {
+    return new URL(url).hostname.split(".")[0] || null;
+  } catch {
+    return null;
+  }
+})();
+
+const isAuthCookie = (name: string) => name.startsWith("sb-");
+
+function isForeignAuthCookie(name: string) {
+  if (!SUPABASE_REF) return false; // env missing — never guess, never wipe
+  return isAuthCookie(name) && !name.startsWith(`sb-${SUPABASE_REF}-`);
+}
+
+function authCookieNames(request: NextRequest) {
+  return request.cookies.getAll().map(c => c.name).filter(isAuthCookie);
+}
+
+function dropCookies(response: NextResponse, names: string[]) {
+  names.forEach(name => response.cookies.set(name, "", { path: "/", maxAge: 0 }));
+  return response;
+}
+
+/**
+ * Only a definitive auth rejection may clear a session. Network failures
+ * (status 0) and 5xx are retryable — clearing on those would sign users out
+ * during a Supabase blip.
+ */
+function isDefinitiveAuthFailure(error: any) {
+  if (!error) return false; // no session stored at all — nothing to clear
+  const status = typeof error.status === "number" ? error.status : 0;
+  if (status === 400 || status === 401 || status === 403) return true;
+  return error.name === "AuthSessionMissingError"; // cookie present but unreadable
+}
+
 export async function middleware(request: NextRequest) {
+  const response = await handleRequest(request);
+
+  // Drop foreign-project cookies on every route (public ones included) — cheap,
+  // no network call. Without this a dead `sb-*` cookie from another project
+  // survives forever on localhost.
+  const foreign = request.cookies.getAll().map(c => c.name).filter(isForeignAuthCookie);
+  return foreign.length ? dropCookies(response, foreign) : response;
+}
+
+async function handleRequest(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── Always allow ─────────────────────────────────────────
@@ -59,7 +112,8 @@ export async function middleware(request: NextRequest) {
   // Root page: rewrite to /home for anonymous users (saves one redirect round-trip).
   // Logged-in users still hit app/page.tsx for role-based portal redirect.
   if (pathname === "/") {
-    const hasSession = request.cookies.getAll().some(c => c.name.startsWith("sb-"));
+    const hasSession = request.cookies.getAll()
+      .some(c => isAuthCookie(c.name) && !isForeignAuthCookie(c.name));
     if (!hasSession) {
       return NextResponse.rewrite(new URL("/home", request.url));
     }
@@ -96,25 +150,32 @@ export async function middleware(request: NextRequest) {
   // Refresh session — MUST call getUser() not getSession()
   // Catch stale/invalid refresh tokens to prevent unhandled errors
   let user = null;
+  let authFailedHard = false;
   try {
-    const { data } = await supabase.auth.getUser();
+    const { data, error } = await supabase.auth.getUser();
     user = data.user;
+    if (!user) authFailedHard = isDefinitiveAuthFailure(error);
   } catch {
-    // session cookie invalid or refresh token expired — treat as logged out
+    // session cookie invalid or refresh token expired — treat as logged out.
+    // Thrown errors are network/parse failures, so never definitive.
   }
 
   // ── Not logged in → protect portal routes and API routes ──
   if (!user) {
+    // Dead session (refresh token rejected) → clear the cookies so the browser
+    // stops replaying them on every subsequent request.
+    const dead = authFailedHard ? authCookieNames(request) : [];
+
     if (isPortalRoute) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(url);
+      return dropCookies(NextResponse.redirect(url), dead);
     }
     if (isAdminApiRoute || isCrmApiRoute || isProtectedApi) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return dropCookies(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), dead);
     }
-    return response;
+    return dropCookies(response, dead);
   }
 
   // ── Logged in ────────────────────────────────────────────

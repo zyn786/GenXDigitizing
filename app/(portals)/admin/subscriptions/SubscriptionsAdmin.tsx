@@ -197,11 +197,21 @@ export function SubscriptionsAdmin({ subscriptions: initialSubs, invoices: initi
           }),
         }).catch(e => console.error("[sendPaymentLink] Notif error:", e));
       }
-      // Send payment link email
+      // Send payment link email (server-side — Resend key never touches browser)
       if (clientEmail && sub) {
         const planCfg = PLAN_CONFIG[sub.plan];
-        const { emailPaymentLinkSent } = await import("@/lib/email/subscription");
-        emailPaymentLinkSent(clientEmail, planCfg.label, planCfg.price, planCfg.designs, universalLink).catch(e => console.error("[sendPaymentLink] Email failed:", e));
+        fetch("/api/admin/subscriptions/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            kind: "payment_link",
+            email: clientEmail,
+            planLabel: planCfg.label,
+            price: planCfg.price,
+            designs: planCfg.designs,
+            link: universalLink,
+          }),
+        }).catch(e => console.error("[sendPaymentLink] Email failed:", e));
       }
       // Audit log
       logAuditEvent({ action: "subscription_payment_link_sent", entity: "subscription", entityId: subId, newData: { payment_link: universalLink } });
@@ -260,12 +270,23 @@ export function SubscriptionsAdmin({ subscriptions: initialSubs, invoices: initi
         }));
       }
 
-      // Send activation email + receipt
+      // Send activation email + receipt (server-side — Resend key never touches browser)
       if (clientEmail && sub) {
         const planCfg = PLAN_CONFIG[sub.plan];
-        const { emailSubscriptionApproved, emailSubscriptionReceipt } = await import("@/lib/email/subscription");
-        emailSubscriptionApproved(clientEmail, planCfg.label, planCfg.price, planCfg.designs, universalLink, planCfg.features).catch(e => console.error("[approve] Activation email failed:", e));
-        emailSubscriptionReceipt(clientEmail, planCfg.label, inv?.invoice_number || "N/A", planCfg.price, planCfg.designs, planCfg.features).catch(e => console.error("[approve] Receipt email failed:", e));
+        fetch("/api/admin/subscriptions/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            kind: "approved",
+            email: clientEmail,
+            planLabel: planCfg.label,
+            price: planCfg.price,
+            designs: planCfg.designs,
+            link: universalLink || undefined,
+            features: planCfg.features,
+            invoiceNumber: inv?.invoice_number || "N/A",
+          }),
+        }).catch(e => console.error("[approve] Email failed:", e));
       }
 
       // Generate invoice PDF

@@ -4,7 +4,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient }         from "@/lib/supabase/server";
 import { getAdminUser }              from "@/lib/supabase/get-user";
-import { deleteFromS3, extractS3Key } from "@/lib/s3";
+import { deleteFromStorage, deleteLegacyS3, extractS3Key, isS3Key, normalizeStoragePath } from "@/lib/storage";
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,13 +41,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Can only delete output files" }, { status: 422 });
     }
 
-    // Delete from S3
+    // Delete from storage (legacy S3 rows use the fallback path)
     if (file.file_url) {
       try {
-        const key = extractS3Key(file.file_url);
-        await deleteFromS3(key);
+        if (isS3Key(file.file_url)) {
+          await deleteLegacyS3(extractS3Key(file.file_url));
+        } else {
+          await deleteFromStorage(normalizeStoragePath(file.file_url), file.file_type);
+        }
       } catch (err: any) {
-        console.error("[file-delete] S3 delete warning:", err?.message ?? err);
+        console.error("[file-delete] Storage delete warning:", err?.message ?? err);
       }
     }
 

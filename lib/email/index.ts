@@ -6,6 +6,7 @@
  */
 
 import { Resend } from "resend";
+import { createAdminClient } from "@/lib/supabase/server";
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY ?? "placeholder");
@@ -96,6 +97,20 @@ async function sendEmail(params: SendParams, retries: number = 2) {
         }
         console.error("[email] Resend error after " + retries + " retries:", error);
         return { success: false, error: error };
+      }
+
+      // Log to sent_emails so the admin /email page shows full send history.
+      // Fire-and-forget: logging must never fail the send.
+      try {
+        await createAdminClient().from("sent_emails").insert({
+          to_email: Array.isArray(params.to) ? params.to.join(", ") : params.to,
+          from_email: process.env.RESEND_FROM_EMAIL || "support@genxdigitizing.com",
+          subject: params.subject,
+          body: params.text || text,
+          resend_id: data?.id || null,
+        });
+      } catch (logErr) {
+        console.error("[email] sent_emails log error:", logErr);
       }
 
       return { success: true, id: data?.id };

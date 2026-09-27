@@ -2,9 +2,9 @@
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
-import { uploadToS3, getS3SignedUrl } from "@/lib/s3";
+import { uploadToStorage, signStorageUrl } from "@/lib/storage";
 
-// POST /api/admin/upload-free-design-file — upload design files to S3
+// POST /api/admin/upload-free-design-file — upload design files to Supabase Storage
 // Auth: middleware.ts enforces admin role for all /api/admin/* routes.
 export async function POST(req: NextRequest) {
   try {
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     const contentType = file.type || "application/octet-stream";
 
     console.log(`Uploading free design file: ${file.name} (${file.size} bytes) → ${key}`);
-    await uploadToS3(buffer, key, contentType);
+    await uploadToStorage(buffer, key, contentType);
 
     // Public download URL — not under /api/admin/ so anyone can download
     const fileUrl = `/api/free-designs/download-file?key=${encodeURIComponent(key)}`;
@@ -48,14 +48,11 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("Free design file upload error:", err);
     const message = err?.message ?? "Upload failed";
-    if (err?.Code || err?.$metadata) {
-      console.error("S3 error details:", JSON.stringify(err, null, 2));
-    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-// GET — resolve presigned URL for download
+// GET — redirect to signed URL for download
 export async function GET(req: NextRequest) {
   try {
     const key = req.nextUrl.searchParams.get("key");
@@ -63,7 +60,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Missing key param" }, { status: 400 });
     }
 
-    const signedUrl = await getS3SignedUrl(key, 86400);
+    const signedUrl = await signStorageUrl(key, undefined, 86400);
+    if (!signedUrl) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    }
     return NextResponse.redirect(signedUrl);
   } catch (err: any) {
     console.error("Free design file download error:", err);

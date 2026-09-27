@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { uploadToS3 } from "@/lib/s3";
+import { uploadToStorage } from "@/lib/storage";
 import { notifyUsers } from "@/lib/notify-server";
 import { recordRedemption } from "@/lib/coupons";
 
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     const admin = createAdminClient();
 
-    // Upload files to S3 (max 25MB each, max 5 files)
+    // Upload files to Supabase Storage (max 25MB each, max 5 files)
     const MAX_FILE_SIZE = 25 * 1024 * 1024;
     const MAX_FILES = 5;
 
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const key = `guest-uploads/${Date.now()}-${safeName}`;
-      await uploadToS3(buffer, key, file.type || "application/octet-stream");
+      await uploadToStorage(buffer, key, file.type || "application/octet-stream");
       uploadedFiles.push({ name: file.name, key, size: file.size });
     }
 

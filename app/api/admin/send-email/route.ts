@@ -2,33 +2,58 @@
 /**
  * Admin email compose endpoint.
  * Sends email via Resend with branded layout, logs to sent_emails.
+ *
+ * Attachments arrive as Supabase Storage paths (uploaded beforehand by
+ * app/api/admin/email/upload) and are downloaded here — they are no longer
+ * base64'd through the request body, which broke on Vercel's 4.5MB limit.
  */
 
+export const runtime = "nodejs";
+
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { createAdminClient } from "@/lib/supabase/server";
+import { getAdminUser } from "@/lib/supabase/get-user";
+import { resolveBucket } from "@/lib/storage";
 import { Resend } from "resend";
 import { baseLayout } from "@/lib/email/index";
 
 var REPLY = process.env.RESEND_REPLY_TO || "support@genxdigitizing.com";
 
-// Allowed sender addresses — must match FROM_OPTIONS in EmailComposer
-var ALLOWED_FROM = [
-  "support@genxdigitizing.com",
-  "noreply@genxdigitizing.com",
-  "orders@genxdigitizing.com",
-  "billing@genxdigitizing.com",
-];
+/**
+ * Senders are restricted to the verified domain rather than a fixed list, so an
+ * address added in the Resend dashboard (billing@, info@, …) can be replied
+ * from immediately without a code change. Anything off-domain is still refused,
+ * which is what the old four-address allow-list was protecting against.
+ */
+var FROM_DOMAIN = (process.env.RESEND_FROM_DOMAIN || "genxdigitizing.com").toLowerCase();
+
+/** Pull the bare address out of `Name <addr@x.com>` or `addr@x.com`. */
+function bareAddress(value: string): string {
+  var m = /<([^>]+)>/.exec(value || "");
+  return (m ? m[1] : (value || "")).trim().toLowerCase();
+}
+
+function isAllowedSender(value: string): boolean {
+  var email = bareAddress(value);
+  var at = email.lastIndexOf("@");
+  if (at <= 0) return false;
+  return email.slice(at + 1) === FROM_DOMAIN;
+}
+
+/** Only attachments written by the composer's upload route may be attached. */
+var ATTACHMENT_PREFIX = "email-attachments/";
 
 // Simple in-memory rate limiter: max 10 emails per minute per user
 var rateLimit = new Map();
 var RATE_WINDOW_MS = 60_000; // 1 minute
 var RATE_MAX = 10;
 
-function checkRateLimit(userId: string): boolean {
+function checkRateLimit(key: string): boolean {
   var now = Date.now();
-  var entry = rateLimit.get(userId);
+  var entry = rateLimit.get(key);
   if (!entry || now - entry.windowStart > RATE_WINDOW_MS) {
-    rateLimit.set(userId, { count: 1, windowStart: now });
+    rateLimit.set(key, { count: 1, windowStart: now });
     return true;
   }
   if (entry.count >= RATE_MAX) return false;
@@ -38,20 +63,33 @@ function checkRateLimit(userId: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
+    // Identity comes from the session, never from the request body — `sent_by`
+    // and the rate-limit key were both previously client-supplied and spoofable.
+    var user = await getAdminUser().catch(function () { return null; });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (user.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     var body = await request.json();
     var to = body.to;
     var subject = body.subject;
     var message = body.message;
-    var userId = body.userId;
     var from = body.from;
-    var attachments = body.attachments || [];
+    var attachments = Array.isArray(body.attachments) ? body.attachments : [];
+
+    // Threading: set by the composer when replying from a conversation.
+    var inReplyTo = typeof body.inReplyTo === "string" ? body.inReplyTo : null;
+    var references = typeof body.references === "string" ? body.references : null;
+    var threadId = typeof body.threadId === "string" ? body.threadId : null;
 
     if (!to || !subject || !message) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Rate limit
-    if (!checkRateLimit(userId || "anonymous")) {
+    if (!checkRateLimit(user.id)) {
       return NextResponse.json({ error: "Rate limit exceeded. Max " + RATE_MAX + " emails per minute." }, { status: 429 });
     }
 
@@ -64,9 +102,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Validate from address — only whitelisted senders
-    var senderEmail = from || process.env.RESEND_FROM_EMAIL || "noreply@genxdigitizing.com";
-    if (ALLOWED_FROM.indexOf(senderEmail) === -1) {
+    // Validate from address — must be on the verified sending domain.
+    // RESEND_FROM_EMAIL may carry a display name ("GenX Digitizing <…>"), so
+    // normalise to the bare address before validating or composing From.
+    var senderEmail = bareAddress(from || process.env.RESEND_FROM_EMAIL || "noreply@genxdigitizing.com");
+    if (!isAllowedSender(senderEmail)) {
       return NextResponse.json({ error: "Invalid sender address: " + senderEmail }, { status: 400 });
     }
     var senderName = process.env.RESEND_FROM_NAME || "GenXdigitizing";
@@ -77,14 +117,47 @@ export async function POST(request: NextRequest) {
 
     var resend = new Resend(process.env.RESEND_API_KEY);
 
-    // Build attachment payload
-    var resendAttachments = attachments.map(function (a) {
-      return {
-        filename: a.filename,
-        content: a.content, // base64 string
-        content_type: a.content_type || undefined,
-      };
-    });
+    // Resolve storage paths into Resend attachment payloads.
+    var supabase = createAdminClient();
+    var resendAttachments = [];
+    var attachmentNames = [];
+
+    for (var a = 0; a < attachments.length; a++) {
+      var att = attachments[a];
+      var path = att && att.path;
+      var filename = (att && att.filename) || "attachment";
+
+      // Guard against attaching arbitrary objects from other buckets/prefixes.
+      if (typeof path !== "string" || path.indexOf(ATTACHMENT_PREFIX) !== 0 || path.indexOf("..") !== -1) {
+        return NextResponse.json({ error: "Invalid attachment reference" }, { status: 400 });
+      }
+
+      var bucket = resolveBucket(path);
+      var dl = await supabase.storage.from(bucket).download(path);
+      if (dl.error || !dl.data) {
+        console.error("[admin/send-email] Attachment fetch failed:", path, dl.error?.message);
+        return NextResponse.json(
+          { error: "Could not read attachment \"" + filename + "\". Re-attach it and try again." },
+          { status: 400 }
+        );
+      }
+
+      resendAttachments.push({
+        filename: filename,
+        content: Buffer.from(await dl.data.arrayBuffer()),
+        content_type: att.content_type || undefined,
+      });
+      attachmentNames.push(filename);
+    }
+
+    // Our own RFC Message-ID. Storing it is what lets a reply find its way
+    // back into this conversation; sending it (plus In-Reply-To / References
+    // on replies) is what lets the recipient's own mail client group the
+    // exchange instead of showing it as a fresh message.
+    var ourMessageId = "<" + randomUUID() + "@genxdigitizing.com>";
+    var customHeaders: Record<string, string> = { "Message-ID": ourMessageId };
+    if (inReplyTo) customHeaders["In-Reply-To"] = inReplyTo;
+    if (references || inReplyTo) customHeaders["References"] = references || inReplyTo || "";
 
     var sendParams: any = {
       from: fromAddr,
@@ -92,6 +165,7 @@ export async function POST(request: NextRequest) {
       subject: subject,
       html: html,
       reply_to: REPLY,
+      headers: customHeaders,
     };
 
     if (resendAttachments.length > 0) {
@@ -102,27 +176,65 @@ export async function POST(request: NextRequest) {
 
     if (result.error) {
       console.error("[admin/send-email] Resend error:", result.error);
-      return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
+      return NextResponse.json(
+        { error: result.error.message || "Resend rejected the message" },
+        { status: 502 }
+      );
     }
 
-    // Log to sent_emails
+    // Log to sent_emails. The mail has already gone out by this point, so a
+    // logging failure must not fail the request — but it must not be silent
+    // either, since it means the Sent list will be missing this message.
     try {
-      var supabase = createAdminClient();
-      await supabase.from("sent_emails").insert({
+      var logRow: any = {
         to_email: to,
         from_email: senderEmail,
         subject: subject,
         body: message,
-        sent_by: userId || null,
+        sent_by: user.id,
         resend_id: result.data?.id || null,
-      });
+        attachments_meta: attachmentNames.length ? attachmentNames.join(", ") : null,
+        message_id: ourMessageId,
+        in_reply_to: inReplyTo,
+        references: references,
+        // Replies carry the conversation explicitly rather than relying on
+        // Resend echoing our Message-ID back in a future reply's References.
+        thread_id: threadId,
+      };
+
+      var logged = await supabase.from("sent_emails").insert(logRow);
+
+      // Migrations 037/038 may not be applied yet. The mail has already gone
+      // out — never let a logging failure look like a send failure.
+      if (logged.error && /does not exist/i.test(logged.error.message || "")) {
+        console.warn("[admin/send-email] Threading columns missing — logging with legacy columns");
+        logged = await supabase.from("sent_emails").insert({
+          to_email: to,
+          from_email: senderEmail,
+          subject: subject,
+          body: message,
+          sent_by: user.id,
+          resend_id: result.data?.id || null,
+        });
+      }
+
+      if (logged.error) {
+        console.error(
+          "[admin/send-email] Sent-log insert failed (email was still delivered):",
+          logged.error.message
+        );
+      }
     } catch (e) {
-      console.error("[admin/send-email] Log error:", e);
+      console.error("[admin/send-email] Sent-log insert threw (email was still delivered):", e);
     }
 
     return NextResponse.json({ success: true, id: result.data?.id });
-  } catch (err) {
+  } catch (err: any) {
+    // Surface the real reason — the previous bare catch returned the literal
+    // string "Internal server error", which hid every failure cause.
     console.error("[admin/send-email] Unexpected error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    var msg = err?.message || "Unexpected error";
+    var status = /too large|payload|entity too large/i.test(msg) ? 413 : 500;
+    return NextResponse.json({ error: msg }, { status: status });
   }
 }
