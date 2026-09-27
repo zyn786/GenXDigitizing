@@ -5,14 +5,10 @@ import { redirect } from "next/navigation";
 import { getAdminUser } from "@/lib/supabase/get-user";
 import { createAdminClient } from "@/lib/supabase/server";
 import { Topbar } from "@/components/portals/Topbar";
+import { isMissingColumn } from "@/lib/db-errors";
 import { EmailComposer } from "./EmailComposer";
 
 const PAGE_SIZE = 50;
-
-/** Postgres "column does not exist" — a migration hasn't been applied. */
-function isMissingColumn(error: any) {
-  return !!error && /does not exist/i.test(error.message || "");
-}
 
 /** Columns added by migration 037 and 038, with the pre-migration fallbacks. */
 const SENT_COLUMNS_FULL = "id, to_email, from_email, subject, body, sent_at, resend_id, attachments_meta, message_id, thread_id, in_reply_to, references";
@@ -20,13 +16,15 @@ const SENT_COLUMNS_LEGACY = "id, to_email, from_email, subject, body, sent_at, r
 const INBOX_COLUMNS_FULL = "id, from_email, to_email, cc_emails, subject, body_html, body_text, received_at, attachments_meta, is_read, sender_name, message_id, resend_id, thread_id, in_reply_to, references";
 const INBOX_COLUMNS_LEGACY = "id, from_email, to_email, cc_emails, subject, body_html, body_text, received_at, attachments_meta, resend_id";
 
+const THREAD_COLUMNS = "thread_id, last_at, first_at, message_count, unread_count";
+
 /**
  * Reads use the service-role client: `email_thread_summary` is deliberately
  * revoked from `anon`/`authenticated` (it aggregates every conversation and
  * would otherwise leak other people's mail through a security-definer view).
  * Callers must therefore be verified admins — see the role check in the page.
  */
-async function getEmailHistory(sentPage: number, inboxPage: number) {
+async function getEmailHistory(sentPage: number, inboxPage: number, repliesPage: number) {
   const supabase = createAdminClient();
   const sentFrom = (sentPage - 1) * PAGE_SIZE;
   const sentTo = sentFrom + PAGE_SIZE - 1;
@@ -53,14 +51,47 @@ async function getEmailHistory(sentPage: number, inboxPage: number) {
   const threadsFrom = (inboxPage - 1) * PAGE_SIZE;
   const threadsTo = threadsFrom + PAGE_SIZE - 1;
 
+  // Two tabs from one view: Inbox is mail that arrived on its own, Replies is
+  // conversations where somebody answered an email we sent.
+  const repliesFrom = (repliesPage - 1) * PAGE_SIZE;
+  const repliesTo = repliesFrom + PAGE_SIZE - 1;
+
   let threadsRes = await supabase
     .from("email_thread_summary")
-    .select("thread_id, last_at, first_at, message_count, unread_count", { count: "exact", head: false })
+    .select(THREAD_COLUMNS, { count: "exact", head: false })
+    .eq("has_outbound", false)
     .order("last_at", { ascending: false })
     .range(threadsFrom, threadsTo);
 
+  // `has_outbound` arrives with migration 039. Without it every conversation
+  // stays in the Inbox, which is the pre-split behaviour.
+  if (isMissingColumn(threadsRes.error)) {
+    migrationMissing = true;
+    threadsRes = await supabase
+      .from("email_thread_summary")
+      .select(THREAD_COLUMNS, { count: "exact", head: false })
+      .order("last_at", { ascending: false })
+      .range(threadsFrom, threadsTo);
+  }
+
   let threads = threadsRes.data ?? [];
   let threadTotal = threadsRes.count ?? 0;
+
+  let repliesRes = await supabase
+    .from("email_thread_summary")
+    .select(THREAD_COLUMNS, { count: "exact", head: false })
+    .eq("has_outbound", true)
+    .eq("has_inbound", true)
+    .order("last_at", { ascending: false })
+    .range(repliesFrom, repliesTo);
+
+  if (isMissingColumn(repliesRes.error)) {
+    migrationMissing = true;
+    repliesRes = { data: [], count: 0, error: null };
+  }
+
+  const replies = repliesRes.data ?? [];
+  const repliesTotal = repliesRes.count ?? 0;
 
   if (threadsRes.error) {
     // No view (migration 038 not applied, or the view was dropped) — fall back
@@ -76,21 +107,28 @@ async function getEmailHistory(sentPage: number, inboxPage: number) {
       sent: sentRes.data ?? [],
       received: flatRows,
       threads: [],
+      replies: [],
       messages: [],
       addresses: [],
       sentTotal: sentRes.count ?? 0,
       receivedTotal: flat.count ?? 0,
+      repliesTotal: 0,
       unreadCount: 0,
+      unreadReplies: 0,
       migrationMissing: true,
       error: sentRes.error?.message || null,
       sentPage,
       inboxPage,
+      repliesPage,
       pageSize: PAGE_SIZE,
     };
   }
 
-  // Messages belonging to the conversations on this page.
-  const threadIds = threads.map((t: any) => t.thread_id).filter(Boolean);
+  // Messages for every conversation on either tab's page — the reading pane
+  // needs the whole exchange regardless of which list the row came from.
+  const threadIds = Array.from(new Set(
+    [...threads, ...replies].map((t: any) => t.thread_id).filter(Boolean)
+  ));
   let messages: any[] = [];
 
   if (threadIds.length > 0) {
@@ -137,26 +175,44 @@ async function getEmailHistory(sentPage: number, inboxPage: number) {
     addresses = Array.from(seen).sort();
   }
 
-  // Unread badge — count of conversations with unread mail, not messages.
+  // Badges count conversations with unread mail, per tab.
   let unreadCount = 0;
+  let unreadReplies = 0;
+
   if (!migrationMissing) {
-    const unread = await supabase
+    const unreadInbox = await supabase
       .from("email_thread_summary")
       .select("thread_id", { count: "exact", head: true })
-      .gt("unread_count", 0);
-    if (unread.error) migrationMissing = isMissingColumn(unread.error);
-    unreadCount = unread.count ?? 0;
+      .gt("unread_count", 0)
+      .eq("has_outbound", false);
+
+    const unreadReply = await supabase
+      .from("email_thread_summary")
+      .select("thread_id", { count: "exact", head: true })
+      .gt("unread_count", 0)
+      .eq("has_outbound", true)
+      .eq("has_inbound", true);
+
+    if (unreadInbox.error || unreadReply.error) {
+      migrationMissing = true;
+    } else {
+      unreadCount = unreadInbox.count ?? 0;
+      unreadReplies = unreadReply.count ?? 0;
+    }
   }
 
   return {
     sent: sentRes.data ?? [],
     received: [],
     threads,
+    replies,
     messages,
     addresses,
     sentTotal: sentRes.count ?? 0,
     receivedTotal: threadTotal,
+    repliesTotal,
     unreadCount,
+    unreadReplies,
     migrationMissing,
     error: sentRes.error?.message || null,
     sentPage,
@@ -165,7 +221,7 @@ async function getEmailHistory(sentPage: number, inboxPage: number) {
   };
 }
 
-export default async function AdminEmailPage({ searchParams }: { searchParams: { sentPage?: string; inboxPage?: string } }) {
+export default async function AdminEmailPage({ searchParams }: { searchParams: { sentPage?: string; inboxPage?: string; repliesPage?: string } }) {
   const user = await getAdminUser();
 
   // Required: this page reads with the service-role client, which bypasses RLS
@@ -175,7 +231,8 @@ export default async function AdminEmailPage({ searchParams }: { searchParams: {
 
   const sp = searchParams.sentPage ? parseInt(searchParams.sentPage, 10) : 1;
   const ip = searchParams.inboxPage ? parseInt(searchParams.inboxPage, 10) : 1;
-  const history = await getEmailHistory(Math.max(1, sp), Math.max(1, ip));
+  const rp = searchParams.repliesPage ? parseInt(searchParams.repliesPage, 10) : 1;
+  const history = await getEmailHistory(Math.max(1, sp), Math.max(1, ip), Math.max(1, rp));
 
   return (
     <>
@@ -183,20 +240,24 @@ export default async function AdminEmailPage({ searchParams }: { searchParams: {
       <EmailComposer
         // key forces remount on page change — EmailComposer keeps lists in useState,
         // so without a remount it shows stale page-1 data after paginating
-        key={`email-${history.sentPage}-${history.inboxPage}`}
+        key={`email-${history.sentPage}-${history.inboxPage}-${history.repliesPage}`}
         userId={user.id}
         sentEmails={history.sent}
         receivedEmails={history.received}
         threads={history.threads}
+        replies={history.replies}
         threadMessages={history.messages}
         addresses={history.addresses}
         sentTotal={history.sentTotal}
         receivedTotal={history.receivedTotal}
+        repliesTotal={history.repliesTotal}
         unreadCount={history.unreadCount}
+        unreadReplies={history.unreadReplies}
         migrationMissing={history.migrationMissing}
         loadError={history.error}
         sentPage={history.sentPage}
         inboxPage={history.inboxPage}
+        repliesPage={history.repliesPage}
         pageSize={history.pageSize}
       />
     </>

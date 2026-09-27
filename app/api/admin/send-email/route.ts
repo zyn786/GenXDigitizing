@@ -17,6 +17,7 @@ import { getAdminUser } from "@/lib/supabase/get-user";
 import { resolveBucket } from "@/lib/storage";
 import { Resend } from "resend";
 import { baseLayout } from "@/lib/email/index";
+import { isMissingColumn } from "@/lib/db-errors";
 
 var REPLY = process.env.RESEND_REPLY_TO || "support@genxdigitizing.com";
 
@@ -206,7 +207,7 @@ export async function POST(request: NextRequest) {
 
       // Migrations 037/038 may not be applied yet. The mail has already gone
       // out — never let a logging failure look like a send failure.
-      if (logged.error && /does not exist/i.test(logged.error.message || "")) {
+      if (isMissingColumn(logged.error)) {
         console.warn("[admin/send-email] Threading columns missing — logging with legacy columns");
         logged = await supabase.from("sent_emails").insert({
           to_email: to,

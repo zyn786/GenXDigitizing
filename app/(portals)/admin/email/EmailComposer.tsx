@@ -231,25 +231,30 @@ interface Props {
   sentEmails: SentEmail[];
   receivedEmails: ReceivedEmail[];
   threads?: ThreadRow[];
+  replies?: ThreadRow[];
   threadMessages?: AnyMessage[];
   /** Addresses that actually receive mail, discovered from the data. */
   addresses?: string[];
   sentTotal: number;
   receivedTotal: number;
+  repliesTotal?: number;
   unreadCount?: number;
+  unreadReplies?: number;
   migrationMissing?: boolean;
   loadError?: string | null;
   sentPage: number;
   inboxPage: number;
+  repliesPage?: number;
   pageSize: number;
 }
 
 export function EmailComposer({
   userId, sentEmails: initSent, receivedEmails: initRecv,
-  threads: initThreads = [], threadMessages: initMessages = [], addresses = [],
-  sentTotal, receivedTotal, unreadCount: initUnread = 0,
+  threads: initThreads = [], replies: initReplies = [], threadMessages: initMessages = [], addresses = [],
+  sentTotal, receivedTotal, repliesTotal = 0,
+  unreadCount: initUnread = 0, unreadReplies: initUnreadReplies = 0,
   migrationMissing = false, loadError = null,
-  sentPage, inboxPage, pageSize,
+  sentPage, inboxPage, repliesPage = 1, pageSize,
 }: Props) {
   var router = useRouter();
   var searchParams = useSearchParams();
@@ -281,8 +286,10 @@ export function EmailComposer({
 
   var [sentList, setSentList] = useState(initSent);
   var [threadList, setThreadList] = useState(initThreads);
+  var [replyList, setReplyList] = useState(initReplies);
   var [messages, setMessages] = useState(initMessages);
   var [unread, setUnread] = useState(initUnread);
+  var [unreadReplies, setUnreadReplies] = useState(initUnreadReplies);
   var [sentOffset, setSentOffset] = useState(0);
   var [syncing, setSyncing] = useState(false);
   var fileRef = useRef(null);
@@ -294,7 +301,7 @@ export function EmailComposer({
     (threadsById[key] = threadsById[key] || []).push(m);
   });
 
-  var conversations = threadList.map(function (t) {
+  function buildConversation(t: any, tab: string) {
     var msgs = threadsById[t.thread_id] || [];
     var last = msgs[msgs.length - 1];
     var inbound = msgs.filter(function (m) { return m.direction === "in"; });
@@ -312,6 +319,7 @@ export function EmailComposer({
 
     return {
       thread_id: t.thread_id,
+      tab: tab,
       addresses: threadAddresses,
       address: threadAddresses[0] || null,
       last_at: t.last_at,
@@ -325,7 +333,10 @@ export function EmailComposer({
       lastFrom: last ? senderLabel(last) : "",
       messages: msgs,
     };
-  });
+  }
+
+  var conversations = threadList.map(function (t: any) { return buildConversation(t, "inbox"); })
+    .concat(replyList.map(function (t: any) { return buildConversation(t, "replies"); }));
 
   // Which addresses to offer as filters — from the data, so a new Resend
   // address appears here on its own.
@@ -342,6 +353,9 @@ export function EmailComposer({
   );
 
   var filteredThreads = conversations.filter(function (c) {
+    // Replies live only in their own tab; the Inbox is mail that arrived on
+    // its own, so nothing appears twice.
+    if (c.tab !== (folder === "replies" ? "replies" : "inbox")) return false;
     if (addressFilter && c.addresses.indexOf(addressFilter) === -1) return false;
     if (!search) return true;
     var q = search.toLowerCase();
@@ -590,13 +604,15 @@ export function EmailComposer({
         setMessages(function (prev) {
           return prev.concat([{ ...entry, direction: "out", at: entry.sent_at }]);
         });
-        setThreadList(function (prev) {
-          return prev.map(function (t) {
+        var bumpCount = function (prev: any) {
+          return prev.map(function (t: any) {
             return t.thread_id === c.thread_id
               ? { ...t, message_count: (t.message_count || 0) + 1, last_at: entry.sent_at }
               : t;
           });
-        });
+        };
+        setThreadList(bumpCount);
+        setReplyList(bumpCount);
         setSentList(function (p) { return [entry].concat(p); });
         setSentOffset(function (o) { return o + 1; });
 
@@ -621,12 +637,17 @@ export function EmailComposer({
     if (!t) return;
     if (isRead && !t.unread_count) return;
 
-    setThreadList(function (prev) {
-      return prev.map(function (x) {
+    var bump = function (prev: any) {
+      return prev.map(function (x: any) {
         return x.thread_id === threadId ? { ...x, unread_count: isRead ? 0 : x.message_count } : x;
       });
-    });
-    setUnread(function (u) { return Math.max(0, u + (isRead ? -1 : 1)); });
+    };
+    var inReplies = replyList.some(function (x: any) { return x.thread_id === threadId; });
+
+    setThreadList(bump);
+    setReplyList(bump);
+    if (inReplies) setUnreadReplies(function (u) { return Math.max(0, u + (isRead ? -1 : 1)); });
+    else setUnread(function (u) { return Math.max(0, u + (isRead ? -1 : 1)); });
 
     fetch("/api/admin/email/read", {
       method: "POST",
@@ -636,9 +657,12 @@ export function EmailComposer({
   }
 
   function markAllRead() {
-    if (unread === 0) return;
-    setThreadList(function (prev) { return prev.map(function (t) { return { ...t, unread_count: 0 }; }); });
+    if (unread === 0 && unreadReplies === 0) return;
+    var clear = function (prev: any) { return prev.map(function (t: any) { return { ...t, unread_count: 0 }; }); };
+    setThreadList(clear);
+    setReplyList(clear);
     setUnread(0);
+    setUnreadReplies(0);
     fetch("/api/admin/email/read", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -684,17 +708,17 @@ export function EmailComposer({
   }
 
   /* pagination */
-  var curPage = folder === "inbox" ? inboxPage : sentPage;
-  var curTotal = folder === "inbox" ? receivedTotal : (sentTotal + sentOffset);
+  var curPage = folder === "replies" ? repliesPage : (folder === "inbox" ? inboxPage : sentPage);
+  var curTotal = folder === "replies" ? repliesTotal : (folder === "inbox" ? receivedTotal : (sentTotal + sentOffset));
   var goPage = useCallback(function(p: number) {
     var params = new URLSearchParams(searchParams.toString());
-    var key = folder === "inbox" ? "inboxPage" : "sentPage";
+    var key = folder === "replies" ? "repliesPage" : (folder === "inbox" ? "inboxPage" : "sentPage");
     if (p <= 1) params.delete(key); else params.set(key, String(p));
     router.push("?" + params.toString(), { scroll: false });
   }, [folder, searchParams, router]);
 
   var showCompose = folder === "compose";
-  var showThreadDetail = !showList && !!openThread && folder === "inbox";
+  var showThreadDetail = !showList && !!openThread && (folder === "inbox" || folder === "replies");
   var showSentDetail = !showList && !!openSent && folder === "sent";
   var showDetail = showThreadDetail || showSentDetail;
 
@@ -715,7 +739,7 @@ export function EmailComposer({
       <div className="email-mobile-header" style={{ display: "none", padding: "8px 12px", borderBottom: "1px solid " + cBord, alignItems: "center", gap: 8 }}>
         <button type="button" onClick={function(){setSidebarOpen(!sidebarOpen)}} style={{ background: "none", border: "none", cursor: "pointer", color: cTxt, padding: 4, display: "flex" }}><Menu size={20} /></button>
         <span style={{ fontSize: 15, fontWeight: 700, color: cTxt, fontFamily: "Syne, sans-serif" }}>
-          {showCompose ? "Compose" : folder === "inbox" ? "Inbox" : "Sent"}
+          {showCompose ? "Compose" : folder === "inbox" ? "Inbox" : folder === "replies" ? "Replies" : "Sent"}
         {!showCompose && showList && (
           <button type="button" onClick={startCompose} style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 4, background: CLR.blue.icon, border: "none", cursor: "pointer", color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "Inter, sans-serif", padding: "6px 12px", borderRadius: 8 }}>
             <Mail size={13} /> Compose
@@ -743,8 +767,9 @@ export function EmailComposer({
         </div>
         <div style={{ flex: 1, padding: "0 8px" }}>
           {[
-            { key: "inbox", label: "Inbox", count: unread, icon: <Inbox size={16} />, accent: unread > 0 },
-            { key: "sent",  label: "Sent",  count: sentTotal + sentOffset, icon: <Send size={16} />, accent: false },
+            { key: "inbox",   label: "Inbox",   count: unread, icon: <Inbox size={16} />, accent: unread > 0 },
+            { key: "replies", label: "Replies", count: unreadReplies, icon: <Reply size={16} />, accent: unreadReplies > 0 },
+            { key: "sent",    label: "Sent",    count: sentTotal + sentOffset, icon: <Send size={16} />, accent: false },
           ].map(function (f) {
             var act = folder === f.key;
             return (
@@ -903,12 +928,12 @@ export function EmailComposer({
                     placeholder={"Search " + folder + "..."} value={search}
                     onChange={function(e){setSearch(e.target.value);}} />
                 </div>
-                {folder === "inbox" && (
+                {(folder === "inbox" || folder === "replies") && (
                   <>
-                    {unread > 0 && (
+                    {(folder === "replies" ? unreadReplies : unread) > 0 && (
                       <button type="button" onClick={markAllRead} title="Mark all read"
                         style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "7px 9px", borderRadius: 9, border: "1px solid " + cBord2, background: "transparent", color: cTxt2, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
-                        <MailOpen size={13} /> {unread}
+                        <MailOpen size={13} /> {folder === "replies" ? unreadReplies : unread}
                       </button>
                     )}
                     <button type="button" onClick={syncFromResend} disabled={syncing} title="Import received mail from Resend"
@@ -920,7 +945,7 @@ export function EmailComposer({
               </div>
 
               {/* Address filter — only meaningful with more than one address */}
-              {folder === "inbox" && knownAddresses.length > 1 && (
+              {(folder === "inbox" || folder === "replies") && knownAddresses.length > 1 && (
                 <div style={{ display: "flex", gap: 6, padding: "8px 12px", borderBottom: "1px solid " + cBord, overflowX: "auto" }} className="scrollbar-none">
                   {[null].concat(knownAddresses).map(function (addr: any) {
                     var active = addressFilter === addr;
@@ -945,17 +970,23 @@ export function EmailComposer({
 
               {/* List */}
               <div style={{ flex: 1, overflow: "auto" }}>
-                {folder === "inbox" ? (
+                {(folder === "inbox" || folder === "replies") ? (
                   filteredThreads.length === 0 ? (
                     <div style={{ padding: 32, textAlign: "center" }}>
                       <div style={{ width: 48, height: 48, borderRadius: "50%", background: CLR.blue.bg, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
                         <Inbox size={22} style={{ color: CLR.blue.icon }} />
                       </div>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: cTxt, margin: "0 0 4px" }}>{search ? "No matches" : "Inbox empty"}</p>
-                      <p style={{ fontSize: 12, color: cTxt3, margin: 0 }}>
-                        {search ? "Try different search" : (loadError ? "Mail could not be loaded — see the notice above" : "No mail yet — try Sync to import from Resend")}
+                      <p style={{ fontSize: 14, fontWeight: 600, color: cTxt, margin: "0 0 4px" }}>
+                        {search ? "No matches" : (folder === "replies" ? "No replies yet" : "Inbox empty")}
                       </p>
-                      {!search && (
+                      <p style={{ fontSize: 12, color: cTxt3, margin: 0 }}>
+                        {search
+                          ? "Try different search"
+                          : folder === "replies"
+                            ? "Conversations where someone answered an email you sent show up here."
+                            : (loadError ? "Mail could not be loaded — see the notice above" : "No mail yet — try Sync to import from Resend")}
+                      </p>
+                      {!search && folder === "inbox" && (
                         <button type="button" onClick={syncFromResend} disabled={syncing}
                           style={{ marginTop: 14, display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 9, border: "none", background: CLR.blue.icon, color: "#fff", fontSize: 12, fontWeight: 700, cursor: syncing ? "default" : "pointer", fontFamily: "Inter, sans-serif" }}>
                           <RefreshCw size={13} className={syncing ? "animate-spin" : ""} /> {syncing ? "Syncing…" : "Sync from Resend"}

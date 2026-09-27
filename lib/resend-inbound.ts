@@ -11,6 +11,7 @@
  */
 
 import { resolveThreadId, normalizeMessageId } from "@/lib/email-threads";
+import { isMissingColumn } from "@/lib/db-errors";
 
 export const RESEND_API = "https://api.resend.com";
 
@@ -170,7 +171,7 @@ export async function importReceivedEmail(supabase: any, meta: any) {
     .select("id")
     .maybeSingle();
 
-  if (written.error && /does not exist/i.test(written.error.message || "")) {
+  if (isMissingColumn(written.error)) {
     console.warn("[resend-inbound] Newer columns missing (migration 037?) — inserting with legacy columns");
     var legacyRow: any = {
       from_email: fromEmail,
@@ -228,7 +229,7 @@ async function ensureThreaded(supabase: any, emailId: string, meta: any) {
     .from("received_emails")
     .update({ thread_id: threadId })
     .eq("id", current.data.id);
-  if (res.error && !/does not exist/i.test(res.error.message || "")) {
+  if (res.error && !isMissingColumn(res.error)) {
     console.error("[resend-inbound] Thread backfill failed:", res.error.message);
   }
 }
@@ -269,7 +270,7 @@ async function enrich(supabase: any, emailId: string, meta?: any) {
   // sender_name / message_id / thread_id arrive with migrations 037/038 —
   // retry without them so the body (the part that actually matters) is still
   // stored. The panel reports the missing migration separately.
-  if (res.error && /does not exist/i.test(res.error.message || "")) {
+  if (isMissingColumn(res.error)) {
     var legacy: any = {
       body_html: full.html || null,
       body_text: full.text || null,
