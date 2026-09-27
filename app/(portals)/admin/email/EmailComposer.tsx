@@ -5,7 +5,7 @@ import { useState, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
-import { stripTags, bodyTextOf as bodyText, buildQuote as buildQuoteText } from "@/lib/email-text";
+import { stripTags, bodyTextOf as bodyText, buildQuote as buildQuoteText, buildQuoteHtml, toHtmlBody, looksLikeHtml } from "@/lib/email-text";
 import {
   Send, Loader2, CheckCircle2, X, Mail, Inbox, Search,
   ArrowLeft, Reply, Paperclip, Menu, ChevronLeft, ChevronRight,
@@ -539,7 +539,10 @@ export function EmailComposer({
 
     var ready = replyAttachments.filter(function (a) { return a.status === "ready"; });
     var subj = target.subject || c.subject || "";
-    var body = replyText.trim() + buildQuote(target);
+
+    // Built as HTML: the typed part keeps its line breaks, and the original is
+    // quoted behind a grey rule the way Gmail does it, rather than as raw "> ".
+    var body = toHtmlBody(replyText.trim()) + buildQuoteHtml(target);
 
     // Thread the outgoing reply: locally via threadId, and for the recipient's
     // client via In-Reply-To / References.
@@ -1172,7 +1175,7 @@ function ThreadDetail({ thread, onBack, onUnread, replySlot }: {
                   )}
                   <div className="email-body" style={{ fontSize: 14, color: cTxt, lineHeight: 1.75 }}>
                     {isOut ? (
-                      /<[a-z][\s\S]*>/i.test(m.body || "")
+                      looksLikeHtml(m.body)
                         ? <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(m.body) }} />
                         : <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{m.body}</div>
                     ) : m.body_html ? (
@@ -1329,7 +1332,7 @@ function SentDetail({ email, onBack }: { email: any; onBack: () => void }) {
           <AttachmentChips message={{ ...email, direction: "out" }} />
         </div>
         <div className="email-body" style={{ fontSize: 14, color: cTxt, lineHeight: 1.75 }}>
-          {/<[a-z][\s\S]*>/i.test(email.body || "")
+          {looksLikeHtml(email.body)
             ? <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(email.body) }} />
             : <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{email.body}</div>}
         </div>

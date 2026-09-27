@@ -18,6 +18,7 @@ import { resolveBucket } from "@/lib/storage";
 import { Resend } from "resend";
 import { baseLayout } from "@/lib/email/index";
 import { isMissingColumn } from "@/lib/db-errors";
+import { toHtmlBody } from "@/lib/email-text";
 
 var REPLY = process.env.RESEND_REPLY_TO || "support@genxdigitizing.com";
 
@@ -113,8 +114,11 @@ export async function POST(request: NextRequest) {
     var senderName = process.env.RESEND_FROM_NAME || "GenXdigitizing";
     var fromAddr = senderName + " <" + senderEmail + ">";
 
-    // Wrap body in branded email layout
-    var html = baseLayout(message, subject);
+    // Wrap body in branded email layout. Plain-text bodies are escaped and
+    // their newlines converted — the layout has no `white-space: pre-wrap`, so
+    // an unconverted body arrives as one run-on line, with any `<` in it (an
+    // email address inside a quote) swallowed as a tag.
+    var html = baseLayout(toHtmlBody(message), subject);
 
     var resend = new Resend(process.env.RESEND_API_KEY);
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { stripTags, bodyTextOf, buildQuote } from "./email-text";
+import { stripTags, bodyTextOf, buildQuote, buildQuoteHtml, toHtmlBody, looksLikeHtml } from "./email-text";
 
 /*
   This suite runs in vitest's "node" environment, where `document` does not
@@ -97,5 +97,88 @@ describe("buildQuote", () => {
   it("returns nothing when the original has no text", () => {
     expect(buildQuote({ ...msg, body_text: "", body_html: "" })).toBe("");
     expect(buildQuote(null)).toBe("");
+  });
+});
+
+describe("toHtmlBody", () => {
+  it("converts newlines so they survive the HTML layout", () => {
+    // baseLayout has no white-space: pre-wrap — raw newlines collapse.
+    expect(toHtmlBody("line one\nline two")).toBe("line one<br>line two");
+    expect(toHtmlBody("a\r\nb\rc")).toBe("a<br>b<br>c");
+  });
+
+  it("escapes angle brackets so a quoted address is not eaten as a tag", () => {
+    expect(toHtmlBody("On Mon, Diane <diane@x.com> wrote:"))
+      .toBe("On Mon, Diane &lt;diane@x.com&gt; wrote:");
+  });
+
+  it("escapes ampersands and quotes", () => {
+    expect(toHtmlBody("Tom & Jerry said \"hi\"")).toBe("Tom &amp; Jerry said &quot;hi&quot;");
+  });
+
+  it("leaves real markup alone", () => {
+    const html = '<p>Hello <strong>there</strong></p>';
+    expect(toHtmlBody(html)).toBe(html);
+  });
+
+  it("treats a bare address in angle brackets as plain text, not a tag", () => {
+    // `<diane@x.com>` superficially looks like a tag — it is not one.
+    expect(looksLikeHtml("Diane <diane@x.com> wrote:")).toBe(false);
+    expect(toHtmlBody("Diane <diane@x.com> wrote:")).toBe("Diane &lt;diane@x.com&gt; wrote:");
+  });
+
+  it("handles empty input", () => {
+    expect(toHtmlBody("")).toBe("");
+    expect(toHtmlBody(null)).toBe("");
+  });
+});
+
+describe("looksLikeHtml", () => {
+  it("recognises real tags, including attributes and self-closing", () => {
+    expect(looksLikeHtml("<p>hi</p>")).toBe(true);
+    expect(looksLikeHtml('See <a href="https://x.com">this</a>')).toBe(true);
+    expect(looksLikeHtml("line<br/>break")).toBe(true);
+    expect(looksLikeHtml("<!DOCTYPE html><html>")).toBe(true);
+  });
+
+  it("does not mistake plain text for markup", () => {
+    expect(looksLikeHtml("plain text, no tags")).toBe(false);
+    expect(looksLikeHtml("2 < 3 and 5 > 4")).toBe(false);
+    expect(looksLikeHtml("me@example.com")).toBe(false);
+  });
+});
+
+describe("buildQuoteHtml", () => {
+  const msg = {
+    direction: "in",
+    at: "2026-09-25T02:58:00.000Z",
+    from_email: "kleinsembroidery@yahoo.com",
+    sender_name: "Diane Klein",
+    body_text: "Even though this is 1 color, can you change stitch direction?\nDiane Klein\n540-212-1183",
+  };
+
+  it("renders an attribution line and a blockquote", () => {
+    const html = buildQuoteHtml(msg);
+    expect(html).toContain("Diane Klein");
+    expect(html).toContain("&lt;kleinsembroidery@yahoo.com&gt;");
+    expect(html).toContain("wrote:");
+    expect(html).toContain("<blockquote");
+    expect(html).toContain("border-left:2px solid");
+  });
+
+  it("drops the literal '> ' markers in favour of the visual indent", () => {
+    const html = buildQuoteHtml(msg);
+    expect(html).not.toContain("&gt; Even though");
+    expect(html).toContain("Even though this is 1 color");
+  });
+
+  it("keeps the quoted lines separate", () => {
+    const html = buildQuoteHtml(msg);
+    expect(html).toContain("Diane Klein<br>540-212-1183");
+  });
+
+  it("returns nothing when there is nothing to quote", () => {
+    expect(buildQuoteHtml({ ...msg, body_text: "", body_html: "" })).toBe("");
+    expect(buildQuoteHtml(null)).toBe("");
   });
 });
