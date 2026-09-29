@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Syne, Inter } from "next/font/google";
-import { SITE_STATS } from "@/lib/site-config";
 import { Toaster } from "sonner";
 import Script from "next/script";
 import { LiveOrderProvider } from "@/components/social-proof/LiveOrderProvider";
 import { OrganizationSchema, WebSiteSchema } from "@/components/shared/StructuredData";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const syne = Syne({
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     locale:      "en_US",
     siteName:    "genxdigitizing",
     title:       "genxdigitizing — Production-Ready Embroidery Files",
-    description: `Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. ${SITE_STATS.ordersCompleted.toLocaleString()}+ orders completed.`,
+    description: "Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. Every major machine format.",
     images: [
       {
         url:    "/images/black_logo.png",
@@ -144,6 +144,9 @@ export default function RootLayout({
           }}
         />
         <LiveOrderProvider />
+        {/* Vercel Analytics — cookieless pageviews and real-user Core Web
+            Vitals. Complements the GA4 tag in <head>, which does neither. */}
+        <Analytics />
       </body>
     </html>
   );

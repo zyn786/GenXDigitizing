@@ -1,42 +1,15 @@
 // @ts-nocheck
 /**
- * Notification helpers — unified in-app + push delivery.
- * Use these instead of raw .from("notifications").insert() to also get push.
+ * Back-compat shims.
+ *
+ * These used to be a SECOND implementation of notification delivery, with no
+ * try/catch — unlike lib/notify-server.ts, which swallowed everything. The same
+ * failure therefore behaved differently depending on which module a route
+ * imported, and neither recorded that a notification was lost.
+ *
+ * They now delegate to the single hardened implementation, so existing imports
+ * keep working and every path gets the same behaviour: inactive recipients are
+ * dropped, failures are recorded, and the result says what actually happened.
  */
-import { createAdminClient } from "@/lib/supabase/server";
-
-/** Insert in-app notification + trigger web push for specific user(s) */
-export async function notifyUser(
-  userId: string,
-  payload: { type: string; title: string; body: string; action_url?: string }
-) {
-  const admin = createAdminClient();
-  // In-app
-  await admin.from("notifications").insert({
-    user_id: userId,
-    type: payload.type,
-    title: payload.title,
-    body: payload.body,
-    action_url: payload.action_url || null,
-  });
-  // Push
-  const { sendPushToUsers } = await import("@/lib/push-notifications-server");
-  await sendPushToUsers([userId], {
-    title: payload.title,
-    body: payload.body,
-    url: payload.action_url || "/",
-  });
-}
-
-/** Notify all active users with a specific role (admin, client, designer, crm) */
-export async function notifyRole(
-  role: string,
-  payload: { type: string; title: string; body: string; action_url?: string }
-) {
-  const admin = createAdminClient();
-  const { data: users } = await admin.from("users").select("id").eq("role", role).eq("is_active", true);
-  if (!users?.length) return;
-
-  const { notifyUsers } = await import("@/lib/notify-server");
-  await notifyUsers(users.map((u: any) => u.id), payload);
-}
+export { notifyUser, notifyUsers, notifyRole } from "@/lib/notify-server";
+export type { NotifyPayload, NotifyResult } from "@/lib/notify-server";

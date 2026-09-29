@@ -366,7 +366,51 @@ export async function runInvariantChecks(
     }
   }
 
-  // ── 9. Crons reporting failures ────────────────────────────
+  // ── 9. Notification delivery ───────────────────────────────
+  {
+    const { data, error } = await db
+      .from("notification_failures")
+      .select("channel, reason, title, created_at")
+      .eq("resolved", false)
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (error && isMissingColumn(error)) {
+      checks.push({
+        id: "notifications_delivered",
+        title: "Notifications are being delivered",
+        meaning: "Undelivered notifications are recorded so a lost alert is visible.",
+        severity: "high",
+        ok: true,
+        count: 0,
+        detail: "",
+        samples: [],
+        skipped: "notification_failures table missing — apply migration 050",
+      });
+    } else {
+      const rows = data ?? [];
+      // Push being unconfigured is one failure per send and drowns out the rest.
+      const pushDisabled = rows.filter((r) => /VAPID/i.test(r.reason ?? ""));
+      const other = rows.filter((r) => !/VAPID/i.test(r.reason ?? ""));
+
+      checks.push({
+        id: "notifications_delivered",
+        title: "Notifications are being delivered",
+        meaning:
+          "A notification could not be delivered. Before this was recorded, a failed alert was indistinguishable from a delivered one.",
+        severity: "high",
+        ok: rows.length === 0,
+        count: rows.length,
+        detail:
+          `${rows.length} undelivered notification(s) in the last ${windowHours}h` +
+          (pushDisabled.length ? ` — ${pushDisabled.length} because push has no VAPID keys.` : "."),
+        samples: sample(other.length ? other : rows, (r) => `[${r.channel}] ${r.title} — ${String(r.reason).slice(0, 70)}`),
+      });
+    }
+  }
+
+  // ── 10. Crons reporting failures ───────────────────────────
   {
     const alerts = recentNotifs.filter((n) => /^Cron Alert:/.test(n.title ?? ""));
     checks.push({

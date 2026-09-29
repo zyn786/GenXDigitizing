@@ -131,30 +131,30 @@ export async function GET(req: NextRequest) {
       // which is exactly the case that used to go unwatched. Admins are always
       // told, so someone owns it either way.
       if (designer?.id) {
-        notifyUser(designer.id, {
+        await notifyUser(designer.id, {
           type: "sla_warning",
           title,
           body,
           action_url: "/designer/tasks",
-        }).catch(console.error);
+        });
 
         if (designer.email) {
-          emailSLAWarning({
+          await emailSLAWarning({
             to: designer.email,
             designerName: designer.full_name ?? "Designer",
             orderNumber: order.order_number,
             clientName,
             hoursLeft,
-          }).catch(console.error);
+          });
         }
       }
 
-      notifyRole("admin", {
+      await notifyRole("admin", {
         type: "sla_warning",
         title,
         body: designer ? body : `${body} · UNASSIGNED`,
         action_url: "/admin/orders",
-      }).catch(console.error);
+      });
 
       notified.push(`${order.order_number}:${stage}`);
     }
