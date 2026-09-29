@@ -19,9 +19,13 @@ export async function GET(
 
   if (!post) return NextResponse.json({ comments: [] });
 
+  // Column list is explicit on purpose. This route uses the service-role client,
+  // which bypasses RLS, so a `select("*")` here publishes every commenter's
+  // email address to anyone who calls the endpoint — no database policy can
+  // catch it. Never widen this to * or add author_email.
   const { data, error } = await supabase
     .from("blog_comments")
-    .select("*")
+    .select("id, post_id, author_name, content, created_at")
     .eq("post_id", post.id)
     .eq("is_approved", true)
     .order("created_at", { ascending: true });
@@ -67,7 +71,8 @@ export async function POST(
       content: content.trim(),
       is_approved: false,
     })
-    .select()
+    // Echo back only what the submitter already typed — not the stored row.
+    .select("id, post_id, author_name, content, created_at, is_approved")
     .single();
 
   if (error) return NextResponse.json({ error: "Failed to submit comment" }, { status: 500 });

@@ -24,10 +24,6 @@ const DATA: ServicePageData = {
     { q: "Can you digitize from a photo of my existing logo?", a: "Yes — we can work from photos, scans, or any digital file. We'll clean up and optimize for the left chest format." },
     { q: "What format do you deliver for left chest designs?", a: "DST is standard. We also provide PES, EMB, JEF, and any other format you need — all included at no extra charge." },
   ],
-  testimonials: [
-    { name: "Linda Martinez", company: "ThreadWorks Studio, USA", text: "We run hundreds of left chest logos weekly for corporate clients. genxdigitizing files consistently run clean — zero thread breaks, perfect registration." },
-    { name: "Priya Mehta", company: "Monogram Collective, India", text: "Fast, affordable, and the free format conversion saves me time. I get DST, PES, and JEF all in one order for every logo." },
-  ],
   portfolioSlug: "digitizing",
   portfolioTag: "Left Chest",
   cta: { text: "Digitize Your Left Chest Logo — Free Quote", href: "/contact" },

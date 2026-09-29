@@ -24,10 +24,6 @@ const DATA: ServicePageData = {
     { q: "What's the typical embroidery size for tote bags?", a: "Standard tote bag embroidery areas range from 3″–6″ wide. Backpacks can accommodate 4″–8″ wide designs. We optimize for your specific bag dimensions." },
     { q: "How do you handle thick bag fabrics?", a: "Thick materials like canvas need stronger underlay and slightly reduced density. We adjust settings per fabric to ensure clean, professional results." },
   ],
-  testimonials: [
-    { name: "Linda Martinez", company: "ThreadWorks Studio, USA", text: "Tote bag orders used to break needles constantly. genxdigitizing's bag-optimized files handle thick canvas perfectly. Clean sew-outs, zero issues." },
-    { name: "Priya Mehta", company: "Monogram Collective, India", text: "We do corporate branded bags for events. genxdigitizing handles all materials — canvas, nylon, leather — with consistent quality across the board." },
-  ],
   portfolioSlug: "digitizing",
   cta: { text: "Digitize Your Bags — Free Quote", href: "/contact" },
 };

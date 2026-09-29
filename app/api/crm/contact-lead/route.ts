@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { notifyUsers } from "@/lib/notify-server";
+import { isMissingColumn } from "@/lib/db-errors";
 
 const FROM = "genxdigitizing <support@genxdigitizing.com>";
 const REPLY = "support@genxdigitizing.com";
@@ -72,11 +73,23 @@ export async function POST(req: NextRequest) {
     const activityNote = `\n[${new Date().toISOString()}] Email sent to ${to} - "${subject}"`;
     const newNotes = (currentLead?.notes || "") + activityNote;
 
-    await admin.from("crm_leads").update({
+    // NOTE: this update used to write a `last_contact_at` column that no
+    // migration ever created. PostgREST rejects the whole statement for an
+    // unknown column, so the stage change and the note were silently lost —
+    // leads never left the "lead" stage. Keep the column list to real ones and
+    // check the error.
+    const { error: leadUpdateError } = await admin.from("crm_leads").update({
       stage: "contacted",
       notes: newNotes,
-      last_contact_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }).eq("id", leadId);
+    if (leadUpdateError) {
+      console.error(
+        isMissingColumn(leadUpdateError)
+          ? "[contact-lead] lead update failed — unapplied migration? " + leadUpdateError.message
+          : "[contact-lead] lead update failed: " + leadUpdateError.message
+      );
+    }
 
     // If lead's email has a registered user account, send a chat message from support
     const { data: leadUser } = await admin.from("users").select("id").eq("email", to).maybeSingle();

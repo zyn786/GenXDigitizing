@@ -25,10 +25,6 @@ const DATA: ServicePageData = {
     { q: "Can you digitize for both white and colored towels?", a: "Yes. We adjust color recommendations based on towel color. Dark towels may need different underlay visibility settings than light towels." },
     { q: "What backing is needed for towel embroidery?", a: "Water-soluble topping (WST) is strongly recommended for terry cloth. We provide settings optimized for WST use." },
   ],
-  testimonials: [
-    { name: "James Okafor", company: "Victory Sportswear, Nigeria", text: "Golf towel orders were hit-or-miss until we switched to genxdigitizing. Their terry-cloth settings are perfect — logos pop on textured fabric." },
-    { name: "David Chen", company: "The Embroidery House, Canada", text: "We do high-volume promotional towels. genxdigitizing files handle terry cloth perfectly. No sinking stitches, clean sew-outs every time." },
-  ],
   portfolioSlug: "digitizing",
   cta: { text: "Digitize Your Towels — Free Quote", href: "/contact" },
 };

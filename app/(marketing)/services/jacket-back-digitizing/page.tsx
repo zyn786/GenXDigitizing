@@ -22,10 +22,6 @@ const DATA: ServicePageData = {
     { q: "How many stitches does a jacket back design need?", a: "Typically 15,000–30,000+ stitches depending on design complexity and coverage. We provide stitch count estimates with every quote." },
     { q: "What file format should I use for jacket back digitizing?", a: "DST is the standard for large-format commercial machines. We also deliver PES, EMB, and any other format you need." },
   ],
-  testimonials: [
-    { name: "James Okafor", company: "Victory Sportswear, Nigeria", text: "Our jacket backs are 14″ wide with complex team logos. genxdigitizing handles them perfectly — clean stitch paths, minimal trims, flawless registration." },
-    { name: "David Chen", company: "The Embroidery House, Canada", text: "Large format digitizing is hard to get right. genxdigitizing nails it every time. Density is perfect — no puckering, no distortion." },
-  ],
   portfolioSlug: "digitizing",
   portfolioTag: "Jacket Back",
   cta: { text: "Digitize Your Jacket Back — Free Quote", href: "/contact" },

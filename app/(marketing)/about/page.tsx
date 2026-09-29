@@ -1,13 +1,13 @@
 // @ts-nocheck
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/server";
-import { SITE_STATS, SITE_INFO, fmtPlus } from "@/lib/site-config";
+import { SITE_INFO } from "@/lib/site-config";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { AboutContent } from "./AboutContent";
 
 export const metadata: Metadata = {
   title: "About genxdigitizing — Our Story, Mission & Team",
-  description: `Professional embroidery digitizing team delivering production-ready files since ${SITE_INFO.founded}. ${fmtPlus(SITE_STATS.ordersCompleted)} orders, ${SITE_STATS.satisfactionRate}% satisfaction. Meet the team behind your embroidery.`,
+  description: `Professional embroidery digitizing team delivering production-ready files since ${SITE_INFO.founded}. Manual digitizing, unlimited free revisions, 12-hour turnaround. Meet the team behind your embroidery.`,
   keywords: [
     "about genx digitizing",
     "embroidery digitizing company",
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "About genxdigitizing — Professional Embroidery Digitizing Team",
-    description: `Meet the digitzers behind ${fmtPlus(SITE_STATS.ordersCompleted)} production-ready embroidery files. Manual digitizing, free revisions, global delivery.`,
+    description: "Meet the digitizers behind our production-ready embroidery files. Manual digitizing, free revisions, global delivery.",
     type: "website",
   },
 };

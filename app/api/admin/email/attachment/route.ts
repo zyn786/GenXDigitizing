@@ -95,11 +95,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Could not download attachment" }, { status: 502 });
     }
 
+    // `inline=1` renders in the browser instead of downloading. The UI uses the
+    // default (attachment) for the <img> thumbnail — Content-Disposition is
+    // ignored for subresource loads, so both work — and this for the
+    // click-through, so a full-size image opens in a tab rather than landing in
+    // the Downloads folder.
+    const disposition = req.nextUrl.searchParams.get("inline") === "1" ? "inline" : "attachment";
+
     return new NextResponse(fileRes.body, {
       status: 200,
       headers: {
         "Content-Type": match.content_type || "application/octet-stream",
-        "Content-Disposition": 'attachment; filename="' + safeFilename(match.filename) + '"',
+        "Content-Disposition": disposition + '; filename="' + safeFilename(match.filename) + '"',
         "Cache-Control": "private, no-store",
       },
     });

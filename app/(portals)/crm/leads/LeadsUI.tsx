@@ -5,7 +5,7 @@ import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { Plus, X, DollarSign, Send, Image, Loader2, Mail, Globe, Calendar, Building2, FileText, ChevronRight, TrendingUp, Target, Trophy, Download, ShoppingCart } from "lucide-react";
+import { Plus, X, DollarSign, Send, Image, Loader2, Mail, Globe, Calendar, Building2, FileText, ChevronRight, TrendingUp, Target, Trophy, Download, ShoppingCart, Sparkles } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/utils";
 import NextImage from "next/image";
 
@@ -548,6 +548,39 @@ function ContactLeadModal({ lead, onClose }: { lead: any; onClose: () => void })
   const [subject, setSubject] = useState(`Re: Your inquiry with genxdigitizing`);
   const [message, setMessage] = useState(`Hi ${lead.contact_name},\n\nThank you for reaching out! We'd love to help with your embroidery project.\n\nCould you share more details about what you need? We can provide a quote and turnaround time.\n\nBest regards,\ngenxdigitizing Team`);
   const [sending, setSending] = useState(false);
+  const [drafting, setDrafting] = useState(false);
+  const [escalation, setEscalation] = useState<string | null>(null);
+
+  // Drafts a reply from the lead's real record + conversation history. It never
+  // sends — the draft lands in the textarea for staff to edit first.
+  async function handleDraft() {
+    setDrafting(true);
+    setEscalation(null);
+    try {
+      const res = await fetch("/api/crm/ai-draft", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadId: lead.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toast.error(data.error || "Draft failed"); return; }
+
+      if (data.escalated) {
+        // The model's output here is an internal note addressed to staff, not a
+        // customer reply. It must NOT land in the message box — one stray click
+        // on Send would email the escalation note to the customer. Show it in a
+        // separate banner and leave the compose field untouched.
+        setEscalation(String(data.draft).replace(/^ESCALATE:\s*/i, "").trim());
+        toast.warning("AI recommends a human handle this one.");
+      } else {
+        setMessage(data.draft);
+        toast.success("Draft ready — review before sending.");
+      }
+    } catch {
+      toast.error("Draft failed — network error");
+    } finally {
+      setDrafting(false);
+    }
+  }
 
   async function handleSend() {
     if (!subject || !message) { toast.error("Subject and message are required"); return; }
@@ -578,7 +611,22 @@ function ContactLeadModal({ lead, onClose }: { lead: any; onClose: () => void })
           <input value={subject} onChange={e => setSubject(e.target.value)} style={{ ...inpStyle }} />
         </div>
         <div className="mb-4">
-          <label className="block text-[11px] uppercase tracking-wider font-semibold mb-1.5" style={{ color: txt2 }}>Message</label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-[11px] uppercase tracking-wider font-semibold" style={{ color: txt2 }}>Message</label>
+            <button onClick={handleDraft} disabled={drafting || sending} type="button"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold border cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+              style={{ background: "var(--surface)", borderColor: "var(--border2)", color: clr[4].text }}>
+              {drafting ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+              {drafting ? "Drafting…" : "Draft with AI"}
+            </button>
+          </div>
+          {escalation && (
+            <div className="mb-2.5 p-3 rounded-xl text-[12px] leading-relaxed"
+              style={{ background: "rgba(249,115,22,0.08)", border: "1px solid rgba(249,115,22,0.3)", color: clr[2].text }}>
+              <strong className="block mb-1">⚠ Needs a human — internal note, not sent to the customer</strong>
+              {escalation}
+            </div>
+          )}
           <textarea value={message} onChange={e => setMessage(e.target.value)} rows={8} style={{ ...inpStyle, resize: "vertical", fontFamily: "Inter,sans-serif", lineHeight: 1.5 }} />
         </div>
         <div className="flex gap-2">

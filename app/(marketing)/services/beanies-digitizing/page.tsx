@@ -25,10 +25,6 @@ const DATA: ServicePageData = {
     { q: "Can you digitize for both cuffed and non-cuffed beanies?", a: "Yes. Cuffed beanies have a thicker embroidery surface. We adjust underlay and density for both styles to ensure clean results." },
     { q: "Do you handle 3D puff on beanies?", a: "Yes — 3D puff on beanies requires careful density and underlay adjustments. We specialize in puff effects on knit fabrics." },
   ],
-  testimonials: [
-    { name: "Marcus Rivera", company: "ProStitch Apparel, USA", text: "Beanie orders used to be our biggest headache. genxdigitizing's stretch-compensated files run clean every time. No more puckering on knit fabric." },
-    { name: "Sarah Kim", company: "Branded Threads Co., UK", text: "We run thousands of beanie logos every winter season. genxdigitizing files are optimized perfectly for stretch — minimal thread breaks, sharp results." },
-  ],
   portfolioSlug: "digitizing",
   cta: { text: "Digitize Your Beanies — Free Quote", href: "/contact" },
 };

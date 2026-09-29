@@ -25,10 +25,6 @@ const DATA: ServicePageData = {
     { q: "What format should I send for conversion?", a: "Send the largest, highest-quality version you have. JPG and PNG are fine. If you have the original AI or PSD file, even better." },
     { q: "Do you offer rush vector conversion?", a: "Yes — simple logos can be completed in 2–4 hours. Rush delivery is included free with every order." },
   ],
-  testimonials: [
-    { name: "James T.", company: "Screen Printing Shop, Australia", text: "Their vector redraw service is incredible. We send hand-drawn sketches and get back production-ready vectors. Saves our design team days of work." },
-    { name: "Linda Martinez", company: "ThreadWorks Studio, USA", text: "Clean vectors every time. We use them for both embroidery digitizing and screen printing. Consistent quality across the board." },
-  ],
   portfolioSlug: "vector",
   cta: { text: "Convert Your Artwork — Free Quote", href: "/contact" },
 };

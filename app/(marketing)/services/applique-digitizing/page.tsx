@@ -80,18 +80,9 @@ const DATA: ServicePageData = {
       a: "It helps but isn't required. If you tell us the fabric (cotton, twill, fleece, etc.), we optimize stitch settings accordingly.",
     },
   ],
-  testimonials: [
-    {
-      name: "Angela Foster",
-      company: "Custom Apparel Co.",
-      text: "Our appliqué designs always come back with perfect placement lines. Zero guesswork for our machine operators. Highly recommend genxdigitizing.",
-    },
-    {
-      name: "Tomás Rivera",
-      company: "Rivera Embroidery",
-      text: "The tack-down sequence on multi-fabric appliqués is spot-on. No shifting, no bunching. Clean cover stitches every time.",
-    },
-  ],
+  // testimonials removed — Angela Foster and Tomás Rivera were invented, like
+  // the rest of the service-page testimonials. Render real rows from the
+  // `reviews` table when they exist.
   cta: { text: "Upload Design — Free Quote", href: "/contact" },
 };
 

@@ -25,10 +25,6 @@ const DATA: ServicePageData = {
     { q: "Do you work with corporate brand guidelines?", a: "Absolutely. We follow your brand style guide for logo placement, sizing, and colors. Thread matching to Pantone references included." },
     { q: "What's the typical turnaround for corporate programs?", a: "Full corporate programs delivered in 24 hours. Individual employee items in 12 hours. Rush delivery available for onboarding needs." },
   ],
-  testimonials: [
-    { name: "Linda Martinez", company: "ThreadWorks Studio, USA", text: "Fortune 500 corporate programs demand absolute consistency. genxdigitizing delivers — identical stitch quality across polos, jackets, and caps. Brand guidelines followed perfectly." },
-    { name: "Priya Mehta", company: "Monogram Collective, India", text: "Corporate onboarding is time-sensitive. genxdigitizing turns around full company programs in 24 hours with consistent quality. Our corporate clients are impressed." },
-  ],
   portfolioSlug: "digitizing",
   cta: { text: "Digitize Your Corporate Apparel — Free Quote", href: "/contact" },
 };

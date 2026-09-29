@@ -60,13 +60,13 @@ const SERVICES = [
     title: "Patch Design",
     subtitle: "Custom Embroidered Patches for Brands & Teams",
     description:
-      "Fine-detail embroidered patches with vibrant thread colors. Merit badges, tactical, name, and club patches — professional finish, durable construction. 500+ patches up to 50% off.",
+      "Fine-detail embroidered patches with vibrant thread colors. Merit badges, tactical, name, and club patches — professional finish, durable construction.",
     features: [
       "Merit, tactical, PVC, name & club patches",
       "Vibrant thread color matching",
       "Iron-on, sew-on & Velcro backing",
       "High-density fine detail work",
-      "500+ patches — save up to 50%",
+      "Bulk discounts from 20%",
       "Bulk order discounts available",
       "Digital preview before production",
       "Free revisions & fast turnaround",

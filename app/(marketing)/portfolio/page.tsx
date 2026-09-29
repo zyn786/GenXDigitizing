@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { SITE_STATS, fmtPlus } from "@/lib/site-config";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { PortfolioClient } from "./PortfolioClient";
 
@@ -16,7 +15,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "Our Work — genxdigitizing Portfolio",
-    description: `${fmtPlus(SITE_STATS.ordersCompleted)} orders completed. See the quality of our embroidery digitizing, vector art, and custom patches.`,
+    description: "See the quality of our embroidery digitizing, vector art, and custom patches — real production files.",
     type: "website",
   },
 };

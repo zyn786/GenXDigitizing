@@ -24,10 +24,6 @@ const DATA: ServicePageData = {
     { q: "What file settings are different for 3D puff?", a: "Puff files require wider satin stitches, higher density, specific underlay to secure the foam, and careful sequencing to prevent the foam from tearing during embroidery." },
     { q: "Do I need special foam for 3D puff?", a: "Standard embroidery foam (2-3mm) works for most applications. We can recommend specific foam types based on your design and fabric." },
   ],
-  testimonials: [
-    { name: "Sarah Kim", company: "Branded Threads Co., UK", text: "High-volume cap orders needed consistent 3D puff handling. genxdigitizing delivered proper underlay and height on every file with under 12-hour turnaround." },
-    { name: "David Chen", company: "The Embroidery House, Canada", text: "Their puff digitizing is exceptional. Every cap comes out with perfect height and clean edges. No foam showing through anywhere." },
-  ],
   portfolioSlug: "digitizing",
   portfolioTag: "Puff 3D",
   cta: { text: "Get 3D Puff Digitizing — Free Quote", href: "/contact" },

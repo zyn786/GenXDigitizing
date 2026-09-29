@@ -25,10 +25,6 @@ const DATA: ServicePageData = {
     { q: "Do you digitize player names and numbers?", a: "Yes — we handle jersey numbers, player names, and team logos. All optimized for the same fabric type with consistent quality." },
     { q: "Can you handle large team orders?", a: "Yes — we batch-process team orders for consistency. All jerseys, shorts, and accessories use coordinated settings for uniform output." },
   ],
-  testimonials: [
-    { name: "James Okafor", company: "Victory Sportswear, Nigeria", text: "Team jersey orders are our specialty. genxdigitizing files handle polyester perfectly — no puckering, no show-through. Clean results on every jersey." },
-    { name: "Marcus Rivera", company: "ProStitch Apparel, USA", text: "We do custom team uniforms for leagues. genxdigitizing's sportswear-optimized files save us so much production time. Numbers and names are always sharp." },
-  ],
   portfolioSlug: "digitizing",
   cta: { text: "Digitize Your Sportswear — Free Quote", href: "/contact" },
 };

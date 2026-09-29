@@ -26,10 +26,6 @@ const DATA: ServicePageData = {
     { q: "Can you digitize from any artwork?", a: "Yes — we work with JPGs, PNGs, PDFs, AI files, and even hand sketches. Low-resolution or complex images may need cleanup before digitizing." },
     { q: "Are revisions really free?", a: "Yes — unlimited free revisions on every order. We work until the file runs correctly on your machine. No hidden charges." },
   ],
-  testimonials: [
-    { name: "Marcus Rivera", company: "ProStitch Apparel, USA", text: "Files run clean on first load. Tight stitch paths and correct density for my Brother machine. Will use genxdigitizing for all future orders." },
-    { name: "Sarah Kim", company: "Branded Threads Co., UK", text: "High-volume cap orders needed consistent 3D puff handling. genxdigitizing delivered proper underlay and height on every file with under 12-hour turnaround." },
-  ],
   portfolioSlug: "digitizing",
   cta: { text: "Get Professional Digitizing — Free Quote", href: "/contact" },
 };

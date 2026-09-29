@@ -25,10 +25,6 @@ const DATA: ServicePageData = {
     { q: "Do you support corporate brand guidelines?", a: "Yes — we match thread colors to Pantone references and follow any brand-specific embroidery guidelines you provide." },
     { q: "What file formats do you deliver for uniforms?", a: "DST is standard for commercial machines. We also provide PES, EMB, JEF, and any other format needed — all included free." },
   ],
-  testimonials: [
-    { name: "Linda Martinez", company: "ThreadWorks Studio, USA", text: "We handle corporate uniform programs for Fortune 500 companies. genxdigitizing delivers consistent quality across hundreds of pieces. Brand colors always match." },
-    { name: "James Okafor", company: "Victory Sportswear, Nigeria", text: "School uniform orders are our bread and butter. genxdigitizing's production-optimized files save us hours of machine time. Efficient path planning makes a real difference." },
-  ],
   portfolioSlug: "digitizing",
   cta: { text: "Digitize Your Uniforms — Free Quote", href: "/contact" },
 };

@@ -22,10 +22,6 @@ const DATA: ServicePageData = {
     { q: "How do you match my brand colors?", a: "We reference Pantone colors or your brand style guide. If you don't have exact color codes, we match to the closest thread colors." },
     { q: "What size should my logo be for digitizing?", a: "Provide the artwork at the largest size available. We scale down for embroidery while maintaining legibility and proportion." },
   ],
-  testimonials: [
-    { name: "Linda Martinez", company: "ThreadWorks Studio, USA", text: "Switched from my previous service. Better stitch quality. Underlay and density handled properly here. Our corporate client logos look flawless." },
-    { name: "Priya Mehta", company: "Monogram Collective, India", text: "Fast, affordable, and the free format conversion saves me time. I get DST, PES, and JEF all in one order for every client logo." },
-  ],
   portfolioSlug: "digitizing",
   cta: { text: "Digitize Your Logo — Free Quote", href: "/contact" },
 };

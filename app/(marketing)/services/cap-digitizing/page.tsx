@@ -24,10 +24,6 @@ const DATA: ServicePageData = {
     { q: "What size should cap designs be?", a: "Standard cap embroidery area is 2.25″ tall by 4.5″ wide. We optimize every design for these dimensions. Larger designs may require specialty hooping." },
     { q: "Do you handle 3D puff foam digitizing for caps?", a: "Yes — we specialize in 3D puff cap digitizing with proper foam underlay, satin stitch settings, and density adjustments for raised embroidery effects." },
   ],
-  testimonials: [
-    { name: "James Okafor", company: "Victory Sportswear, Nigeria", text: "Cap digitizing is tricky. genxdigitizing got it right first try. Structural underlay perfect for curved surfaces. Every file runs clean on my Tajima." },
-    { name: "Sarah Kim", company: "Branded Threads Co., UK", text: "High-volume cap orders needed consistent 3D puff handling. genxdigitizing delivered proper underlay and height on every file with under 12-hour turnaround." },
-  ],
   portfolioSlug: "digitizing",
   portfolioTag: "Cap",
   cta: { text: "Get Professional Cap Digitizing — Free Quote", href: "/contact" },
