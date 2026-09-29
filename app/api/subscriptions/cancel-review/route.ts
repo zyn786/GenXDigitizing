@@ -10,7 +10,9 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Verify admin
@@ -26,7 +28,10 @@ export async function POST(req: NextRequest) {
 
     const { subId, action } = await req.json();
     if (!subId || !["approve", "deny"].includes(action)) {
-      return NextResponse.json({ error: "Missing subId or invalid action (approve|deny)" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing subId or invalid action (approve|deny)" },
+        { status: 400 }
+      );
     }
 
     const admin = createAdminClient();
@@ -51,7 +56,8 @@ export async function POST(req: NextRequest) {
     const notes = sub.cancellation_notes || null;
 
     if (action === "approve") {
-      await admin.from("client_subscriptions")
+      await admin
+        .from("client_subscriptions")
         .update({
           status: "cancelled",
           updated_at: new Date().toISOString(),
@@ -71,18 +77,21 @@ export async function POST(req: NextRequest) {
           title: "Subscription cancelled",
           body: `Your ${planLabel} plan cancellation has been processed. Any extra credits have been cleared.`,
           action_url: "/client/subscribe",
-        }).catch(e => console.error("[cancel-review] Client notify error:", e));
+        }).catch((e) => console.error("[cancel-review] Client notify error:", e));
       }
 
       // Send cancellation email
       const { emailSubscriptionCancelled } = await import("@/lib/email/subscription");
-      emailSubscriptionCancelled(clientEmail, planLabel, reason, notes).catch(e => console.error("[cancel-review] Email failed:", e));
+      emailSubscriptionCancelled(clientEmail, planLabel, reason, notes).catch((e) =>
+        console.error("[cancel-review] Email failed:", e)
+      );
 
       return NextResponse.json({ ok: true, status: "cancelled" });
     }
 
     // action === "deny"
-    await admin.from("client_subscriptions")
+    await admin
+      .from("client_subscriptions")
       .update({
         status: "active",
         cancellation_reason: "request_denied",
@@ -99,7 +108,7 @@ export async function POST(req: NextRequest) {
         title: "Cancellation request denied",
         body: "Your cancellation request was denied. Your plan remains active. Contact support if you have questions.",
         action_url: "/client/subscribe",
-      }).catch(e => console.error("[cancel-review] Client notify error:", e));
+      }).catch((e) => console.error("[cancel-review] Client notify error:", e));
     }
 
     return NextResponse.json({ ok: true, status: "active" });

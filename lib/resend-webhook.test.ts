@@ -33,9 +33,9 @@ function headers(overrides: Record<string, string> = {}) {
 
 describe("signResendWebhook", () => {
   it("matches the Svix test vector", () => {
-    expect(
-      signResendWebhook(VECTOR.secret, VECTOR.id, VECTOR.timestamp, VECTOR.body)
-    ).toBe(VECTOR.signature.replace("v1,", ""));
+    expect(signResendWebhook(VECTOR.secret, VECTOR.id, VECTOR.timestamp, VECTOR.body)).toBe(
+      VECTOR.signature.replace("v1,", "")
+    );
   });
 
   it("accepts a secret without the whsec_ prefix", () => {

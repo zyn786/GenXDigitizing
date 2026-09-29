@@ -66,25 +66,34 @@ export async function POST(request: NextRequest) {
     }
 
     // Log all events
-    await record("event log", supabase.from("email_events").insert({
-      event_type: eventType,
-      email_id: eventData.email_id || null,
-      from_email: eventData.from || null,
-      to_email: Array.isArray(eventData.to) ? eventData.to[0] : (eventData.to || null),
-      subject: eventData.subject || null,
-      payload: payload,
-      created_at: new Date().toISOString(),
-    }));
+    await record(
+      "event log",
+      supabase.from("email_events").insert({
+        event_type: eventType,
+        email_id: eventData.email_id || null,
+        from_email: eventData.from || null,
+        to_email: Array.isArray(eventData.to) ? eventData.to[0] : eventData.to || null,
+        subject: eventData.subject || null,
+        payload: payload,
+        created_at: new Date().toISOString(),
+      })
+    );
 
     // Handle bounce — mark email as bounced
     if (eventType === "email.bounced") {
       var email = Array.isArray(eventData.to) ? eventData.to[0] : eventData.to;
       if (email) {
-        await record("bounce log", supabase.from("email_bounces").upsert({
-          email: email.toLowerCase().trim(),
-          bounced_at: new Date().toISOString(),
-          reason: eventData.reason || "unknown",
-        }, { onConflict: "email" }));
+        await record(
+          "bounce log",
+          supabase.from("email_bounces").upsert(
+            {
+              email: email.toLowerCase().trim(),
+              bounced_at: new Date().toISOString(),
+              reason: eventData.reason || "unknown",
+            },
+            { onConflict: "email" }
+          )
+        );
       }
       console.warn("[resend-webhook] BOUNCE:", email, "| reason:", eventData.reason);
     }
@@ -93,10 +102,13 @@ export async function POST(request: NextRequest) {
     if (eventType === "email.complained") {
       var complainedEmail = Array.isArray(eventData.to) ? eventData.to[0] : eventData.to;
       if (complainedEmail) {
-        await record("complaint log", supabase.from("email_complaints").insert({
-          email: complainedEmail.toLowerCase().trim(),
-          complained_at: new Date().toISOString(),
-        }));
+        await record(
+          "complaint log",
+          supabase.from("email_complaints").insert({
+            email: complainedEmail.toLowerCase().trim(),
+            complained_at: new Date().toISOString(),
+          })
+        );
       }
       console.warn("[resend-webhook] COMPLAINT:", complainedEmail);
     }

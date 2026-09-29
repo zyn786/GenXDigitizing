@@ -7,8 +7,12 @@ export const metadata: Metadata = {
   description:
     "Professional appliqué digitizing services. Clean placement lines, tack-down stitches, and cover stitches for flawless appliqué embroidery.",
   keywords: [
-    "applique digitizing", "applique embroidery digitizing", "applique design",
-    "tack-down stitch", "cover stitch", "placement line digitizing",
+    "applique digitizing",
+    "applique embroidery digitizing",
+    "applique design",
+    "tack-down stitch",
+    "cover stitch",
+    "placement line digitizing",
   ],
 };
 

@@ -1,4 +1,4 @@
-import { Nav }    from "@/components/marketing/Nav";
+import { Nav } from "@/components/marketing/Nav";
 import { Footer } from "@/components/marketing/Footer";
 import { TopBar } from "@/components/marketing/TopBar";
 import { PageTransition } from "@/components/shared/PageTransition";
@@ -17,7 +17,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <Nav topOffset="36px" />
       <ExitIntent />
       <LiveOrderProvider />
-      <div className="pt-[100px] pb-4 sm:pb-6">{children}</div>
+      <div className="pb-4 pt-[100px] sm:pb-6">{children}</div>
       <Footer />
       <BackToTop />
       <WhatsAppWidget />

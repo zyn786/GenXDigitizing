@@ -2,14 +2,16 @@
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient }         from "@/lib/supabase/server";
-import { getAdminUser }              from "@/lib/supabase/get-user";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getAdminUser } from "@/lib/supabase/get-user";
 
 // GET /api/notifications — fetch latest 30 notifications for current user
 export async function GET(req: NextRequest) {
   try {
     const user = await getAdminUser().catch(() => null);
-    if (!user) { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const supabase = createAdminClient();
     const { data, error } = await supabase
@@ -19,7 +21,10 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false })
       .limit(30);
 
-    if (error) { console.error("[notifications] error:", error); return NextResponse.json({ error: "Request failed" }, { status: 500 }); }
+    if (error) {
+      console.error("[notifications] error:", error);
+      return NextResponse.json({ error: "Request failed" }, { status: 500 });
+    }
 
     const unread = (data ?? []).filter((n: any) => !n.is_read).length;
 
@@ -33,22 +38,26 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const user = await getAdminUser().catch(() => null);
-    if (!user) { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const body = await req.json().catch(() => ({}));
     const { ids } = body; // optional: array of IDs. If omitted, mark all as read
 
     const supabase = createAdminClient();
 
-    let query = supabase
-      .from("notifications")
-      .update({ is_read: true })
-      .eq("user_id", user.id);
+    let query = supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id);
 
-    if (ids?.length) { query = query.in("id", ids); }
+    if (ids?.length) {
+      query = query.in("id", ids);
+    }
 
     const { error } = await query;
-    if (error) { console.error("[notifications] error:", error); return NextResponse.json({ error: "Request failed" }, { status: 500 }); }
+    if (error) {
+      console.error("[notifications] error:", error);
+      return NextResponse.json({ error: "Request failed" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

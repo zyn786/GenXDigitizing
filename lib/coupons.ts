@@ -9,7 +9,7 @@ import type { Coupon, CouponContext, CouponValidationResult } from "@/types/coup
 /** Validate a coupon code against the database. */
 export async function validateCoupon(
   code: string,
-  context: CouponContext,
+  context: CouponContext
 ): Promise<CouponValidationResult> {
   const supabase = createAdminClient();
   const normalized = code.trim().toUpperCase();
@@ -74,7 +74,7 @@ export async function validateCoupon(
 /** Calculate discount amount from a coupon. */
 export function calculateDiscount(coupon: Coupon, subtotal: number): number {
   if (coupon.discount_type === "percentage") {
-    return Math.round((subtotal * coupon.discount_value) / 100 * 100) / 100;
+    return Math.round(((subtotal * coupon.discount_value) / 100) * 100) / 100;
   }
   // fixed_amount
   return Math.min(coupon.discount_value, subtotal);
@@ -101,7 +101,7 @@ export async function recordRedemption(
   visitorId: string,
   email: string | null,
   orderReference: string | null,
-  discountAmount: number,
+  discountAmount: number
 ): Promise<void> {
   const supabase = createAdminClient();
 

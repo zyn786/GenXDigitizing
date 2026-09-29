@@ -2,9 +2,15 @@
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient }         from "@/lib/supabase/server";
-import { getAdminUser }              from "@/lib/supabase/get-user";
-import { deleteFromStorage, deleteLegacyS3, extractS3Key, isS3Key, normalizeStoragePath } from "@/lib/storage";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getAdminUser } from "@/lib/supabase/get-user";
+import {
+  deleteFromStorage,
+  deleteLegacyS3,
+  extractS3Key,
+  isS3Key,
+  normalizeStoragePath,
+} from "@/lib/storage";
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,10 +61,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Delete DB record
-    const { error: delErr } = await supabase
-      .from("order_files")
-      .delete()
-      .eq("id", file_id);
+    const { error: delErr } = await supabase.from("order_files").delete().eq("id", file_id);
 
     if (delErr) {
       return NextResponse.json({ error: "Delete failed: " + delErr.message }, { status: 500 });
@@ -66,11 +69,11 @@ export async function POST(req: NextRequest) {
 
     // Audit log
     await supabase.from("audit_logs").insert({
-      action:    `file_deleted:${file.file_type}`,
-      entity:    "order_files",
+      action: `file_deleted:${file.file_type}`,
+      entity: "order_files",
       entity_id: file_id,
-      user_id:   user.id,
-      new_data:  { file_name: file.file_name, order_id, reason: "designer_delete" },
+      user_id: user.id,
+      new_data: { file_name: file.file_name, order_id, reason: "designer_delete" },
     });
 
     return NextResponse.json({ success: true });

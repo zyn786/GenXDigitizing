@@ -11,22 +11,24 @@
 /** Convert an HTML body to plain text. Safe on the server — no DOM access. */
 export function stripTags(html: string | null | undefined): string {
   if (!html) return "";
-  return String(html)
-    // Drop the contents of script/style entirely rather than leaving the code
-    // behind as text.
-    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
-    .replace(/<!--[\s\S]*?-->/g, " ")
-    // Block-level tags become a space so words don't run together.
-    .replace(/<\/?(p|div|br|tr|li|h[1-6]|table|blockquote)[^>]*>/gi, " ")
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#0?39;/g, "'")
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    String(html)
+      // Drop the contents of script/style entirely rather than leaving the code
+      // behind as text.
+      .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
+      .replace(/<!--[\s\S]*?-->/g, " ")
+      // Block-level tags become a space so words don't run together.
+      .replace(/<\/?(p|div|br|tr|li|h[1-6]|table|blockquote)[^>]*>/gi, " ")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#0?39;/g, "'")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
 /**
@@ -69,9 +71,7 @@ export function toHtmlBody(text: string | null | undefined): string {
 /** Plain-text body of a message, inbound or outbound. */
 export function bodyTextOf(m: any): string {
   if (!m) return "";
-  return m.direction === "out"
-    ? (m.body || "")
-    : (m.body_text || stripTags(m.body_html) || "");
+  return m.direction === "out" ? m.body || "" : m.body_text || stripTags(m.body_html) || "";
 }
 
 /**
@@ -101,19 +101,26 @@ export function buildQuote(m: any, maxChars: number = 4000): string {
 
   if (text.length > maxChars) text = text.slice(0, maxChars) + "…";
 
-  var quoted = text.split("\n").map(function (line) { return "> " + line; }).join("\n");
+  var quoted = text
+    .split("\n")
+    .map(function (line) {
+      return "> " + line;
+    })
+    .join("\n");
   return "\n\n\n" + attribution(m) + "\n" + quoted;
 }
 
 /** `On Fri, Sep 25, 2026 at 2:58 AM Diane Klein <d@x.com> wrote:` */
 function attribution(m: any): string {
   var when = new Date(m.at).toLocaleString("en-US", {
-    weekday: "short", month: "short", day: "numeric", year: "numeric",
-    hour: "numeric", minute: "2-digit",
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
-  var who = m.sender_name
-    ? m.sender_name + " <" + (m.from_email || "") + ">"
-    : (m.from_email || "");
+  var who = m.sender_name ? m.sender_name + " <" + (m.from_email || "") + ">" : m.from_email || "";
   return "On " + when + " " + who + " wrote:";
 }
 
@@ -140,17 +147,19 @@ export function buildQuoteHtml(m: any, maxChars: number = 4000): string {
   // Drop the leading "> " from each quoted line — the visual indent replaces it.
   var body = quotedText
     .split("\n")
-    .map(function (line) { return line.replace(/^>\s?/, ""); })
+    .map(function (line) {
+      return line.replace(/^>\s?/, "");
+    })
     .join("\n");
 
   return (
     '<div style="margin-top:24px">' +
-      '<div style="font-size:13px;color:#64748B;margin-bottom:10px">' +
-        escapeHtml(attribution(m)) +
-      "</div>" +
-      '<blockquote style="margin:0;padding:0 0 0 14px;border-left:2px solid #E2E8F0;color:#64748B;font-size:14px;line-height:1.7">' +
-        toHtmlBody(body) +
-      "</blockquote>" +
+    '<div style="font-size:13px;color:#64748B;margin-bottom:10px">' +
+    escapeHtml(attribution(m)) +
+    "</div>" +
+    '<blockquote style="margin:0;padding:0 0 0 14px;border-left:2px solid #E2E8F0;color:#64748B;font-size:14px;line-height:1.7">' +
+    toHtmlBody(body) +
+    "</blockquote>" +
     "</div>"
   );
 }

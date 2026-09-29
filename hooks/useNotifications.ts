@@ -15,7 +15,9 @@ export function useNotifications(userId: string | undefined, opts?: { skipRealti
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   const fetchNotifications = useCallback(async () => {
-    if (!userId) { return; }
+    if (!userId) {
+      return;
+    }
 
     const { data, error } = await supabase.current
       .from("notifications")
@@ -34,7 +36,9 @@ export function useNotifications(userId: string | undefined, opts?: { skipRealti
   }, [userId]);
 
   const markAllRead = useCallback(async () => {
-    if (!userId) { return; }
+    if (!userId) {
+      return;
+    }
 
     const prev = notifications;
     setNotifications((p) =>
@@ -53,28 +57,31 @@ export function useNotifications(userId: string | undefined, opts?: { skipRealti
     }
   }, [userId, notifications]);
 
-  const markRead = useCallback(async (notifId: string) => {
-    const prev = notifications;
-    setNotifications((p) =>
-      p.map((n) => (n.id === notifId ? { ...n, is_read: true } : n))
-    );
+  const markRead = useCallback(
+    async (notifId: string) => {
+      const prev = notifications;
+      setNotifications((p) => p.map((n) => (n.id === notifId ? { ...n, is_read: true } : n)));
 
-    const { error } = await supabase.current
-      .from("notifications")
-      .update({ is_read: true, read_at: new Date().toISOString() })
-      .eq("id", notifId);
+      const { error } = await supabase.current
+        .from("notifications")
+        .update({ is_read: true, read_at: new Date().toISOString() })
+        .eq("id", notifId);
 
-    if (error) {
-      console.error("[useNotifications] markRead failed:", error.message);
-      setNotifications(prev);
-    }
-  }, [notifications]);
+      if (error) {
+        console.error("[useNotifications] markRead failed:", error.message);
+        setNotifications(prev);
+      }
+    },
+    [notifications]
+  );
 
   const channelRef = useRef<ReturnType<typeof supabase.current.channel> | null>(null);
   const subscribedRef = useRef(false);
 
   useEffect(() => {
-    if (!userId || subscribedRef.current) { return; }
+    if (!userId || subscribedRef.current) {
+      return;
+    }
 
     fetchNotifications();
 

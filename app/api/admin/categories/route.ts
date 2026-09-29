@@ -8,7 +8,10 @@ export async function GET() {
     const categories = await getAdminCategories();
     return NextResponse.json(categories);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to fetch categories" }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Failed to fetch categories" },
+      { status: 500 }
+    );
   }
 }
 
@@ -25,6 +28,9 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json(category, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to create category" }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Failed to create category" },
+      { status: 500 }
+    );
   }
 }

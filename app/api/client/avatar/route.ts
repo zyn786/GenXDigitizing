@@ -33,17 +33,28 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     const result = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        {
-          folder: "genxdigitizing/avatars",
-          resource_type: "image",
-          transformation: [{ width: 200, height: 200, crop: "fill", gravity: "face", quality: "auto", fetch_format: "auto" }],
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      ).end(buffer);
+      cloudinary.uploader
+        .upload_stream(
+          {
+            folder: "genxdigitizing/avatars",
+            resource_type: "image",
+            transformation: [
+              {
+                width: 200,
+                height: 200,
+                crop: "fill",
+                gravity: "face",
+                quality: "auto",
+                fetch_format: "auto",
+              },
+            ],
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        )
+        .end(buffer);
     });
 
     const avatarUrl = getThumbnailUrl(result.public_id);

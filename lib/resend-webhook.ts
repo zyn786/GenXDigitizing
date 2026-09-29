@@ -25,7 +25,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 const TOLERANCE_SECONDS = 300;
 
 /** Svix uses `webhook-*` headers on white-labelled plans. */
-const ID_HEADERS      = ["svix-id", "webhook-id"];
+const ID_HEADERS = ["svix-id", "webhook-id"];
 const TIMESTAMP_HEADERS = ["svix-timestamp", "webhook-timestamp"];
 const SIGNATURE_HEADERS = ["svix-signature", "webhook-signature"];
 
@@ -77,12 +77,14 @@ export function verifyResendWebhook(
   headers: any,
   opts: { secret?: string; now?: number } = {}
 ): boolean {
-  var secret = opts.secret !== undefined ? opts.secret : (process.env.RESEND_WEBHOOK_SECRET || "");
+  var secret = opts.secret !== undefined ? opts.secret : process.env.RESEND_WEBHOOK_SECRET || "";
   var now = opts.now !== undefined ? opts.now : Math.floor(Date.now() / 1000);
 
   // No secret configured (local dev) — allow, but say so loudly.
   if (!secret) {
-    console.warn("[resend-webhook] RESEND_WEBHOOK_SECRET not set — skipping signature verification");
+    console.warn(
+      "[resend-webhook] RESEND_WEBHOOK_SECRET not set — skipping signature verification"
+    );
     return true;
   }
 

@@ -22,10 +22,10 @@
  * and a clear price beat a rating nobody can verify.
  */
 export const SITE_CLAIMS = {
-  price:      { value: "$7",   label: "Standard designs" },
-  turnaround: { value: "12h",  label: "Standard turnaround" },
-  revisions:  { value: "Free", label: "Unlimited revisions" },
-  formats:    { value: "8",    label: "Machine formats" },
+  price: { value: "$7", label: "Standard designs" },
+  turnaround: { value: "12h", label: "Standard turnaround" },
+  revisions: { value: "Free", label: "Unlimited revisions" },
+  formats: { value: "8", label: "Machine formats" },
 } as const;
 
 /** Ordered for display. Every entry is the same shape as SITE_CLAIMS.x. */

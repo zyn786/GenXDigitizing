@@ -4,10 +4,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 // GET — fetch approved comments for a blog post
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   const supabase = createAdminClient();
 
   // Resolve slug → post_id
@@ -35,14 +32,14 @@ export async function GET(
 }
 
 // POST — submit a new comment (goes to pending until approved)
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { slug: string } }) {
   // Rate limit: 3 comments per IP per 15 minutes
   const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
   if (!checkRateLimit("blog-comments", ip, 3)) {
-    return NextResponse.json({ error: "Too many comments. Please try again later." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Too many comments. Please try again later." },
+      { status: 429 }
+    );
   }
 
   const supabase = createAdminClient();
@@ -76,5 +73,8 @@ export async function POST(
     .single();
 
   if (error) return NextResponse.json({ error: "Failed to submit comment" }, { status: 500 });
-  return NextResponse.json({ comment: data, message: "Comment submitted for review" }, { status: 201 });
+  return NextResponse.json(
+    { comment: data, message: "Comment submitted for review" },
+    { status: 201 }
+  );
 }

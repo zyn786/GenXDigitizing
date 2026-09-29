@@ -66,7 +66,9 @@ export async function notifyUsers(
 
     if (lookupErr) throw lookupErr;
 
-    const active = (recipients ?? []).filter((u: any) => u.is_active !== false).map((u: any) => u.id);
+    const active = (recipients ?? [])
+      .filter((u: any) => u.is_active !== false)
+      .map((u: any) => u.id);
     result.skipped = unique.length - active.length;
 
     if (!active.length) return result;
@@ -149,7 +151,10 @@ export async function notifyRole(role: string, payload: NotifyPayload): Promise<
     if (error) throw error;
     if (!users?.length) return { delivered: 0, skipped: 0, pushAttempted: false };
 
-    return notifyUsers(users.map((u: any) => u.id), payload);
+    return notifyUsers(
+      users.map((u: any) => u.id),
+      payload
+    );
   } catch (err: any) {
     const reason = err?.message ?? String(err);
     console.error("[notifyRole]", role, reason);

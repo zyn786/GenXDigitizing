@@ -10,7 +10,11 @@ export default async function DesignerNotificationsPage() {
   return (
     <>
       <Topbar title="Notifications" subtitle="Task alerts and updates" user={user} />
-      <NotificationsPage userName={user.full_name ?? undefined} userAvatar={user.avatar_url} userRole={user.role} />
+      <NotificationsPage
+        userName={user.full_name ?? undefined}
+        userAvatar={user.avatar_url}
+        userRole={user.role}
+      />
     </>
   );
 }

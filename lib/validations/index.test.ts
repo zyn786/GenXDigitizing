@@ -57,12 +57,20 @@ describe("registerSchema", () => {
   });
 
   it("rejects password without uppercase", () => {
-    const result = registerSchema.safeParse({ ...validInput, password: "lowercase1", confirm_password: "lowercase1" });
+    const result = registerSchema.safeParse({
+      ...validInput,
+      password: "lowercase1",
+      confirm_password: "lowercase1",
+    });
     expect(result.success).toBe(false);
   });
 
   it("rejects password without number", () => {
-    const result = registerSchema.safeParse({ ...validInput, password: "OnlyLetters", confirm_password: "OnlyLetters" });
+    const result = registerSchema.safeParse({
+      ...validInput,
+      password: "OnlyLetters",
+      confirm_password: "OnlyLetters",
+    });
     expect(result.success).toBe(false);
   });
 
@@ -96,12 +104,18 @@ describe("forgotPasswordSchema", () => {
 
 describe("resetPasswordSchema", () => {
   it("accepts matching passwords", () => {
-    const result = resetPasswordSchema.safeParse({ password: "NewPass1", confirm_password: "NewPass1" });
+    const result = resetPasswordSchema.safeParse({
+      password: "NewPass1",
+      confirm_password: "NewPass1",
+    });
     expect(result.success).toBe(true);
   });
 
   it("rejects mismatched passwords", () => {
-    const result = resetPasswordSchema.safeParse({ password: "NewPass1", confirm_password: "WrongPass1" });
+    const result = resetPasswordSchema.safeParse({
+      password: "NewPass1",
+      confirm_password: "WrongPass1",
+    });
     expect(result.success).toBe(false);
   });
 });
@@ -119,7 +133,22 @@ describe("createOrderSchema", () => {
   });
 
   it("accepts all output formats", () => {
-    const formats = ["DST", "PES", "EMB", "JEF", "XXX", "VIP", "HUS", "EXP", "VP3", "SEW", "AI", "SVG", "EPS", "PDF"];
+    const formats = [
+      "DST",
+      "PES",
+      "EMB",
+      "JEF",
+      "XXX",
+      "VIP",
+      "HUS",
+      "EXP",
+      "VP3",
+      "SEW",
+      "AI",
+      "SVG",
+      "EPS",
+      "PDF",
+    ];
     for (const fmt of formats) {
       const result = createOrderSchema.safeParse({ ...validOrder, output_format: fmt });
       expect(result.success).toBe(true);
@@ -159,7 +188,9 @@ describe("createOrderSchema", () => {
 
 describe("assignDesignerSchema", () => {
   it("accepts valid designer ID", () => {
-    const result = assignDesignerSchema.safeParse({ designer_id: "550e8400-e29b-41d4-a716-446655440000" });
+    const result = assignDesignerSchema.safeParse({
+      designer_id: "550e8400-e29b-41d4-a716-446655440000",
+    });
     expect(result.success).toBe(true);
   });
 
@@ -262,7 +293,10 @@ describe("updatePriceSchema", () => {
 
 describe("createLeadSchema", () => {
   it("accepts valid lead", () => {
-    const result = createLeadSchema.safeParse({ contact_name: "Jane Doe", email: "jane@example.com" });
+    const result = createLeadSchema.safeParse({
+      contact_name: "Jane Doe",
+      email: "jane@example.com",
+    });
     expect(result.success).toBe(true);
   });
 

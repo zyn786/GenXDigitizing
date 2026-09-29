@@ -46,7 +46,8 @@ export function serviceEmoji(label: string): string {
 /** Map a service label to an accent color */
 export function serviceAccent(label: string): string {
   const lower = label.toLowerCase();
-  if (lower.includes("vector") || lower.includes("jacket") || lower.includes("puff")) return "#F97316";
+  if (lower.includes("vector") || lower.includes("jacket") || lower.includes("puff"))
+    return "#F97316";
   if (lower.includes("patch")) return "#16A34A";
   return "#2563EB";
 }

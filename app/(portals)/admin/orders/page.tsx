@@ -1,9 +1,9 @@
 // @ts-nocheck
 export const dynamic = "force-dynamic";
 
-import { createClient }    from "@/lib/supabase/server";
-import { getAdminUser }    from "@/lib/supabase/get-user";
-import { Topbar }          from "@/components/portals/Topbar";
+import { createClient } from "@/lib/supabase/server";
+import { getAdminUser } from "@/lib/supabase/get-user";
+import { Topbar } from "@/components/portals/Topbar";
 import { AdminOrdersClient } from "./OrdersClient";
 import { RealtimeRefresher } from "@/components/RealtimeRefresher";
 
@@ -21,40 +21,38 @@ const ORDER_COLUMNS = `
 
 export default async function AdminOrdersPage() {
   const supabase = createClient();
-  const user     = await getAdminUser();
+  const user = await getAdminUser();
 
-  const [{ data: recentOrders }, { data: openOrders }, { data: designers }, { data: editRows }] = await Promise.all([
-    // Recent history, for browsing.
-    supabase
-      .from("orders")
-      .select(ORDER_COLUMNS)
-      .order("created_at", { ascending: false })
-      .limit(200),
+  const [{ data: recentOrders }, { data: openOrders }, { data: designers }, { data: editRows }] =
+    await Promise.all([
+      // Recent history, for browsing.
+      supabase
+        .from("orders")
+        .select(ORDER_COLUMNS)
+        .order("created_at", { ascending: false })
+        .limit(200),
 
-    // Every order that still needs attention — unbounded by age.
-    //
-    // The single `.limit(200)` ordered by `created_at` was the whole page, so an
-    // order that fell outside the 200 most recently *created* was invisible on
-    // every admin list surface regardless of status. An order sitting overdue in
-    // `assigned`, created 300 orders ago, simply could not be seen — and because
-    // the header counters were computed over that same truncated set, the portal
-    // reported confident but wrong totals.
-    supabase
-      .from("orders")
-      .select(ORDER_COLUMNS)
-      .not("status", "in", `(${TERMINAL_STATUSES.join(",")})`)
-      .order("created_at", { ascending: false }),
+      // Every order that still needs attention — unbounded by age.
+      //
+      // The single `.limit(200)` ordered by `created_at` was the whole page, so an
+      // order that fell outside the 200 most recently *created* was invisible on
+      // every admin list surface regardless of status. An order sitting overdue in
+      // `assigned`, created 300 orders ago, simply could not be seen — and because
+      // the header counters were computed over that same truncated set, the portal
+      // reported confident but wrong totals.
+      supabase
+        .from("orders")
+        .select(ORDER_COLUMNS)
+        .not("status", "in", `(${TERMINAL_STATUSES.join(",")})`)
+        .order("created_at", { ascending: false }),
 
-    supabase
-      .from("designers")
-      .select("id, users(id, full_name)")
-      .order("avg_rating", { ascending: false }),
+      supabase
+        .from("designers")
+        .select("id, users(id, full_name)")
+        .order("avg_rating", { ascending: false }),
 
-    supabase
-      .from("order_edit_log")
-      .select("order_id")
-      .eq("reviewed_by_admin", false),
-  ]);
+      supabase.from("order_edit_log").select("order_id").eq("reviewed_by_admin", false),
+    ]);
 
   // Merge, de-duplicated by id, newest first. Open orders always survive the
   // merge; the recent-orders query only adds closed history.
@@ -66,17 +64,18 @@ export default async function AdminOrdersPage() {
 
   // Build unreviewed edits map: order_id → count
   const unreviewedEdits: Record<string, number> = {};
-  for (const row of (editRows ?? [])) {
+  for (const row of editRows ?? []) {
     unreviewedEdits[row.order_id] = (unreviewedEdits[row.order_id] ?? 0) + 1;
   }
 
   // Counted over every open order, not a truncated page.
-  const pending   = (openOrders ?? []).filter(o => o.status === "submitted").length;
-  const inFlight  = (openOrders ?? []).filter(o => ["assigned", "in_progress", "review", "approved"].includes(o.status)).length;
+  const pending = (openOrders ?? []).filter((o) => o.status === "submitted").length;
+  const inFlight = (openOrders ?? []).filter((o) =>
+    ["assigned", "in_progress", "review", "approved"].includes(o.status)
+  ).length;
   const openCount = (openOrders ?? []).length;
 
-  const historyTruncated =
-    (recentOrders?.length ?? 0) >= 200 && orders.length > openCount;
+  const historyTruncated = (recentOrders?.length ?? 0) >= 200 && orders.length > openCount;
 
   return (
     <>
@@ -88,11 +87,17 @@ export default async function AdminOrdersPage() {
         }
         user={user}
       />
-      <AdminOrdersClient orders={orders} designers={designers ?? []} unreviewedEdits={unreviewedEdits} />
-      <RealtimeRefresher configs={[
-        { table: "orders", events: ["INSERT", "UPDATE"] },
-        { table: "invoices", events: ["UPDATE"] },
-      ]} />
+      <AdminOrdersClient
+        orders={orders}
+        designers={designers ?? []}
+        unreviewedEdits={unreviewedEdits}
+      />
+      <RealtimeRefresher
+        configs={[
+          { table: "orders", events: ["INSERT", "UPDATE"] },
+          { table: "invoices", events: ["UPDATE"] },
+        ]}
+      />
     </>
   );
 }

@@ -26,6 +26,7 @@ back with it. Nobody noticed for months. Signup was broken the entire time.
 **1. Can this file abort?** This is the highest-value check.
 A migration is one transaction. Any statement that raises rolls back the whole
 file, silently if the operator does not read the error. Look for:
+
 - `REVOKE`/`GRANT`/`ALTER` naming functions, tables or signatures that may not exist
 - `DROP ...` without `IF EXISTS`
 - `CREATE TRIGGER` without a preceding `DROP TRIGGER IF EXISTS`
@@ -43,6 +44,7 @@ partial failure. `CREATE TABLE` / `CREATE INDEX` need `IF NOT EXISTS`.
 mentally as if run twice.
 
 **3. Will it actually take effect?** Several things look correct and do nothing:
+
 - `REVOKE EXECUTE ... FROM anon` does **not** remove a `PUBLIC` grant, and anon
   inherits from PUBLIC. Name `PUBLIC` explicitly.
 - RLS policies do nothing for code paths using `createAdminClient()` — the

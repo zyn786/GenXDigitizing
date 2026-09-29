@@ -86,14 +86,14 @@ export function HorizontalSlider({
   if (items.length === 0) {
     return (
       <div className="flex items-center justify-center py-16">
-        <p className="text-[var(--txt3)] text-sm">{emptyMessage}</p>
+        <p className="text-sm text-[var(--txt3)]">{emptyMessage}</p>
       </div>
     );
   }
 
   return (
     <div
-      className="relative group/slider"
+      className="group/slider relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -102,11 +102,7 @@ export function HorizontalSlider({
         initial={false}
         animate={{ opacity: showLeftArrow ? 1 : 0, x: showLeftArrow ? 0 : -10 }}
         onClick={() => scroll("left")}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-xl
-          flex items-center justify-center
-          bg-white/90 border border-[var(--border2)]
-          text-[var(--txt2)] hover:text-[var(--txt)] hover:border-[var(--border3)]
-          shadow-lg transition-all pointer-events-none"
+        className="pointer-events-none absolute left-0 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border border-[var(--border2)] bg-white/90 text-[var(--txt2)] shadow-lg transition-all hover:border-[var(--border3)] hover:text-[var(--txt)]"
         style={{ pointerEvents: showLeftArrow ? "auto" : "none" }}
       >
         <ChevronLeft size={18} />
@@ -117,11 +113,7 @@ export function HorizontalSlider({
         initial={false}
         animate={{ opacity: showRightArrow ? 1 : 0, x: showRightArrow ? 0 : 10 }}
         onClick={() => scroll("right")}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-xl
-          flex items-center justify-center
-          bg-white/90 border border-[var(--border2)]
-          text-[var(--txt2)] hover:text-[var(--txt)] hover:border-[var(--border3)]
-          shadow-lg transition-all pointer-events-none"
+        className="pointer-events-none absolute right-0 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border border-[var(--border2)] bg-white/90 text-[var(--txt2)] shadow-lg transition-all hover:border-[var(--border3)] hover:text-[var(--txt)]"
         style={{ pointerEvents: showRightArrow ? "auto" : "none" }}
       >
         <ChevronRight size={18} />
@@ -130,8 +122,7 @@ export function HorizontalSlider({
       {/* Scrollable track */}
       <div
         ref={sliderRef}
-        className="flex gap-4 overflow-x-auto overflow-y-hidden scrollbar-none
-          scroll-smooth snap-x snap-mandatory"
+        className="scrollbar-none flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden scroll-smooth"
         style={{
           cursor: isGrabbing ? "grabbing" : "grab",
           WebkitOverflowScrolling: "touch",
@@ -142,19 +133,21 @@ export function HorizontalSlider({
       >
         {items.map((item, i) => (
           <div key={item.id} className="snap-start">
-            <PortfolioCard item={item} index={i} onClick={() => onItemClick(item)} onCategoryClick={onCategoryClick} />
+            <PortfolioCard
+              item={item}
+              index={i}
+              onClick={() => onItemClick(item)}
+              onCategoryClick={onCategoryClick}
+            />
           </div>
         ))}
 
         {/* End spacer */}
-        <div className="flex-shrink-0 w-1" />
+        <div className="w-1 flex-shrink-0" />
       </div>
 
       {/* Scroll hint (shows on first view) */}
-      <div
-        className="flex items-center justify-center gap-1.5 mt-4 text-[11px] text-[var(--txt3)]
-          opacity-50 md:hidden"
-      >
+      <div className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-[var(--txt3)] opacity-50 md:hidden">
         <GripHorizontal size={14} />
         Swipe to browse
       </div>

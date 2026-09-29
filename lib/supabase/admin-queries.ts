@@ -5,7 +5,13 @@
  * Called from Server Components — no "use client".
  */
 import { createClient } from "@/lib/supabase/server";
-import { extractS3Key, isS3Key, normalizeStoragePath, signLegacyS3, signStorageUrl } from "@/lib/storage";
+import {
+  extractS3Key,
+  isS3Key,
+  normalizeStoragePath,
+  signLegacyS3,
+  signStorageUrl,
+} from "@/lib/storage";
 
 // ── Shared helper ────────────────────────────────────────────
 
@@ -18,7 +24,9 @@ async function signFileUrl(f: any): Promise<any> {
       const key = extractS3Key(f.file_url);
       const signed = await signLegacyS3(key, 86400);
       if (signed) return { ...f, signed_url: signed };
-    } catch { /* fall through */ }
+    } catch {
+      /* fall through */
+    }
     return { ...f, signed_url: f.file_url };
   }
 
@@ -40,10 +48,10 @@ async function signFileUrl(f: any): Promise<any> {
 
 export async function getAdminStats() {
   const supabase = createClient();
-  const now      = new Date();
+  const now = new Date();
   const mtdStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const prevStart= new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-  const prevEnd  = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
+  const prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+  const prevEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).toISOString();
 
   const [
     { count: ordersMTD },
@@ -56,37 +64,55 @@ export async function getAdminStats() {
     { data: weeklyData },
   ] = await Promise.all([
     supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", mtdStart),
-    supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", prevStart).lte("created_at", prevEnd),
+    supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", prevStart)
+      .lte("created_at", prevEnd),
     supabase.from("invoices").select("amount").eq("status", "paid").gte("paid_at", mtdStart),
-    supabase.from("invoices").select("amount").eq("status", "paid").gte("paid_at", prevStart).lte("paid_at", prevEnd),
+    supabase
+      .from("invoices")
+      .select("amount")
+      .eq("status", "paid")
+      .gte("paid_at", prevStart)
+      .lte("paid_at", prevEnd),
     supabase.from("clients").select("*", { count: "exact", head: true }),
-    supabase.from("orders").select("*", { count: "exact", head: true }).in("status", ["submitted", "assigned", "in_progress", "review", "approved"]),
+    supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .in("status", ["submitted", "assigned", "in_progress", "review", "approved"]),
     supabase.from("reviews").select("stars"),
-    supabase.from("orders").select("created_at").gte("created_at", new Date(Date.now() - 7 * 86400000).toISOString()),
+    supabase
+      .from("orders")
+      .select("created_at")
+      .gte("created_at", new Date(Date.now() - 7 * 86400000).toISOString()),
   ]);
 
-  const revenue_mtd   = revMTD?.reduce((s, r) => s + Number(r.amount), 0) ?? 0;
-  const revenue_prev  = revPrev?.reduce((s, r) => s + Number(r.amount), 0) ?? 0;
-  const avg_rating    = ratingData?.length
-    ? ratingData.reduce((s, r) => s + r.stars, 0) / ratingData.length : 0;
+  const revenue_mtd = revMTD?.reduce((s, r) => s + Number(r.amount), 0) ?? 0;
+  const revenue_prev = revPrev?.reduce((s, r) => s + Number(r.amount), 0) ?? 0;
+  const avg_rating = ratingData?.length
+    ? ratingData.reduce((s, r) => s + r.stars, 0) / ratingData.length
+    : 0;
 
   // Build weekly bar data (last 7 days)
-  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const weekly = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(Date.now() - (6 - i) * 86400000);
     const label = days[d.getDay()];
-    const count = weeklyData?.filter(o => new Date(o.created_at).toDateString() === d.toDateString()).length ?? 0;
+    const count =
+      weeklyData?.filter((o) => new Date(o.created_at).toDateString() === d.toDateString())
+        .length ?? 0;
     return { day: label, orders: count };
   });
 
   return {
-    orders_mtd:    ordersMTD   ?? 0,
-    orders_prev:   ordersPrev  ?? 0,
+    orders_mtd: ordersMTD ?? 0,
+    orders_prev: ordersPrev ?? 0,
     revenue_mtd,
     revenue_prev,
     active_clients: totalClients ?? 0,
-    active_orders:  activeOrders ?? 0,
-    avg_rating:    Math.round(avg_rating * 10) / 10,
+    active_orders: activeOrders ?? 0,
+    avg_rating: Math.round(avg_rating * 10) / 10,
     total_reviews: ratingData?.length ?? 0,
     weekly,
   };
@@ -97,13 +123,14 @@ export async function getAdminStats() {
 export async function getAdminOrders(opts?: {
   status?: string;
   search?: string;
-  limit?:  number;
+  limit?: number;
   offset?: number;
 }) {
   const supabase = createClient();
   let q = supabase
     .from("orders")
-    .select(`
+    .select(
+      `
       id, order_number, status, priority, turnaround, price, currency,
       stitch_count, output_format, service_tier_id, sla_deadline,
       created_at, updated_at,
@@ -114,7 +141,9 @@ export async function getAdminOrders(opts?: {
         id, users ( id, full_name )
       ),
       service_tiers ( id, label, category, size_desc )
-    `, { count: "exact" })
+    `,
+      { count: "exact" }
+    )
     .order("created_at", { ascending: false })
     .limit(opts?.limit ?? 50);
 
@@ -133,7 +162,8 @@ export async function getAdminOrderById(id: string) {
   const supabase = createClient();
   const { data: order, error } = await supabase
     .from("orders")
-    .select(`
+    .select(
+      `
       *,
       clients ( *, users ( * ) ),
       designers ( *, users ( * ) ),
@@ -141,7 +171,8 @@ export async function getAdminOrderById(id: string) {
       order_files ( *, users ( full_name, avatar_url ) ),
       invoices ( * ),
       reviews ( * )
-    `)
+    `
+    )
     .eq("id", id)
     .single();
 
@@ -160,10 +191,12 @@ export async function getAdminClients() {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("clients")
-    .select(`
+    .select(
+      `
       id, company_name, country, phone, tier, ltv, credit_balance, joined_at,
       users ( id, email, full_name, avatar_url, is_active, last_sign_in )
-    `)
+    `
+    )
     .order("ltv", { ascending: false });
   return { data: data ?? [], error };
 }
@@ -172,12 +205,14 @@ export async function getClientWithOrders(clientId: string) {
   const supabase = createClient();
   const [{ data: client }, { data: orders }, { data: reviews }] = await Promise.all([
     supabase.from("clients").select("*, users(*)").eq("id", clientId).single(),
-    supabase.from("orders")
+    supabase
+      .from("orders")
       .select("id, order_number, status, price, turnaround, created_at, service_tiers(label)")
       .eq("client_id", clientId)
       .order("created_at", { ascending: false })
       .limit(20),
-    supabase.from("reviews")
+    supabase
+      .from("reviews")
       .select("stars, text, created_at")
       .eq("client_id", clientId)
       .order("created_at", { ascending: false }),
@@ -191,10 +226,12 @@ export async function getAdminDesigners() {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("designers")
-    .select(`
+    .select(
+      `
       id, avg_turnaround_h, avg_rating, revision_rate, total_orders, completed_orders, specialties,
       users ( id, email, full_name, avatar_url, is_active )
-    `)
+    `
+    )
     .order("avg_rating", { ascending: false });
   return { data: data ?? [], error };
 }
@@ -203,8 +240,11 @@ export async function getDesignerWithOrders(designerId: string) {
   const supabase = createClient();
   const [{ data: designer }, { data: orders }] = await Promise.all([
     supabase.from("designers").select("*, users(*)").eq("id", designerId).single(),
-    supabase.from("orders")
-      .select("id, order_number, status, turnaround, created_at, clients(company_name), service_tiers(label)")
+    supabase
+      .from("orders")
+      .select(
+        "id, order_number, status, turnaround, created_at, clients(company_name), service_tiers(label)"
+      )
       .eq("designer_id", designerId)
       .order("created_at", { ascending: false })
       .limit(20),
@@ -218,23 +258,25 @@ export async function getAdminReviews() {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("reviews")
-    .select(`
+    .select(
+      `
       id, stars, text, is_published, created_at,
       clients ( id, company_name, users ( full_name, avatar_url ) ),
       orders ( id, order_number, service_tiers ( label ) )
-    `)
+    `
+    )
     .order("created_at", { ascending: false });
 
-  const reviews   = data ?? [];
-  const avg       = reviews.length ? reviews.reduce((s, r) => s + r.stars, 0) / reviews.length : 0;
-  const fiveStar  = reviews.filter(r => r.stars === 5).length;
+  const reviews = data ?? [];
+  const avg = reviews.length ? reviews.reduce((s, r) => s + r.stars, 0) / reviews.length : 0;
+  const fiveStar = reviews.filter((r) => r.stars === 5).length;
 
   return {
     data: reviews,
     error,
-    avg_rating:     Math.round(avg * 10) / 10,
-    total:          reviews.length,
-    five_star_pct:  reviews.length ? Math.round((fiveStar / reviews.length) * 100) : 0,
+    avg_rating: Math.round(avg * 10) / 10,
+    total: reviews.length,
+    five_star_pct: reviews.length ? Math.round((fiveStar / reviews.length) * 100) : 0,
   };
 }
 
@@ -258,37 +300,46 @@ export async function getAdminMessages() {
   // Get all messages involving admin users or unread ones
   const { data, error } = await supabase
     .from("messages")
-    .select(`
+    .select(
+      `
       id, body, subject, is_read, created_at, order_id,
       sender:from_user ( id, full_name, avatar_url, role ),
       recipient:to_user ( id, full_name, avatar_url, role ),
       orders ( id, order_number )
-    `)
+    `
+    )
     .order("created_at", { ascending: false })
     .limit(100);
 
   // Group into threads by participant pair
   const threads = new Map<string, any>();
   for (const msg of data ?? []) {
-    const sender    = (msg as any).sender;
+    const sender = (msg as any).sender;
     const recipient = (msg as any).recipient;
-    if (!sender || !recipient) { continue; }
+    if (!sender || !recipient) {
+      continue;
+    }
 
     const key = [sender.id, recipient.id].sort().join("-");
     if (!threads.has(key)) {
       const other = sender.role !== "admin" ? sender : recipient;
       threads.set(key, {
         key,
-        participant:  other,
-        messages:     [],
-        unread:       0,
+        participant: other,
+        messages: [],
+        unread: 0,
         last_message: null,
       });
     }
     const thread = threads.get(key)!;
     thread.messages.push(msg);
-    if (!msg.is_read && (msg as any).recipient?.role === "admin") { thread.unread++; }
-    if (!thread.last_message || new Date(msg.created_at) > new Date(thread.last_message.created_at)) {
+    if (!msg.is_read && (msg as any).recipient?.role === "admin") {
+      thread.unread++;
+    }
+    if (
+      !thread.last_message ||
+      new Date(msg.created_at) > new Date(thread.last_message.created_at)
+    ) {
       thread.last_message = msg;
     }
   }
@@ -300,7 +351,7 @@ export async function getAdminMessages() {
 
 export async function getAdminReports() {
   const supabase = createClient();
-  const year     = new Date().getFullYear();
+  const year = new Date().getFullYear();
 
   const [
     { data: monthlyInvoices },
@@ -309,48 +360,73 @@ export async function getAdminReports() {
     { data: topClients },
   ] = await Promise.all([
     // Monthly revenue for current year
-    supabase.from("invoices")
+    supabase
+      .from("invoices")
       .select("amount, paid_at")
       .eq("status", "paid")
       .gte("paid_at", `${year}-01-01`)
       .lte("paid_at", `${year}-12-31`),
 
     // Orders by service tier
-    supabase.from("orders")
-      .select("service_tier_id, price, service_tiers(label, category)"),
+    supabase.from("orders").select("service_tier_id, price, service_tiers(label, category)"),
 
     // Designer performance
-    supabase.from("designers")
-      .select("id, avg_rating, avg_turnaround_h, completed_orders, revision_rate, total_orders, users(full_name)")
+    supabase
+      .from("designers")
+      .select(
+        "id, avg_rating, avg_turnaround_h, completed_orders, revision_rate, total_orders, users(full_name)"
+      )
       .order("completed_orders", { ascending: false })
       .limit(10),
 
     // Top clients by LTV
-    supabase.from("clients")
+    supabase
+      .from("clients")
       .select("id, company_name, ltv, tier, users(email)")
       .order("ltv", { ascending: false })
       .limit(10),
   ]);
 
   // Build monthly chart data
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const monthly = months.map((month, i) => {
-    const monthOrders = monthlyInvoices?.filter(inv => {
-      if (!inv.paid_at) { return false; }
-      return new Date(inv.paid_at).getMonth() === i;
-    }) ?? [];
+    const monthOrders =
+      monthlyInvoices?.filter((inv) => {
+        if (!inv.paid_at) {
+          return false;
+        }
+        return new Date(inv.paid_at).getMonth() === i;
+      }) ?? [];
     return {
       month,
       revenue: monthOrders.reduce((s, inv) => s + Number(inv.amount), 0),
-      orders:  monthOrders.length,
+      orders: monthOrders.length,
     };
   });
 
   // Service breakdown
-  const svcMap = new Map<string, { label: string; category: string; count: number; revenue: number }>();
+  const svcMap = new Map<
+    string,
+    { label: string; category: string; count: number; revenue: number }
+  >();
   for (const order of serviceBreakdown ?? []) {
     const tier = (order as any).service_tiers;
-    if (!tier) { continue; }
+    if (!tier) {
+      continue;
+    }
     const key = order.service_tier_id;
     if (!svcMap.has(key)) {
       svcMap.set(key, { label: tier.label, category: tier.category, count: 0, revenue: 0 });
@@ -362,7 +438,7 @@ export async function getAdminReports() {
   const totalOrders = (serviceBreakdown ?? []).length || 1;
   const breakdown = Array.from(svcMap.values())
     .sort((a, b) => b.count - a.count)
-    .map(s => ({ ...s, pct: Math.round((s.count / totalOrders) * 100) }));
+    .map((s) => ({ ...s, pct: Math.round((s.count / totalOrders) * 100) }));
 
   return {
     monthly,

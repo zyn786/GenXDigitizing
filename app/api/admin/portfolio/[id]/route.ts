@@ -3,10 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { updatePortfolio, deletePortfolio } from "@/lib/supabase/portfolio-queries";
 
 // PATCH /api/admin/portfolio/[id] — update
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = await req.json();
@@ -32,20 +29,23 @@ export async function PATCH(
     return NextResponse.json(item);
   } catch (error: any) {
     console.error("Update portfolio error:", error);
-    return NextResponse.json({ error: error.message || "Failed to update portfolio" }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Failed to update portfolio" },
+      { status: 500 }
+    );
   }
 }
 
 // DELETE /api/admin/portfolio/[id] — delete
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     await deletePortfolio(id);
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to delete portfolio" }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Failed to delete portfolio" },
+      { status: 500 }
+    );
   }
 }

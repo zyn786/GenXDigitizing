@@ -6,7 +6,26 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { Check, Crown, ArrowRight, Sparkles, Shield, Zap, Clock, Headphones, Loader2, XCircle, Calendar, CreditCard, FileText, BarChart3, TrendingUp, Download, MessageSquare, AlertTriangle } from "lucide-react";
+import {
+  Check,
+  Crown,
+  ArrowRight,
+  Sparkles,
+  Shield,
+  Zap,
+  Clock,
+  Headphones,
+  Loader2,
+  XCircle,
+  Calendar,
+  CreditCard,
+  FileText,
+  BarChart3,
+  TrendingUp,
+  Download,
+  MessageSquare,
+  AlertTriangle,
+} from "lucide-react";
 import { PLAN_CONFIG, getPlanPrice } from "@/lib/plans";
 import { CANCELLATION_REASONS, type CancellationReason } from "@/types";
 
@@ -24,22 +43,31 @@ interface PlanUI {
 
 const PLANS: PlanUI[] = [
   {
-    id: "starter", ...PLAN_CONFIG.starter, name: PLAN_CONFIG.starter.label,
+    id: "starter",
+    ...PLAN_CONFIG.starter,
+    name: PLAN_CONFIG.starter.label,
     desc: "Perfect for small businesses.",
     savings: "Save 20%",
   },
   {
-    id: "business", ...PLAN_CONFIG.business, name: PLAN_CONFIG.business.label, popular: true,
+    id: "business",
+    ...PLAN_CONFIG.business,
+    name: PLAN_CONFIG.business.label,
+    popular: true,
     desc: "Ideal for growing embroidery businesses.",
     savings: "Save More Every Month",
   },
   {
-    id: "pro", ...PLAN_CONFIG.pro, name: PLAN_CONFIG.pro.label,
+    id: "pro",
+    ...PLAN_CONFIG.pro,
+    name: PLAN_CONFIG.pro.label,
     desc: "For heavy production businesses.",
     savings: "Best Value",
   },
   {
-    id: "pro_max", ...PLAN_CONFIG.pro_max, name: PLAN_CONFIG.pro_max.label,
+    id: "pro_max",
+    ...PLAN_CONFIG.pro_max,
+    name: PLAN_CONFIG.pro_max.label,
     desc: "For large-scale production & agencies.",
     savings: "Maximum Output",
   },
@@ -64,14 +92,24 @@ export function SubscribePlans() {
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/login"); return; }
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login");
+        return;
+      }
 
       // Load plan price overrides from platform_settings (admin may have customized prices)
       const { data: settings } = await supabase
         .from("platform_settings")
         .select("key, value")
-        .in("key", ["plan_starter_price","plan_business_price","plan_pro_price","plan_pro_max_price"]);
+        .in("key", [
+          "plan_starter_price",
+          "plan_business_price",
+          "plan_pro_price",
+          "plan_pro_max_price",
+        ]);
       if (settings?.length) {
         for (const row of settings) {
           const plan = row.key.replace("plan_", "").replace("_price", "");
@@ -82,20 +120,49 @@ export function SubscribePlans() {
         }
       }
 
-      const { data: client } = await supabase.from("clients").select("id, tier, company_name, credit_balance").eq("user_id", user.id).single();
-      setProfile({ id: client?.id, email: user.email, company: client?.company_name, tier: client?.tier, credit_balance: client?.credit_balance ?? 0 });
+      const { data: client } = await supabase
+        .from("clients")
+        .select("id, tier, company_name, credit_balance")
+        .eq("user_id", user.id)
+        .single();
+      setProfile({
+        id: client?.id,
+        email: user.email,
+        company: client?.company_name,
+        tier: client?.tier,
+        credit_balance: client?.credit_balance ?? 0,
+      });
       if (client?.id) {
-        const { data: sub } = await supabase.from("client_subscriptions").select("*").eq("client_id", client.id).in("status", ["active", "pending", "cancellation_requested"]).maybeSingle();
+        const { data: sub } = await supabase
+          .from("client_subscriptions")
+          .select("*")
+          .eq("client_id", client.id)
+          .in("status", ["active", "pending", "cancellation_requested"])
+          .maybeSingle();
         setCurrentSub(sub);
         // Subscription history (all past + current)
-        const { data: history } = await supabase.from("client_subscriptions").select("*").eq("client_id", client.id).order("created_at", { ascending: false }).limit(20);
+        const { data: history } = await supabase
+          .from("client_subscriptions")
+          .select("*")
+          .eq("client_id", client.id)
+          .order("created_at", { ascending: false })
+          .limit(20);
         setSubHistory(history || []);
         // Billing history
-        const { data: invs } = await supabase.from("invoices").select("*").eq("client_id", client.id).order("created_at", { ascending: false }).limit(20);
+        const { data: invs } = await supabase
+          .from("invoices")
+          .select("*")
+          .eq("client_id", client.id)
+          .order("created_at", { ascending: false })
+          .limit(20);
         setInvoices(invs || []);
         // Orders this period
         if (sub) {
-          const { count } = await supabase.from("orders").select("*", { count: "exact", head: true }).eq("client_id", client.id).gte("created_at", sub.current_period_start);
+          const { count } = await supabase
+            .from("orders")
+            .select("*", { count: "exact", head: true })
+            .eq("client_id", client.id)
+            .gte("created_at", sub.current_period_start);
           setOrderCount(count || 0);
         }
       }
@@ -109,24 +176,38 @@ export function SubscribePlans() {
     if (!profile?.id) return;
     const channel = supabase
       .channel(`client-sub-${profile.id}`)
-      .on("postgres_changes",
-        { event: "UPDATE", schema: "public", table: "client_subscriptions", filter: `client_id=eq.${profile.id}` },
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "client_subscriptions",
+          filter: `client_id=eq.${profile.id}`,
+        },
         (payload) => {
-          setCurrentSub(prev => {
+          setCurrentSub((prev) => {
             if (prev && prev.id === payload.new.id) return { ...prev, ...payload.new };
             return prev;
           });
         }
       )
-      .on("postgres_changes",
-        { event: "INSERT", schema: "public", table: "client_subscriptions", filter: `client_id=eq.${profile.id}` },
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "client_subscriptions",
+          filter: `client_id=eq.${profile.id}`,
+        },
         (payload) => {
           setCurrentSub(payload.new);
         }
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [profile?.id]);
 
   // Scroll to preselected plan on load
@@ -140,7 +221,10 @@ export function SubscribePlans() {
   }, [preselectedPlan, loaded]);
 
   async function requestPlan(planId) {
-    if (!profile?.id) { toast.error("Profile not loaded"); return; }
+    if (!profile?.id) {
+      toast.error("Profile not loaded");
+      return;
+    }
     setBuying(planId);
     try {
       const res = await fetch("/api/subscriptions/checkout", {
@@ -149,7 +233,10 @@ export function SubscribePlans() {
         body: JSON.stringify({ plan: planId, clientId: profile.id }),
       });
       const data = await res.json();
-      if (!res.ok) { toast.error(data.error || "Failed"); return; }
+      if (!res.ok) {
+        toast.error(data.error || "Failed");
+        return;
+      }
       // Show downgrade warning if switching to smaller plan
       if (data.downgradeWarning) {
         toast.warning(data.downgradeWarning, { duration: 8000 });
@@ -164,14 +251,29 @@ export function SubscribePlans() {
       } else {
         toast.success("Plan requested! Admin will send payment link within 1 hour.");
       }
-    } catch { toast.error("Network error"); }
-    finally { setBuying(null); }
+    } catch {
+      toast.error("Network error");
+    } finally {
+      setBuying(null);
+    }
   }
 
   async function cancelPlan(reason?: string, notes?: string) {
-    if (!profile?.id) { toast.error("Profile not loaded"); return; }
+    if (!profile?.id) {
+      toast.error("Profile not loaded");
+      return;
+    }
     // Optimistic: update local state immediately
-    setCurrentSub((prev: any) => prev ? { ...prev, status: "cancellation_requested", cancellation_reason: reason, cancellation_notes: notes } : null);
+    setCurrentSub((prev: any) =>
+      prev
+        ? {
+            ...prev,
+            status: "cancellation_requested",
+            cancellation_reason: reason,
+            cancellation_notes: notes,
+          }
+        : null
+    );
     setShowCancelModal(false);
     setCancelReason("");
     setCancelNotes("");
@@ -185,20 +287,35 @@ export function SubscribePlans() {
       });
       if (!res.ok) {
         // Revert on failure
-        setCurrentSub((prev: any) => prev ? { ...prev, status: "active", cancellation_reason: null, cancellation_notes: null } : null);
+        setCurrentSub((prev: any) =>
+          prev
+            ? { ...prev, status: "active", cancellation_reason: null, cancellation_notes: null }
+            : null
+        );
         const data = await res.json().catch(() => ({}));
         toast.error(data.error || "Failed to cancel");
       }
     } catch {
-      setCurrentSub((prev: any) => prev ? { ...prev, status: "active", cancellation_reason: null, cancellation_notes: null } : null);
+      setCurrentSub((prev: any) =>
+        prev
+          ? { ...prev, status: "active", cancellation_reason: null, cancellation_notes: null }
+          : null
+      );
       toast.error("Network error");
     }
   }
 
   async function withdrawRequest() {
-    if (!currentSub?.id) { toast.error("No active request"); return; }
+    if (!currentSub?.id) {
+      toast.error("No active request");
+      return;
+    }
     // Optimistic: revert to active instantly
-    setCurrentSub((prev: any) => prev ? { ...prev, status: "active", cancellation_reason: null, cancellation_notes: null } : null);
+    setCurrentSub((prev: any) =>
+      prev
+        ? { ...prev, status: "active", cancellation_reason: null, cancellation_notes: null }
+        : null
+    );
     toast.success("Request withdrawn. Plan is active.");
 
     try {
@@ -209,17 +326,22 @@ export function SubscribePlans() {
       });
       if (!res.ok) {
         // Revert on failure
-        setCurrentSub((prev: any) => prev ? { ...prev, status: "cancellation_requested" } : null);
+        setCurrentSub((prev: any) => (prev ? { ...prev, status: "cancellation_requested" } : null));
         const data = await res.json().catch(() => ({}));
         toast.error(data.error || "Failed to withdraw");
       }
     } catch {
-      setCurrentSub((prev: any) => prev ? { ...prev, status: "cancellation_requested" } : null);
+      setCurrentSub((prev: any) => (prev ? { ...prev, status: "cancellation_requested" } : null));
       toast.error("Network error");
     }
   }
 
-  if (!loaded) return <div className="portal-content flex items-center justify-center"><div className="w-6 h-6 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin" /></div>;
+  if (!loaded)
+    return (
+      <div className="portal-content flex items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#2563EB] border-t-transparent" />
+      </div>
+    );
 
   // Labels for display
   const reasonLabels: Record<string, string> = {
@@ -233,175 +355,331 @@ export function SubscribePlans() {
 
   return (
     <div className="portal-content" style={{ background: "var(--bg)" }}>
-      <div className="max-w-[960px] mx-auto">
+      <div className="mx-auto max-w-[960px]">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
+        <div className="mb-6 text-center sm:mb-8">
           <Crown size={28} className="mx-auto mb-2" style={{ color: "#F59E0B" }} />
-          <h2 className="font-syne font-bold text-2xl sm:text-3xl mb-2" style={{ color: "var(--txt)" }}>
-            {!currentSub ? "Choose Your Plan"
-              : currentSub.status === "active" ? "Your Subscription"
-              : currentSub.status === "pending" ? "Awaiting Approval"
-              : currentSub.status === "cancellation_requested" ? "Cancellation Under Review"
-              : "Choose Your Plan"}
+          <h2
+            className="mb-2 font-syne text-2xl font-bold sm:text-3xl"
+            style={{ color: "var(--txt)" }}
+          >
+            {!currentSub
+              ? "Choose Your Plan"
+              : currentSub.status === "active"
+                ? "Your Subscription"
+                : currentSub.status === "pending"
+                  ? "Awaiting Approval"
+                  : currentSub.status === "cancellation_requested"
+                    ? "Cancellation Under Review"
+                    : "Choose Your Plan"}
           </h2>
           <p className="text-[13px] sm:text-sm" style={{ color: "var(--txt2)" }}>
-            {!currentSub ? "Get fixed pricing, faster turnaround, and priority support"
-              : currentSub.status === "active" ? "Manage your plan, credits, and billing"
-              : currentSub.status === "pending" ? "Your plan is being reviewed by our team"
-              : currentSub.status === "cancellation_requested" ? "Our team is reviewing your cancellation request"
-              : "Get fixed pricing, faster turnaround, and priority support"}
+            {!currentSub
+              ? "Get fixed pricing, faster turnaround, and priority support"
+              : currentSub.status === "active"
+                ? "Manage your plan, credits, and billing"
+                : currentSub.status === "pending"
+                  ? "Your plan is being reviewed by our team"
+                  : currentSub.status === "cancellation_requested"
+                    ? "Our team is reviewing your cancellation request"
+                    : "Get fixed pricing, faster turnaround, and priority support"}
           </p>
         </div>
 
         {/* ═══ Subscription Dashboard ═══ */}
-        {currentSub && currentSub.status === "active" && (() => {
-          const extraCredits = profile?.credit_balance || 0;
-          const remaining = currentSub.designs_total - currentSub.designs_used + (currentSub.designs_rolled_over || 0) + extraCredits;
-          const total = currentSub.designs_total + (currentSub.designs_rolled_over || 0) + extraCredits;
-          const pct = total > 0 ? Math.round((currentSub.designs_used / total) * 100) : 0;
-          const renewalDate = new Date(currentSub.current_period_end).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-          return (
-            <div className="mb-6 space-y-4">
-              {/* Status Card */}
-              <div className="rounded-2xl p-4 sm:p-5 border" style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.06), rgba(139,92,246,0.04))", borderColor: "rgba(245,158,11,0.25)" }}>
-                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <Crown size={20} style={{ color: "#F59E0B" }} />
-                    <div>
-                      <h3 className="font-syne font-bold text-[16px] sm:text-[18px]" style={{ color: "var(--txt)" }}>
-                        {currentSub.plan.toUpperCase()} Plan
-                      </h3>
-                      <p className="text-[11px]" style={{ color: "var(--txt3)" }}>
-                        {getPlanPrice(currentSub.plan)}/month · {currentSub.designs_total} designs/mo
-                      </p>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold" style={{ background: "rgba(22,163,74,0.1)", color: "#16A34A", border: "1px solid rgba(22,163,74,0.25)" }}>
-                    ● Active
-                  </span>
-                </div>
-
-                {/* Usage Bar */}
-                <div className="mb-3">
-                  <div className="flex justify-between text-[11px] mb-1.5" style={{ color: "var(--txt2)" }}>
-                    <span><strong style={{ color: "var(--txt)" }}>{remaining}</strong> credits remaining</span>
-                    <span>{currentSub.designs_used} of {total} used</span>
-                  </div>
-                  <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "var(--border2)" }}>
-                    <div className="h-full rounded-full transition-all duration-700" style={{
-                      width: `${Math.min(pct, 100)}%`,
-                      background: pct > 80 ? "linear-gradient(90deg, #F97316, #DC2626)" : pct > 50 ? "linear-gradient(90deg, #F59E0B, #F97316)" : "linear-gradient(90deg, #2563EB, #7C3AED)",
-                    }} />
-                  </div>
-                </div>
-
-                {/* Stats Row */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 sm:gap-2 mb-4">
-                  {[
-                    [Crown, "Plan Credits", `${remaining} left of ${total}`],
-                    [Calendar, "Renews", renewalDate],
-                    [BarChart3, "Orders", `${orderCount} this period`],
-                    [TrendingUp, "Rollover", `${currentSub.designs_rolled_over || 0} credits`],
-                    [CreditCard, "Extra Credits", `${profile?.credit_balance || 0} credits`],
-                  ].map(([Icon, label, value]) => (
-                    <div key={label} className="p-2.5 rounded-xl text-center relative group" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-                      <Icon size={13} style={{ color: label === "Extra Credits" ? "#F59E0B" : label === "Plan Designs" ? "#7C3AED" : "#2563EB" }} className="mx-auto mb-1" />
-                      <p className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: "var(--txt3)" }}>{label}</p>
-                      <p className="text-[11px] font-bold" style={{ color: "var(--txt)" }}>{value}</p>
-                      {label === "Extra Credits" && (
-                        <p className="text-[8px] mt-0.5" style={{ color: "var(--txt3)" }}>
-                          <a onClick={(e) => { e.preventDefault(); document.getElementById("extra-credits")?.scrollIntoView({ behavior: "smooth" }); }} style={{ color: "#F59E0B", cursor: "pointer", textDecoration: "underline" }}>Buy more ↓</a>
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => { setCancelReason(""); setCancelNotes(""); setShowCancelModal(true); }}
-                    disabled={false}
-                    className="flex-1 py-2.5 rounded-xl text-[12px] font-semibold border cursor-pointer disabled:opacity-50 transition-all"
-                    style={{ color: "#DC2626", borderColor: "rgba(220,38,38,0.3)" }}
-                  >
-                    <XCircle size={12} className="inline mr-1" />
-                    Cancel Plan
-                  </button>
-                </div>
-              </div>
-
-              {/* Billing History */}
-              {invoices.length > 0 && (
-                <div className="rounded-2xl p-4 sm:p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-                  <h4 className="font-syne font-bold text-[14px] mb-3 flex items-center gap-2" style={{ color: "var(--txt)" }}>
-                    <FileText size={16} style={{ color: "#2563EB" }} /> Billing & Credits History
-                  </h4>
-                  <div className="space-y-1.5">
-                    {invoices.slice(0, 5).map((inv: any) => {
-                      const notes: string = inv.notes || "";
-                      const isSubscription = notes.toLowerCase().includes("subscription");
-                      const isExtraCredits = notes.toLowerCase().includes("extra credits");
-                      const creditMatch = notes.match(/Extra credits:\s*(\d+)\s*design credits/i);
-                      const typeLabel = isSubscription ? "Plan" : isExtraCredits ? "Credits" : "Order";
-                      const typeIcon = isSubscription ? "📦" : isExtraCredits ? "⚡" : "🧾";
-                      const typeColor = isSubscription ? "#7C3AED" : isExtraCredits ? "#F59E0B" : "#2563EB";
-                      return (
-                      <div key={inv.id} className="flex items-center justify-between p-2.5 rounded-lg" style={{ borderBottom: "1px solid var(--border)" }}>
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="text-xs">{typeIcon}</span>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <p className="text-[12px] font-semibold" style={{ color: "var(--txt)" }}>
-                                {inv.invoice_number || "INV-—"} · ${Number(inv.amount).toFixed(0)}
-                              </p>
-                              <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded" style={{ background: `${typeColor}15`, color: typeColor }}>
-                                {typeLabel}
-                              </span>
-                            </div>
-                            <p className="text-[10px]" style={{ color: "var(--txt3)" }}>
-                              {new Date(inv.created_at).toLocaleDateString()}
-                              {isExtraCredits && creditMatch && (
-                                <span style={{ color: "#F59E0B" }}> · +{creditMatch[1]} credits</span>
-                              )}
-                              {isSubscription && (
-                                <span style={{ color: "#7C3AED" }}> · {notes.split("—")[0]?.replace("Subscription:", "").trim() || ""}</span>
-                              )}
-                              <span> · </span>
-                              <span style={{ color: inv.status === "paid" ? "#16A34A" : inv.status === "pending" ? "#F59E0B" : "var(--txt3)" }}>{inv.status}</span>
-                            </p>
-                          </div>
-                        </div>
-                        <a
-                          href={`/api/invoices/${inv.id}/pdf`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 rounded-lg hover:bg-[var(--elevated)] transition-all flex-shrink-0"
-                          style={{ color: "#2563EB" }}
-                          title="Download PDF"
+        {currentSub &&
+          currentSub.status === "active" &&
+          (() => {
+            const extraCredits = profile?.credit_balance || 0;
+            const remaining =
+              currentSub.designs_total -
+              currentSub.designs_used +
+              (currentSub.designs_rolled_over || 0) +
+              extraCredits;
+            const total =
+              currentSub.designs_total + (currentSub.designs_rolled_over || 0) + extraCredits;
+            const pct = total > 0 ? Math.round((currentSub.designs_used / total) * 100) : 0;
+            const renewalDate = new Date(currentSub.current_period_end).toLocaleDateString(
+              "en-US",
+              { month: "long", day: "numeric", year: "numeric" }
+            );
+            return (
+              <div className="mb-6 space-y-4">
+                {/* Status Card */}
+                <div
+                  className="rounded-2xl border p-4 sm:p-5"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(245,158,11,0.06), rgba(139,92,246,0.04))",
+                    borderColor: "rgba(245,158,11,0.25)",
+                  }}
+                >
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Crown size={20} style={{ color: "#F59E0B" }} />
+                      <div>
+                        <h3
+                          className="font-syne text-[16px] font-bold sm:text-[18px]"
+                          style={{ color: "var(--txt)" }}
                         >
-                          <Download size={14} />
-                        </a>
+                          {currentSub.plan.toUpperCase()} Plan
+                        </h3>
+                        <p className="text-[11px]" style={{ color: "var(--txt3)" }}>
+                          {getPlanPrice(currentSub.plan)}/month · {currentSub.designs_total}{" "}
+                          designs/mo
+                        </p>
                       </div>
-                    )})}
+                    </div>
+                    <span
+                      className="rounded-full px-2.5 py-1 text-[10px] font-bold"
+                      style={{
+                        background: "rgba(22,163,74,0.1)",
+                        color: "#16A34A",
+                        border: "1px solid rgba(22,163,74,0.25)",
+                      }}
+                    >
+                      ● Active
+                    </span>
                   </div>
-                  {invoices.length > 5 && (
-                    <Link href="/client/invoices" className="block text-center mt-3 text-[11px] font-semibold" style={{ color: "#2563EB" }}>
-                      View all {invoices.length} invoices →
-                    </Link>
-                  )}
+
+                  {/* Usage Bar */}
+                  <div className="mb-3">
+                    <div
+                      className="mb-1.5 flex justify-between text-[11px]"
+                      style={{ color: "var(--txt2)" }}
+                    >
+                      <span>
+                        <strong style={{ color: "var(--txt)" }}>{remaining}</strong> credits
+                        remaining
+                      </span>
+                      <span>
+                        {currentSub.designs_used} of {total} used
+                      </span>
+                    </div>
+                    <div
+                      className="h-2.5 overflow-hidden rounded-full"
+                      style={{ background: "var(--border2)" }}
+                    >
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: `${Math.min(pct, 100)}%`,
+                          background:
+                            pct > 80
+                              ? "linear-gradient(90deg, #F97316, #DC2626)"
+                              : pct > 50
+                                ? "linear-gradient(90deg, #F59E0B, #F97316)"
+                                : "linear-gradient(90deg, #2563EB, #7C3AED)",
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Stats Row */}
+                  <div className="mb-4 grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 lg:grid-cols-5">
+                    {[
+                      [Crown, "Plan Credits", `${remaining} left of ${total}`],
+                      [Calendar, "Renews", renewalDate],
+                      [BarChart3, "Orders", `${orderCount} this period`],
+                      [TrendingUp, "Rollover", `${currentSub.designs_rolled_over || 0} credits`],
+                      [CreditCard, "Extra Credits", `${profile?.credit_balance || 0} credits`],
+                    ].map(([Icon, label, value]) => (
+                      <div
+                        key={label}
+                        className="group relative rounded-xl p-2.5 text-center"
+                        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+                      >
+                        <Icon
+                          size={13}
+                          style={{
+                            color:
+                              label === "Extra Credits"
+                                ? "#F59E0B"
+                                : label === "Plan Designs"
+                                  ? "#7C3AED"
+                                  : "#2563EB",
+                          }}
+                          className="mx-auto mb-1"
+                        />
+                        <p
+                          className="text-[9px] font-semibold uppercase tracking-wider"
+                          style={{ color: "var(--txt3)" }}
+                        >
+                          {label}
+                        </p>
+                        <p className="text-[11px] font-bold" style={{ color: "var(--txt)" }}>
+                          {value}
+                        </p>
+                        {label === "Extra Credits" && (
+                          <p className="mt-0.5 text-[8px]" style={{ color: "var(--txt3)" }}>
+                            <a
+                              onClick={(e) => {
+                                e.preventDefault();
+                                document
+                                  .getElementById("extra-credits")
+                                  ?.scrollIntoView({ behavior: "smooth" });
+                              }}
+                              style={{
+                                color: "#F59E0B",
+                                cursor: "pointer",
+                                textDecoration: "underline",
+                              }}
+                            >
+                              Buy more ↓
+                            </a>
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setCancelReason("");
+                        setCancelNotes("");
+                        setShowCancelModal(true);
+                      }}
+                      disabled={false}
+                      className="flex-1 cursor-pointer rounded-xl border py-2.5 text-[12px] font-semibold transition-all disabled:opacity-50"
+                      style={{ color: "#DC2626", borderColor: "rgba(220,38,38,0.3)" }}
+                    >
+                      <XCircle size={12} className="mr-1 inline" />
+                      Cancel Plan
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
-          );
-        })()}
+
+                {/* Billing History */}
+                {invoices.length > 0 && (
+                  <div
+                    className="rounded-2xl border p-4 sm:p-5"
+                    style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+                  >
+                    <h4
+                      className="mb-3 flex items-center gap-2 font-syne text-[14px] font-bold"
+                      style={{ color: "var(--txt)" }}
+                    >
+                      <FileText size={16} style={{ color: "#2563EB" }} /> Billing & Credits History
+                    </h4>
+                    <div className="space-y-1.5">
+                      {invoices.slice(0, 5).map((inv: any) => {
+                        const notes: string = inv.notes || "";
+                        const isSubscription = notes.toLowerCase().includes("subscription");
+                        const isExtraCredits = notes.toLowerCase().includes("extra credits");
+                        const creditMatch = notes.match(/Extra credits:\s*(\d+)\s*design credits/i);
+                        const typeLabel = isSubscription
+                          ? "Plan"
+                          : isExtraCredits
+                            ? "Credits"
+                            : "Order";
+                        const typeIcon = isSubscription ? "📦" : isExtraCredits ? "⚡" : "🧾";
+                        const typeColor = isSubscription
+                          ? "#7C3AED"
+                          : isExtraCredits
+                            ? "#F59E0B"
+                            : "#2563EB";
+                        return (
+                          <div
+                            key={inv.id}
+                            className="flex items-center justify-between rounded-lg p-2.5"
+                            style={{ borderBottom: "1px solid var(--border)" }}
+                          >
+                            <div className="flex min-w-0 items-center gap-2.5">
+                              <span className="text-xs">{typeIcon}</span>
+                              <div className="min-w-0">
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <p
+                                    className="text-[12px] font-semibold"
+                                    style={{ color: "var(--txt)" }}
+                                  >
+                                    {inv.invoice_number || "INV-—"} · $
+                                    {Number(inv.amount).toFixed(0)}
+                                  </p>
+                                  <span
+                                    className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase"
+                                    style={{ background: `${typeColor}15`, color: typeColor }}
+                                  >
+                                    {typeLabel}
+                                  </span>
+                                </div>
+                                <p className="text-[10px]" style={{ color: "var(--txt3)" }}>
+                                  {new Date(inv.created_at).toLocaleDateString()}
+                                  {isExtraCredits && creditMatch && (
+                                    <span style={{ color: "#F59E0B" }}>
+                                      {" "}
+                                      · +{creditMatch[1]} credits
+                                    </span>
+                                  )}
+                                  {isSubscription && (
+                                    <span style={{ color: "#7C3AED" }}>
+                                      {" "}
+                                      ·{" "}
+                                      {notes.split("—")[0]?.replace("Subscription:", "").trim() ||
+                                        ""}
+                                    </span>
+                                  )}
+                                  <span> · </span>
+                                  <span
+                                    style={{
+                                      color:
+                                        inv.status === "paid"
+                                          ? "#16A34A"
+                                          : inv.status === "pending"
+                                            ? "#F59E0B"
+                                            : "var(--txt3)",
+                                    }}
+                                  >
+                                    {inv.status}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+                            <a
+                              href={`/api/invoices/${inv.id}/pdf`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-shrink-0 rounded-lg p-2 transition-all hover:bg-[var(--elevated)]"
+                              style={{ color: "#2563EB" }}
+                              title="Download PDF"
+                            >
+                              <Download size={14} />
+                            </a>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {invoices.length > 5 && (
+                      <Link
+                        href="/client/invoices"
+                        className="mt-3 block text-center text-[11px] font-semibold"
+                        style={{ color: "#2563EB" }}
+                      >
+                        View all {invoices.length} invoices →
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         {currentSub && currentSub.status === "pending" && (
-          <div className="mb-6 p-4 sm:p-5 rounded-2xl border" style={{ background: "rgba(245,158,11,0.04)", borderColor: "rgba(245,158,11,0.3)" }}>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(245,158,11,0.15)" }}>
+          <div
+            className="mb-6 rounded-2xl border p-4 sm:p-5"
+            style={{ background: "rgba(245,158,11,0.04)", borderColor: "rgba(245,158,11,0.3)" }}
+          >
+            <div className="mb-3 flex items-center gap-3">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-xl"
+                style={{ background: "rgba(245,158,11,0.15)" }}
+              >
                 <Clock size={20} style={{ color: "#F59E0B" }} />
               </div>
               <div>
-                <h3 className="font-syne font-bold text-[14px] sm:text-[15px]" style={{ color: "var(--txt)" }}>
+                <h3
+                  className="font-syne text-[14px] font-bold sm:text-[15px]"
+                  style={{ color: "var(--txt)" }}
+                >
                   {currentSub.plan.toUpperCase()} Plan — Awaiting Approval
                 </h3>
                 <p className="text-[11px]" style={{ color: "var(--txt3)" }}>
@@ -411,18 +689,23 @@ export function SubscribePlans() {
             </div>
             {/* Progress steps — derive from actual invoice state */}
             {(() => {
-              const subInv = invoices.find((inv: any) =>
-                inv.client_id === profile?.id &&
-                inv.notes?.toLowerCase().includes("subscription") &&
-                (inv.status === "pending" || inv.status === "paid")
+              const subInv = invoices.find(
+                (inv: any) =>
+                  inv.client_id === profile?.id &&
+                  inv.notes?.toLowerCase().includes("subscription") &&
+                  (inv.status === "pending" || inv.status === "paid")
               );
-              const linkSent = !!(subInv?.payoneer_checkout_url);
+              const linkSent = !!subInv?.payoneer_checkout_url;
               const paymentConfirmed = subInv?.status === "paid";
               const currentStepIdx = linkSent && paymentConfirmed ? 3 : linkSent ? 2 : 1;
               const steps = [
                 { icon: "✓", label: "Requested", done: true },
                 { icon: linkSent ? "✓" : "●", label: "Payment Link", done: linkSent },
-                { icon: paymentConfirmed ? "✓" : (linkSent ? "●" : "○"), label: "Payment", done: paymentConfirmed },
+                {
+                  icon: paymentConfirmed ? "✓" : linkSent ? "●" : "○",
+                  label: "Payment",
+                  done: paymentConfirmed,
+                },
                 { icon: "○", label: "Activated", done: false },
               ];
               const doneBg = "rgba(22,163,74,0.08)";
@@ -431,23 +714,28 @@ export function SubscribePlans() {
               const activeColor = "#2563EB";
               return (
                 <>
-                  <div className="flex items-center gap-1 mb-3">
+                  <div className="mb-3 flex items-center gap-1">
                     {steps.map((step, i) => {
                       const isDone = step.done;
                       const isCurrent = i === currentStepIdx && !isDone;
                       const bg = isDone ? doneBg : isCurrent ? activeBg : "var(--elevated)";
                       const clr = isDone ? doneColor : isCurrent ? activeColor : "var(--txt3)";
                       return (
-                        <div key={step.label} className="flex-1 flex items-center gap-1">
-                          <div className="flex-1 text-center py-1.5 rounded-lg text-[10px] font-semibold" style={{ background: bg, color: clr }}>
+                        <div key={step.label} className="flex flex-1 items-center gap-1">
+                          <div
+                            className="flex-1 rounded-lg py-1.5 text-center text-[10px] font-semibold"
+                            style={{ background: bg, color: clr }}
+                          >
                             {step.icon} {step.label}
                           </div>
-                          {i < steps.length - 1 && <span style={{ color: "var(--border2)" }}>→</span>}
+                          {i < steps.length - 1 && (
+                            <span style={{ color: "var(--border2)" }}>→</span>
+                          )}
                         </div>
                       );
                     })}
                   </div>
-                  <p className="text-[11px] text-center mb-2" style={{ color: "var(--txt3)" }}>
+                  <p className="mb-2 text-center text-[11px]" style={{ color: "var(--txt3)" }}>
                     {!linkSent
                       ? "Our team reviews subscriptions within 1 business hour."
                       : !paymentConfirmed
@@ -460,7 +748,7 @@ export function SubscribePlans() {
                         href={subInv.payoneer_checkout_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-bold text-[12px] no-underline active:scale-[0.98] transition-all"
+                        className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-[12px] font-bold text-white no-underline transition-all active:scale-[0.98]"
                         style={{ background: "linear-gradient(135deg, #2563EB, #7C3AED)" }}
                       >
                         <CreditCard size={14} /> Pay Now — {getPlanPrice(currentSub.plan)}
@@ -474,41 +762,58 @@ export function SubscribePlans() {
         )}
 
         {currentSub && currentSub.status === "cancellation_requested" && (
-          <div className="mb-6 p-4 sm:p-5 rounded-2xl border" style={{ background: "rgba(245,158,11,0.04)", borderColor: "rgba(245,158,11,0.3)" }}>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(245,158,11,0.15)" }}>
+          <div
+            className="mb-6 rounded-2xl border p-4 sm:p-5"
+            style={{ background: "rgba(245,158,11,0.04)", borderColor: "rgba(245,158,11,0.3)" }}
+          >
+            <div className="mb-3 flex items-center gap-3">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-xl"
+                style={{ background: "rgba(245,158,11,0.15)" }}
+              >
                 <Clock size={20} style={{ color: "#F59E0B" }} />
               </div>
               <div>
-                <h3 className="font-syne font-bold text-[14px] sm:text-[15px]" style={{ color: "var(--txt)" }}>
+                <h3
+                  className="font-syne text-[14px] font-bold sm:text-[15px]"
+                  style={{ color: "var(--txt)" }}
+                >
                   Cancellation Requested — Under Review
                 </h3>
                 <p className="text-[11px]" style={{ color: "var(--txt3)" }}>
-                  {currentSub.plan.toUpperCase()} Plan · {getPlanPrice(currentSub.plan)}/month · {currentSub.designs_total} designs/mo
+                  {currentSub.plan.toUpperCase()} Plan · {getPlanPrice(currentSub.plan)}/month ·{" "}
+                  {currentSub.designs_total} designs/mo
                 </p>
               </div>
             </div>
             {currentSub.cancellation_reason && (
-              <div className="mb-3 p-3 rounded-xl" style={{ background: "var(--elevated)", border: "1px solid var(--border2)" }}>
-                <p className="text-[11px] font-semibold mb-0.5" style={{ color: "var(--txt3)" }}>Your reason:</p>
+              <div
+                className="mb-3 rounded-xl p-3"
+                style={{ background: "var(--elevated)", border: "1px solid var(--border2)" }}
+              >
+                <p className="mb-0.5 text-[11px] font-semibold" style={{ color: "var(--txt3)" }}>
+                  Your reason:
+                </p>
                 <p className="text-[12px]" style={{ color: "var(--txt)" }}>
                   {reasonLabels[currentSub.cancellation_reason] || currentSub.cancellation_reason}
                   {currentSub.cancellation_notes && (
-                    <span className="italic ml-1" style={{ color: "var(--txt3)" }}>— "{currentSub.cancellation_notes}"</span>
+                    <span className="ml-1 italic" style={{ color: "var(--txt3)" }}>
+                      — "{currentSub.cancellation_notes}"
+                    </span>
                   )}
                 </p>
               </div>
             )}
-            <p className="text-[11px] mb-3" style={{ color: "var(--txt3)" }}>
+            <p className="mb-3 text-[11px]" style={{ color: "var(--txt3)" }}>
               Our team will review your request. Your plan remains active until confirmed.
             </p>
             <button
               onClick={withdrawRequest}
               disabled={false}
-              className="py-2.5 px-4 rounded-xl text-[12px] font-semibold border cursor-pointer disabled:opacity-50 transition-all"
+              className="cursor-pointer rounded-xl border px-4 py-2.5 text-[12px] font-semibold transition-all disabled:opacity-50"
               style={{ color: "var(--txt)", borderColor: "var(--border2)" }}
             >
-                            Withdraw Request
+              Withdraw Request
             </button>
           </div>
         )}
@@ -518,111 +823,192 @@ export function SubscribePlans() {
           <div className="mb-6">
             <button
               onClick={() => setShowPlans(!showPlans)}
-              className="w-full p-3 rounded-xl flex items-center justify-between border cursor-pointer transition-all hover:border-[#2563EB]/30"
-              style={{ background: "var(--surface)", borderColor: "var(--border2)", color: "var(--txt)" }}
+              className="flex w-full cursor-pointer items-center justify-between rounded-xl border p-3 transition-all hover:border-[#2563EB]/30"
+              style={{
+                background: "var(--surface)",
+                borderColor: "var(--border2)",
+                color: "var(--txt)",
+              }}
             >
               <span className="flex items-center gap-2 text-[13px] font-semibold">
-                <ArrowRight size={14} style={{ transform: showPlans ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                <ArrowRight
+                  size={14}
+                  style={{
+                    transform: showPlans ? "rotate(90deg)" : "rotate(0deg)",
+                    transition: "transform 0.2s",
+                  }}
+                />
                 {showPlans ? "Hide Plans" : "Upgrade / Change Plan"}
               </span>
-              <span className="text-[11px]" style={{ color: "var(--txt3)" }}>4 plans available</span>
+              <span className="text-[11px]" style={{ color: "var(--txt3)" }}>
+                4 plans available
+              </span>
             </button>
           </div>
         ) : null}
         {(!currentSub || showPlans) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-8">
-          {PLANS.map(plan => {
-            const isCurrent = currentSub?.plan === plan.id && currentSub?.status === "active";
-            const isPending = currentSub?.plan === plan.id && currentSub?.status === "pending";
-            const isCancelRequested = currentSub?.plan === plan.id && currentSub?.status === "cancellation_requested";
-            const isDisabled = isCurrent || isPending || isCancelRequested;
-            return (
-              <div key={plan.id} id={`plan-card-${plan.id}`} className={`relative rounded-2xl border-2 p-5 sm:p-6 flex flex-col transition-all ${
-                plan.popular ? "border-[#2563EB] bg-[#2563EB]/3 shadow-[0_4px_20px_rgba(37,99,235,0.1)]" : "border-[var(--border2)] bg-[var(--surface)]"
-              } ${preselectedPlan === plan.id ? "ring-2 ring-[#F59E0B] ring-offset-2" : ""}`}>
-                {plan.popular && !isCurrent && !isPending && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#2563EB] text-white text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                    <Sparkles size={10} /> Most Popular
-                  </span>
-                )}
-                {isCurrent && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#F59E0B] text-white text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                    <Crown size={10} /> Current Plan
-                  </span>
-                )}
-                {isPending && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#F97316] text-white text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                    <Loader2 size={10} className="animate-spin" /> Pending Approval
-                  </span>
-                )}
+          <div className="mb-8 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {PLANS.map((plan) => {
+              const isCurrent = currentSub?.plan === plan.id && currentSub?.status === "active";
+              const isPending = currentSub?.plan === plan.id && currentSub?.status === "pending";
+              const isCancelRequested =
+                currentSub?.plan === plan.id && currentSub?.status === "cancellation_requested";
+              const isDisabled = isCurrent || isPending || isCancelRequested;
+              return (
+                <div
+                  key={plan.id}
+                  id={`plan-card-${plan.id}`}
+                  className={`relative flex flex-col rounded-2xl border-2 p-5 transition-all sm:p-6 ${
+                    plan.popular
+                      ? "bg-[#2563EB]/3 border-[#2563EB] shadow-[0_4px_20px_rgba(37,99,235,0.1)]"
+                      : "border-[var(--border2)] bg-[var(--surface)]"
+                  } ${preselectedPlan === plan.id ? "ring-2 ring-[#F59E0B] ring-offset-2" : ""}`}
+                >
+                  {plan.popular && !isCurrent && !isPending && (
+                    <span className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-[#2563EB] px-3 py-1 text-[10px] font-bold text-white">
+                      <Sparkles size={10} /> Most Popular
+                    </span>
+                  )}
+                  {isCurrent && (
+                    <span className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-[#F59E0B] px-3 py-1 text-[10px] font-bold text-white">
+                      <Crown size={10} /> Current Plan
+                    </span>
+                  )}
+                  {isPending && (
+                    <span className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-[#F97316] px-3 py-1 text-[10px] font-bold text-white">
+                      <Loader2 size={10} className="animate-spin" /> Pending Approval
+                    </span>
+                  )}
 
-                <div className="text-center mb-4">
-                  <span className="text-2xl sm:text-3xl">{plan.emoji}</span>
-                  <h3 className="font-syne font-bold text-[18px] sm:text-[20px] mt-2 mb-1" style={{ color: "var(--txt)" }}>{plan.name}</h3>
-                  <p className="text-[12px]" style={{ color: "var(--txt2)" }}>{plan.designs} designs/month</p>
+                  <div className="mb-4 text-center">
+                    <span className="text-2xl sm:text-3xl">{plan.emoji}</span>
+                    <h3
+                      className="mb-1 mt-2 font-syne text-[18px] font-bold sm:text-[20px]"
+                      style={{ color: "var(--txt)" }}
+                    >
+                      {plan.name}
+                    </h3>
+                    <p className="text-[12px]" style={{ color: "var(--txt2)" }}>
+                      {plan.designs} designs/month
+                    </p>
+                  </div>
+
+                  <div className="mb-4 text-center">
+                    <span
+                      className="font-syne text-[30px] font-bold sm:text-[36px]"
+                      style={{ color: "var(--txt)" }}
+                    >
+                      ${plan.price}
+                    </span>
+                    <span className="text-[13px]" style={{ color: "var(--txt3)" }}>
+                      /month
+                    </span>
+                  </div>
+
+                  <p className="mb-4 text-center text-[12px]" style={{ color: "var(--txt2)" }}>
+                    {plan.desc}
+                  </p>
+
+                  <ul className="mb-5 flex-1 space-y-2">
+                    {plan.features.map((f) => (
+                      <li
+                        key={f}
+                        className="flex items-start gap-2 text-[11px] sm:text-[12px]"
+                        style={{ color: "var(--txt2)" }}
+                      >
+                        <Check size={13} className="mt-0.5 flex-shrink-0 text-[#16A34A]" /> {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mb-3 text-center">
+                    <span
+                      className="inline-block rounded-full px-3 py-1 text-[10px] font-semibold sm:text-[11px]"
+                      style={{ background: "rgba(22,163,74,0.1)", color: "#16A34A" }}
+                    >
+                      💰 {plan.savings}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => requestPlan(plan.id)}
+                    disabled={buying === plan.id || isDisabled}
+                    className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-2xl border-none py-3 text-[13px] font-bold text-white transition-all active:scale-[0.98] disabled:opacity-50 sm:text-[14px]"
+                    style={{
+                      background: isDisabled
+                        ? "var(--border2)"
+                        : "linear-gradient(135deg, #2563EB, #7C3AED)",
+                    }}
+                  >
+                    {isCurrent ? (
+                      "Current Plan"
+                    ) : isPending ? (
+                      "Awaiting Approval"
+                    ) : isCancelRequested ? (
+                      "Under Review"
+                    ) : buying === plan.id ? (
+                      "Requesting…"
+                    ) : (
+                      <>
+                        Request Plan <ArrowRight size={14} />
+                      </>
+                    )}
+                  </button>
                 </div>
-
-                <div className="text-center mb-4">
-                  <span className="font-syne font-bold text-[30px] sm:text-[36px]" style={{ color: "var(--txt)" }}>${plan.price}</span>
-                  <span className="text-[13px]" style={{ color: "var(--txt3)" }}>/month</span>
-                </div>
-
-                <p className="text-[12px] text-center mb-4" style={{ color: "var(--txt2)" }}>{plan.desc}</p>
-
-                <ul className="space-y-2 mb-5 flex-1">
-                  {plan.features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-[11px] sm:text-[12px]" style={{ color: "var(--txt2)" }}>
-                      <Check size={13} className="text-[#16A34A] flex-shrink-0 mt-0.5" /> {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="text-center mb-3">
-                  <span className="inline-block px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold" style={{ background: "rgba(22,163,74,0.1)", color: "#16A34A" }}>
-                    💰 {plan.savings}
-                  </span>
-                </div>
-
-                <button onClick={() => requestPlan(plan.id)} disabled={buying === plan.id || isDisabled}
-                  className="w-full py-3 rounded-2xl text-white font-bold text-[13px] sm:text-[14px] border-none cursor-pointer active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
-                  style={{ background: isDisabled ? "var(--border2)" : "linear-gradient(135deg, #2563EB, #7C3AED)" }}>
-                  {isCurrent ? "Current Plan" : isPending ? "Awaiting Approval" : isCancelRequested ? "Under Review" : buying === plan.id ? "Requesting…" : <>Request Plan <ArrowRight size={14} /></>}
-                </button>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
         )}
 
         {/* Buy Extra Credits — one-time add-on */}
         {currentSub && currentSub.status === "active" && (
-          <div id="extra-credits" className="mb-6 p-4 sm:p-5 rounded-2xl border text-center" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+          <div
+            id="extra-credits"
+            className="mb-6 rounded-2xl border p-4 text-center sm:p-5"
+            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          >
             {/* Credit cost guide */}
-            <div className="mb-4 p-3 rounded-xl text-left" style={{ background: "var(--elevated)", border: "1px solid var(--border2)" }}>
-              <p className="text-[10px] font-bold mb-1.5" style={{ color: "var(--txt)" }}>📐 How Credits Work</p>
+            <div
+              className="mb-4 rounded-xl p-3 text-left"
+              style={{ background: "var(--elevated)", border: "1px solid var(--border2)" }}
+            >
+              <p className="mb-1.5 text-[10px] font-bold" style={{ color: "var(--txt)" }}>
+                📐 How Credits Work
+              </p>
               <div className="space-y-1 text-[10px]" style={{ color: "var(--txt2)" }}>
-                <p>• <strong>1 credit</strong> = 1 standard design (left chest, cap, simple logo)</p>
-                <p>• <strong>2 credits</strong> = 1 complex design (jacket back, large print)</p>
-                <p>• <strong>3 credits</strong> = 1 extra-complex design (high stitch count, detailed)</p>
+                <p>
+                  • <strong>1 credit</strong> = 1 standard design (left chest, cap, simple logo)
+                </p>
+                <p>
+                  • <strong>2 credits</strong> = 1 complex design (jacket back, large print)
+                </p>
+                <p>
+                  • <strong>3 credits</strong> = 1 extra-complex design (high stitch count,
+                  detailed)
+                </p>
               </div>
               {currentSub && (
-                <p className="text-[9px] mt-1.5" style={{ color: "var(--txt3)" }}>
-                  Your {currentSub.plan.toUpperCase()} plan: big designs cost {PLAN_CONFIG[currentSub.plan]?.creditCostBigDesign || "—"} credit(s) each
+                <p className="mt-1.5 text-[9px]" style={{ color: "var(--txt3)" }}>
+                  Your {currentSub.plan.toUpperCase()} plan: big designs cost{" "}
+                  {PLAN_CONFIG[currentSub.plan]?.creditCostBigDesign || "—"} credit(s) each
                 </p>
               )}
             </div>
-            <h3 className="font-syne font-bold text-[14px] sm:text-[15px] mb-1" style={{ color: "var(--txt)" }}>
-              <Sparkles size={14} className="inline text-[#F59E0B] mr-1" /> Top Up Your Credits
+            <h3
+              className="mb-1 font-syne text-[14px] font-bold sm:text-[15px]"
+              style={{ color: "var(--txt)" }}
+            >
+              <Sparkles size={14} className="mr-1 inline text-[#F59E0B]" /> Top Up Your Credits
             </h3>
-            <p className="text-[11px] sm:text-[12px] mb-4" style={{ color: "var(--txt3)" }}>
+            <p className="mb-4 text-[11px] sm:text-[12px]" style={{ color: "var(--txt3)" }}>
               One-time packs — no subscription needed, credits never expire
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-[600px] mx-auto">
+            <div className="mx-auto grid max-w-[600px] grid-cols-1 gap-3 sm:grid-cols-3">
               {[
                 { count: 5, price: 25, icon: "⚡", label: "Starter Pack" },
                 { count: 10, price: 45, icon: "🔥", label: "Value Pack", popular: true },
                 { count: 25, price: 99, icon: "💎", label: "Pro Pack", bestValue: true },
-              ].map(pkg => (
+              ].map((pkg) => (
                 <button
                   key={pkg.count}
                   onClick={async () => {
@@ -631,7 +1017,11 @@ export function SubscribePlans() {
                       const res = await fetch("/api/subscriptions/extra-credits", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ clientId: profile.id, credits: pkg.count, amount: pkg.price }),
+                        body: JSON.stringify({
+                          clientId: profile.id,
+                          credits: pkg.count,
+                          amount: pkg.price,
+                        }),
                       });
                       if (res.ok) {
                         const data = await res.json();
@@ -639,16 +1029,20 @@ export function SubscribePlans() {
                           toast.success("Redirecting to payment...");
                           window.open(data.paymentLink, "_blank");
                         } else {
-                          toast.success(`${pkg.count} extra credits requested! Admin will send payment link.`);
+                          toast.success(
+                            `${pkg.count} extra credits requested! Admin will send payment link.`
+                          );
                         }
                         router.refresh();
                       } else {
                         const d = await res.json();
                         toast.error(d.error || "Failed");
                       }
-                    } catch { toast.error("Network error"); }
+                    } catch {
+                      toast.error("Network error");
+                    }
                   }}
-                  className={`relative p-4 rounded-2xl border-2 text-center cursor-pointer transition-all active:scale-[0.98] ${
+                  className={`relative cursor-pointer rounded-2xl border-2 p-4 text-center transition-all active:scale-[0.98] ${
                     pkg.popular
                       ? "border-[#F59E0B] bg-[#F59E0B]/5 hover:shadow-[0_4px_16px_rgba(245,158,11,0.2)]"
                       : pkg.bestValue
@@ -657,18 +1051,40 @@ export function SubscribePlans() {
                   }`}
                 >
                   {pkg.popular && (
-                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[#F59E0B] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">Most Popular</span>
+                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-[#F59E0B] px-2.5 py-0.5 text-[10px] font-bold text-white">
+                      Most Popular
+                    </span>
                   )}
                   {pkg.bestValue && !pkg.popular && (
-                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[#7C3AED] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">Best Value</span>
+                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-[#7C3AED] px-2.5 py-0.5 text-[10px] font-bold text-white">
+                      Best Value
+                    </span>
                   )}
-                  <span className="text-2xl mb-2 block">{pkg.icon}</span>
-                  <p className="font-syne font-bold text-[20px] sm:text-[24px] mb-0.5" style={{ color: "var(--txt)" }}>+{pkg.count}</p>
-                  <p className="text-[10px] font-medium mb-2" style={{ color: "var(--txt3)" }}>{pkg.label}</p>
-                  <p className="text-[22px] font-bold mb-1" style={{ color: pkg.popular ? "#F59E0B" : pkg.bestValue ? "#7C3AED" : "#2563EB" }}>${pkg.price}</p>
+                  <span className="mb-2 block text-2xl">{pkg.icon}</span>
+                  <p
+                    className="mb-0.5 font-syne text-[20px] font-bold sm:text-[24px]"
+                    style={{ color: "var(--txt)" }}
+                  >
+                    +{pkg.count}
+                  </p>
+                  <p className="mb-2 text-[10px] font-medium" style={{ color: "var(--txt3)" }}>
+                    {pkg.label}
+                  </p>
+                  <p
+                    className="mb-1 text-[22px] font-bold"
+                    style={{
+                      color: pkg.popular ? "#F59E0B" : pkg.bestValue ? "#7C3AED" : "#2563EB",
+                    }}
+                  >
+                    ${pkg.price}
+                  </p>
                   <p className="text-[11px] font-medium" style={{ color: "var(--txt3)" }}>
                     ${(pkg.price / pkg.count).toFixed(2)}/credit
-                    {pkg.count === 5 ? " · $5.00" : pkg.count === 10 ? " · save 10%" : " · save 21%"}
+                    {pkg.count === 5
+                      ? " · $5.00"
+                      : pkg.count === 10
+                        ? " · save 10%"
+                        : " · save 21%"}
                   </p>
                 </button>
               ))}
@@ -678,8 +1094,14 @@ export function SubscribePlans() {
 
         {/* Subscription & Activity History */}
         {(subHistory.length > 0 || invoices.length > 0) && (
-          <div className="mb-6 rounded-2xl p-4 sm:p-5 border" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
-            <h3 className="font-syne font-bold text-[14px] sm:text-[16px] mb-3 flex items-center gap-2" style={{ color: "var(--txt)" }}>
+          <div
+            className="mb-6 rounded-2xl border p-4 sm:p-5"
+            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          >
+            <h3
+              className="mb-3 flex items-center gap-2 font-syne text-[14px] font-bold sm:text-[16px]"
+              style={{ color: "var(--txt)" }}
+            >
               <Clock size={16} style={{ color: "#7C3AED" }} /> Subscription & Activity History
             </h3>
             <div className="space-y-1.5">
@@ -691,9 +1113,17 @@ export function SubscribePlans() {
                   paused: { bg: "rgba(245,158,11,0.1)", color: "#F59E0B", label: "Paused" },
                   cancelled: { bg: "rgba(220,38,38,0.08)", color: "#DC2626", label: "Cancelled" },
                   expired: { bg: "rgba(156,163,175,0.1)", color: "#9CA3AF", label: "Expired" },
-                  cancellation_requested: { bg: "rgba(249,115,22,0.1)", color: "#F97316", label: "Under Review" },
+                  cancellation_requested: {
+                    bg: "rgba(249,115,22,0.1)",
+                    color: "#F97316",
+                    label: "Under Review",
+                  },
                 };
-                const sc = statusColors[sub.status] || { bg: "var(--elevated)", color: "var(--txt3)", label: sub.status };
+                const sc = statusColors[sub.status] || {
+                  bg: "var(--elevated)",
+                  color: "var(--txt3)",
+                  label: sub.status,
+                };
                 const started = new Date(sub.current_period_start).toLocaleDateString();
                 const ended = new Date(sub.current_period_end).toLocaleDateString();
                 const reasonLabels: Record<string, string> = {
@@ -709,109 +1139,180 @@ export function SubscribePlans() {
                   other: "Other",
                 };
                 return (
-                  <div key={`sub-${sub.id}`} className="flex items-center justify-between p-2.5 rounded-lg" style={{ borderBottom: "1px solid var(--border)" }}>
+                  <div
+                    key={`sub-${sub.id}`}
+                    className="flex items-center justify-between rounded-lg p-2.5"
+                    style={{ borderBottom: "1px solid var(--border)" }}
+                  >
                     <div className="flex items-center gap-2.5">
-                      <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded" style={{ background: sc.bg, color: sc.color }}>
+                      <span
+                        className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase"
+                        style={{ background: sc.bg, color: sc.color }}
+                      >
                         {sub.plan}
                       </span>
-                      <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded" style={{ background: sc.bg, color: sc.color }}>
+                      <span
+                        className="rounded px-1.5 py-0.5 text-[8px] font-bold uppercase"
+                        style={{ background: sc.bg, color: sc.color }}
+                      >
                         {sc.label}
                       </span>
                       {sub.subscription_number && (
-                        <span className="text-[10px] font-mono" style={{ color: "var(--txt3)" }}>{sub.subscription_number}</span>
+                        <span className="font-mono text-[10px]" style={{ color: "var(--txt3)" }}>
+                          {sub.subscription_number}
+                        </span>
                       )}
                     </div>
                     <div className="flex items-center gap-3">
                       {sub.cancellation_reason && (
-                        <span className="text-[10px] italic hidden sm:inline" style={{ color: "var(--txt3)" }}>
+                        <span
+                          className="hidden text-[10px] italic sm:inline"
+                          style={{ color: "var(--txt3)" }}
+                        >
                           {reasonLabels[sub.cancellation_reason] || sub.cancellation_reason}
                         </span>
                       )}
                       <span className="text-[10px]" style={{ color: "var(--txt3)" }}>
-                        {started} — {sub.status === "active" || sub.status === "cancellation_requested" ? "Present" : ended}
+                        {started} —{" "}
+                        {sub.status === "active" || sub.status === "cancellation_requested"
+                          ? "Present"
+                          : ended}
                       </span>
                     </div>
                   </div>
                 );
               })}
               {/* Extra credit purchases */}
-              {invoices.filter((inv: any) => (inv.notes || "").toLowerCase().includes("extra credits")).slice(0, 5).map((inv: any) => {
-                const creditMatch = (inv.notes || "").match(/Extra credits:\s*(\d+)\s*design credits/i);
-                const creditCount = creditMatch ? creditMatch[1] : "?";
-                return (
-                  <div key={`credit-${inv.id}`} className="flex items-center justify-between p-2.5 rounded-lg" style={{ borderBottom: "1px solid var(--border)" }}>
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded" style={{ background: "rgba(245,158,11,0.1)", color: "#F59E0B" }}>
-                        +{creditCount}
-                      </span>
-                      <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded" style={{ background: "rgba(22,163,74,0.08)", color: inv.status === "paid" ? "#16A34A" : "#F59E0B" }}>
-                        {inv.status === "paid" ? "Credited" : "Pending"}
-                      </span>
-                      <span className="text-[10px] font-mono" style={{ color: "var(--txt3)" }}>{inv.invoice_number}</span>
+              {invoices
+                .filter((inv: any) => (inv.notes || "").toLowerCase().includes("extra credits"))
+                .slice(0, 5)
+                .map((inv: any) => {
+                  const creditMatch = (inv.notes || "").match(
+                    /Extra credits:\s*(\d+)\s*design credits/i
+                  );
+                  const creditCount = creditMatch ? creditMatch[1] : "?";
+                  return (
+                    <div
+                      key={`credit-${inv.id}`}
+                      className="flex items-center justify-between rounded-lg p-2.5"
+                      style={{ borderBottom: "1px solid var(--border)" }}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span
+                          className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase"
+                          style={{ background: "rgba(245,158,11,0.1)", color: "#F59E0B" }}
+                        >
+                          +{creditCount}
+                        </span>
+                        <span
+                          className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase"
+                          style={{
+                            background: "rgba(22,163,74,0.08)",
+                            color: inv.status === "paid" ? "#16A34A" : "#F59E0B",
+                          }}
+                        >
+                          {inv.status === "paid" ? "Credited" : "Pending"}
+                        </span>
+                        <span className="font-mono text-[10px]" style={{ color: "var(--txt3)" }}>
+                          {inv.invoice_number}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[11px] font-semibold" style={{ color: "var(--txt)" }}>
+                          ${Number(inv.amount).toFixed(0)}
+                        </span>
+                        <span className="text-[10px]" style={{ color: "var(--txt3)" }}>
+                          {new Date(inv.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[11px] font-semibold" style={{ color: "var(--txt)" }}>${Number(inv.amount).toFixed(0)}</span>
-                      <span className="text-[10px]" style={{ color: "var(--txt3)" }}>
-                        {new Date(inv.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           </div>
         )}
 
         {/* Why subscribe — only for non-subscribers */}
-        {!currentSub && <div className="text-center mb-6">
-          <h3 className="font-syne font-bold text-[18px] sm:text-[22px] mb-4" style={{ color: "var(--txt)" }}>Why Subscribe?</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {[
-              [Zap, "Lower price per design"],
-              [Clock, "Priority turnaround"],
-              [Headphones, "Dedicated support"],
-              [Shield, "Consistent quality"],
-              [Sparkles, "Roll over 30 days"],
-            ].map(([Icon, text]) => (
-              <div key={text} className="flex flex-col items-center gap-1.5 p-3 rounded-xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-                <Icon size={18} style={{ color: "#2563EB" }} />
-                <span className="text-[10px] sm:text-[11px] font-semibold text-center" style={{ color: "var(--txt2)" }}>{text}</span>
-              </div>
-            ))}
+        {!currentSub && (
+          <div className="mb-6 text-center">
+            <h3
+              className="mb-4 font-syne text-[18px] font-bold sm:text-[22px]"
+              style={{ color: "var(--txt)" }}
+            >
+              Why Subscribe?
+            </h3>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+              {[
+                [Zap, "Lower price per design"],
+                [Clock, "Priority turnaround"],
+                [Headphones, "Dedicated support"],
+                [Shield, "Consistent quality"],
+                [Sparkles, "Roll over 30 days"],
+              ].map(([Icon, text]) => (
+                <div
+                  key={text}
+                  className="flex flex-col items-center gap-1.5 rounded-xl p-3"
+                  style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+                >
+                  <Icon size={18} style={{ color: "#2563EB" }} />
+                  <span
+                    className="text-center text-[10px] font-semibold sm:text-[11px]"
+                    style={{ color: "var(--txt2)" }}
+                  >
+                    {text}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-        }
+        )}
 
         {/* Cancel Confirmation Modal */}
         {showCancelModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/50 " onClick={() => setShowCancelModal(false)} />
+            <div
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setShowCancelModal(false)}
+            />
             {/* Modal */}
-            <div className="relative w-full max-w-[420px] rounded-2xl p-5 sm:p-6 shadow-2xl animate-fade-in-up" style={{ background: "var(--surface)", border: "1px solid var(--border2)" }}>
-              <div className="text-center mb-5">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: "rgba(220,38,38,0.1)" }}>
+            <div
+              className="relative w-full max-w-[420px] animate-fade-in-up rounded-2xl p-5 shadow-2xl sm:p-6"
+              style={{ background: "var(--surface)", border: "1px solid var(--border2)" }}
+            >
+              <div className="mb-5 text-center">
+                <div
+                  className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full"
+                  style={{ background: "rgba(220,38,38,0.1)" }}
+                >
                   <AlertTriangle size={24} style={{ color: "#DC2626" }} />
                 </div>
-                <h3 className="font-syne font-bold text-[16px] sm:text-[18px]" style={{ color: "var(--txt)" }}>
+                <h3
+                  className="font-syne text-[16px] font-bold sm:text-[18px]"
+                  style={{ color: "var(--txt)" }}
+                >
                   Cancel {currentSub?.plan?.toUpperCase()} Plan?
                 </h3>
-                <p className="text-[12px] mt-1" style={{ color: "var(--txt3)" }}>
-                  Your cancellation will be reviewed by our team before processing. Your plan remains active until confirmed.
+                <p className="mt-1 text-[12px]" style={{ color: "var(--txt3)" }}>
+                  Your cancellation will be reviewed by our team before processing. Your plan
+                  remains active until confirmed.
                 </p>
               </div>
 
               {/* Reason selector */}
               <div className="mb-4">
-                <label className="block text-[11px] font-semibold mb-2" style={{ color: "var(--txt2)" }}>
-                  <MessageSquare size={12} className="inline mr-1" />
+                <label
+                  className="mb-2 block text-[11px] font-semibold"
+                  style={{ color: "var(--txt2)" }}
+                >
+                  <MessageSquare size={12} className="mr-1 inline" />
                   Why are you cancelling?
                 </label>
                 <div className="space-y-1.5">
                   {CANCELLATION_REASONS.map(({ value, label }) => (
                     <label
                       key={value}
-                      className={`flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer transition-all border text-[12px] font-medium ${
+                      className={`flex cursor-pointer items-center gap-2.5 rounded-xl border p-2.5 text-[12px] font-medium transition-all ${
                         cancelReason === value
                           ? "border-[#DC2626]/30 bg-[#DC2626]/5"
                           : "border-transparent hover:bg-[var(--elevated)]"
@@ -823,13 +1324,17 @@ export function SubscribePlans() {
                         name="cancelReason"
                         value={value}
                         checked={cancelReason === value}
-                        onChange={e => setCancelReason(e.target.value as CancellationReason)}
+                        onChange={(e) => setCancelReason(e.target.value as CancellationReason)}
                         className="sr-only"
                       />
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                        cancelReason === value ? "border-[#DC2626]" : "border-[var(--border2)]"
-                      }`}>
-                        {cancelReason === value && <div className="w-2 h-2 rounded-full bg-[#DC2626]" />}
+                      <div
+                        className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2 ${
+                          cancelReason === value ? "border-[#DC2626]" : "border-[var(--border2)]"
+                        }`}
+                      >
+                        {cancelReason === value && (
+                          <div className="h-2 w-2 rounded-full bg-[#DC2626]" />
+                        )}
                       </div>
                       {label}
                     </label>
@@ -839,15 +1344,18 @@ export function SubscribePlans() {
 
               {/* Optional notes */}
               <div className="mb-5">
-                <label className="block text-[11px] font-semibold mb-1.5" style={{ color: "var(--txt2)" }}>
+                <label
+                  className="mb-1.5 block text-[11px] font-semibold"
+                  style={{ color: "var(--txt2)" }}
+                >
                   Additional feedback (optional)
                 </label>
                 <textarea
                   value={cancelNotes}
-                  onChange={e => setCancelNotes(e.target.value)}
+                  onChange={(e) => setCancelNotes(e.target.value)}
                   placeholder="Tell us more about your experience..."
                   rows={2}
-                  className="w-full p-2.5 rounded-xl text-[12px] resize-none outline-none transition-all"
+                  className="w-full resize-none rounded-xl p-2.5 text-[12px] outline-none transition-all"
                   style={{
                     background: "var(--elevated)",
                     border: "1px solid var(--border2)",
@@ -861,14 +1369,14 @@ export function SubscribePlans() {
                 <button
                   onClick={() => setShowCancelModal(false)}
                   disabled={false}
-                  className="flex-1 py-2.5 rounded-xl text-[12px] font-semibold border cursor-pointer disabled:opacity-50 transition-all"
+                  className="flex-1 cursor-pointer rounded-xl border py-2.5 text-[12px] font-semibold transition-all disabled:opacity-50"
                   style={{ borderColor: "var(--border2)", color: "var(--txt2)" }}
                 >
                   Keep Plan
                 </button>
                 <button
                   onClick={() => cancelPlan(cancelReason || undefined, cancelNotes || undefined)}
-                  className="flex-1 py-2.5 rounded-xl text-[12px] font-bold border-none cursor-pointer transition-all text-white"
+                  className="flex-1 cursor-pointer rounded-xl border-none py-2.5 text-[12px] font-bold text-white transition-all"
                   style={{ background: "#DC2626" }}
                 >
                   Confirm Cancel

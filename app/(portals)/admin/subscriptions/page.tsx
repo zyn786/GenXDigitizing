@@ -36,7 +36,12 @@ export default async function AdminSubscriptionsPage() {
     .eq("key", "subscription_payment_link")
     .maybeSingle();
 
-  console.log("[admin/subscriptions] subs count:", subs?.length, "invoices count:", invoices?.length);
+  console.log(
+    "[admin/subscriptions] subs count:",
+    subs?.length,
+    "invoices count:",
+    invoices?.length
+  );
 
   return (
     <>

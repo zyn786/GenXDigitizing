@@ -17,7 +17,8 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "About genxdigitizing — Professional Embroidery Digitizing Team",
-    description: "Meet the digitizers behind our production-ready embroidery files. Manual digitizing, free revisions, global delivery.",
+    description:
+      "Meet the digitizers behind our production-ready embroidery files. Manual digitizing, free revisions, global delivery.",
     type: "website",
   },
 };

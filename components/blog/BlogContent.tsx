@@ -12,10 +12,18 @@ function renderInline(text: string) {
   const parts = text.split(/(\*\*\*.*?\*\*\*|\*\*.*?\*\*|\*.*?\*)/);
   return parts.map((part, i) => {
     if (part.startsWith("***") && part.endsWith("***")) {
-      return <strong key={i} className="text-[var(--txt)]"><em>{part.slice(3, -3)}</em></strong>;
+      return (
+        <strong key={i} className="text-[var(--txt)]">
+          <em>{part.slice(3, -3)}</em>
+        </strong>
+      );
     }
     if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} className="text-[var(--txt)] font-semibold">{part.slice(2, -2)}</strong>;
+      return (
+        <strong key={i} className="font-semibold text-[var(--txt)]">
+          {part.slice(2, -2)}
+        </strong>
+      );
     }
     if (part.startsWith("*") && part.endsWith("*") && !part.startsWith("**")) {
       return <em key={i}>{part.slice(1, -1)}</em>;
@@ -32,24 +40,40 @@ function SectionBlock({ block }: { block: string }) {
     const headerRow = lines[0];
     const dataRows = lines.slice(1).filter((r) => !r.match(/^\|[\s\-:]+\|[\s\-:]+/));
     if (dataRows.length === 0) return null;
-    const headers = headerRow.split("|").filter(Boolean).map((h) => h.trim());
+    const headers = headerRow
+      .split("|")
+      .filter(Boolean)
+      .map((h) => h.trim());
     return (
-      <div className="overflow-x-auto my-5 rounded-xl border border-[var(--border)]">
+      <div className="my-5 overflow-x-auto rounded-xl border border-[var(--border)]">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-[var(--elevated)]">
               {headers.map((h) => (
-                <th key={h} className="text-left px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-[var(--txt2)]">{h}</th>
+                <th
+                  key={h}
+                  className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-[var(--txt2)]"
+                >
+                  {h}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {dataRows.map((row, ri) => {
-              const cells = row.split("|").filter(Boolean).map((c) => c.trim());
+              const cells = row
+                .split("|")
+                .filter(Boolean)
+                .map((c) => c.trim());
               return (
                 <tr key={ri} className="border-t border-[var(--border)] even:bg-[var(--surface)]">
                   {cells.map((cell, ci) => (
-                    <td key={ci} className="px-4 py-3 text-[13px] sm:text-sm text-[var(--txt2)] leading-relaxed">{renderInline(cell)}</td>
+                    <td
+                      key={ci}
+                      className="px-4 py-3 text-[13px] leading-relaxed text-[var(--txt2)] sm:text-sm"
+                    >
+                      {renderInline(cell)}
+                    </td>
                   ))}
                 </tr>
               );
@@ -62,14 +86,22 @@ function SectionBlock({ block }: { block: string }) {
   // Bullet lists
   if (block.match(/^[-•]\s/m)) {
     const items = block.split("\n").filter((l) => l.match(/^[-•]\s/));
-    if (items.length === 0) return <p className="text-[15px] sm:text-base text-[var(--txt2)] leading-relaxed">{renderInline(block)}</p>;
+    if (items.length === 0)
+      return (
+        <p className="text-[15px] leading-relaxed text-[var(--txt2)] sm:text-base">
+          {renderInline(block)}
+        </p>
+      );
     return (
-      <ul className="space-y-2 pl-0 list-none">
+      <ul className="list-none space-y-2 pl-0">
         {items.map((item, k) => {
           const clean = item.replace(/^[-•]\s*/, "");
           return (
-            <li key={k} className="flex items-start gap-3 text-[15px] sm:text-base text-[var(--txt2)] leading-relaxed">
-              <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#2563EB]/40 flex-shrink-0" />
+            <li
+              key={k}
+              className="flex items-start gap-3 text-[15px] leading-relaxed text-[var(--txt2)] sm:text-base"
+            >
+              <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#2563EB]/40" />
               <span>{renderInline(clean)}</span>
             </li>
           );
@@ -80,14 +112,24 @@ function SectionBlock({ block }: { block: string }) {
   // Numbered lists
   if (block.match(/^\d+\.\s/m)) {
     const items = block.split("\n").filter((l) => l.match(/^\d+\.\s/));
-    if (items.length === 0) return <p className="text-[15px] sm:text-base text-[var(--txt2)] leading-relaxed">{renderInline(block)}</p>;
+    if (items.length === 0)
+      return (
+        <p className="text-[15px] leading-relaxed text-[var(--txt2)] sm:text-base">
+          {renderInline(block)}
+        </p>
+      );
     return (
-      <ol className="space-y-2 pl-0 list-none">
+      <ol className="list-none space-y-2 pl-0">
         {items.map((item, k) => {
           const clean = item.replace(/^\d+\.\s*/, "");
           return (
-            <li key={k} className="flex items-start gap-3 text-[15px] sm:text-base text-[var(--txt2)] leading-relaxed">
-              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#2563EB]/10 text-[#2563EB] text-xs font-bold flex items-center justify-center mt-0.5">{k + 1}</span>
+            <li
+              key={k}
+              className="flex items-start gap-3 text-[15px] leading-relaxed text-[var(--txt2)] sm:text-base"
+            >
+              <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#2563EB]/10 text-xs font-bold text-[#2563EB]">
+                {k + 1}
+              </span>
               <span>{renderInline(clean)}</span>
             </li>
           );
@@ -96,13 +138,20 @@ function SectionBlock({ block }: { block: string }) {
     );
   }
   // Bold-definition pattern
-  if (block.includes("**") && block.split("\n").length > 1 && block.split("\n").every((l) => l.trim().startsWith("**") || l.trim() === "")) {
+  if (
+    block.includes("**") &&
+    block.split("\n").length > 1 &&
+    block.split("\n").every((l) => l.trim().startsWith("**") || l.trim() === "")
+  ) {
     const items = block.split("\n").filter((l) => l.trim().startsWith("**"));
     return (
       <div className="space-y-2">
         {items.map((item, k) => (
-          <p key={k} className="text-[15px] sm:text-base text-[var(--txt2)] leading-relaxed flex items-start gap-2">
-            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#2563EB]/30 flex-shrink-0" />
+          <p
+            key={k}
+            className="flex items-start gap-2 text-[15px] leading-relaxed text-[var(--txt2)] sm:text-base"
+          >
+            <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#2563EB]/30" />
             <span>{renderInline(item.trim())}</span>
           </p>
         ))}
@@ -113,86 +162,143 @@ function SectionBlock({ block }: { block: string }) {
   const lines = block.split("\n").filter(Boolean);
   if (lines.length > 1 && !block.startsWith("|") && !block.match(/^[-•\d]+\s/m)) {
     return (
-      <p className="text-[15px] sm:text-base text-[var(--txt2)] leading-relaxed">
+      <p className="text-[15px] leading-relaxed text-[var(--txt2)] sm:text-base">
         {lines.map((line, li) => (
-          <span key={li}>{li > 0 && <><br /></>}{renderInline(line)}</span>
+          <span key={li}>
+            {li > 0 && (
+              <>
+                <br />
+              </>
+            )}
+            {renderInline(line)}
+          </span>
         ))}
       </p>
     );
   }
   return (
-    <p className="text-[15px] sm:text-base text-[var(--txt2)] leading-relaxed">
+    <p className="text-[15px] leading-relaxed text-[var(--txt2)] sm:text-base">
       {renderInline(block)}
     </p>
   );
 }
 
-export default function BlogContent({ post, showBack = true, children }: { post: BlogPost; showBack?: boolean; children?: React.ReactNode }) {
+export default function BlogContent({
+  post,
+  showBack = true,
+  children,
+}: {
+  post: BlogPost;
+  showBack?: boolean;
+  children?: React.ReactNode;
+}) {
   return (
-    <div className="bg-[var(--bg)] text-[var(--txt)] overflow-x-hidden">
+    <div className="overflow-x-hidden bg-[var(--bg)] text-[var(--txt)]">
       {/* Hero */}
-      <section className="relative text-center pt-12 sm:pt-16 pb-8 sm:pb-10 px-4 sm:px-6">
-        <GradientOrb color={post.hero.color} size={260} className="top-[-80px] left-1/2 -translate-x-1/2 opacity-10" />
-        <div className="flex items-center justify-center gap-2 mb-5">
+      <section className="relative px-4 pb-8 pt-12 text-center sm:px-6 sm:pb-10 sm:pt-16">
+        <GradientOrb
+          color={post.hero.color}
+          size={260}
+          className="left-1/2 top-[-80px] -translate-x-1/2 opacity-10"
+        />
+        <div className="mb-5 flex items-center justify-center gap-2">
           {showBack && (
             <Link
               href="/blog"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium bg-[var(--elevated)] border border-[var(--border)] text-[var(--txt2)] hover:text-[var(--txt)] hover:border-[var(--border3)] hover:-translate-y-px transition-all duration-200 no-underline"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--elevated)] px-3.5 py-2 text-xs font-medium text-[var(--txt2)] no-underline transition-all duration-200 hover:-translate-y-px hover:border-[var(--border3)] hover:text-[var(--txt)]"
             >
               <ArrowLeft size={13} />
               All Posts
             </Link>
           )}
           <span
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold"
-            style={{ background: `${post.hero.color}15`, color: post.hero.color, border: `1px solid ${post.hero.color}25` }}
+            className="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold"
+            style={{
+              background: `${post.hero.color}15`,
+              color: post.hero.color,
+              border: `1px solid ${post.hero.color}25`,
+            }}
           >
             {post.hero.emoji} {post.category}
           </span>
         </div>
-        <h1 className="font-syne font-bold text-[clamp(28px,6vw,48px)] leading-[1.08] mb-3">{post.title}</h1>
-        <p className="text-sm sm:text-base text-[var(--txt2)] max-w-2xl mx-auto mb-4">{post.description}</p>
-        <div className="flex items-center justify-center gap-4 text-xs text-[var(--txt3)] mb-6">
-          <span className="flex items-center gap-1"><Calendar size={12} /> {post.date || new Date().toISOString().split("T")[0]}</span>
-          <span className="flex items-center gap-1"><Clock size={12} /> {post.readTime || "6 min read"}</span>
+        <h1 className="mb-3 font-syne text-[clamp(28px,6vw,48px)] font-bold leading-[1.08]">
+          {post.title}
+        </h1>
+        <p className="mx-auto mb-4 max-w-2xl text-sm text-[var(--txt2)] sm:text-base">
+          {post.description}
+        </p>
+        <div className="mb-6 flex items-center justify-center gap-4 text-xs text-[var(--txt3)]">
+          <span className="flex items-center gap-1">
+            <Calendar size={12} /> {post.date || new Date().toISOString().split("T")[0]}
+          </span>
+          <span className="flex items-center gap-1">
+            <Clock size={12} /> {post.readTime || "6 min read"}
+          </span>
         </div>
         {post.hero.image && (
-          <div className="max-w-[760px] mx-auto relative rounded-2xl overflow-hidden aspect-[16/9] border border-[var(--border)]">
-            <Image fill src={post.hero.image} alt={post.title} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
+          <div className="relative mx-auto aspect-[16/9] max-w-[760px] overflow-hidden rounded-2xl border border-[var(--border)]">
+            <Image
+              fill
+              src={post.hero.image}
+              alt={post.title}
+              className="object-cover"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, 800px"
+            />
           </div>
         )}
       </section>
 
       {/* Content */}
       <section className="pb-12 sm:pb-16">
-        <article className="max-w-[720px] mx-auto px-4 sm:px-6">
+        <article className="mx-auto max-w-[720px] px-4 sm:px-6">
           <AnimatedSection>
             <div className="space-y-12 sm:space-y-16">
               {post.sections.map((section, i) => (
                 <div key={i}>
                   {/* Heading with left accent bar */}
-                  <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-5">
+                  <div className="mb-4 flex items-start gap-3 sm:mb-5 sm:gap-4">
                     <div
-                      className="mt-1.5 sm:mt-2 w-1 sm:w-1.5 h-6 sm:h-8 rounded-full flex-shrink-0"
-                      style={{ background: `linear-gradient(180deg, ${post.hero.color}, ${post.hero.color}40)` }}
+                      className="mt-1.5 h-6 w-1 flex-shrink-0 rounded-full sm:mt-2 sm:h-8 sm:w-1.5"
+                      style={{
+                        background: `linear-gradient(180deg, ${post.hero.color}, ${post.hero.color}40)`,
+                      }}
                     />
-                    <h2 className="font-syne font-bold text-xl sm:text-2xl md:text-3xl text-[var(--txt)] leading-snug">{section.heading}</h2>
+                    <h2 className="font-syne text-xl font-bold leading-snug text-[var(--txt)] sm:text-2xl md:text-3xl">
+                      {section.heading}
+                    </h2>
                   </div>
 
                   {/* Layout: image-top (single full-width image) */}
-                  {(section.layout === "image-top" || (!section.layout && section.image)) && section.image && (
-                    <div className="relative rounded-2xl overflow-hidden aspect-[16/9] border border-[var(--border)] mb-5">
-                      <Image fill src={section.image} alt={section.heading} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
-                    </div>
-                  )}
+                  {(section.layout === "image-top" || (!section.layout && section.image)) &&
+                    section.image && (
+                      <div className="relative mb-5 aspect-[16/9] overflow-hidden rounded-2xl border border-[var(--border)]">
+                        <Image
+                          fill
+                          src={section.image}
+                          alt={section.heading}
+                          className="object-cover"
+                          loading="lazy"
+                          sizes="(max-width: 768px) 100vw, 800px"
+                        />
+                      </div>
+                    )}
 
                   {/* Layout: image-left — image beside text */}
                   {section.layout === "image-left" && section.image && (
-                    <div className="grid sm:grid-cols-2 gap-4 sm:gap-5 mb-5 items-start">
-                      <div className="relative rounded-xl overflow-hidden aspect-[4/3] border border-[var(--border)]">
-                        <Image fill src={section.image} alt={section.heading} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
+                    <div className="mb-5 grid items-start gap-4 sm:grid-cols-2 sm:gap-5">
+                      <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-[var(--border)]">
+                        <Image
+                          fill
+                          src={section.image}
+                          alt={section.heading}
+                          className="object-cover"
+                          loading="lazy"
+                          sizes="(max-width: 768px) 100vw, 800px"
+                        />
                       </div>
-                      <div className="text-[15px] sm:text-base text-[var(--txt2)] leading-relaxed">
+                      <div className="text-[15px] leading-relaxed text-[var(--txt2)] sm:text-base">
                         {section.body.split(/\n{2,}/).map((block, j) => (
                           <SectionBlock key={j} block={block} />
                         ))}
@@ -202,31 +308,56 @@ export default function BlogContent({ post, showBack = true, children }: { post:
 
                   {/* Layout: image-right — text beside image */}
                   {section.layout === "image-right" && section.image && (
-                    <div className="grid sm:grid-cols-2 gap-4 sm:gap-5 mb-5 items-start">
-                      <div className="text-[15px] sm:text-base text-[var(--txt2)] leading-relaxed order-2 sm:order-1">
+                    <div className="mb-5 grid items-start gap-4 sm:grid-cols-2 sm:gap-5">
+                      <div className="order-2 text-[15px] leading-relaxed text-[var(--txt2)] sm:order-1 sm:text-base">
                         {section.body.split(/\n{2,}/).map((block, j) => (
                           <SectionBlock key={j} block={block} />
                         ))}
                       </div>
-                      <div className="relative rounded-xl overflow-hidden aspect-[4/3] border border-[var(--border)] order-1 sm:order-2">
-                        <Image fill src={section.image} alt={section.heading} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
+                      <div className="relative order-1 aspect-[4/3] overflow-hidden rounded-xl border border-[var(--border)] sm:order-2">
+                        <Image
+                          fill
+                          src={section.image}
+                          alt={section.heading}
+                          className="object-cover"
+                          loading="lazy"
+                          sizes="(max-width: 768px) 100vw, 800px"
+                        />
                       </div>
                     </div>
                   )}
 
                   {/* Layout: comparison — before/after */}
                   {section.layout === "comparison" && (section.images || []).length >= 2 && (
-                    <div className="grid grid-cols-2 gap-3 mb-5">
-                      <div className="rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--surface)]">
-                        <div className="px-3 py-2 border-b border-[var(--border)] text-[10px] font-bold uppercase tracking-wider text-[var(--txt2)] text-center">Before</div>
+                    <div className="mb-5 grid grid-cols-2 gap-3">
+                      <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+                        <div className="border-b border-[var(--border)] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-[var(--txt2)]">
+                          Before
+                        </div>
                         <div className="relative aspect-[4/3]">
-                          <Image fill src={(section.images || [])[0]} alt="Before" className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
+                          <Image
+                            fill
+                            src={(section.images || [])[0]}
+                            alt="Before"
+                            className="object-cover"
+                            loading="lazy"
+                            sizes="(max-width: 768px) 100vw, 800px"
+                          />
                         </div>
                       </div>
-                      <div className="rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--surface)]">
-                        <div className="px-3 py-2 border-b border-[var(--border)] text-[10px] font-bold uppercase tracking-wider text-[var(--txt2)] text-center">After</div>
+                      <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+                        <div className="border-b border-[var(--border)] px-3 py-2 text-center text-[10px] font-bold uppercase tracking-wider text-[var(--txt2)]">
+                          After
+                        </div>
                         <div className="relative aspect-[4/3]">
-                          <Image fill src={(section.images || [])[1]} alt="After" className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
+                          <Image
+                            fill
+                            src={(section.images || [])[1]}
+                            alt="After"
+                            className="object-cover"
+                            loading="lazy"
+                            sizes="(max-width: 768px) 100vw, 800px"
+                          />
                         </div>
                       </div>
                     </div>
@@ -234,10 +365,20 @@ export default function BlogContent({ post, showBack = true, children }: { post:
 
                   {/* Layout: image-grid-2 */}
                   {section.layout === "image-grid-2" && (section.images || []).length > 0 && (
-                    <div className="grid grid-cols-2 gap-3 mb-5">
+                    <div className="mb-5 grid grid-cols-2 gap-3">
                       {(section.images || []).map((url, imgIdx) => (
-                        <div key={imgIdx} className="relative rounded-xl overflow-hidden aspect-[4/3] border border-[var(--border)]">
-                          <Image fill src={url} alt={`${section.heading} — image ${imgIdx + 1}`} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
+                        <div
+                          key={imgIdx}
+                          className="relative aspect-[4/3] overflow-hidden rounded-xl border border-[var(--border)]"
+                        >
+                          <Image
+                            fill
+                            src={url}
+                            alt={`${section.heading} — image ${imgIdx + 1}`}
+                            className="object-cover"
+                            loading="lazy"
+                            sizes="(max-width: 768px) 100vw, 800px"
+                          />
                         </div>
                       ))}
                     </div>
@@ -245,10 +386,20 @@ export default function BlogContent({ post, showBack = true, children }: { post:
 
                   {/* Layout: image-grid-3 */}
                   {section.layout === "image-grid-3" && (section.images || []).length > 0 && (
-                    <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5">
+                    <div className="mb-5 grid grid-cols-3 gap-2 sm:gap-3">
                       {(section.images || []).map((url, imgIdx) => (
-                        <div key={imgIdx} className="relative rounded-xl overflow-hidden aspect-square border border-[var(--border)]">
-                          <Image fill src={url} alt={`${section.heading} — image ${imgIdx + 1}`} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
+                        <div
+                          key={imgIdx}
+                          className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border)]"
+                        >
+                          <Image
+                            fill
+                            src={url}
+                            alt={`${section.heading} — image ${imgIdx + 1}`}
+                            className="object-cover"
+                            loading="lazy"
+                            sizes="(max-width: 768px) 100vw, 800px"
+                          />
                         </div>
                       ))}
                     </div>
@@ -256,10 +407,20 @@ export default function BlogContent({ post, showBack = true, children }: { post:
 
                   {/* Layout: image-grid-4 */}
                   {section.layout === "image-grid-4" && (section.images || []).length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-5">
+                    <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
                       {(section.images || []).map((url, imgIdx) => (
-                        <div key={imgIdx} className="relative rounded-xl overflow-hidden aspect-square border border-[var(--border)]">
-                          <Image fill src={url} alt={`${section.heading} — image ${imgIdx + 1}`} className="object-cover" loading="lazy"  sizes="(max-width: 768px) 100vw, 800px" />
+                        <div
+                          key={imgIdx}
+                          className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border)]"
+                        >
+                          <Image
+                            fill
+                            src={url}
+                            alt={`${section.heading} — image ${imgIdx + 1}`}
+                            className="object-cover"
+                            loading="lazy"
+                            sizes="(max-width: 768px) 100vw, 800px"
+                          />
                         </div>
                       ))}
                     </div>
@@ -279,14 +440,16 @@ export default function BlogContent({ post, showBack = true, children }: { post:
 
             {/* Internal Links */}
             {post.internalLinks.length > 0 && (
-              <div className="mt-12 p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
-                <h3 className="font-syne font-bold text-sm mb-3 text-[var(--txt)]">Continue Reading</h3>
+              <div className="mt-12 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
+                <h3 className="mb-3 font-syne text-sm font-bold text-[var(--txt)]">
+                  Continue Reading
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {post.internalLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="text-xs font-medium text-[#2563EB] hover:underline px-3 py-1.5 rounded-full bg-[#2563EB]/5 border border-[#2563EB]/15 transition-colors hover:bg-[#2563EB]/10"
+                      className="rounded-full border border-[#2563EB]/15 bg-[#2563EB]/5 px-3 py-1.5 text-xs font-medium text-[#2563EB] transition-colors hover:bg-[#2563EB]/10 hover:underline"
                     >
                       {link.text}
                     </Link>
@@ -299,9 +462,9 @@ export default function BlogContent({ post, showBack = true, children }: { post:
             {children}
 
             {/* CTA */}
-            <div className="mt-12 text-center p-6 sm:p-8 rounded-2xl bg-white/90 border border-[var(--border)]">
-              <h3 className="font-syne font-bold text-lg sm:text-xl mb-2">Ready to Get Started?</h3>
-              <p className="text-sm text-[var(--txt2)] mb-5 max-w-md mx-auto leading-relaxed">
+            <div className="mt-12 rounded-2xl border border-[var(--border)] bg-white/90 p-6 text-center sm:p-8">
+              <h3 className="mb-2 font-syne text-lg font-bold sm:text-xl">Ready to Get Started?</h3>
+              <p className="mx-auto mb-5 max-w-md text-sm leading-relaxed text-[var(--txt2)]">
                 {post.cta.text}
               </p>
               <Link href={post.cta.href}>

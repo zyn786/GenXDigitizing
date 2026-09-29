@@ -2,8 +2,8 @@
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient }         from "@/lib/supabase/server";
-import { getAdminUser }              from "@/lib/supabase/get-user";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getAdminUser } from "@/lib/supabase/get-user";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,11 +16,17 @@ export async function POST(req: NextRequest) {
     const { email, full_name, password } = body;
 
     if (!email || !full_name || !password) {
-      return NextResponse.json({ error: "email, full_name, and password are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "email, full_name, and password are required" },
+        { status: 400 }
+      );
     }
 
     if (password.length < 6) {
-      return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Password must be at least 6 characters" },
+        { status: 400 }
+      );
     }
 
     const supabase = createAdminClient();
@@ -46,8 +52,8 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "apikey": serviceKey,
-        "Authorization": `Bearer ${serviceKey}`,
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
       },
       body: JSON.stringify({
         email,
@@ -60,9 +66,12 @@ export async function POST(req: NextRequest) {
     if (!authRes.ok) {
       const err = await authRes.json().catch(() => ({}));
       console.error("[create-designer] Auth API error:", err);
-      return NextResponse.json({
-        error: (err as any).msg ?? (err as any).message ?? "Failed to create auth user",
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: (err as any).msg ?? (err as any).message ?? "Failed to create auth user",
+        },
+        { status: 500 }
+      );
     }
 
     const authUser = await authRes.json();
@@ -70,7 +79,7 @@ export async function POST(req: NextRequest) {
 
     // The handle_new_user trigger creates public.users + public.designers rows.
     // Wait briefly then verify the designer row exists.
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
 
     const { data: designerRow } = await supabase
       .from("designers")
@@ -98,8 +107,8 @@ export async function POST(req: NextRequest) {
         await fetch(`${supabaseUrl}/auth/v1/admin/users/${userId}`, {
           method: "DELETE",
           headers: {
-            "apikey": serviceKey,
-            "Authorization": `Bearer ${serviceKey}`,
+            apikey: serviceKey,
+            Authorization: `Bearer ${serviceKey}`,
           },
         });
         return NextResponse.json({ error: "Failed to create designer profile" }, { status: 500 });
@@ -113,21 +122,15 @@ export async function POST(req: NextRequest) {
     }
 
     // Ensure public.users has correct full_name
-    await supabase.from("users")
-      .update({ full_name, role: "designer" })
-      .eq("id", userId);
+    await supabase.from("users").update({ full_name, role: "designer" }).eq("id", userId);
 
     return NextResponse.json({
       success: true,
       designer_id: designerRow.id,
       user_id: userId,
     });
-
   } catch (err: any) {
     console.error("[create-designer] Error:", err);
-    return NextResponse.json(
-      { error: err.message ?? "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err.message ?? "Internal server error" }, { status: 500 });
   }
 }

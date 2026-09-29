@@ -37,31 +37,30 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "genxdigitizing" }],
   creator: "genxdigitizing",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com"
-  ),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com"),
   openGraph: {
-    type:        "website",
-    locale:      "en_US",
-    siteName:    "genxdigitizing",
-    title:       "genxdigitizing — Production-Ready Embroidery Files",
-    description: "Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. Every major machine format.",
+    type: "website",
+    locale: "en_US",
+    siteName: "genxdigitizing",
+    title: "genxdigitizing — Production-Ready Embroidery Files",
+    description:
+      "Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. Every major machine format.",
     images: [
       {
-        url:    "/images/black_logo.png",
-        width:  1200,
+        url: "/images/black_logo.png",
+        width: 1200,
         height: 630,
-        alt:    "genxdigitizing — Professional Embroidery Digitizing",
+        alt: "genxdigitizing — Professional Embroidery Digitizing",
       },
     ],
   },
   twitter: {
-    card:     "summary_large_image",
-    title:    "genxdigitizing — Production-Ready Embroidery Files",
-    images:   ["/images/black_logo.png"],
+    card: "summary_large_image",
+    title: "genxdigitizing — Production-Ready Embroidery Files",
+    images: ["/images/black_logo.png"],
   },
   robots: {
-    index:  true,
+    index: true,
     follow: true,
   },
   // Per-page canonical set individually. No global default — wrong default
@@ -70,21 +69,13 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#2563EB",
-  width:      "device-width",
+  width: "device-width",
   initialScale: 1,
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${syne.variable} ${inter.variable}`}
-    >
+    <html lang="en" suppressHydrationWarning className={`${syne.variable} ${inter.variable}`}>
       <head>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -124,9 +115,7 @@ export default function RootLayout({
         {/* Skip to content — accessibility */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[9999]
-            focus:px-4 focus:py-2 focus:bg-[#2563EB] focus:text-white focus:rounded-lg focus:text-sm focus:font-semibold
-            focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[9999] focus:rounded-lg focus:bg-[#2563EB] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"
         >
           Skip to content
         </a>
@@ -139,7 +128,7 @@ export default function RootLayout({
           toastOptions={{
             style: {
               fontFamily: "var(--font-inter), Inter, sans-serif",
-              fontSize:   "13px",
+              fontSize: "13px",
             },
           }}
         />

@@ -13,32 +13,34 @@ export function OrganizationSchema() {
     image: `${BASE_URL}/images/black_logo.png`,
     email: SITE_INFO.email,
     ...(SITE_INFO.phone ? { telephone: SITE_INFO.phone } : {}),
-    ...(SITE_INFO.address ? {
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: SITE_INFO.address.street,
-        addressLocality: SITE_INFO.address.city,
-        addressRegion: SITE_INFO.address.region,
-        postalCode: SITE_INFO.address.postalCode,
-        addressCountry: SITE_INFO.address.country,
-      },
-    } : {}),
+    ...(SITE_INFO.address
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: SITE_INFO.address.street,
+            addressLocality: SITE_INFO.address.city,
+            addressRegion: SITE_INFO.address.region,
+            postalCode: SITE_INFO.address.postalCode,
+            addressCountry: SITE_INFO.address.country,
+          },
+        }
+      : {}),
     foundingDate: String(SITE_INFO.founded),
     // No aggregateRating here. It previously carried a fabricated 4.9/5 from
     // 500 invented reviews, which is deceptive advertising and a Google
     // structured-data violation that risks a manual action. Only add
     // aggregateRating when the `reviews` table actually has published rows.
     priceRange: "$5-$30",
-    description: "Production-ready embroidery digitizing, vector art, and custom patches. From $7, 12-hour turnaround, unlimited free revisions, every major machine format.",
-    ...(SITE_INFO.social ? {
-      sameAs: Object.values(SITE_INFO.social),
-    } : {}),
+    description:
+      "Production-ready embroidery digitizing, vector art, and custom patches. From $7, 12-hour turnaround, unlimited free revisions, every major machine format.",
+    ...(SITE_INFO.social
+      ? {
+          sameAs: Object.values(SITE_INFO.social),
+        }
+      : {}),
   };
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
   );
 }
 
@@ -54,10 +56,7 @@ export function FAQSchema({ faqs }: { faqs: { q: string; a: string }[] }) {
     })),
   };
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
   );
 }
 
@@ -94,10 +93,7 @@ export function ServiceSchema({
     },
   };
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
   );
 }
 
@@ -128,10 +124,7 @@ export function VideoObjectSchema({
     ...(duration ? { duration } : {}),
   };
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
   );
 }
 
@@ -147,10 +140,11 @@ export function WebSiteSchema() {
     // structured-data violation that risks a manual action. Only add
     // aggregateRating when the `reviews` table actually has published rows.
     priceRange: "$5-$30",
-    description: "Production-ready embroidery digitizing, vector art, and custom patches. From $7, 12-hour turnaround, unlimited free revisions, every major machine format.",
+    description:
+      "Production-ready embroidery digitizing, vector art, and custom patches. From $7, 12-hour turnaround, unlimited free revisions, every major machine format.",
     potentialAction: {
       "@type": "SearchAction",
-      "target": {
+      target: {
         "@type": "EntryPoint",
         urlTemplate: `${BASE_URL}/blog?search={search_term_string}`,
       },
@@ -158,19 +152,12 @@ export function WebSiteSchema() {
     },
   };
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
   );
 }
 
 /** BreadcrumbList schema — include on every page */
-export function BreadcrumbSchema({
-  items,
-}: {
-  items: { name: string; url: string }[];
-}) {
+export function BreadcrumbSchema({ items }: { items: { name: string; url: string }[] }) {
   const data = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -182,9 +169,6 @@ export function BreadcrumbSchema({
     })),
   };
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
   );
 }

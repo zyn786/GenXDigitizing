@@ -44,10 +44,7 @@ export async function POST(req: NextRequest) {
 
     const { leadId, clientEmail, instruction } = await req.json();
     if (!leadId && !clientEmail) {
-      return NextResponse.json(
-        { error: "Provide leadId or clientEmail" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Provide leadId or clientEmail" }, { status: 400 });
     }
 
     const admin = createAdminClient();

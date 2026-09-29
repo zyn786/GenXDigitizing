@@ -30,9 +30,7 @@ export function getOptimizedUrl(
 // Generate blur placeholder URL (tiny, blurred)
 export function getBlurUrl(publicId: string): string {
   return cloudinary.url(publicId, {
-    transformation: [
-      { width: 40, effect: "blur:500", quality: 10, fetch_format: "auto" },
-    ],
+    transformation: [{ width: 40, effect: "blur:500", quality: 10, fetch_format: "auto" }],
     secure: true,
   });
 }
@@ -40,9 +38,7 @@ export function getBlurUrl(publicId: string): string {
 // Generate thumbnail URL
 export function getThumbnailUrl(publicId: string): string {
   return cloudinary.url(publicId, {
-    transformation: [
-      { width: 600, crop: "limit", fetch_format: "auto", quality: "auto" },
-    ],
+    transformation: [{ width: 600, crop: "limit", fetch_format: "auto", quality: "auto" }],
     secure: true,
   });
 }

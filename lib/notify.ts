@@ -64,7 +64,9 @@ export async function requestNotificationPermission(userId?: string): Promise<bo
     if (ctx.state === "suspended") {
       await ctx.resume();
     }
-  } catch (err) { console.warn("[requestNotificationPermission] Audio resume failed:", err); }
+  } catch (err) {
+    console.warn("[requestNotificationPermission] Audio resume failed:", err);
+  }
 
   if (Notification.permission === "granted") {
     // Also subscribe to push if userId provided
@@ -94,14 +96,18 @@ async function getToast() {
   if (!_Toast) {
     try {
       _Toast = (await import("sonner")).toast;
-    } catch { /* sonner not available */ }
+    } catch {
+      /* sonner not available */
+    }
   }
   return _Toast;
 }
 
 export function showBrowserNotification(title: string, body: string, actionUrl?: string | null) {
   if (!("Notification" in window)) {
-    console.warn("[showBrowserNotification] Notification API not available (mobile Safari / unsupported browser).");
+    console.warn(
+      "[showBrowserNotification] Notification API not available (mobile Safari / unsupported browser)."
+    );
     return false;
   }
   if (Notification.permission !== "granted") {
@@ -145,4 +151,3 @@ export function notify(title: string, body: string, actionUrl?: string | null) {
     });
   }
 }
-

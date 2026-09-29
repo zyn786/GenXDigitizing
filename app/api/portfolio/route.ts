@@ -19,6 +19,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ items, categories });
   } catch (error: any) {
     console.error("Fetch portfolio error:", error);
-    return NextResponse.json({ error: error.message || "Failed to fetch portfolio" }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Failed to fetch portfolio" },
+      { status: 500 }
+    );
   }
 }

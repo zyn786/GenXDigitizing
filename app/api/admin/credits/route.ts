@@ -11,11 +11,19 @@ export async function GET(req: NextRequest) {
   if (!clientId) return NextResponse.json({ error: "clientId required" }, { status: 400 });
 
   const admin = createAdminClient();
-  const { data: sub } = await admin.from("client_subscriptions")
-    .select("*").eq("client_id", clientId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+  const { data: sub } = await admin
+    .from("client_subscriptions")
+    .select("*")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  const { data: client } = await admin.from("clients")
-    .select("credit_balance, tier").eq("id", clientId).single();
+  const { data: client } = await admin
+    .from("clients")
+    .select("credit_balance, tier")
+    .eq("id", clientId)
+    .single();
 
   return NextResponse.json({
     credit_balance: client?.credit_balance ?? 0,
@@ -32,20 +40,27 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { clientId, amount, reason } = await req.json();
-    if (!clientId || amount == null) return NextResponse.json({ error: "clientId and amount required" }, { status: 400 });
+    if (!clientId || amount == null)
+      return NextResponse.json({ error: "clientId and amount required" }, { status: 400 });
 
     const admin = createAdminClient();
     const numAmount = Number(amount);
 
     // Get current balance
-    const { data: client } = await admin.from("clients").select("credit_balance").eq("id", clientId).single();
+    const { data: client } = await admin
+      .from("clients")
+      .select("credit_balance")
+      .eq("id", clientId)
+      .single();
     if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
     const newBalance = Math.max(0, (client.credit_balance || 0) + numAmount);
 
     // Update balance
-    const { error: updErr } = await admin.from("clients")
-      .update({ credit_balance: newBalance }).eq("id", clientId);
+    const { error: updErr } = await admin
+      .from("clients")
+      .update({ credit_balance: newBalance })
+      .eq("id", clientId);
     if (updErr) return NextResponse.json({ error: "Failed to update credits" }, { status: 500 });
 
     // Log adjustment
@@ -54,7 +69,11 @@ export async function POST(req: NextRequest) {
       action: numAmount > 0 ? "credit_add" : "credit_remove",
       entity: "client",
       entity_id: clientId,
-      new_data: { credit_balance: newBalance, adjustment: numAmount, reason: reason || "Manual adjustment" },
+      new_data: {
+        credit_balance: newBalance,
+        adjustment: numAmount,
+        reason: reason || "Manual adjustment",
+      },
     });
 
     return NextResponse.json({ ok: true, credit_balance: newBalance, adjustment: numAmount });

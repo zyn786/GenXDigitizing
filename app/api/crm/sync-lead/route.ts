@@ -23,10 +23,13 @@ export async function POST(req: NextRequest) {
 
     if (lead) {
       const activityNote = `\n[${new Date().toISOString()}] Client replied via chat — auto moved to Contacted`;
-      await admin.from("crm_leads").update({
-        stage: "contacted",
-        notes: (lead.notes || "") + activityNote,
-      }).eq("id", lead.id);
+      await admin
+        .from("crm_leads")
+        .update({
+          stage: "contacted",
+          notes: (lead.notes || "") + activityNote,
+        })
+        .eq("id", lead.id);
     }
 
     return NextResponse.json({ success: true });

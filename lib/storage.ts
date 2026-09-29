@@ -80,9 +80,7 @@ export async function signStorageUrl(
 ): Promise<string | null> {
   const supabase = createAdminClient();
   const bucket = resolveBucket(path, fileType);
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .createSignedUrl(path, expiresIn);
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
   if (!error && data?.signedUrl) return data.signedUrl;
 
   // Not in Supabase Storage — maybe a legacy S3 object
@@ -95,7 +93,10 @@ export async function signStorageUrl(
 }
 
 /** Delete an object from Supabase Storage. Returns error if any (null = success). */
-export async function deleteFromStorage(path: string, fileType?: string): Promise<{ message: string } | null> {
+export async function deleteFromStorage(
+  path: string,
+  fileType?: string
+): Promise<{ message: string } | null> {
   const supabase = createAdminClient();
   const bucket = resolveBucket(path, fileType);
   const { error } = await supabase.storage.from(bucket).remove([path]);
@@ -143,7 +144,9 @@ export async function signLegacyS3(key: string, expiresIn: number = 86400): Prom
       },
       forcePathStyle: true,
     });
-    return getSignedUrl(client, new GetObjectCommand({ Bucket: LEGACY_S3_BUCKET(), Key: key }), { expiresIn });
+    return getSignedUrl(client, new GetObjectCommand({ Bucket: LEGACY_S3_BUCKET(), Key: key }), {
+      expiresIn,
+    });
   } catch (err: any) {
     console.error("[storage] Legacy S3 sign failed:", err?.message ?? err);
     return null;

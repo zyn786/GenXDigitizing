@@ -47,8 +47,7 @@ export function LiveOrderToast({ notification, onDismiss }: LiveOrderToastProps)
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
-      className="relative flex items-start gap-3 w-[300px] sm:w-[340px] p-3.5 sm:p-4 pr-10
-        rounded-2xl pointer-events-auto select-none overflow-hidden"
+      className="pointer-events-auto relative flex w-[300px] select-none items-start gap-3 overflow-hidden rounded-2xl p-3.5 pr-10 sm:w-[340px] sm:p-4"
       style={{
         background: "#FFFFFF",
         border: "1px solid var(--border2)",
@@ -56,7 +55,10 @@ export function LiveOrderToast({ notification, onDismiss }: LiveOrderToastProps)
       }}
     >
       {/* Progress bar */}
-      <div className="absolute top-0 left-0 right-0 h-[2.5px]" style={{ background: "var(--border)" }}>
+      <div
+        className="absolute left-0 right-0 top-0 h-[2.5px]"
+        style={{ background: "var(--border)" }}
+      >
         <motion.div
           className="h-full rounded-r-full"
           style={{
@@ -71,52 +73,68 @@ export function LiveOrderToast({ notification, onDismiss }: LiveOrderToastProps)
         <motion.div
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute top-3 left-4 text-[9px] font-semibold px-2 py-0.5
-            rounded-full border z-10"
-          style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: "var(--txt3)" }}>
+          className="absolute left-4 top-3 z-10 rounded-full border px-2 py-0.5 text-[9px] font-semibold"
+          style={{
+            background: "var(--elevated)",
+            borderColor: "var(--border2)",
+            color: "var(--txt3)",
+          }}
+        >
           Paused
         </motion.div>
       )}
 
       {/* Close button */}
       <button
-        onClick={(e) => { e.stopPropagation(); onDismiss(); }}
-        className="absolute top-2.5 right-2.5 w-6 h-6 rounded-lg flex items-center justify-center
-          transition-all cursor-pointer bg-transparent border-none z-10 hover:opacity-70"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDismiss();
+        }}
+        className="absolute right-2.5 top-2.5 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent transition-all hover:opacity-70"
         style={{ color: "var(--txt3)" }}
       >
         <X size={13} />
       </button>
 
       {/* Service icon */}
-      <div className="flex flex-col items-center gap-1 flex-shrink-0 pt-0.5">
-        <span className="text-lg sm:text-xl leading-none">{emoji}</span>
+      <div className="flex flex-shrink-0 flex-col items-center gap-1 pt-0.5">
+        <span className="text-lg leading-none sm:text-xl">{emoji}</span>
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0 pt-0.5">
-        <p className="text-[12px] sm:text-[13px] leading-snug font-semibold" style={{ color: "var(--txt)" }}>
+      <div className="min-w-0 flex-1 pt-0.5">
+        <p
+          className="text-[12px] font-semibold leading-snug sm:text-[13px]"
+          style={{ color: "var(--txt)" }}
+        >
           {firstName}{" "}
-          <span className="font-normal" style={{ color: "var(--txt2)" }}>placed an order</span>
+          <span className="font-normal" style={{ color: "var(--txt2)" }}>
+            placed an order
+          </span>
         </p>
-        <p className="text-[11.5px] sm:text-[12px] mt-1 leading-snug" style={{ color: "var(--txt2)" }}>
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10.5px] sm:text-[11px] font-bold"
+        <p
+          className="mt-1 text-[11.5px] leading-snug sm:text-[12px]"
+          style={{ color: "var(--txt2)" }}
+        >
+          <span
+            className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10.5px] font-bold sm:text-[11px]"
             style={{
               background: `${accent}15`,
               color: accent,
               border: `1px solid ${accent}25`,
-            }}>
+            }}
+          >
             {emoji} {serviceLabel}
           </span>
         </p>
-        <p className="text-[10px] mt-1.5 font-medium" style={{ color: "var(--txt3)" }}>
+        <p className="mt-1.5 text-[10px] font-medium" style={{ color: "var(--txt3)" }}>
           {notification.timeAgo}
         </p>
       </div>
 
       {/* Accent dot */}
       <div
-        className="absolute bottom-3 right-3 w-1.5 h-1.5 rounded-full animate-pulse"
+        className="absolute bottom-3 right-3 h-1.5 w-1.5 animate-pulse rounded-full"
         style={{ background: accent, opacity: 0.6 }}
       />
 
@@ -125,7 +143,7 @@ export function LiveOrderToast({ notification, onDismiss }: LiveOrderToastProps)
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="absolute inset-0 rounded-2xl pointer-events-none"
+          className="pointer-events-none absolute inset-0 rounded-2xl"
           style={{
             border: `2px solid ${accent}30`,
             boxShadow: `inset 0 0 24px ${accent}08`,

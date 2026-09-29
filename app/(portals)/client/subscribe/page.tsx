@@ -8,7 +8,8 @@ import { SubscribePlans } from "./SubscribePlans";
 
 export const metadata: Metadata = {
   title: "Subscription Plans | genxdigitizing",
-  description: "Choose a monthly digitizing plan. Fixed pricing, priority turnaround, dedicated support.",
+  description:
+    "Choose a monthly digitizing plan. Fixed pricing, priority turnaround, dedicated support.",
 };
 
 export default async function ClientSubscribePage() {
@@ -16,7 +17,11 @@ export default async function ClientSubscribePage() {
 
   return (
     <>
-      <Topbar title="Plans & Billing" subtitle="Manage your subscription, credits, and billing" user={user} />
+      <Topbar
+        title="Plans & Billing"
+        subtitle="Manage your subscription, credits, and billing"
+        user={user}
+      />
       <SubscribePlans />
     </>
   );

@@ -55,17 +55,20 @@ Work through this list top-to-bottom before going live.
 ## 5. Post-Deploy Verification
 
 ### Auth flow
+
 - [ ] Register a new client account → verify confirmation email arrives
 - [ ] Confirm email → lands on `/client` dashboard
 - [ ] Verify client record was created in `public.clients`
 - [ ] Log out → log in again → correct portal loads
 
 ### Admin
+
 - [ ] Log in as admin → all 10 sidebar pages load
 - [ ] Admin → Pricing → prices display and are editable
 - [ ] Admin → Settings → company fields save
 
 ### Client order flow
+
 - [ ] Place a test order (all 4 wizard steps)
 - [ ] Confirm order appears in Admin → Orders
 - [ ] Admin creates Payoneer checkout link → invoice updated
@@ -73,11 +76,13 @@ Work through this list top-to-bottom before going live.
 - [ ] Notification bell shows new order notification
 
 ### Payoneer
+
 - [ ] Use sandbox checkout URL → complete test payment
 - [ ] Webhook fires → invoice status → `paid`, order status → `submitted`
 - [ ] Client receives payment confirmation email
 
 ### Designer flow
+
 - [ ] Create a designer user account, set role in SQL
 - [ ] Admin assigns order to designer
 - [ ] Designer logs in → task appears in /designer/tasks
@@ -85,6 +90,7 @@ Work through this list top-to-bottom before going live.
 - [ ] Admin delivers → client receives delivery email
 
 ### CRM
+
 - [ ] Submit contact form → lead appears in CRM → Leads
 - [ ] Admin notification fires
 - [ ] CRM messages thread works (send and receive)

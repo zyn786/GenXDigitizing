@@ -4,18 +4,52 @@
 
 // ── Enums ────────────────────────────────────────────────────
 
-export type UserRole     = "admin" | "crm" | "client" | "designer";
-export type OrderStatus  = "submitted" | "assigned" | "in_progress" | "review" | "approved" | "delivered" | "revision" | "refunded" | "cancelled";
-export type ServiceType  = "digitizing_standard" | "digitizing_large" | "digitizing_jumbo" | "vector_basic" | "vector_standard" | "vector_complex" | "sewout_standard" | "sewout_large" | "sewout_jumbo";
+export type UserRole = "admin" | "crm" | "client" | "designer";
+export type OrderStatus =
+  | "submitted"
+  | "assigned"
+  | "in_progress"
+  | "review"
+  | "approved"
+  | "delivered"
+  | "revision"
+  | "refunded"
+  | "cancelled";
+export type ServiceType =
+  | "digitizing_standard"
+  | "digitizing_large"
+  | "digitizing_jumbo"
+  | "vector_basic"
+  | "vector_standard"
+  | "vector_complex"
+  | "sewout_standard"
+  | "sewout_large"
+  | "sewout_jumbo";
 export type ServiceCategory = "digitizing" | "vector" | "sewout";
-export type OutputFormat = "DST" | "PES" | "EMB" | "JEF" | "XXX" | "VIP" | "HUS" | "EXP" | "VP3" | "SEW";
-export type ClientTier   = "new" | "active" | "vip";
-export type Priority     = "low" | "medium" | "high";
-export type PayStatus    = "pending" | "paid" | "refunded" | "failed";
-export type LeadStage    = "lead" | "contacted" | "quote_sent" | "negotiation" | "won" | "lost";
-export type NotifType    = "order_update" | "message" | "payment" | "system" | "sla_warning" | "review";
-export type FileType     = "artwork" | "output" | "revision";
-export type Turnaround   = "standard" | "rush" | "urgent";
+export type OutputFormat =
+  | "DST"
+  | "PES"
+  | "EMB"
+  | "JEF"
+  | "XXX"
+  | "VIP"
+  | "HUS"
+  | "EXP"
+  | "VP3"
+  | "SEW";
+export type ClientTier = "new" | "active" | "vip";
+export type Priority = "low" | "medium" | "high";
+export type PayStatus = "pending" | "paid" | "refunded" | "failed";
+export type LeadStage = "lead" | "contacted" | "quote_sent" | "negotiation" | "won" | "lost";
+export type NotifType =
+  | "order_update"
+  | "message"
+  | "payment"
+  | "system"
+  | "sla_warning"
+  | "review";
+export type FileType = "artwork" | "output" | "revision";
+export type Turnaround = "standard" | "rush" | "urgent";
 
 // ── Core Entities ─────────────────────────────────────────────
 
@@ -65,12 +99,12 @@ export interface Designer {
 }
 
 export interface ServiceTier {
-  id: string;           // e.g. "digitizing_standard"
+  id: string; // e.g. "digitizing_standard"
   category: ServiceCategory;
-  label: string;        // e.g. "Standard Design"
-  size_desc: string;    // e.g. "4″–8″"
-  price: number;        // editable by admin
-  est_hours: string;    // e.g. "12–24h"
+  label: string; // e.g. "Standard Design"
+  size_desc: string; // e.g. "4″–8″"
+  price: number; // editable by admin
+  est_hours: string; // e.g. "12–24h"
   is_big_design: boolean;
   is_active: boolean;
   sort_order: number;
@@ -271,7 +305,7 @@ export interface AdminDashStats {
 }
 
 export interface MonthlyRevenue {
-  month: string;       // "Jan", "Feb", etc.
+  month: string; // "Jan", "Feb", etc.
   year: number;
   revenue: number;
   orders: number;
@@ -296,7 +330,7 @@ export interface CreateOrderPayload {
   height_inches?: number;
   color_count?: number;
   placement_notes?: string;
-  artwork_file_url: string;  // uploaded to Storage before calling API
+  artwork_file_url: string; // uploaded to Storage before calling API
   artwork_file_name: string;
 }
 
@@ -355,17 +389,11 @@ export interface AuthUser {
   role: UserRole;
   full_name: string;
   avatar_url?: string | null;
-  client_id?: string;    // set if role === 'client'
-  designer_id?: string;  // set if role === 'designer'
+  client_id?: string; // set if role === 'client'
+  designer_id?: string; // set if role === 'designer'
 }
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 // ── Coupons ──────────────────────────────────────────────────
 export type {
@@ -381,7 +409,13 @@ export type {
 
 // ── Subscriptions ────────────────────────────────────────────
 
-export type SubscriptionStatus = "active" | "pending" | "paused" | "cancelled" | "expired" | "cancellation_requested";
+export type SubscriptionStatus =
+  | "active"
+  | "pending"
+  | "paused"
+  | "cancelled"
+  | "expired"
+  | "cancellation_requested";
 export type SubscriptionPlan = "starter" | "business" | "pro" | "pro_max";
 
 export type CancellationReason =

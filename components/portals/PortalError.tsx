@@ -15,16 +15,14 @@ export function PortalError({
   const router = useRouter();
 
   return (
-    <div className="portal-content flex items-center justify-center h-full">
-      <div className="text-center max-w-[420px] p-8">
-        <div className="text-[48px] mb-3">⚠️</div>
-        <h2 className="font-syne font-bold text-lg text-[var(--txt)] mb-2">
-          Something went wrong
-        </h2>
-        <p className="text-[13px] text-[var(--txt2)] mb-5 leading-relaxed">
+    <div className="portal-content flex h-full items-center justify-center">
+      <div className="max-w-[420px] p-8 text-center">
+        <div className="mb-3 text-[48px]">⚠️</div>
+        <h2 className="mb-2 font-syne text-lg font-bold text-[var(--txt)]">Something went wrong</h2>
+        <p className="mb-5 text-[13px] leading-relaxed text-[var(--txt2)]">
           {error.message || "An unexpected error occurred. Please try again."}
         </p>
-        <div className="flex gap-2 justify-center">
+        <div className="flex justify-center gap-2">
           <Button variant="grad" size="sm" onClick={reset}>
             Try again
           </Button>

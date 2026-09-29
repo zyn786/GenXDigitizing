@@ -7,13 +7,18 @@ export async function POST(req: NextRequest) {
   const supabase = createClient();
 
   // Auth check
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Get user role
   const { data: profile } = await supabase.from("users").select("role").eq("id", user.id).single();
   if (!profile || (profile.role !== "client" && profile.role !== "admin")) {
-    return NextResponse.json({ error: "Only clients and admins can upload artwork" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Only clients and admins can upload artwork" },
+      { status: 403 }
+    );
   }
 
   try {
@@ -29,8 +34,16 @@ export async function POST(req: NextRequest) {
 
     // Verify user has access to this order
     if (profile.role === "client") {
-      const { data: clientData } = await db.from("clients").select("id").eq("user_id", user.id).single();
-      const { data: order } = await db.from("orders").select("client_id").eq("id", orderId).single();
+      const { data: clientData } = await db
+        .from("clients")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+      const { data: order } = await db
+        .from("orders")
+        .select("client_id")
+        .eq("id", orderId)
+        .single();
       if (!order || order.client_id !== clientData?.id) {
         return NextResponse.json({ error: "You don't have access to this order" }, { status: 403 });
       }
@@ -40,7 +53,10 @@ export async function POST(req: NextRequest) {
 
     for (const file of files) {
       if (file.size > 50 * 1024 * 1024) {
-        return NextResponse.json({ error: `File ${file.name} exceeds 50MB limit` }, { status: 413 });
+        return NextResponse.json(
+          { error: `File ${file.name} exceeds 50MB limit` },
+          { status: 413 }
+        );
       }
 
       const buffer = Buffer.from(await file.arrayBuffer());

@@ -11,14 +11,14 @@ import { createServerClient } from "@supabase/ssr";
 */
 
 const PORTAL_HOME: Record<string, string> = {
-  admin:    "/admin",
-  crm:      "/crm",
-  client:   "/client",
+  admin: "/admin",
+  crm: "/crm",
+  client: "/client",
   designer: "/designer",
 };
 
 const PORTAL_PREFIXES = ["/admin", "/crm", "/client", "/designer"];
-const AUTH_PAGES      = ["/login", "/register", "/forgot-password"];
+const AUTH_PAGES = ["/login", "/register", "/forgot-password"];
 
 // ── Stale session cookie cleanup ───────────────────────────
 // Project ref of the configured Supabase instance. @supabase/ssr stores its
@@ -43,11 +43,14 @@ function isForeignAuthCookie(name: string) {
 }
 
 function authCookieNames(request: NextRequest) {
-  return request.cookies.getAll().map(c => c.name).filter(isAuthCookie);
+  return request.cookies
+    .getAll()
+    .map((c) => c.name)
+    .filter(isAuthCookie);
 }
 
 function dropCookies(response: NextResponse, names: string[]) {
-  names.forEach(name => response.cookies.set(name, "", { path: "/", maxAge: 0 }));
+  names.forEach((name) => response.cookies.set(name, "", { path: "/", maxAge: 0 }));
   return response;
 }
 
@@ -69,7 +72,10 @@ export async function middleware(request: NextRequest) {
   // Drop foreign-project cookies on every route (public ones included) — cheap,
   // no network call. Without this a dead `sb-*` cookie from another project
   // survives forever on localhost.
-  const foreign = request.cookies.getAll().map(c => c.name).filter(isForeignAuthCookie);
+  const foreign = request.cookies
+    .getAll()
+    .map((c) => c.name)
+    .filter(isForeignAuthCookie);
   return foreign.length ? dropCookies(response, foreign) : response;
 }
 
@@ -79,10 +85,10 @@ async function handleRequest(request: NextRequest) {
   // ── Always allow ─────────────────────────────────────────
   if (
     pathname.startsWith("/api/webhooks") ||
-    pathname.startsWith("/api/cron")     ||  // cron endpoints secured by x-cron-secret
+    pathname.startsWith("/api/cron") || // cron endpoints secured by x-cron-secret
     pathname.startsWith("/api/admin/email-inbound") || // Resend webhook — unauthenticated
-    pathname.startsWith("/_next")        ||
-    pathname.startsWith("/favicon")      ||
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon") ||
     pathname.match(/\.(ico|png|jpg|jpeg|svg|css|js|woff|woff2|ttf|map)$/)
   ) {
     return NextResponse.next();
@@ -98,22 +104,24 @@ async function handleRequest(request: NextRequest) {
   const isAdminApiRoute = pathname.startsWith("/api/admin/");
   const isCrmApiRoute = pathname.startsWith("/api/crm/");
   // Auth/chat endpoints that need at minimum authentication
-  const isProtectedApi = pathname.startsWith("/api/auth/auto-confirm") ||
-                         pathname.startsWith("/api/auth/send-welcome") ||
-                         pathname.startsWith("/api/chat/upload") ||
-                         pathname.startsWith("/api/review-notify") ||
-                         pathname.startsWith("/api/message-notify") ||
-                         pathname.startsWith("/api/chat/notify");
+  const isProtectedApi =
+    pathname.startsWith("/api/auth/auto-confirm") ||
+    pathname.startsWith("/api/auth/send-welcome") ||
+    pathname.startsWith("/api/chat/upload") ||
+    pathname.startsWith("/api/review-notify") ||
+    pathname.startsWith("/api/message-notify") ||
+    pathname.startsWith("/api/chat/notify");
 
   // ── Auth check only for portal + auth routes ───────────────
-  const isPortalRoute = PORTAL_PREFIXES.some(p => pathname.startsWith(p));
-  const isAuthPage    = AUTH_PAGES.some(p => pathname.startsWith(p));
+  const isPortalRoute = PORTAL_PREFIXES.some((p) => pathname.startsWith(p));
+  const isAuthPage = AUTH_PAGES.some((p) => pathname.startsWith(p));
 
   // Root page: rewrite to /home for anonymous users (saves one redirect round-trip).
   // Logged-in users still hit app/page.tsx for role-based portal redirect.
   if (pathname === "/") {
-    const hasSession = request.cookies.getAll()
-      .some(c => isAuthCookie(c.name) && !isForeignAuthCookie(c.name));
+    const hasSession = request.cookies
+      .getAll()
+      .some((c) => isAuthCookie(c.name) && !isForeignAuthCookie(c.name));
     if (!hasSession) {
       return NextResponse.rewrite(new URL("/home", request.url));
     }
@@ -135,7 +143,9 @@ async function handleRequest(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() { return request.cookies.getAll(); },
+        getAll() {
+          return request.cookies.getAll();
+        },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });

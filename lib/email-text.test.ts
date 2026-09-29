@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { stripTags, bodyTextOf, buildQuote, buildQuoteHtml, toHtmlBody, looksLikeHtml } from "./email-text";
+import {
+  stripTags,
+  bodyTextOf,
+  buildQuote,
+  buildQuoteHtml,
+  toHtmlBody,
+  looksLikeHtml,
+} from "./email-text";
 
 /*
   This suite runs in vitest's "node" environment, where `document` does not
@@ -42,7 +49,9 @@ describe("stripTags", () => {
 
 describe("bodyTextOf", () => {
   it("prefers body_text for inbound mail", () => {
-    expect(bodyTextOf({ direction: "in", body_text: "plain", body_html: "<p>html</p>" })).toBe("plain");
+    expect(bodyTextOf({ direction: "in", body_text: "plain", body_html: "<p>html</p>" })).toBe(
+      "plain"
+    );
   });
 
   it("falls back to stripped html for inbound mail", () => {
@@ -108,16 +117,17 @@ describe("toHtmlBody", () => {
   });
 
   it("escapes angle brackets so a quoted address is not eaten as a tag", () => {
-    expect(toHtmlBody("On Mon, Diane <diane@x.com> wrote:"))
-      .toBe("On Mon, Diane &lt;diane@x.com&gt; wrote:");
+    expect(toHtmlBody("On Mon, Diane <diane@x.com> wrote:")).toBe(
+      "On Mon, Diane &lt;diane@x.com&gt; wrote:"
+    );
   });
 
   it("escapes ampersands and quotes", () => {
-    expect(toHtmlBody("Tom & Jerry said \"hi\"")).toBe("Tom &amp; Jerry said &quot;hi&quot;");
+    expect(toHtmlBody('Tom & Jerry said "hi"')).toBe("Tom &amp; Jerry said &quot;hi&quot;");
   });
 
   it("leaves real markup alone", () => {
-    const html = '<p>Hello <strong>there</strong></p>';
+    const html = "<p>Hello <strong>there</strong></p>";
     expect(toHtmlBody(html)).toBe(html);
   });
 
@@ -154,7 +164,8 @@ describe("buildQuoteHtml", () => {
     at: "2026-09-25T02:58:00.000Z",
     from_email: "kleinsembroidery@yahoo.com",
     sender_name: "Diane Klein",
-    body_text: "Even though this is 1 color, can you change stitch direction?\nDiane Klein\n540-212-1183",
+    body_text:
+      "Even though this is 1 color, can you change stitch direction?\nDiane Klein\n540-212-1183",
   };
 
   it("renders an attribution line and a blockquote", () => {

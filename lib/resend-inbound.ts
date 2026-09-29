@@ -62,7 +62,11 @@ export async function fetchReceivedEmail(emailId: string) {
       { headers: { Authorization: "Bearer " + key } }
     );
     if (!res.ok) {
-      console.error("[resend-inbound] Body fetch failed:", res.status, (await res.text()).slice(0, 300));
+      console.error(
+        "[resend-inbound] Body fetch failed:",
+        res.status,
+        (await res.text()).slice(0, 300)
+      );
       return null;
     }
     return await res.json();
@@ -107,11 +111,14 @@ export async function importReceivedEmail(supabase: any, meta: any) {
   var emailId = meta.email_id || meta.id || null;
 
   var attachments = Array.isArray(meta.attachments) ? meta.attachments : [];
-  var attachmentMeta = attachments.length > 0
-    ? JSON.stringify(attachments.map(function (a: any) {
-        return { id: a.id, filename: a.filename, content_type: a.content_type, size: a.size };
-      }))
-    : null;
+  var attachmentMeta =
+    attachments.length > 0
+      ? JSON.stringify(
+          attachments.map(function (a: any) {
+            return { id: a.id, filename: a.filename, content_type: a.content_type, size: a.size };
+          })
+        )
+      : null;
 
   var fromEmail = meta.from || "";
   var toEmail = (Array.isArray(meta.to) ? meta.to.join(", ") : meta.to) || "";
@@ -165,14 +172,12 @@ export async function importReceivedEmail(supabase: any, meta: any) {
   };
   if (meta.created_at) row.received_at = meta.created_at;
 
-  var written = await supabase
-    .from("received_emails")
-    .insert(row)
-    .select("id")
-    .maybeSingle();
+  var written = await supabase.from("received_emails").insert(row).select("id").maybeSingle();
 
   if (isMissingColumn(written.error)) {
-    console.warn("[resend-inbound] Newer columns missing (migration 037?) — inserting with legacy columns");
+    console.warn(
+      "[resend-inbound] Newer columns missing (migration 037?) — inserting with legacy columns"
+    );
     var legacyRow: any = {
       from_email: fromEmail,
       to_email: toEmail,
@@ -183,11 +188,7 @@ export async function importReceivedEmail(supabase: any, meta: any) {
     };
     if (meta.created_at) legacyRow.received_at = meta.created_at;
 
-    written = await supabase
-      .from("received_emails")
-      .insert(legacyRow)
-      .select("id")
-      .maybeSingle();
+    written = await supabase.from("received_emails").insert(legacyRow).select("id").maybeSingle();
   }
 
   if (written.error) {
@@ -215,7 +216,11 @@ async function ensureThreaded(supabase: any, emailId: string, meta: any) {
   if (current.data.thread_id) return;
 
   var headers = {};
-  try { headers = JSON.parse(current.data.headers || "{}"); } catch (e) { headers = {}; }
+  try {
+    headers = JSON.parse(current.data.headers || "{}");
+  } catch (e) {
+    headers = {};
+  }
 
   var threadId = await resolveThreadId(supabase, {
     messageId: normalizeMessageId(current.data.message_id || headerValue(headers, "message-id")),

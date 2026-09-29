@@ -21,7 +21,7 @@ export async function GET() {
     checks.db = { status: "error", ms: Date.now() - t0 };
   }
 
-  const allOk = Object.values(checks).every(c => c.status === "ok");
+  const allOk = Object.values(checks).every((c) => c.status === "ok");
 
   return NextResponse.json(
     {

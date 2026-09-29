@@ -51,7 +51,11 @@ export default function BlogComments({ slug }: { slug: string }) {
       const res = await fetch(`/api/blog/${slug}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ author_name: name.trim(), author_email: email.trim(), content: body.trim() }),
+        body: JSON.stringify({
+          author_name: name.trim(),
+          author_email: email.trim(),
+          content: body.trim(),
+        }),
       });
       if (!res.ok) {
         const d = await res.json();
@@ -69,29 +73,44 @@ export default function BlogComments({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="mt-12 pt-8 border-t border-[var(--border)]">
-      <h3 className="font-syne font-bold text-lg mb-1 text-[var(--txt)]">
-        Comments {comments.length > 0 && <span className="text-[var(--txt3)] text-sm font-normal">({comments.length})</span>}
+    <div className="mt-12 border-t border-[var(--border)] pt-8">
+      <h3 className="mb-1 font-syne text-lg font-bold text-[var(--txt)]">
+        Comments{" "}
+        {comments.length > 0 && (
+          <span className="text-sm font-normal text-[var(--txt3)]">({comments.length})</span>
+        )}
       </h3>
-      <p className="text-xs text-[var(--txt3)] mb-6">Share your thoughts. Comments are reviewed before publishing.</p>
+      <p className="mb-6 text-xs text-[var(--txt3)]">
+        Share your thoughts. Comments are reviewed before publishing.
+      </p>
 
       {/* Existing comments */}
       {loading ? (
-        <div className="flex justify-center py-6"><Loader2 size={18} className="animate-spin text-[var(--txt3)]" /></div>
+        <div className="flex justify-center py-6">
+          <Loader2 size={18} className="animate-spin text-[var(--txt3)]" />
+        </div>
       ) : comments.length > 0 ? (
-        <div className="space-y-4 mb-8">
+        <div className="mb-8 space-y-4">
           {comments.map((c) => (
-            <div key={c.id} className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)]">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-7 h-7 rounded-full bg-[#2563EB]/10 text-[#2563EB] flex items-center justify-center text-xs font-bold">
+            <div
+              key={c.id}
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4"
+            >
+              <div className="mb-2 flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#2563EB]/10 text-xs font-bold text-[#2563EB]">
                   {c.author_name.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-sm font-semibold text-[var(--txt)]">{c.author_name}</span>
-                <span className="text-[10px] text-[var(--txt3)] flex items-center gap-1">
-                  <Clock size={10} /> {new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                <span className="flex items-center gap-1 text-[10px] text-[var(--txt3)]">
+                  <Clock size={10} />{" "}
+                  {new Date(c.created_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
                 </span>
               </div>
-              <p className="text-sm text-[var(--txt2)] leading-relaxed">{c.content}</p>
+              <p className="text-sm leading-relaxed text-[var(--txt2)]">{c.content}</p>
             </div>
           ))}
         </div>
@@ -99,16 +118,16 @@ export default function BlogComments({ slug }: { slug: string }) {
 
       {/* Comment form */}
       {submitted ? (
-        <div className="p-5 rounded-xl bg-[#16A34A]/5 border border-[#16A34A]/15 text-center">
-          <div className="w-10 h-10 rounded-full bg-[#16A34A]/10 text-[#16A34A] flex items-center justify-center mx-auto mb-2">
+        <div className="rounded-xl border border-[#16A34A]/15 bg-[#16A34A]/5 p-5 text-center">
+          <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-[#16A34A]/10 text-[#16A34A]">
             <Check size={18} />
           </div>
-          <p className="text-sm font-semibold text-[#16A34A] mb-1">Thank you!</p>
+          <p className="mb-1 text-sm font-semibold text-[#16A34A]">Thank you!</p>
           <p className="text-xs text-[var(--txt3)]">Your comment has been submitted for review.</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -128,10 +147,18 @@ export default function BlogComments({ slug }: { slug: string }) {
             placeholder="Write your comment... *"
             rows={3}
             required
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] text-sm text-[var(--txt)] p-3 resize-y placeholder:text-[var(--txt3)] focus:outline-none focus:border-[#2563EB]/40 focus:ring-1 focus:ring-[#2563EB]/20"
+            className="w-full resize-y rounded-xl border border-[var(--border)] bg-[var(--bg)] p-3 text-sm text-[var(--txt)] placeholder:text-[var(--txt3)] focus:border-[#2563EB]/40 focus:outline-none focus:ring-1 focus:ring-[#2563EB]/20"
           />
           {error && <p className="text-xs text-[#DC2626]">{error}</p>}
-          <Button type="submit" variant="grad" size="sm" disabled={submitting} rightIcon={submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}>
+          <Button
+            type="submit"
+            variant="grad"
+            size="sm"
+            disabled={submitting}
+            rightIcon={
+              submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />
+            }
+          >
             {submitting ? "Submitting..." : "Post Comment"}
           </Button>
         </form>

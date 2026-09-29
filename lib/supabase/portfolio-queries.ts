@@ -23,14 +23,16 @@ function normalizeImages(images: any[]) {
 
 function normalizeItem(item: any) {
   if (!item) return item;
-  const cat = item.categories ? {
-    id: item.categories.id,
-    name: item.categories.name,
-    slug: item.categories.slug,
-    emoji: item.categories.emoji,
-    color: item.categories.color,
-    sortOrder: item.categories.sort_order,
-  } : null;
+  const cat = item.categories
+    ? {
+        id: item.categories.id,
+        name: item.categories.name,
+        slug: item.categories.slug,
+        emoji: item.categories.emoji,
+        color: item.categories.color,
+        sortOrder: item.categories.sort_order,
+      }
+    : null;
 
   return {
     id: item.id,
@@ -164,10 +166,7 @@ export async function updatePortfolio(id: string, data: any, images?: any[]) {
   const supabase = createAdminClient();
 
   if (Object.keys(data).length > 0) {
-    const { error } = await supabase
-      .from("portfolios")
-      .update(data)
-      .eq("id", id);
+    const { error } = await supabase.from("portfolios").update(data).eq("id", id);
 
     if (error) throw error;
   }
@@ -239,11 +238,7 @@ export async function getAdminCategories() {
 
 export async function createCategory(data: any) {
   const supabase = createAdminClient();
-  const { data: cat, error } = await supabase
-    .from("categories")
-    .insert(data)
-    .select("*")
-    .single();
+  const { data: cat, error } = await supabase.from("categories").insert(data).select("*").single();
   if (error) throw error;
   return cat;
 }

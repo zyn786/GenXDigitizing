@@ -30,15 +30,23 @@ function healthy(over: Record<string, any[]> = {}) {
   return {
     orders: [
       {
-        id: "o1", order_number: "GX1001", status: "in_progress", price: 18,
-        sla_deadline: iso(10), created_at: iso(-2), designer_id: "d1", design_name: "Logo",
+        id: "o1",
+        order_number: "GX1001",
+        status: "in_progress",
+        price: 18,
+        sla_deadline: iso(10),
+        created_at: iso(-2),
+        designer_id: "d1",
+        design_name: "Logo",
       },
     ],
     notifications: [{ title: "New order — GX1001", created_at: iso(-2), user_id: "a1" }],
     order_files: [{ order_id: "o1", file_type: "artwork" }],
     audit_logs: [],
     email_failures: [],
-    sent_emails: [{ id: "e1", from_email: "order@genxdigitizing.com", sent_by: null, sent_at: iso(-2) }],
+    sent_emails: [
+      { id: "e1", from_email: "order@genxdigitizing.com", sent_by: null, sent_at: iso(-2) },
+    ],
     email_events: [{ id: "ev1" }],
     ...over,
   };
@@ -63,7 +71,7 @@ describe("runInvariantChecks — healthy state", () => {
 describe("orders_not_notified", () => {
   it("fails when an order has no notification naming it", async () => {
     const report = await runInvariantChecks(
-      fakeDb(healthy({ notifications: [] }))   // nobody was told
+      fakeDb(healthy({ notifications: [] })) // nobody was told
     );
     const c = get(report, "orders_not_notified");
     expect(c.ok).toBe(false);
@@ -74,7 +82,11 @@ describe("orders_not_notified", () => {
 
   it("treats any notification naming the order as notified", async () => {
     const report = await runInvariantChecks(
-      fakeDb(healthy({ notifications: [{ title: "SLA OVERDUE — GX1001", created_at: iso(-1), user_id: "a1" }] }))
+      fakeDb(
+        healthy({
+          notifications: [{ title: "SLA OVERDUE — GX1001", created_at: iso(-1), user_id: "a1" }],
+        })
+      )
     );
     expect(get(report, "orders_not_notified").ok).toBe(true);
   });
@@ -82,16 +94,24 @@ describe("orders_not_notified", () => {
 
 describe("overdue_unescalated", () => {
   const overdueOrder = {
-    id: "o2", order_number: "GX2002", status: "in_progress", price: 7,
-    sla_deadline: iso(-3), created_at: iso(-30), designer_id: "d1", design_name: "Cap",
+    id: "o2",
+    order_number: "GX2002",
+    status: "in_progress",
+    price: 7,
+    sla_deadline: iso(-3),
+    created_at: iso(-30),
+    designer_id: "d1",
+    design_name: "Cap",
   };
 
   it("fails for an order past deadline with no recent escalation", async () => {
     const report = await runInvariantChecks(
-      fakeDb(healthy({
-        orders: [overdueOrder],
-        notifications: [{ title: "New order — GX2002", created_at: iso(-30), user_id: "a1" }],
-      }))
+      fakeDb(
+        healthy({
+          orders: [overdueOrder],
+          notifications: [{ title: "New order — GX2002", created_at: iso(-30), user_id: "a1" }],
+        })
+      )
     );
     const c = get(report, "overdue_unescalated");
     expect(c.ok).toBe(false);
@@ -101,20 +121,24 @@ describe("overdue_unescalated", () => {
 
   it("passes when a recent escalation names the order", async () => {
     const report = await runInvariantChecks(
-      fakeDb(healthy({
-        orders: [overdueOrder],
-        notifications: [{ title: "SLA OVERDUE — GX2002", created_at: iso(-1), user_id: "a1" }],
-      }))
+      fakeDb(
+        healthy({
+          orders: [overdueOrder],
+          notifications: [{ title: "SLA OVERDUE — GX2002", created_at: iso(-1), user_id: "a1" }],
+        })
+      )
     );
     expect(get(report, "overdue_unescalated").ok).toBe(true);
   });
 
   it("does not accept a stale escalation", async () => {
     const report = await runInvariantChecks(
-      fakeDb(healthy({
-        orders: [overdueOrder],
-        notifications: [{ title: "SLA OVERDUE — GX2002", created_at: iso(-20), user_id: "a1" }],
-      })),
+      fakeDb(
+        healthy({
+          orders: [overdueOrder],
+          notifications: [{ title: "SLA OVERDUE — GX2002", created_at: iso(-20), user_id: "a1" }],
+        })
+      ),
       { escalationRepeatHours: 6 }
     );
     expect(get(report, "overdue_unescalated").ok).toBe(false);
@@ -129,13 +153,23 @@ describe("overdue_unescalated", () => {
 describe("orders_stuck_submitted", () => {
   it("fails for an old unassigned order", async () => {
     const report = await runInvariantChecks(
-      fakeDb(healthy({
-        orders: [{
-          id: "o3", order_number: "GX3003", status: "submitted", price: 7,
-          sla_deadline: iso(20), created_at: iso(-10), designer_id: null, design_name: "Patch",
-        }],
-        notifications: [{ title: "New order — GX3003", created_at: iso(-10), user_id: "a1" }],
-      })),
+      fakeDb(
+        healthy({
+          orders: [
+            {
+              id: "o3",
+              order_number: "GX3003",
+              status: "submitted",
+              price: 7,
+              sla_deadline: iso(20),
+              created_at: iso(-10),
+              designer_id: null,
+              design_name: "Patch",
+            },
+          ],
+          notifications: [{ title: "New order — GX3003", created_at: iso(-10), user_id: "a1" }],
+        })
+      ),
       { staleSubmittedHours: 4 }
     );
     const c = get(report, "orders_stuck_submitted");
@@ -145,13 +179,23 @@ describe("orders_stuck_submitted", () => {
 
   it("does not flag a freshly submitted order", async () => {
     const report = await runInvariantChecks(
-      fakeDb(healthy({
-        orders: [{
-          id: "o4", order_number: "GX4004", status: "submitted", price: 7,
-          sla_deadline: iso(20), created_at: iso(-0.5), designer_id: null, design_name: "Patch",
-        }],
-        notifications: [{ title: "New order — GX4004", created_at: iso(-0.5), user_id: "a1" }],
-      })),
+      fakeDb(
+        healthy({
+          orders: [
+            {
+              id: "o4",
+              order_number: "GX4004",
+              status: "submitted",
+              price: 7,
+              sla_deadline: iso(20),
+              created_at: iso(-0.5),
+              designer_id: null,
+              design_name: "Patch",
+            },
+          ],
+          notifications: [{ title: "New order — GX4004", created_at: iso(-0.5), user_id: "a1" }],
+        })
+      ),
       { staleSubmittedHours: 4 }
     );
     expect(get(report, "orders_stuck_submitted").ok).toBe(true);
@@ -161,12 +205,22 @@ describe("orders_stuck_submitted", () => {
 describe("null_sla_deadline", () => {
   it("fails for an open order with no deadline", async () => {
     const report = await runInvariantChecks(
-      fakeDb(healthy({
-        orders: [{
-          id: "o5", order_number: "GX5005", status: "assigned", price: 7,
-          sla_deadline: null, created_at: iso(-2), designer_id: "d1", design_name: "X",
-        }],
-      }))
+      fakeDb(
+        healthy({
+          orders: [
+            {
+              id: "o5",
+              order_number: "GX5005",
+              status: "assigned",
+              price: 7,
+              sla_deadline: null,
+              created_at: iso(-2),
+              designer_id: "d1",
+              design_name: "X",
+            },
+          ],
+        })
+      )
     );
     const c = get(report, "null_sla_deadline");
     expect(c.ok).toBe(false);
@@ -194,9 +248,18 @@ describe("transactional_email_flowing", () => {
   it("fails when orders exist but no transactional send was logged", async () => {
     // The exact state found in production: every logged send carries sent_by.
     const report = await runInvariantChecks(
-      fakeDb(healthy({
-        sent_emails: [{ id: "e1", from_email: "orders@genxdigitizing.com", sent_by: "admin-1", sent_at: iso(-2) }],
-      }))
+      fakeDb(
+        healthy({
+          sent_emails: [
+            {
+              id: "e1",
+              from_email: "orders@genxdigitizing.com",
+              sent_by: "admin-1",
+              sent_at: iso(-2),
+            },
+          ],
+        })
+      )
     );
     const c = get(report, "transactional_email_flowing");
     expect(c.ok).toBe(false);
@@ -220,20 +283,22 @@ describe("transactional_email_flowing", () => {
 });
 
 describe("unapplied migrations are skipped, never passed silently", () => {
-  const missing = { message: "Could not find the table 'public.email_failures' in the schema cache" };
+  const missing = {
+    message: "Could not find the table 'public.email_failures' in the schema cache",
+  };
 
   it("marks email_failures skipped and counts it separately", async () => {
-    const report = await runInvariantChecks(
-      fakeDb(healthy(), { email_failures: missing })
-    );
+    const report = await runInvariantChecks(fakeDb(healthy(), { email_failures: missing }));
     const c = get(report, "email_failures_unresolved");
     expect(c.skipped).toBeTruthy();
-    expect(c.ok).toBe(true);        // not a failure…
-    expect(report.skipped).toBeGreaterThan(0);  // …but not silently healthy either
+    expect(c.ok).toBe(true); // not a failure…
+    expect(report.skipped).toBeGreaterThan(0); // …but not silently healthy either
   });
 
   it("keeps the overall report ok when only skipped checks exist", async () => {
-    const report = await runInvariantChecks(fakeDb(healthy(), { email_failures: missing, email_events: missing }));
+    const report = await runInvariantChecks(
+      fakeDb(healthy(), { email_failures: missing, email_events: missing })
+    );
     expect(report.ok).toBe(true);
     expect(report.skipped).toBe(2);
     expect(summarise(report)).toContain("skipped=2");
@@ -243,12 +308,14 @@ describe("unapplied migrations are skipped, never passed silently", () => {
 describe("cron_alerts", () => {
   it("fails when a cron reported a failure", async () => {
     const report = await runInvariantChecks(
-      fakeDb(healthy({
-        notifications: [
-          { title: "New order — GX1001", created_at: iso(-2), user_id: "a1" },
-          { title: "Cron Alert: sla-check", created_at: iso(-1), user_id: "a1" },
-        ],
-      }))
+      fakeDb(
+        healthy({
+          notifications: [
+            { title: "New order — GX1001", created_at: iso(-2), user_id: "a1" },
+            { title: "Cron Alert: sla-check", created_at: iso(-1), user_id: "a1" },
+          ],
+        })
+      )
     );
     const c = get(report, "cron_alerts");
     expect(c.ok).toBe(false);

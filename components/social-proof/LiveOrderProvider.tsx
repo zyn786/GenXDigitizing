@@ -23,22 +23,30 @@ export function LiveOrderProvider() {
   const dismiss = useCallback((id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
     const t = timersRef.current.get(id);
-    if (t) { clearTimeout(t); timersRef.current.delete(id); }
+    if (t) {
+      clearTimeout(t);
+      timersRef.current.delete(id);
+    }
   }, []);
 
-  const showNotification = useCallback((notification: LiveNotification) => {
-    setNotifications((prev) => {
-      if (prev.length >= MAX_VISIBLE) return prev;
-      const dismissTimer = setTimeout(() => dismiss(notification.id), DISPLAY_DURATION);
-      timersRef.current.set(notification.id, dismissTimer);
-      return [...prev, notification];
-    });
-  }, [dismiss]);
+  const showNotification = useCallback(
+    (notification: LiveNotification) => {
+      setNotifications((prev) => {
+        if (prev.length >= MAX_VISIBLE) return prev;
+        const dismissTimer = setTimeout(() => dismiss(notification.id), DISPLAY_DURATION);
+        timersRef.current.set(notification.id, dismissTimer);
+        return [...prev, notification];
+      });
+    },
+    [dismiss]
+  );
 
   const poll = useCallback(async () => {
     try {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return; // Silent skip for unauthenticated visitors
       const since = new Date(Date.now() - LOOKBACK_MINUTES * 60 * 1000).toISOString();
       const orders = await getRecentOrdersForLiveToast(supabase, since);
@@ -85,18 +93,14 @@ export function LiveOrderProvider() {
 
   return (
     <div
-      className="fixed bottom-14 sm:bottom-16 right-2 sm:right-6 z-[150] flex flex-col-reverse gap-2 sm:gap-2.5 pointer-events-none"
+      className="pointer-events-none fixed bottom-14 right-2 z-[150] flex flex-col-reverse gap-2 sm:bottom-16 sm:right-6 sm:gap-2.5"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       aria-live="polite"
       aria-label="Live order activity"
     >
       <AnimatePresence mode="popLayout">
         {notifications.map((n) => (
-          <LiveOrderToast
-            key={n.id}
-            notification={n}
-            onDismiss={() => dismiss(n.id)}
-          />
+          <LiveOrderToast key={n.id} notification={n} onDismiss={() => dismiss(n.id)} />
         ))}
       </AnimatePresence>
     </div>

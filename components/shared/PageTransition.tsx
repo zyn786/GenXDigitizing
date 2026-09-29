@@ -29,13 +29,13 @@ export function PageTransition() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className="fixed inset-0 z-[9999] bg-[#FAFAF9] flex flex-col items-center justify-center gap-4"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-4 bg-[#FAFAF9]"
         >
           {/* Logo */}
           <motion.img
             src="/images/black_logo.png"
             alt="genxdigitizing"
-            className="w-24 sm:w-32 h-auto"
+            className="h-auto w-24 sm:w-32"
             initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
@@ -52,7 +52,7 @@ export function PageTransition() {
               {[0, 1, 2].map((i) => (
                 <motion.div
                   key={i}
-                  className="w-1.5 h-1.5 rounded-full bg-[#2563EB]"
+                  className="h-1.5 w-1.5 rounded-full bg-[#2563EB]"
                   animate={{ opacity: [0.3, 1, 0.3] }}
                   transition={{
                     duration: 1.2,

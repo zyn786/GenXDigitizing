@@ -26,26 +26,38 @@ const FROM = composeFrom();
 const REPLY = composeReplyTo();
 
 function send(options: { to: string; subject: string; html: string }) {
-  return getResend().emails.send({ from: FROM, reply_to: REPLY, ...options })
+  return getResend()
+    .emails.send({ from: FROM, reply_to: REPLY, ...options })
     .then(async (result) => {
       // Resend reports API-level rejections in the resolved value rather than by
       // throwing — check it, or a rejected send gets logged as a success.
       const apiError = (result as any)?.error;
       if (apiError) {
         console.error(`[email/subscription] Resend rejected "${options.subject}":`, apiError);
-        await logEmailFailure({ to: options.to, from: FROM, subject: options.subject, error: apiError });
+        await logEmailFailure({
+          to: options.to,
+          from: FROM,
+          subject: options.subject,
+          error: apiError,
+        });
         return result;
       }
 
       // Log to sent_emails so the admin /email page shows full send history
       try {
-        await createAdminClient().from("sent_emails").insert({
-          to_email: options.to,
-          from_email: bareAddress(FROM),
-          subject: options.subject,
-          body: options.html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 2000),
-          resend_id: result?.data?.id || null,
-        });
+        await createAdminClient()
+          .from("sent_emails")
+          .insert({
+            to_email: options.to,
+            from_email: bareAddress(FROM),
+            subject: options.subject,
+            body: options.html
+              .replace(/<[^>]*>/g, " ")
+              .replace(/\s+/g, " ")
+              .trim()
+              .slice(0, 2000),
+            resend_id: result?.data?.id || null,
+          });
       } catch (logErr) {
         console.error("[email/subscription] sent_emails log error:", logErr);
       }
@@ -57,7 +69,12 @@ function send(options: { to: string; subject: string; html: string }) {
     });
 }
 
-export function emailSubscriptionRequested(to: string, planLabel: string, price: number, designs: number) {
+export function emailSubscriptionRequested(
+  to: string,
+  planLabel: string,
+  price: number,
+  designs: number
+) {
   return send({
     to,
     subject: `Plan Requested — ${planLabel} Plan`,
@@ -71,11 +88,18 @@ export function emailSubscriptionRequested(to: string, planLabel: string, price:
   });
 }
 
-export function emailSubscriptionApproved(to: string, planLabel: string, price: number, designs: number, paymentLink?: string, features?: string[]) {
+export function emailSubscriptionApproved(
+  to: string,
+  planLabel: string,
+  price: number,
+  designs: number,
+  paymentLink?: string,
+  features?: string[]
+) {
   const featuresHtml = features?.length
     ? `<div style="margin:16px 0;padding:16px;background:#F0FDF4;border-radius:12px;border:1px solid rgba(22,163,74,0.2)">
         <p style="font-weight:700;color:#16A34A;margin:0 0 8px">🎁 Your ${planLabel} Benefits:</p>
-        <ul style="margin:0;padding-left:20px">${features.map(f => `<li style="color:#166534;font-size:13px;margin-bottom:4px">${f}</li>`).join("")}</ul>
+        <ul style="margin:0;padding-left:20px">${features.map((f) => `<li style="color:#166534;font-size:13px;margin-bottom:4px">${f}</li>`).join("")}</ul>
        </div>`
     : "";
 
@@ -114,10 +138,21 @@ export function emailSubscriptionApproved(to: string, planLabel: string, price: 
   });
 }
 
-export function emailSubscriptionReceipt(to: string, planLabel: string, invoiceNumber: string, amount: number, designs: number, features?: string[]) {
-  const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+export function emailSubscriptionReceipt(
+  to: string,
+  planLabel: string,
+  invoiceNumber: string,
+  amount: number,
+  designs: number,
+  features?: string[]
+) {
+  const today = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
   const featuresHtml = features?.length
-    ? `<ul style="margin:8px 0 0;padding-left:20px">${features.map(f => `<li style="color:#374151;font-size:13px;margin-bottom:3px">${f}</li>`).join("")}</ul>`
+    ? `<ul style="margin:8px 0 0;padding-left:20px">${features.map((f) => `<li style="color:#374151;font-size:13px;margin-bottom:3px">${f}</li>`).join("")}</ul>`
     : "";
 
   return send({
@@ -150,7 +185,13 @@ export function emailSubscriptionReceipt(to: string, planLabel: string, invoiceN
   });
 }
 
-export function emailPaymentLinkSent(to: string, planLabel: string, price: number, designs: number, paymentLink: string) {
+export function emailPaymentLinkSent(
+  to: string,
+  planLabel: string,
+  price: number,
+  designs: number,
+  paymentLink: string
+) {
   return send({
     to,
     subject: `Payment Link Ready — ${planLabel} Plan`,
@@ -178,7 +219,12 @@ export function emailPaymentLinkSent(to: string, planLabel: string, price: numbe
   });
 }
 
-export function emailCancelRequested(to: string, planLabel: string, reason?: string, notes?: string | null) {
+export function emailCancelRequested(
+  to: string,
+  planLabel: string,
+  reason?: string,
+  notes?: string | null
+) {
   const reasonLabelMap: Record<string, string> = {
     too_expensive: "Too expensive",
     not_enough_designs: "Not enough designs",
@@ -187,7 +233,7 @@ export function emailCancelRequested(to: string, planLabel: string, reason?: str
     poor_quality: "Quality concerns",
     other: "Other",
   };
-  const reasonLabel = reason ? (reasonLabelMap[reason] || reason) : "Not specified";
+  const reasonLabel = reason ? reasonLabelMap[reason] || reason : "Not specified";
 
   return send({
     to,
@@ -203,7 +249,12 @@ export function emailCancelRequested(to: string, planLabel: string, reason?: str
   });
 }
 
-export function emailSubscriptionCancelled(to: string, planLabel: string, reason?: string, notes?: string | null) {
+export function emailSubscriptionCancelled(
+  to: string,
+  planLabel: string,
+  reason?: string,
+  notes?: string | null
+) {
   const reasonLabelMap: Record<string, string> = {
     too_expensive: "Too expensive",
     not_enough_designs: "Not enough designs",
@@ -215,7 +266,7 @@ export function emailSubscriptionCancelled(to: string, planLabel: string, reason
     plan_change: "Changed to a different plan",
     other: "Other",
   };
-  const reasonLabel = reason ? (reasonLabelMap[reason] || reason) : "Not specified";
+  const reasonLabel = reason ? reasonLabelMap[reason] || reason : "Not specified";
 
   return send({
     to,
@@ -231,7 +282,12 @@ export function emailSubscriptionCancelled(to: string, planLabel: string, reason
   });
 }
 
-export function emailSubscriptionExpiring(to: string, planLabel: string, daysLeft: number, designsRemaining: number) {
+export function emailSubscriptionExpiring(
+  to: string,
+  planLabel: string,
+  daysLeft: number,
+  designsRemaining: number
+) {
   return send({
     to,
     subject: `Subscription Expiring Soon — ${daysLeft} Days Left`,

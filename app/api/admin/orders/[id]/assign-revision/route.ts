@@ -12,12 +12,11 @@ function getServiceClient() {
   );
 }
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: profile } = await supabase.from("users").select("role").eq("id", user.id).single();
@@ -32,11 +31,13 @@ export async function POST(
     // Fetch order with designer info
     const { data: order } = await admin
       .from("orders")
-      .select(`
+      .select(
+        `
         id, order_number, status, turnaround,
         clients ( company_name, users ( full_name ) ),
         designers ( users ( id, full_name, email ) )
-      `)
+      `
+      )
       .eq("id", orderId)
       .single();
 
@@ -52,9 +53,8 @@ export async function POST(
       return NextResponse.json({ error: "No designer assigned to this order" }, { status: 400 });
     }
 
-    const clientName = orderData.clients?.users?.full_name
-      || orderData.clients?.company_name
-      || "Client";
+    const clientName =
+      orderData.clients?.users?.full_name || orderData.clients?.company_name || "Client";
 
     // Notify designer (in-app + push)
     await notifyUsers([designerUser.id], {

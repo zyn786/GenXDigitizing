@@ -33,8 +33,8 @@ const TURNAROUNDS = new Set(["standard", "rush", "urgent"]);
 
 const TURNAROUND_LABEL: Record<string, string> = {
   standard: "Standard (12–24h)",
-  rush:     "Rush (6h) ⚡ FREE",
-  urgent:   "Urgent (3h) 🔥 FREE",
+  rush: "Rush (6h) ⚡ FREE",
+  urgent: "Urgent (3h) 🔥 FREE",
 };
 
 const money = (n: number) => Math.round(n * 100) / 100;
@@ -42,7 +42,9 @@ const money = (n: number) => Math.round(n * 100) / 100;
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const db = createAdminClient();
@@ -61,16 +63,31 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const {
-      service_tier_id, turnaround, output_format, additional_formats,
-      width_inches, height_inches, color_count, placement_notes, design_name,
-      quantity, coupon_code, visitor_id, use_credits, idempotency_key, file_count,
+      service_tier_id,
+      turnaround,
+      output_format,
+      additional_formats,
+      width_inches,
+      height_inches,
+      color_count,
+      placement_notes,
+      design_name,
+      quantity,
+      coupon_code,
+      visitor_id,
+      use_credits,
+      idempotency_key,
+      file_count,
     } = body;
 
     if (!service_tier_id || !design_name?.trim()) {
       return NextResponse.json({ error: "Service and design name are required" }, { status: 400 });
     }
-    if (width_inches && !height_inches || !width_inches && height_inches) {
-      return NextResponse.json({ error: "Enter both width and height, or neither" }, { status: 400 });
+    if ((width_inches && !height_inches) || (!width_inches && height_inches)) {
+      return NextResponse.json(
+        { error: "Enter both width and height, or neither" },
+        { status: 400 }
+      );
     }
 
     // Retry safety: a repeated submission returns the original order.
@@ -117,7 +134,10 @@ export async function POST(req: NextRequest) {
         coupon = { id: result.coupon.id, code: result.coupon.code };
       } else {
         // Report rather than silently drop it — the customer believes it applied.
-        return NextResponse.json({ error: result.error ?? "Coupon could not be applied" }, { status: 422 });
+        return NextResponse.json(
+          { error: result.error ?? "Coupon could not be applied" },
+          { status: 422 }
+        );
       }
     }
 
@@ -159,9 +179,12 @@ export async function POST(req: NextRequest) {
       extraCredits = needed - planCredits;
 
       if (extraCredits > (clientRow?.credit_balance ?? 0)) {
-        return NextResponse.json({
-          error: `Not enough credits — ${needed} needed, ${remaining + (clientRow?.credit_balance ?? 0)} available.`,
-        }, { status: 422 });
+        return NextResponse.json(
+          {
+            error: `Not enough credits — ${needed} needed, ${remaining + (clientRow?.credit_balance ?? 0)} available.`,
+          },
+          { status: 422 }
+        );
       }
 
       subscriptionId = sub.id;
@@ -174,7 +197,8 @@ export async function POST(req: NextRequest) {
       client_id: client.id,
       service_tier_id: tier.id,
       output_format: output_format || "DST",
-      additional_formats: Array.isArray(additional_formats) && additional_formats.length ? additional_formats : null,
+      additional_formats:
+        Array.isArray(additional_formats) && additional_formats.length ? additional_formats : null,
       turnaround: turn,
       price,
       currency: "USD",
@@ -187,30 +211,48 @@ export async function POST(req: NextRequest) {
       sla_deadline: computeDeadline(turn, !!tier.is_big_design),
       status: "submitted",
       idempotency_key: idempotency_key || null,
-      ...(coupon ? { coupon_code: coupon.code, coupon_id: coupon.id, discount_amount: discount } : {}),
+      ...(coupon
+        ? { coupon_code: coupon.code, coupon_id: coupon.id, discount_amount: discount }
+        : {}),
     };
 
-    let { data: order, error: insertErr } = await db.from("orders").insert(payload).select().single();
+    let { data: order, error: insertErr } = await db
+      .from("orders")
+      .insert(payload)
+      .select()
+      .single();
 
     // `idempotency_key` arrives in migration 047. Until that is applied the
     // column does not exist, and sending it would fail the insert — taking
     // ordering down completely. Retry without it so this route is safe to deploy
     // either side of the migration. Retry protection is lost, nothing else is.
     if (insertErr && isMissingColumn(insertErr) && "idempotency_key" in payload) {
-      console.warn("[orders/create] idempotency_key column missing — apply migration 047. Creating without retry protection.");
+      console.warn(
+        "[orders/create] idempotency_key column missing — apply migration 047. Creating without retry protection."
+      );
       delete payload.idempotency_key;
-      ({ data: order, error: insertErr } = await db.from("orders").insert(payload).select().single());
+      ({ data: order, error: insertErr } = await db
+        .from("orders")
+        .insert(payload)
+        .select()
+        .single());
     }
 
     if (insertErr || !order) {
       // A unique-violation here means a concurrent retry won the race.
       if (insertErr?.code === "23505" && idempotency_key) {
         const { data: won } = await db
-          .from("orders").select("*").eq("idempotency_key", idempotency_key).maybeSingle();
+          .from("orders")
+          .select("*")
+          .eq("idempotency_key", idempotency_key)
+          .maybeSingle();
         if (won) return NextResponse.json({ order: won, reused: true });
       }
       console.error("[orders/create] insert failed:", insertErr);
-      return NextResponse.json({ error: "Could not create the order. Please try again." }, { status: 500 });
+      return NextResponse.json(
+        { error: "Could not create the order. Please try again." },
+        { status: 500 }
+      );
     }
 
     // ── Consume credits now that the order exists ───────────
@@ -222,7 +264,10 @@ export async function POST(req: NextRequest) {
     if (use_credits && (planCredits > 0 || extraCredits > 0)) {
       try {
         if (planCredits > 0 && subscriptionId) {
-          const { error } = await db.rpc("increment_sub_usage", { sub_id: subscriptionId, amount: planCredits });
+          const { error } = await db.rpc("increment_sub_usage", {
+            sub_id: subscriptionId,
+            amount: planCredits,
+          });
           if (error) throw new Error(error.message);
         }
         if (extraCredits > 0) {
@@ -236,7 +281,12 @@ export async function POST(req: NextRequest) {
         }
       } catch (err) {
         creditWarning = err?.message ?? "credit consumption failed";
-        console.error("[orders/create] credit consumption failed:", creditWarning, "order:", order.order_number);
+        console.error(
+          "[orders/create] credit consumption failed:",
+          creditWarning,
+          "order:",
+          order.order_number
+        );
       }
     }
 
@@ -245,22 +295,32 @@ export async function POST(req: NextRequest) {
 
     // ── Notify, server-side and awaited ─────────────────────
     // This used to be a separate client fetch that a closed tab could skip.
-    const { data: admins } = await db.from("users").select("id").eq("role", "admin").eq("is_active", true);
+    const { data: admins } = await db
+      .from("users")
+      .select("id")
+      .eq("role", "admin")
+      .eq("is_active", true);
     if (admins?.length) {
-      await notifyUsers(admins.map((a: any) => a.id), {
-        type: "order_update",
-        title: `New order — ${orderNumber}`,
-        body: `${tier.label} · ${qty > 1 ? `${qty}× · ` : ""}$${price.toFixed(0)} · ${TURNAROUND_LABEL[turn] ?? turn}`,
-        action_url: "/admin/orders",
-      });
+      await notifyUsers(
+        admins.map((a: any) => a.id),
+        {
+          type: "order_update",
+          title: `New order — ${orderNumber}`,
+          body: `${tier.label} · ${qty > 1 ? `${qty}× · ` : ""}$${price.toFixed(0)} · ${TURNAROUND_LABEL[turn] ?? turn}`,
+          action_url: "/admin/orders",
+        }
+      );
 
       if (creditWarning) {
-        await notifyUsers(admins.map((a: any) => a.id), {
-          type: "payment",
-          title: `Credits not applied — ${orderNumber}`,
-          body: `${clientUser?.full_name ?? "Client"}'s order was created but credit consumption failed: ${creditWarning}. Adjust manually.`,
-          action_url: `/admin/orders/${order.id}`,
-        });
+        await notifyUsers(
+          admins.map((a: any) => a.id),
+          {
+            type: "payment",
+            title: `Credits not applied — ${orderNumber}`,
+            body: `${clientUser?.full_name ?? "Client"}'s order was created but credit consumption failed: ${creditWarning}. Adjust manually.`,
+            action_url: `/admin/orders/${order.id}`,
+          }
+        );
       }
     }
 

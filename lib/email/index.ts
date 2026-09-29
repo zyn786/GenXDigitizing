@@ -16,8 +16,8 @@ function getResend() {
 
 // Always compose through lib/email/address — interpolating RESEND_FROM_EMAIL
 // directly produced a nested-bracket header when the env var carried a name.
-const FROM    = composeFrom();
-const REPLY   = composeReplyTo();
+const FROM = composeFrom();
+const REPLY = composeReplyTo();
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.genxdigitizing.com";
 const LOGO_URL = `${APP_URL}/images/black_logo.png`;
 const TRUSTPILOT_BCC = "genxdigitizing.com+a5c28d839b@invite.trustpilot.com";
@@ -85,37 +85,50 @@ async function sendEmail(params: SendParams, retries: number = 2) {
         text: text,
         reply_to: params.reply_to ?? REPLY,
         bcc: params.bcc ? (Array.isArray(params.bcc) ? params.bcc : [params.bcc]) : undefined,
-        attachments: params.attachments?.map(function(a) { return {
-          filename: a.filename,
-          content: a.content instanceof Buffer
-            ? a.content.toString("base64")
-            : Buffer.from(a.content).toString("base64"),
-        }; }),
+        attachments: params.attachments?.map(function (a) {
+          return {
+            filename: a.filename,
+            content:
+              a.content instanceof Buffer
+                ? a.content.toString("base64")
+                : Buffer.from(a.content).toString("base64"),
+          };
+        }),
       });
 
       if (error) {
         if (attempt < retries) {
           console.warn("[email] Retry " + (attempt + 1) + "/" + retries + ":", error.message);
-          await new Promise(function(r) { return setTimeout(r, 1000 * (attempt + 1)); });
+          await new Promise(function (r) {
+            return setTimeout(r, 1000 * (attempt + 1));
+          });
           continue;
         }
         console.error("[email] Resend error after " + retries + " retries:", error);
-        await logEmailFailure({ to: params.to, from: FROM, subject: params.subject, error, attempts: retries + 1 });
+        await logEmailFailure({
+          to: params.to,
+          from: FROM,
+          subject: params.subject,
+          error,
+          attempts: retries + 1,
+        });
         return { success: false, error: error };
       }
 
       // Log to sent_emails so the admin /email page shows full send history.
       // Fire-and-forget: logging must never fail the send.
       try {
-        await createAdminClient().from("sent_emails").insert({
-          to_email: Array.isArray(params.to) ? params.to.join(", ") : params.to,
-          // Record the address that actually went on the wire, not the raw env
-          // value — the two diverged whenever RESEND_FROM_EMAIL carried a name.
-          from_email: bareAddress(FROM),
-          subject: params.subject,
-          body: params.text || text,
-          resend_id: data?.id || null,
-        });
+        await createAdminClient()
+          .from("sent_emails")
+          .insert({
+            to_email: Array.isArray(params.to) ? params.to.join(", ") : params.to,
+            // Record the address that actually went on the wire, not the raw env
+            // value — the two diverged whenever RESEND_FROM_EMAIL carried a name.
+            from_email: bareAddress(FROM),
+            subject: params.subject,
+            body: params.text || text,
+            resend_id: data?.id || null,
+          });
       } catch (logErr) {
         console.error("[email] sent_emails log error:", logErr);
       }
@@ -124,11 +137,19 @@ async function sendEmail(params: SendParams, retries: number = 2) {
     } catch (err: any) {
       if (attempt < retries) {
         console.warn("[email] Retry " + (attempt + 1) + "/" + retries + ":", err.message);
-        await new Promise(function(r) { return setTimeout(r, 1000 * (attempt + 1)); });
+        await new Promise(function (r) {
+          return setTimeout(r, 1000 * (attempt + 1));
+        });
         continue;
       }
       console.error("[email] Unexpected error after " + retries + " retries:", err);
-      await logEmailFailure({ to: params.to, from: FROM, subject: params.subject, error: err, attempts: retries + 1 });
+      await logEmailFailure({
+        to: params.to,
+        from: FROM,
+        subject: params.subject,
+        error: err,
+        attempts: retries + 1,
+      });
       return { success: false, error: err };
     }
   }
@@ -141,7 +162,10 @@ async function sendEmail(params: SendParams, retries: number = 2) {
 export function baseLayout(content: string, title: string, utm?: SendParams["utm"]): string {
   var url = withUtm(APP_URL, utm);
   // Replace bare APP_URL references in content with UTM-appended version
-  var processed = content.replace(new RegExp(APP_URL.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?!\\?)", "g"), url);
+  var processed = content.replace(
+    new RegExp(APP_URL.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?!\\?)", "g"),
+    url
+  );
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -393,7 +417,8 @@ export async function emailOrderSubmitted(params: {
   estimatedDelivery: string;
 }) {
   var utm = { campaign: "order_submitted" };
-  const html = baseLayout(`
+  const html = baseLayout(
+    `
     <p class="greeting">Hi ${params.clientName},</p>
     <p>Your digitizing order has been <strong>received</strong> and is now being processed by our team.</p>
 
@@ -419,9 +444,16 @@ export async function emailOrderSubmitted(params: {
     </div>
 
     <p style="margin-top:16px;color:#64748B;font-size:13px;text-align:center;">Our team will begin work shortly. You'll receive updates at each step.</p>
-  `, "Order Confirmed");
+  `,
+    "Order Confirmed"
+  );
 
-  return sendEmail({ to: params.to, subject: `Order Confirmed — ${params.orderNumber} | genxdigitizing`, html, bcc: TRUSTPILOT_BCC });
+  return sendEmail({
+    to: params.to,
+    subject: `Order Confirmed — ${params.orderNumber} | genxdigitizing`,
+    html,
+    bcc: TRUSTPILOT_BCC,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -434,7 +466,8 @@ export async function emailDesignerAssigned(params: {
   orderNumber: string;
   designerName: string;
 }) {
-  const html = baseLayout(`
+  const html = baseLayout(
+    `
     <p class="greeting">Hi ${params.clientName},</p>
     <p>Great news — your order <span class="order-num">${params.orderNumber}</span> has been assigned to <strong>${params.designerName}</strong> and work has begun.</p>
 
@@ -445,9 +478,15 @@ export async function emailDesignerAssigned(params: {
     <div class="cta-wrap">
       <a href="${APP_URL}/client/my-orders" class="cta">View Order Status →</a>
     </div>
-  `, "Designer Assigned");
+  `,
+    "Designer Assigned"
+  );
 
-  return sendEmail({ to: params.to, subject: `${params.designerName} is working on ${params.orderNumber}`, html });
+  return sendEmail({
+    to: params.to,
+    subject: `${params.designerName} is working on ${params.orderNumber}`,
+    html,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -462,7 +501,8 @@ export async function emailOrderDelivered(params: {
   stitchCount?: number;
   downloadUrl: string;
 }) {
-  const html = baseLayout(`
+  const html = baseLayout(
+    `
     <p class="greeting">Hi ${params.clientName},</p>
     <p>Your order is <strong>ready</strong>! Your digitized file for <strong>${params.serviceName}</strong> has passed our quality review and is available for download.</p>
 
@@ -480,9 +520,16 @@ export async function emailOrderDelivered(params: {
 
     <p style="margin-top:16px;color:#64748B;font-size:13px;text-align:center;">Need adjustments? Request a revision in your portal — <strong>always free</strong>.</p>
     <p style="color:#64748B;font-size:13px;text-align:center;">Happy with the result? Leave a quick review ⭐ — it means a lot to our team.</p>
-  `, "Your Order is Ready");
+  `,
+    "Your Order is Ready"
+  );
 
-  return sendEmail({ to: params.to, subject: `✅ ${params.orderNumber} is ready for download!`, html, bcc: TRUSTPILOT_BCC });
+  return sendEmail({
+    to: params.to,
+    subject: `✅ ${params.orderNumber} is ready for download!`,
+    html,
+    bcc: TRUSTPILOT_BCC,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -497,7 +544,8 @@ export async function emailPaymentRequired(params: {
   amount: number;
   portalUrl: string;
 }) {
-  const html = baseLayout(`
+  const html = baseLayout(
+    `
     <p class="greeting">Hi ${params.clientName},</p>
     <p>Your <strong>${params.serviceName}</strong> for order <span class="order-num">${params.orderNumber}</span> is complete and ready for download.</p>
 
@@ -512,7 +560,9 @@ export async function emailPaymentRequired(params: {
     </div>
 
     <p style="margin-top:16px;color:#64748B;font-size:13px;text-align:center;">Unlimited free revisions are always included after download.</p>
-  `, "Payment Required");
+  `,
+    "Payment Required"
+  );
 
   return sendEmail({ to: params.to, subject: `Payment required — ${params.orderNumber}`, html });
 }
@@ -532,7 +582,8 @@ export async function emailPaymentConfirmed(params: {
   pdfUrl?: string;
   pdfAttachment?: { filename: string; content: Buffer };
 }) {
-  const html = baseLayout(`
+  const html = baseLayout(
+    `
     <p class="greeting">Hi ${params.clientName},</p>
     <p>Your payment of <strong style="color:#16A34A;">$${params.amount} ${params.currency}</strong> has been received for order <span class="order-num">${params.orderNumber}</span>.</p>
 
@@ -543,22 +594,32 @@ export async function emailPaymentConfirmed(params: {
       <div class="detail-row"><span class="detail-label">Reference</span><span class="detail-value" style="font-family:monospace;font-size:12px;">${params.payoneerRef}</span></div>
     </div>
 
-    ${params.pdfUrl ? `
+    ${
+      params.pdfUrl
+        ? `
     <div class="cta-wrap">
       <a href="${params.pdfUrl}" class="cta">Download Invoice PDF →</a>
-    </div>` : ""}
+    </div>`
+        : ""
+    }
 
     <p style="margin-top:16px;color:#64748B;font-size:13px;text-align:center;">A copy of your invoice is attached to this email for your records.</p>
-  `, "Payment Confirmed");
+  `,
+    "Payment Confirmed"
+  );
 
   return sendEmail({
     to: params.to,
     subject: `Payment received — Invoice ${params.invoiceNumber}`,
     html,
-    attachments: params.pdfAttachment ? [{
-      filename: params.pdfAttachment.filename,
-      content: params.pdfAttachment.content,
-    }] : undefined,
+    attachments: params.pdfAttachment
+      ? [
+          {
+            filename: params.pdfAttachment.filename,
+            content: params.pdfAttachment.content,
+          },
+        ]
+      : undefined,
   });
 }
 
@@ -572,7 +633,8 @@ export async function emailRevisionRequested(params: {
   orderNumber: string;
   revisionNotes: string;
 }) {
-  const html = baseLayout(`
+  const html = baseLayout(
+    `
     <p class="greeting">Revision Requested</p>
     <p>A revision has been requested for order <span class="order-num">${params.orderNumber}</span> by <strong>${params.clientName}</strong>.</p>
 
@@ -583,7 +645,9 @@ export async function emailRevisionRequested(params: {
     <div class="cta-wrap">
       <a href="${APP_URL}/admin/orders" class="cta">View Order in Admin →</a>
     </div>
-  `, "Revision Requested");
+  `,
+    "Revision Requested"
+  );
 
   return sendEmail({ to: params.to, subject: `Revision requested — ${params.orderNumber}`, html });
 }
@@ -600,7 +664,8 @@ export async function emailNewOrderAlert(params: {
   price: number;
   turnaround: string;
 }) {
-  const html = baseLayout(`
+  const html = baseLayout(
+    `
     <p class="greeting">New Order Received</p>
     <p>A <strong>new order</strong> has been placed and needs a designer assigned.</p>
 
@@ -615,9 +680,15 @@ export async function emailNewOrderAlert(params: {
     <div class="cta-wrap">
       <a href="${APP_URL}/admin/orders" class="cta">Assign Designer →</a>
     </div>
-  `, "New Order Alert");
+  `,
+    "New Order Alert"
+  );
 
-  return sendEmail({ to: params.to, subject: `New order — ${params.orderNumber} (${params.turnaround})`, html });
+  return sendEmail({
+    to: params.to,
+    subject: `New order — ${params.orderNumber} (${params.turnaround})`,
+    html,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -630,7 +701,8 @@ export async function emailWelcome(params: {
   companyName: string;
 }) {
   var firstName = params.clientName.split(" ")[0] || params.clientName;
-  var html = baseLayout(`
+  var html = baseLayout(
+    `
     <p class="greeting">Welcome to the family, ${firstName}! 👋</p>
 
     <p>Thanks for creating your account with <strong>GenXdigitizing</strong>. You've just joined <strong>2,500+ businesses</strong> who trust us for professional embroidery digitizing — backed by the industry's strongest guarantees.</p>
@@ -717,9 +789,16 @@ export async function emailWelcome(params: {
     <p style="margin-top:16px;color:#64748B;font-size:13px;text-align:center;">
       Questions? Reply to this email or reach us at <a href="mailto:support@genxdigitizing.com" style="color:#2563EB;">support@genxdigitizing.com</a> — we respond within minutes during business hours.
     </p>
-  `, "Welcome to GenXdigitizing");
+  `,
+    "Welcome to GenXdigitizing"
+  );
 
-  return sendEmail({ to: params.to, subject: `Welcome to GenXdigitizing, ${firstName}! Here's how to get started 🎉`, html, bcc: TRUSTPILOT_BCC });
+  return sendEmail({
+    to: params.to,
+    subject: `Welcome to GenXdigitizing, ${firstName}! Here's how to get started 🎉`,
+    html,
+    bcc: TRUSTPILOT_BCC,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -733,7 +812,8 @@ export async function emailSLAWarning(params: {
   designerName: string;
   hoursLeft: number;
 }) {
-  const html = baseLayout(`
+  const html = baseLayout(
+    `
     <p class="greeting">⚠️ SLA Deadline Approaching</p>
     <div class="info-card info-card-red">
       <strong>Order <span class="order-num" style="color:#991B1B;">${params.orderNumber}</span></strong> for <strong>${params.clientName}</strong><br/>
@@ -744,9 +824,15 @@ export async function emailSLAWarning(params: {
     <div class="cta-wrap">
       <a href="${APP_URL}/admin/orders" class="cta">View Order →</a>
     </div>
-  `, "SLA Warning");
+  `,
+    "SLA Warning"
+  );
 
-  return sendEmail({ to: params.to, subject: `SLA warning — ${params.orderNumber} due in ${params.hoursLeft}h`, html });
+  return sendEmail({
+    to: params.to,
+    subject: `SLA warning — ${params.orderNumber} due in ${params.hoursLeft}h`,
+    html,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -761,7 +847,8 @@ export async function emailDesignerTaskAssigned(params: {
   turnaround: string;
   deadline: string;
 }) {
-  const html = baseLayout(`
+  const html = baseLayout(
+    `
     <p class="greeting">Hi ${params.designerName},</p>
     <p>A new order has been <strong>assigned</strong> to you. Please review the details and begin work.</p>
 
@@ -775,9 +862,15 @@ export async function emailDesignerTaskAssigned(params: {
     <div class="cta-wrap">
       <a href="${APP_URL}/designer/tasks" class="cta">Open Designer Portal →</a>
     </div>
-  `, "New Task Assigned");
+  `,
+    "New Task Assigned"
+  );
 
-  return sendEmail({ to: params.to, subject: `New task assigned — ${params.orderNumber} (${params.turnaround})`, html });
+  return sendEmail({
+    to: params.to,
+    subject: `New task assigned — ${params.orderNumber} (${params.turnaround})`,
+    html,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -790,7 +883,8 @@ export async function emailReviewRequest(params: {
   orderNumber: string;
   serviceName: string;
 }) {
-  const html = baseLayout(`
+  const html = baseLayout(
+    `
     <p class="greeting">Hi ${params.clientName},</p>
     <p>We hope you're happy with your <strong>${params.serviceName}</strong> for order <span class="order-num">${params.orderNumber}</span>!</p>
     <p>Would you take <strong>30 seconds</strong> to rate your experience? Your feedback helps our team improve and guides future clients.</p>
@@ -804,7 +898,14 @@ export async function emailReviewRequest(params: {
     </div>
 
     <p style="margin-top:14px;color:#64748B;font-size:13px;text-align:center;">Remember — free revisions and format conversions are <strong>always</strong> available.</p>
-  `, "How was your order?");
+  `,
+    "How was your order?"
+  );
 
-  return sendEmail({ to: params.to, subject: `How was your genxdigitizing order? ⭐ (${params.orderNumber})`, html, bcc: TRUSTPILOT_BCC });
+  return sendEmail({
+    to: params.to,
+    subject: `How was your genxdigitizing order? ⭐ (${params.orderNumber})`,
+    html,
+    bcc: TRUSTPILOT_BCC,
+  });
 }

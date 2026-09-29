@@ -10,8 +10,8 @@ function ChatLayout({ singleMode }: { singleMode?: boolean }) {
 
   if (singleMode) {
     return (
-      <div className="flex-1 flex bg-[var(--bg)] min-h-0">
-        <div className="flex flex-1 min-h-0">
+      <div className="flex min-h-0 flex-1 bg-[var(--bg)]">
+        <div className="flex min-h-0 flex-1">
           <ChatWindow />
         </div>
       </div>
@@ -19,12 +19,15 @@ function ChatLayout({ singleMode }: { singleMode?: boolean }) {
   }
 
   return (
-    <div className="flex-1 flex bg-[var(--bg)] min-h-0 min-w-0 overflow-hidden">
-      <div className={`${mobileView === "chat" ? "hidden" : "flex"} md:flex
-        w-full md:w-[320px] lg:w-[360px] flex-shrink-0 min-w-0`}>
+    <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden bg-[var(--bg)]">
+      <div
+        className={`${mobileView === "chat" ? "hidden" : "flex"} w-full min-w-0 flex-shrink-0 md:flex md:w-[320px] lg:w-[360px]`}
+      >
         <ChatSidebar />
       </div>
-      <div className={`${mobileView === "sidebar" ? "hidden" : "flex"} md:flex flex-1 min-h-0 min-w-0 overflow-hidden`}>
+      <div
+        className={`${mobileView === "sidebar" ? "hidden" : "flex"} min-h-0 min-w-0 flex-1 overflow-hidden md:flex`}
+      >
         <ChatWindow />
       </div>
     </div>

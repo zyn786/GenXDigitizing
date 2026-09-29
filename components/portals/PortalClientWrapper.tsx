@@ -5,12 +5,22 @@ import { NotificationProvider } from "@/hooks/NotificationProvider";
 import { BadgeProvider } from "@/hooks/BadgeProvider";
 
 const MobileBottomNav = dynamic(
-  () => import("./MobileBottomNav").then(m => ({ default: m.MobileBottomNav })),
+  () => import("./MobileBottomNav").then((m) => ({ default: m.MobileBottomNav })),
   { ssr: false }
 );
 
-export function PortalClientWrapper({ userId, children, role, userName, userEmail }: {
-  userId: string; children: React.ReactNode; role?: string; userName?: string; userEmail?: string;
+export function PortalClientWrapper({
+  userId,
+  children,
+  role,
+  userName,
+  userEmail,
+}: {
+  userId: string;
+  children: React.ReactNode;
+  role?: string;
+  userName?: string;
+  userEmail?: string;
 }) {
   return (
     <NotificationProvider userId={userId}>
@@ -23,8 +33,18 @@ export function PortalClientWrapper({ userId, children, role, userName, userEmai
 }
 
 // Top-level wrapper that wraps Sidebar + main content so Sidebar gets BadgeProvider context
-export function PortalProviders({ userId, children, role, userName, userEmail }: {
-  userId: string; children: React.ReactNode; role?: string; userName?: string; userEmail?: string;
+export function PortalProviders({
+  userId,
+  children,
+  role,
+  userName,
+  userEmail,
+}: {
+  userId: string;
+  children: React.ReactNode;
+  role?: string;
+  userName?: string;
+  userEmail?: string;
 }) {
   return (
     <NotificationProvider userId={userId}>

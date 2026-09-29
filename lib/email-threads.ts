@@ -34,7 +34,7 @@ const SUBJECT_PREFIX = new RegExp(
     "|(automatic\\s+reply|auto[\\s-]?reply|autoreply|automatic\\s+response)" +
     "|(out\\s+of\\s+(the\\s+)?office)" +
     "|(undeliverable|delivery\\s+(status\\s+)?notification|read\\s*:)" +
-  ")\\s*(\\[\\d+\\])?\\s*:\\s*",
+    ")\\s*(\\[\\d+\\])?\\s*:\\s*",
   "i"
 );
 
@@ -144,8 +144,10 @@ export async function resolveThreadId(
       .limit(FALLBACK_SCAN_LIMIT);
 
     var inboundMatch = (recentInbound?.data || []).find(function (r: any) {
-      return normalizeSubject(r.subject) === norm &&
-             (r.from_email || "").toLowerCase().trim() === counterparty;
+      return (
+        normalizeSubject(r.subject) === norm &&
+        (r.from_email || "").toLowerCase().trim() === counterparty
+      );
     });
     if (inboundMatch?.thread_id) return inboundMatch.thread_id;
 
@@ -159,12 +161,14 @@ export async function resolveThreadId(
       .limit(FALLBACK_SCAN_LIMIT);
 
     var sentMatch = (recentSent?.data || []).find(function (r: any) {
-      return normalizeSubject(r.subject) === norm &&
-             (r.to_email || "").toLowerCase().trim() === counterparty;
+      return (
+        normalizeSubject(r.subject) === norm &&
+        (r.to_email || "").toLowerCase().trim() === counterparty
+      );
     });
 
     if (sentMatch) {
-      var threadId = sentMatch.thread_id || ("s-" + (sentMatch.resend_id || sentMatch.id));
+      var threadId = sentMatch.thread_id || "s-" + (sentMatch.resend_id || sentMatch.id);
       if (!sentMatch.thread_id) {
         // Adopt it, so the original message joins the conversation.
         await supabase.from("sent_emails").update({ thread_id: threadId }).eq("id", sentMatch.id);

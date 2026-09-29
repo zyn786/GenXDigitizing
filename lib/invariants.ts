@@ -180,7 +180,10 @@ export async function runInvariantChecks(
       ok: stalled.length === 0,
       count: stalled.length,
       detail: `${stalled.length} order(s) in \`submitted\` with no designer for over ${staleSubmittedHours}h.`,
-      samples: sample(stalled, (o) => `${o.order_number} — since ${new Date(o.created_at).toISOString().slice(0, 16)}Z`),
+      samples: sample(
+        stalled,
+        (o) => `${o.order_number} — since ${new Date(o.created_at).toISOString().slice(0, 16)}Z`
+      ),
     });
   }
 
@@ -269,7 +272,11 @@ export async function runInvariantChecks(
         ok: rows.length === 0,
         count: rows.length,
         detail: `${rows.length} unresolved send failure(s) in the last ${windowHours}h.`,
-        samples: sample(rows, (r) => `${r.to_email} — "${String(r.subject).slice(0, 40)}" — ${String(r.error).slice(0, 60)}`),
+        samples: sample(
+          rows,
+          (r) =>
+            `${r.to_email} — "${String(r.subject).slice(0, 40)}" — ${String(r.error).slice(0, 60)}`
+        ),
       });
     }
   }
@@ -289,7 +296,8 @@ export async function runInvariantChecks(
       checks.push({
         id: "transactional_email_flowing",
         title: "Transactional email is being sent",
-        meaning: "Customer notifications (order received, delivered, revision) are leaving the system.",
+        meaning:
+          "Customer notifications (order received, delivered, revision) are leaving the system.",
         severity: "critical",
         ok: true,
         count: 0,
@@ -405,7 +413,10 @@ export async function runInvariantChecks(
         detail:
           `${rows.length} undelivered notification(s) in the last ${windowHours}h` +
           (pushDisabled.length ? ` — ${pushDisabled.length} because push has no VAPID keys.` : "."),
-        samples: sample(other.length ? other : rows, (r) => `[${r.channel}] ${r.title} — ${String(r.reason).slice(0, 70)}`),
+        samples: sample(
+          other.length ? other : rows,
+          (r) => `[${r.channel}] ${r.title} — ${String(r.reason).slice(0, 70)}`
+        ),
       });
     }
   }

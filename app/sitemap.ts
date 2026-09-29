@@ -18,59 +18,56 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let blogEntries: MetadataRoute.Sitemap = [];
   try {
     const supabase = createAdminClient();
-    const { data: posts } = await supabase
-      .from("blog_posts")
-      .select("slug")
-      .eq("published", true);
+    const { data: posts } = await supabase.from("blog_posts").select("slug").eq("published", true);
     blogEntries = (posts || []).map((p: { slug: string }) =>
       u(`/blog/${p.slug}`, { freq: "monthly", pri: 0.8 })
     );
   } catch {
     // Fallback to hardcoded entries if DB unavailable
     blogEntries = [
-      u("/blog/what-is-embroidery-digitizing",     { freq: "monthly", pri: 0.8 }),
-      u("/blog/manual-vs-auto-digitizing",         { freq: "monthly", pri: 0.8 }),
+      u("/blog/what-is-embroidery-digitizing", { freq: "monthly", pri: 0.8 }),
+      u("/blog/manual-vs-auto-digitizing", { freq: "monthly", pri: 0.8 }),
       u("/blog/embroidery-file-formats-explained", { freq: "monthly", pri: 0.8 }),
-      u("/blog/how-to-convert-jpg-to-vector",      { freq: "monthly", pri: 0.8 }),
+      u("/blog/how-to-convert-jpg-to-vector", { freq: "monthly", pri: 0.8 }),
     ];
   }
 
   return [
     // ── Core ────────────────────────────────────────────
-    u("/",              { freq: "weekly",  pri: 1.0 }),
+    u("/", { freq: "weekly", pri: 1.0 }),
 
     // ── Marketing ───────────────────────────────────────
-    u("/about",         { freq: "monthly", pri: 0.9 }),
-    u("/services",      { freq: "weekly",  pri: 0.95 }),
-    u("/portfolio",     { freq: "weekly",  pri: 0.9 }),
-    u("/pricing",       { freq: "weekly",  pri: 0.95 }),
-    u("/blog",          { freq: "weekly",  pri: 0.9 }),
-    u("/upload",        { freq: "monthly", pri: 0.9 }),
-    u("/contact",       { freq: "monthly", pri: 0.85 }),
-    u("/subscribe",     { freq: "monthly", pri: 0.85 }),
+    u("/about", { freq: "monthly", pri: 0.9 }),
+    u("/services", { freq: "weekly", pri: 0.95 }),
+    u("/portfolio", { freq: "weekly", pri: 0.9 }),
+    u("/pricing", { freq: "weekly", pri: 0.95 }),
+    u("/blog", { freq: "weekly", pri: 0.9 }),
+    u("/upload", { freq: "monthly", pri: 0.9 }),
+    u("/contact", { freq: "monthly", pri: 0.85 }),
+    u("/subscribe", { freq: "monthly", pri: 0.85 }),
 
     // ── Blog posts (dynamic) ─────────────────────────────
     ...blogEntries,
 
     // ── Service pages ───────────────────────────────────
-    u("/services/3d-puff-digitizing",              { freq: "monthly", pri: 0.8 }),
-    u("/services/bags-digitizing",                 { freq: "monthly", pri: 0.8 }),
-    u("/services/beanies-digitizing",              { freq: "monthly", pri: 0.8 }),
-    u("/services/cap-digitizing",                  { freq: "monthly", pri: 0.85 }),
-    u("/services/corporate-apparel-digitizing",    { freq: "monthly", pri: 0.85 }),
-    u("/services/custom-patches",                  { freq: "monthly", pri: 0.85 }),
-    u("/services/embroidery-digitizing",           { freq: "monthly", pri: 0.85 }),
-    u("/services/jacket-back-digitizing",          { freq: "monthly", pri: 0.8 }),
-    u("/services/left-chest-digitizing",           { freq: "monthly", pri: 0.85 }),
-    u("/services/logo-digitizing",                 { freq: "monthly", pri: 0.85 }),
-    u("/services/sportswear-digitizing",           { freq: "monthly", pri: 0.85 }),
-    u("/services/towels-digitizing",               { freq: "monthly", pri: 0.8 }),
-    u("/services/uniforms-digitizing",             { freq: "monthly", pri: 0.85 }),
-    u("/services/vector-art-conversion",           { freq: "monthly", pri: 0.85 }),
+    u("/services/3d-puff-digitizing", { freq: "monthly", pri: 0.8 }),
+    u("/services/bags-digitizing", { freq: "monthly", pri: 0.8 }),
+    u("/services/beanies-digitizing", { freq: "monthly", pri: 0.8 }),
+    u("/services/cap-digitizing", { freq: "monthly", pri: 0.85 }),
+    u("/services/corporate-apparel-digitizing", { freq: "monthly", pri: 0.85 }),
+    u("/services/custom-patches", { freq: "monthly", pri: 0.85 }),
+    u("/services/embroidery-digitizing", { freq: "monthly", pri: 0.85 }),
+    u("/services/jacket-back-digitizing", { freq: "monthly", pri: 0.8 }),
+    u("/services/left-chest-digitizing", { freq: "monthly", pri: 0.85 }),
+    u("/services/logo-digitizing", { freq: "monthly", pri: 0.85 }),
+    u("/services/sportswear-digitizing", { freq: "monthly", pri: 0.85 }),
+    u("/services/towels-digitizing", { freq: "monthly", pri: 0.8 }),
+    u("/services/uniforms-digitizing", { freq: "monthly", pri: 0.85 }),
+    u("/services/vector-art-conversion", { freq: "monthly", pri: 0.85 }),
 
     // ── Legal ───────────────────────────────────────────
-    u("/privacy-policy",        { freq: "yearly", pri: 0.3 }),
-    u("/terms-and-conditions",  { freq: "yearly", pri: 0.3 }),
-    u("/refund-policy",         { freq: "yearly", pri: 0.3 }),
+    u("/privacy-policy", { freq: "yearly", pri: 0.3 }),
+    u("/terms-and-conditions", { freq: "yearly", pri: 0.3 }),
+    u("/refund-policy", { freq: "yearly", pri: 0.3 }),
   ];
 }

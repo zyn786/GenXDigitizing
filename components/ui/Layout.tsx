@@ -13,13 +13,21 @@ import Image from "next/image";
 //  PageShell — scrollable container, centered, padded
 // ═══════════════════════════════════════════════════════════════
 
-export function PageShell({ children, className }: { children: React.ReactNode; className?: string }) {
+export function PageShell({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <div className={cn(
-      "flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-4 sm:py-5",
-      "max-w-[900px] mx-auto w-full",
-      className
-    )}>
+    <div
+      className={cn(
+        "flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-5 md:px-6",
+        "mx-auto w-full max-w-[900px]",
+        className
+      )}
+    >
       {children}
     </div>
   );
@@ -29,7 +37,13 @@ export function PageShell({ children, className }: { children: React.ReactNode; 
 //  Section — consistent vertical rhythm
 // ═══════════════════════════════════════════════════════════════
 
-export function Section({ children, className }: { children: React.ReactNode; className?: string }) {
+export function Section({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return <div className={cn("mb-5", className)}>{children}</div>;
 }
 
@@ -59,7 +73,15 @@ interface PageHeaderProps {
 }
 
 export function PageHeader({
-  name, avatar, badge, badgeColor, avatarGradient, right, title, titleGradient, subtitle,
+  name,
+  avatar,
+  badge,
+  badgeColor,
+  avatarGradient,
+  right,
+  title,
+  titleGradient,
+  subtitle,
 }: PageHeaderProps) {
   const badgeBg = badgeColor ?? "#7C3AED";
   const grad = avatarGradient ?? "linear-gradient(135deg, #7C3AED, #D946EF)";
@@ -69,19 +91,37 @@ export function PageHeader({
     <>
       {/* Profile strip */}
       <Section>
-        <div className="px-4 py-3 rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="relative w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden"
-              style={{ background: grad }}>
-              {avatar
-                ? <Image fill src={avatar} alt={name} className="rounded-full object-cover" sizes="36px" />
-                : (name?.charAt(0)?.toUpperCase() || "U")}
+            <div
+              className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full font-bold text-white"
+              style={{ background: grad }}
+            >
+              {avatar ? (
+                <Image
+                  fill
+                  src={avatar}
+                  alt={name}
+                  className="rounded-full object-cover"
+                  sizes="36px"
+                />
+              ) : (
+                name?.charAt(0)?.toUpperCase() || "U"
+              )}
             </div>
-            <div className="flex-1 min-w-0">
-              <span className="font-syne font-bold text-md" style={{ color: "var(--txt)" }}>{name}</span>
+            <div className="min-w-0 flex-1">
+              <span className="font-syne text-md font-bold" style={{ color: "var(--txt)" }}>
+                {name}
+              </span>
               {badge && (
-                <span className="text-2xs ml-2 px-2 py-0.5 rounded-full font-semibold"
-                  style={{ background: `${badgeBg}1a`, color: badgeBg, border: `1px solid ${badgeBg}40` }}>
+                <span
+                  className="ml-2 rounded-full px-2 py-0.5 text-2xs font-semibold"
+                  style={{
+                    background: `${badgeBg}1a`,
+                    color: badgeBg,
+                    border: `1px solid ${badgeBg}40`,
+                  }}
+                >
                   {badge}
                 </span>
               )}
@@ -92,17 +132,19 @@ export function PageHeader({
       </Section>
 
       {/* Title */}
-      <h2 className="font-syne font-bold text-xl sm:text-2xl leading-tight mb-1"
+      <h2
+        className="mb-1 font-syne text-xl font-bold leading-tight sm:text-2xl"
         style={{
           background: titleGrad,
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
           backgroundClip: "text",
-        }}>
+        }}
+      >
         {title}
       </h2>
       {subtitle && (
-        <p className="text-sm mb-5 font-medium" style={{ color: "var(--txt3)" }}>
+        <p className="mb-5 text-sm font-medium" style={{ color: "var(--txt3)" }}>
           {subtitle}
         </p>
       )}
@@ -124,24 +166,32 @@ interface StatItem {
 export function StatGrid({ items }: { items: StatItem[] }) {
   return (
     <Section>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-        {items.map(s => (
-          <div key={s.label} className="rounded-2xl p-3 sm:p-3.5 transition-all hover:translate-y-[-2px]"
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+        {items.map((s) => (
+          <div
+            key={s.label}
+            className="rounded-2xl p-3 transition-all hover:translate-y-[-2px] sm:p-3.5"
             style={{
               background: s.color.bgSoft,
               border: `1px solid ${s.color.border}`,
               boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
-            }}>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: s.color.bgSoft, color: s.color.icon }}>
+            }}
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <div
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl"
+                style={{ background: s.color.bgSoft, color: s.color.icon }}
+              >
                 {s.icon}
               </div>
-              <span className="text-2xs uppercase tracking-wider font-semibold" style={{ color: "var(--txt3)" }}>
+              <span
+                className="text-2xs font-semibold uppercase tracking-wider"
+                style={{ color: "var(--txt3)" }}
+              >
                 {s.label}
               </span>
             </div>
-            <div className="font-syne font-bold text-lg sm:text-xl" style={{ color: s.color.text }}>
+            <div className="font-syne text-lg font-bold sm:text-xl" style={{ color: s.color.text }}>
               {s.value}
             </div>
           </div>
@@ -163,26 +213,35 @@ interface TabItem {
   color: { bg: string; bgSoft: string; border: string; text: string; glow: string };
 }
 
-export function FilterTabs({ tabs, active, onChange }: {
+export function FilterTabs({
+  tabs,
+  active,
+  onChange,
+}: {
   tabs: TabItem[];
   active: string;
   onChange: (key: string) => void;
 }) {
   return (
     <Section>
-      <div className="flex gap-2 overflow-x-auto scrollbar-none flex-nowrap pb-1 -mx-0.5 px-0.5"
-        style={{ WebkitOverflowScrolling: "touch" }}>
-        {tabs.map(tab => {
+      <div
+        className="scrollbar-none -mx-0.5 flex flex-nowrap gap-2 overflow-x-auto px-0.5 pb-1"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
+        {tabs.map((tab) => {
           const isActive = active === tab.key;
           return (
-            <button key={tab.key} onClick={() => onChange(isActive ? tabs[0].key : tab.key)}
-              className="flex-shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 px-3.5 py-2.5 sm:py-2 rounded-xl text-xs font-semibold border transition-all active:scale-95 tab-switch"
+            <button
+              key={tab.key}
+              onClick={() => onChange(isActive ? tabs[0].key : tab.key)}
+              className="tab-switch inline-flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border px-3.5 py-2.5 text-xs font-semibold transition-all active:scale-95 sm:py-2"
               style={{
                 background: isActive ? tab.color.bg : tab.color.bgSoft,
                 color: isActive ? "#fff" : tab.color.text,
                 borderColor: isActive ? tab.color.bg : tab.color.border,
                 boxShadow: isActive ? `0 2px 12px ${tab.color.glow}` : "none",
-              }}>
+              }}
+            >
               {tab.icon && <span>{tab.icon}</span>}
               {tab.label}
               {tab.count !== undefined && (
@@ -211,20 +270,24 @@ interface ListCardProps {
 
 function ListCard({ id, expanded, onToggle, accentColor, header, children }: ListCardProps) {
   return (
-    <div className="rounded-2xl overflow-hidden transition-all"
+    <div
+      className="overflow-hidden rounded-2xl transition-all"
       style={{
         background: "var(--surface)",
         border: `1px solid var(--border)`,
         borderLeft: `3px solid ${accentColor}`,
         boxShadow: expanded ? "0 2px 8px rgba(0,0,0,0.04)" : "none",
-      }}>
-      <div className="px-4 sm:px-5 py-3.5 sm:py-4 cursor-pointer select-none"
+      }}
+    >
+      <div
+        className="cursor-pointer select-none px-4 py-3.5 sm:px-5 sm:py-4"
         style={{ WebkitTapHighlightColor: "transparent" }}
-        onClick={() => onToggle(id)}>
+        onClick={() => onToggle(id)}
+      >
         {header}
       </div>
       {expanded && children && (
-        <div className="px-4 sm:px-5 py-4" style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="px-4 py-4 sm:px-5" style={{ borderTop: "1px solid var(--border)" }}>
           {children}
         </div>
       )}
@@ -232,12 +295,14 @@ function ListCard({ id, expanded, onToggle, accentColor, header, children }: Lis
   );
 }
 
-export function CardList({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={cn("flex flex-col gap-2.5 mb-5", className)}>
-      {children}
-    </div>
-  );
+export function CardList({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return <div className={cn("mb-5 flex flex-col gap-2.5", className)}>{children}</div>;
 }
 
 CardList.Item = ListCard;
@@ -246,7 +311,12 @@ CardList.Item = ListCard;
 //  EmptyState — consistent empty state
 // ═══════════════════════════════════════════════════════════════
 
-export function EmptyState({ icon, title, description, action }: {
+export function EmptyState({
+  icon,
+  title,
+  description,
+  action,
+}: {
   icon?: string;
   title: string;
   description?: string;
@@ -254,10 +324,16 @@ export function EmptyState({ icon, title, description, action }: {
 }) {
   return (
     <Section>
-      <div className="text-center py-14 rounded-2xl border bg-[var(--surface)] border-[var(--border)]">
-        {icon && <p className="text-4xl mb-3">{icon}</p>}
-        <p className="font-syne font-bold text-lg" style={{ color: "var(--txt)" }}>{title}</p>
-        {description && <p className="text-sm mt-1.5" style={{ color: "var(--txt2)" }}>{description}</p>}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] py-14 text-center">
+        {icon && <p className="mb-3 text-4xl">{icon}</p>}
+        <p className="font-syne text-lg font-bold" style={{ color: "var(--txt)" }}>
+          {title}
+        </p>
+        {description && (
+          <p className="mt-1.5 text-sm" style={{ color: "var(--txt2)" }}>
+            {description}
+          </p>
+        )}
         {action && <div className="mt-4">{action}</div>}
       </div>
     </Section>

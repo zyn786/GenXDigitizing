@@ -82,10 +82,7 @@ function defineTool<S extends z.ZodType<any>>(opts: {
   schema: S;
   run: (input: z.infer<S>) => Promise<string>;
 }): AgentTool {
-  const jsonSchema = z.toJSONSchema(opts.schema, { reused: "ref" }) as Record<
-    string,
-    unknown
-  >;
+  const jsonSchema = z.toJSONSchema(opts.schema, { reused: "ref" }) as Record<string, unknown>;
   // The API rejects tool schemas without this.
   jsonSchema.additionalProperties = false;
 
@@ -117,9 +114,7 @@ const getServicePrices = defineTool({
     service: z
       .string()
       .optional()
-      .describe(
-        "Optional filter, e.g. 'digitizing', 'vector', 'patch', 'sewout', 'puff'."
-      ),
+      .describe("Optional filter, e.g. 'digitizing', 'vector', 'patch', 'sewout', 'puff'."),
   }),
   run: async ({ service }) => {
     const admin = createAdminClient();
@@ -240,9 +235,7 @@ export async function draftReply({
   const messages: Anthropic.MessageParam[] = [
     {
       role: "user",
-      content: instruction
-        ? `${briefing}\n\n---\n\nSTAFF INSTRUCTION: ${instruction}`
-        : briefing,
+      content: instruction ? `${briefing}\n\n---\n\nSTAFF INSTRUCTION: ${instruction}` : briefing,
     },
   ];
 
@@ -310,9 +303,7 @@ export async function draftReply({
         .trim();
 
       if (!draft) {
-        throw new Error(
-          `No draft produced (stop_reason: ${response.stop_reason ?? "unknown"}).`
-        );
+        throw new Error(`No draft produced (stop_reason: ${response.stop_reason ?? "unknown"}).`);
       }
 
       return {
@@ -397,13 +388,9 @@ export function buildLeadBriefing(lead: any, thread: any[] = []): string {
   if (lead.created_at)
     parts.push(`First seen: ${new Date(lead.created_at).toISOString().slice(0, 10)}`);
   if (lead.updated_at)
-    parts.push(
-      `Record last updated: ${new Date(lead.updated_at).toISOString().slice(0, 10)}`
-    );
+    parts.push(`Record last updated: ${new Date(lead.updated_at).toISOString().slice(0, 10)}`);
   if (lead.follow_up_at)
-    parts.push(
-      `Follow-up due: ${new Date(lead.follow_up_at).toISOString().slice(0, 10)}`
-    );
+    parts.push(`Follow-up due: ${new Date(lead.follow_up_at).toISOString().slice(0, 10)}`);
   if (lead.lost_reason) parts.push(`Lost reason: ${lead.lost_reason}`);
 
   if (lead.notes) {

@@ -33,11 +33,14 @@ export async function POST() {
 
       if (testErr && testErr.message.includes("does not exist")) {
         // Tables don't exist — we need SQL. Return the migration SQL for manual run.
-        return NextResponse.json({
-          needsSetup: true,
-          message: "Tables don't exist. Run the migration SQL in Supabase SQL Editor.",
-          migrationFile: "supabase/migrations/007_portfolio.sql",
-        }, { status: 200 });
+        return NextResponse.json(
+          {
+            needsSetup: true,
+            message: "Tables don't exist. Run the migration SQL in Supabase SQL Editor.",
+            migrationFile: "supabase/migrations/007_portfolio.sql",
+          },
+          { status: 200 }
+        );
       }
 
       if (testErr) {
@@ -49,12 +52,21 @@ export async function POST() {
       if (!cats || cats.length === 0) {
         // Tables exist but no seed data — insert defaults
         const { error: seedErr } = await supabase.from("categories").insert([
-          { name: "Embroidery Digitizing", slug: "digitizing", emoji: "🧵", color: "#2FA4D7", sort_order: 1 },
+          {
+            name: "Embroidery Digitizing",
+            slug: "digitizing",
+            emoji: "🧵",
+            color: "#2FA4D7",
+            sort_order: 1,
+          },
           { name: "Vector Art", slug: "vector", emoji: "✏️", color: "#E76F2E", sort_order: 2 },
           { name: "Patch Design", slug: "patches", emoji: "🏷️", color: "#10B981", sort_order: 3 },
         ]);
         if (seedErr) {
-          return NextResponse.json({ error: "Failed to seed categories: " + seedErr.message }, { status: 500 });
+          return NextResponse.json(
+            { error: "Failed to seed categories: " + seedErr.message },
+            { status: 500 }
+          );
         }
         results.push("Seeded 3 categories");
       }

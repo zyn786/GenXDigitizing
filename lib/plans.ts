@@ -101,7 +101,11 @@ export function getAnnualPrice(plan: string): string {
 }
 
 /** Get credit cost for a design tier. Uses per-tier credit_cost if available, falls back to plan's big-design cost. */
-export function getCreditCost(plan: string, isBigDesign: boolean, tierCreditCost?: number | null): number {
+export function getCreditCost(
+  plan: string,
+  isBigDesign: boolean,
+  tierCreditCost?: number | null
+): number {
   if (tierCreditCost && tierCreditCost > 0) return tierCreditCost;
   if (!isBigDesign) return 1;
   const config = PLAN_CONFIG[plan];

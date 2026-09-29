@@ -44,7 +44,10 @@ export async function POST(req: NextRequest) {
     const uploadedFiles: { name: string; key: string; size: number }[] = [];
     for (const file of files) {
       if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json({ error: `File ${file.name} exceeds 25MB limit` }, { status: 413 });
+        return NextResponse.json(
+          { error: `File ${file.name} exceeds 25MB limit` },
+          { status: 413 }
+        );
       }
       const buffer = Buffer.from(await file.arrayBuffer());
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -54,9 +57,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Create CRM lead
-    const fileList = uploadedFiles.map(f =>
-      `- ${f.name} (${(f.size / 1024 / 1024).toFixed(1)}MB) — /api/chat/upload?key=${encodeURIComponent(f.key)}`
-    ).join("\n");
+    const fileList = uploadedFiles
+      .map(
+        (f) =>
+          `- ${f.name} (${(f.size / 1024 / 1024).toFixed(1)}MB) — /api/chat/upload?key=${encodeURIComponent(f.key)}`
+      )
+      .join("\n");
 
     const leadNotes = [
       `Design: ${designName}`,
@@ -71,7 +77,9 @@ export async function POST(req: NextRequest) {
       "",
       "Uploaded Files:",
       fileList,
-    ].filter(Boolean).join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     const { error: leadErr } = await admin.from("crm_leads").insert({
       contact_name: name,
@@ -96,7 +104,7 @@ export async function POST(req: NextRequest) {
           visitorId,
           email || null,
           null,
-          discountAmount ? Number(discountAmount) : 0,
+          discountAmount ? Number(discountAmount) : 0
         );
       } catch (err) {
         console.error("[guest-order] Coupon redemption error:", err);
@@ -107,12 +115,15 @@ export async function POST(req: NextRequest) {
     // Notify admins
     const { data: admins } = await admin.from("users").select("id").eq("role", "admin");
     if (admins?.length) {
-      await notifyUsers(admins.map((a: any) => a.id), {
-        type: "system",
-        title: `New upload from ${name}`,
-        body: `${email} · ${designName} · ${placement} · ${files.length} file(s)`,
-        action_url: "/admin/leads",
-      });
+      await notifyUsers(
+        admins.map((a: any) => a.id),
+        {
+          type: "system",
+          title: `New upload from ${name}`,
+          body: `${email} · ${designName} · ${placement} · ${files.length} file(s)`,
+          action_url: "/admin/leads",
+        }
+      );
     }
 
     return NextResponse.json({ success: true });

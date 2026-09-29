@@ -57,8 +57,11 @@ export async function POST(request: NextRequest) {
     var result = await importReceivedEmail(supabase, email);
 
     if (result.error) {
-      console.error("[email-inbound] Store failed:", result.error,
-        "— if this mentions a missing column or unique constraint, apply migration 037.");
+      console.error(
+        "[email-inbound] Store failed:",
+        result.error,
+        "— if this mentions a missing column or unique constraint, apply migration 037."
+      );
       return NextResponse.json({ error: "Failed to store email" }, { status: 500 });
     }
 
@@ -73,7 +76,9 @@ export async function POST(request: NextRequest) {
 
         if (admins && admins.length > 0) {
           await notifyUsers(
-            admins.map(function (a: any) { return a.id; }),
+            admins.map(function (a: any) {
+              return a.id;
+            }),
             {
               type: "system",
               title: "New email from " + fromEmail,
@@ -88,7 +93,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log("[email-inbound] Stored:", result.id, "created:", result.created, "from:", fromEmail);
+    console.log(
+      "[email-inbound] Stored:",
+      result.id,
+      "created:",
+      result.created,
+      "from:",
+      fromEmail
+    );
     return NextResponse.json({ success: true, id: result.id, created: result.created });
   } catch (err: any) {
     console.error("[email-inbound] Unexpected error:", err);

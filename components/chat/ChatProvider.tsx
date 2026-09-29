@@ -5,7 +5,14 @@ import { createContext, useContext, useState, useCallback, useRef, useEffect } f
 import { createClient } from "@/lib/supabase/client";
 import { useChatRealtime } from "@/hooks/useChatRealtime";
 import { toast } from "sonner";
-import type { Conversation, Message, MessageStatus, Attachment, VoiceNote, LinkedOrder } from "./types";
+import type {
+  Conversation,
+  Message,
+  MessageStatus,
+  Attachment,
+  VoiceNote,
+  LinkedOrder,
+} from "./types";
 
 interface ChatContextType {
   conversations: Conversation[];
@@ -79,7 +86,11 @@ export function ChatProvider({
   const [mobileView, setMobileView] = useState<"sidebar" | "chat">("sidebar");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [replyTo, setReplyTo] = useState<{ id: string; content: string; senderName: string } | null>(null);
+  const [replyTo, setReplyTo] = useState<{
+    id: string;
+    content: string;
+    senderName: string;
+  } | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const typingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
@@ -129,7 +140,7 @@ export function ChatProvider({
   }, [currentUserId, supabase]);
 
   const activeConversation = activeConversationId
-    ? conversations.find((c) => c.id === activeConversationId) ?? null
+    ? (conversations.find((c) => c.id === activeConversationId) ?? null)
     : null;
 
   const isMobileSidebar = typeof window !== "undefined" && window.innerWidth < 768;
@@ -141,8 +152,7 @@ export function ChatProvider({
       c.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.linkedOrder?.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.linkedOrder?.service.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || c.linkedOrder?.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || c.linkedOrder?.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -173,13 +183,26 @@ export function ChatProvider({
             const ext = file.name.split(".").pop()?.toLowerCase() ?? "file";
 
             const typeMap: Record<string, Attachment["type"]> = {
-              dst: "embroidery", pes: "embroidery", emb: "embroidery",
-              jef: "embroidery", xxx: "embroidery", vip: "embroidery",
-              hus: "embroidery", exp: "embroidery",
-              jpg: "image", jpeg: "image", png: "image", gif: "image",
-              webp: "image", avif: "image", svg: "vector",
-              ai: "vector", eps: "vector", pdf: "document",
-              zip: "archive", rar: "archive",
+              dst: "embroidery",
+              pes: "embroidery",
+              emb: "embroidery",
+              jef: "embroidery",
+              xxx: "embroidery",
+              vip: "embroidery",
+              hus: "embroidery",
+              exp: "embroidery",
+              jpg: "image",
+              jpeg: "image",
+              png: "image",
+              gif: "image",
+              webp: "image",
+              avif: "image",
+              svg: "vector",
+              ai: "vector",
+              eps: "vector",
+              pdf: "document",
+              zip: "archive",
+              rar: "archive",
             };
 
             resolve({
@@ -211,7 +234,9 @@ export function ChatProvider({
   const startRecording = useCallback(async () => {
     try {
       if (navigator.permissions) {
-        const micStatus = await navigator.permissions.query({ name: "microphone" as PermissionName });
+        const micStatus = await navigator.permissions.query({
+          name: "microphone" as PermissionName,
+        });
         if (micStatus.state === "denied") {
           toast.error("Microphone blocked. Enable it in your browser site settings.");
           return;
@@ -312,8 +337,12 @@ export function ChatProvider({
         body = `--reply--\n${JSON.stringify({ id: replyTo.id, c: replyTo.content, n: replyTo.senderName })}\n--reply--\n${body}`;
       }
       if (attachments.length > 0) {
-        const attMeta = attachments.map(a => JSON.stringify({ n: a.name, u: a.url, t: a.type, s: a.size })).join("||");
-        body = body ? `${body}\n--attachments--\n${attMeta}` : `📎 ${attachments.length} file(s)\n--attachments--\n${attMeta}`;
+        const attMeta = attachments
+          .map((a) => JSON.stringify({ n: a.name, u: a.url, t: a.type, s: a.size }))
+          .join("||");
+        body = body
+          ? `${body}\n--attachments--\n${attMeta}`
+          : `📎 ${attachments.length} file(s)\n--attachments--\n${attMeta}`;
       }
 
       // Optimistic local insert
@@ -353,8 +382,7 @@ export function ChatProvider({
       typingTimers.current.delete(activeConversationId);
 
       // Insert into Supabase
-      const { data: inserted, error } = await (supabase
-        .from("messages") as any)
+      const { data: inserted, error } = await (supabase.from("messages") as any)
         .insert({
           body,
           from_user: currentUserId,
@@ -463,16 +491,18 @@ export function ChatProvider({
         prev.map((c) => ({
           ...c,
           messages: c.messages.filter((m) => m.id !== messageId),
-          lastMessage: c.messages.length <= 1
-            ? undefined
-            : c.messages.filter((m) => m.id !== messageId).at(-1)?.content?.slice(0, 80),
+          lastMessage:
+            c.messages.length <= 1
+              ? undefined
+              : c.messages
+                  .filter((m) => m.id !== messageId)
+                  .at(-1)
+                  ?.content?.slice(0, 80),
         }))
       );
 
       // Delete from Supabase
-      const { error } = await (supabase.from("messages") as any)
-        .delete()
-        .eq("id", messageId);
+      const { error } = await (supabase.from("messages") as any).delete().eq("id", messageId);
 
       if (error) {
         toast.error("Failed to delete message");
@@ -504,9 +534,7 @@ export function ChatProvider({
       }
 
       // Delete all messages from Supabase
-      const { error } = await (supabase.from("messages") as any)
-        .delete()
-        .in("id", messageIds);
+      const { error } = await (supabase.from("messages") as any).delete().in("id", messageIds);
 
       if (error) {
         toast.error("Failed to delete conversation");
@@ -541,36 +569,40 @@ export function ChatProvider({
           .map((m) => m.id);
 
         if (unreadIds.length > 0) {
-          await (supabase.from("messages") as any)
-            .update({ is_read: true })
-            .in("id", unreadIds);
+          await (supabase.from("messages") as any).update({ is_read: true }).in("id", unreadIds);
         }
       }
     },
     [conversations, currentUserRole, supabase]
   );
 
-  const startTyping = useCallback((conversationId: string) => {
-    clearTimeout(typingTimers.current.get(conversationId));
-    // Only broadcast — don't set local isTyping (that comes from receiving broadcasts)
-    typingChannel.current?.send({
-      type: "broadcast",
-      event: "typing",
-      payload: { userId: currentUserId, conversationId, isTyping: true },
-    });
-    const timer = setTimeout(() => stopTyping(conversationId), 5000);
-    typingTimers.current.set(conversationId, timer);
-  }, [currentUserId]);
+  const startTyping = useCallback(
+    (conversationId: string) => {
+      clearTimeout(typingTimers.current.get(conversationId));
+      // Only broadcast — don't set local isTyping (that comes from receiving broadcasts)
+      typingChannel.current?.send({
+        type: "broadcast",
+        event: "typing",
+        payload: { userId: currentUserId, conversationId, isTyping: true },
+      });
+      const timer = setTimeout(() => stopTyping(conversationId), 5000);
+      typingTimers.current.set(conversationId, timer);
+    },
+    [currentUserId]
+  );
 
-  const stopTyping = useCallback((conversationId: string) => {
-    clearTimeout(typingTimers.current.get(conversationId));
-    typingTimers.current.delete(conversationId);
-    typingChannel.current?.send({
-      type: "broadcast",
-      event: "typing",
-      payload: { userId: currentUserId, conversationId, isTyping: false },
-    });
-  }, [currentUserId]);
+  const stopTyping = useCallback(
+    (conversationId: string) => {
+      clearTimeout(typingTimers.current.get(conversationId));
+      typingTimers.current.delete(conversationId);
+      typingChannel.current?.send({
+        type: "broadcast",
+        event: "typing",
+        payload: { userId: currentUserId, conversationId, isTyping: false },
+      });
+    },
+    [currentUserId]
+  );
 
   // ── Permission helpers ───────────────────────────────────
   const canDeleteMessage = useCallback(
@@ -596,9 +628,7 @@ export function ChatProvider({
         prev.map((c) => ({
           ...c,
           messages: c.messages.map((m) =>
-            m.id === messageId
-              ? { ...m, content, edited: true }
-              : m
+            m.id === messageId ? { ...m, content, edited: true } : m
           ),
         }))
       );

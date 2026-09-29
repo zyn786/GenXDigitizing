@@ -26,7 +26,10 @@ export async function POST(req: NextRequest) {
       let page = 1;
       const perPage = 100;
       while (true) {
-        const { data: { users }, error: lookupError } = await admin.auth.admin.listUsers({
+        const {
+          data: { users },
+          error: lookupError,
+        } = await admin.auth.admin.listUsers({
           page,
           perPage,
         });

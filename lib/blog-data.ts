@@ -35,7 +35,11 @@ function mapPost(p: any): BlogPost {
     category: p.category,
     readTime: calcReadTime(p),
     keywords: p.keywords || [],
-    hero: { emoji: p.emoji || "📝", color: p.accent_color || "#2563EB", image: p.hero_image || undefined },
+    hero: {
+      emoji: p.emoji || "📝",
+      color: p.accent_color || "#2563EB",
+      image: p.hero_image || undefined,
+    },
     sections: p.content?.sections || [],
     faqs: p.content?.faqs || [],
     internalLinks: p.content?.internalLinks || [],
@@ -74,11 +78,19 @@ export async function fetchBlogPostsClient(publishedOnly = true): Promise<BlogPo
         category: p.category,
         readTime: "6 min read",
         keywords: p.keywords || [],
-        hero: { emoji: p.emoji || "📝", color: p.accent_color || "#2563EB", image: p.hero_image || undefined },
+        hero: {
+          emoji: p.emoji || "📝",
+          color: p.accent_color || "#2563EB",
+          image: p.hero_image || undefined,
+        },
         sections: p.content?.sections || [],
         faqs: p.content?.faqs || [],
         internalLinks: p.content?.internalLinks || [],
-        cta: p.content?.cta || { text: "Get a Free Quote", href: "/contact", label: "Upload Design" },
+        cta: p.content?.cta || {
+          text: "Get a Free Quote",
+          href: "/contact",
+          label: "Upload Design",
+        },
       }));
     }
   } catch {}

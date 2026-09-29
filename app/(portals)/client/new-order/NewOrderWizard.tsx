@@ -13,117 +13,257 @@ import { Step2Turnaround } from "./Step2Turnaround";
 import { Step3Upload } from "./Step3Upload";
 import { Step4Confirm } from "./Step4Confirm";
 
-const txt = "var(--txt)", txt2 = "var(--txt2)", txt3 = "var(--txt3)";
-const GREEN = {bg:"#10B981",bgSoft:"rgba(16,185,129,0.08)",border:"rgba(16,185,129,0.25)",icon:"#059669",text:"#047857"};
-const PURPLE = {bg:"#8B5CF6",bgSoft:"rgba(139,92,246,0.08)",icon:"#7C3AED",text:"#6D28D9"};
+const txt = "var(--txt)",
+  txt2 = "var(--txt2)",
+  txt3 = "var(--txt3)";
+const GREEN = {
+  bg: "#10B981",
+  bgSoft: "rgba(16,185,129,0.08)",
+  border: "rgba(16,185,129,0.25)",
+  icon: "#059669",
+  text: "#047857",
+};
+const PURPLE = { bg: "#8B5CF6", bgSoft: "rgba(139,92,246,0.08)", icon: "#7C3AED", text: "#6D28D9" };
 const TURNS = [
-  {id:"standard",label:"Standard",time:"12–24h",icon:"🕐"},
-  {id:"rush",label:"Rush",time:"6h",icon:"⚡"},
-  {id:"urgent",label:"Urgent",time:"3h",icon:"🔥"},
+  { id: "standard", label: "Standard", time: "12–24h", icon: "🕐" },
+  { id: "rush", label: "Rush", time: "6h", icon: "⚡" },
+  { id: "urgent", label: "Urgent", time: "3h", icon: "🔥" },
 ];
 
 // Deadline rule lives in lib/sla so this file, QuickOrder and the CRM path agree.
 
-function DoneScreen({done,totalPrice,qty,sel,serviceName,selTurn,router,setDone,setStep,setSel,setFiles,setNotes,setDesignName,setW,setH,setCol,setQuantity,setStitchCount,setInstructions}:any){
-  return(
-    <div className="portal-content flex items-center justify-center p-4" style={{background:"var(--bg)"}}>
-      <div className="rounded-2xl p-6 sm:p-8 max-w-[420px] w-full text-center border" style={{background:"var(--surface)",borderColor:GREEN.border}}>
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{background:GREEN.bgSoft}}>
-          <CheckCircle size={28} style={{color:GREEN.icon}}/>
+function DoneScreen({
+  done,
+  totalPrice,
+  qty,
+  sel,
+  serviceName,
+  selTurn,
+  router,
+  setDone,
+  setStep,
+  setSel,
+  setFiles,
+  setNotes,
+  setDesignName,
+  setW,
+  setH,
+  setCol,
+  setQuantity,
+  setStitchCount,
+  setInstructions,
+}: any) {
+  return (
+    <div
+      className="portal-content flex items-center justify-center p-4"
+      style={{ background: "var(--bg)" }}
+    >
+      <div
+        className="w-full max-w-[420px] rounded-2xl border p-6 text-center sm:p-8"
+        style={{ background: "var(--surface)", borderColor: GREEN.border }}
+      >
+        <div
+          className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
+          style={{ background: GREEN.bgSoft }}
+        >
+          <CheckCircle size={28} style={{ color: GREEN.icon }} />
         </div>
-        <h2 className="font-syne font-bold text-xl mb-2" style={{color:GREEN.text}}>Order Placed!</h2>
-        <p className="text-[13px] leading-relaxed mb-4" style={{color:txt2}}>
-          <strong className="font-mono text-base" style={{color:PURPLE.text}}>{done.order_number}</strong>
-          <br/>submitted — our team is on it.
+        <h2 className="mb-2 font-syne text-xl font-bold" style={{ color: GREEN.text }}>
+          Order Placed!
+        </h2>
+        <p className="mb-4 text-[13px] leading-relaxed" style={{ color: txt2 }}>
+          <strong className="font-mono text-base" style={{ color: PURPLE.text }}>
+            {done.order_number}
+          </strong>
+          <br />
+          submitted — our team is on it.
         </p>
-        <div className="rounded-xl p-3 mb-4 text-left" style={{background:"var(--elevated)",border:"1px solid var(--border)"}}>
-          <Row k="Service" v={serviceName}/>
-          <Row k="Price" v={"$"+totalPrice.toFixed(0)+(qty>1?" ("+qty+"x)":"")} c={GREEN.text}/>
-          <Row k="Turnaround" v={selTurn?.icon+" "+selTurn?.label}/>
-          <Row k="Revisions" v="♾️ FREE"/>
-          <Row k="Conversions" v="🔄 FREE"/>
+        <div
+          className="mb-4 rounded-xl p-3 text-left"
+          style={{ background: "var(--elevated)", border: "1px solid var(--border)" }}
+        >
+          <Row k="Service" v={serviceName} />
+          <Row
+            k="Price"
+            v={"$" + totalPrice.toFixed(0) + (qty > 1 ? " (" + qty + "x)" : "")}
+            c={GREEN.text}
+          />
+          <Row k="Turnaround" v={selTurn?.icon + " " + selTurn?.label} />
+          <Row k="Revisions" v="♾️ FREE" />
+          <Row k="Conversions" v="🔄 FREE" />
         </div>
         <div className="flex gap-2">
-          <button onClick={()=>router.push("/client/my-orders")} className="flex-1 py-2.5 rounded-xl text-[13px] font-semibold border-none cursor-pointer text-white"
-            style={{background:"linear-gradient(135deg,"+PURPLE.bg+","+PURPLE.icon+")"}}>My Orders</button>
-          <button onClick={()=>{setDone(null);setStep(1);setSel(null);setFiles([]);setNotes("");setDesignName("");setW("");setH("");setCol("");setQuantity("1");setStitchCount("");setInstructions("");}}
-            className="flex-1 py-2.5 rounded-xl text-[13px] font-medium cursor-pointer border"
-            style={{background:"var(--elevated)",color:txt2,borderColor:"var(--border2)"}}>New Order</button>
+          <button
+            onClick={() => router.push("/client/my-orders")}
+            className="flex-1 cursor-pointer rounded-xl border-none py-2.5 text-[13px] font-semibold text-white"
+            style={{ background: "linear-gradient(135deg," + PURPLE.bg + "," + PURPLE.icon + ")" }}
+          >
+            My Orders
+          </button>
+          <button
+            onClick={() => {
+              setDone(null);
+              setStep(1);
+              setSel(null);
+              setFiles([]);
+              setNotes("");
+              setDesignName("");
+              setW("");
+              setH("");
+              setCol("");
+              setQuantity("1");
+              setStitchCount("");
+              setInstructions("");
+            }}
+            className="flex-1 cursor-pointer rounded-xl border py-2.5 text-[13px] font-medium"
+            style={{ background: "var(--elevated)", color: txt2, borderColor: "var(--border2)" }}
+          >
+            New Order
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-function Row({k,v,c}:{k:string;v:string;c?:string}){return(<div className="flex justify-between py-1.5 text-[13px]" style={{borderBottom:"1px solid var(--border)"}}><span style={{color:"var(--txt3)"}}>{k}</span><span className="font-bold" style={{color:c||"var(--txt)"}}>{v}</span></div>)}
+function Row({ k, v, c }: { k: string; v: string; c?: string }) {
+  return (
+    <div
+      className="flex justify-between py-1.5 text-[13px]"
+      style={{ borderBottom: "1px solid var(--border)" }}
+    >
+      <span style={{ color: "var(--txt3)" }}>{k}</span>
+      <span className="font-bold" style={{ color: c || "var(--txt)" }}>
+        {v}
+      </span>
+    </div>
+  );
+}
 
-export function NewOrderWizard({tiers,clientId,userId}:any){
-  const router=useRouter(); const supabase=createClient();
-  const [step,setStep]=useState(1);
-  const [sel,setSel]=useState<any>(null);
-  const [turn,setTurn]=useState("standard");
-  const [fmt,setFmt]=useState("DST");
-  const [extras,setExtras]=useState<any[]>([]);
-  const [designName,setDesignName]=useState("");
-  const [notes,setNotes]=useState("");
-  const [w,setW]=useState(""); const [h,setH]=useState(""); const [col,setCol]=useState("");
-  const [files,setFiles]=useState<any[]>([]);
+export function NewOrderWizard({ tiers, clientId, userId }: any) {
+  const router = useRouter();
+  const supabase = createClient();
+  const [step, setStep] = useState(1);
+  const [sel, setSel] = useState<any>(null);
+  const [turn, setTurn] = useState("standard");
+  const [fmt, setFmt] = useState("DST");
+  const [extras, setExtras] = useState<any[]>([]);
+  const [designName, setDesignName] = useState("");
+  const [notes, setNotes] = useState("");
+  const [w, setW] = useState("");
+  const [h, setH] = useState("");
+  const [col, setCol] = useState("");
+  const [files, setFiles] = useState<any[]>([]);
   const fileRef = useRef<any>(null);
-  const [busy,setBusy]=useState(false);
-  const [done,setDone]=useState<any>(null);
-  const [uploadProgress,setUploadProgress]=useState(0);
-  const abortRef = useRef<AbortController|null>(null);
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState<any>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const abortRef = useRef<AbortController | null>(null);
   // Stable per submission, cleared once the order exists, so a double-click or a
   // retry after a dropped connection reuses the same order instead of creating two.
-  const idemKeyRef = useRef<string|null>(null);
-  const [stitchCount,setStitchCount]=useState("");
-  const [quantity,setQuantity]=useState("1");
-  const [instructions,setInstructions]=useState("");
-  const [subscription,setSubscription]=useState<any>(null);
-  const [creditBalance,setCreditBalance]=useState(0);
+  const idemKeyRef = useRef<string | null>(null);
+  const [stitchCount, setStitchCount] = useState("");
+  const [quantity, setQuantity] = useState("1");
+  const [instructions, setInstructions] = useState("");
+  const [subscription, setSubscription] = useState<any>(null);
+  const [creditBalance, setCreditBalance] = useState(0);
 
   // Coupon
   const {
-    couponCode, setCouponCode,
-    appliedCoupon, discount,
-    isApplying, error: couponError,
-    applyCoupon, removeCoupon,
+    couponCode,
+    setCouponCode,
+    appliedCoupon,
+    discount,
+    isApplying,
+    error: couponError,
+    applyCoupon,
+    removeCoupon,
     visitorId,
   } = useCoupon(1);
 
   // Load subscription
-  useEffect(()=>{(async()=>{if(!clientId)return;const{data:sub}=await supabase.from("client_subscriptions").select("*").eq("client_id",clientId).eq("status","active").maybeSingle();setSubscription(sub);const{data:c}=await supabase.from("clients").select("credit_balance").eq("id",clientId).single();setCreditBalance(c?.credit_balance||0);})();},[]);
+  useEffect(() => {
+    (async () => {
+      if (!clientId) return;
+      const { data: sub } = await supabase
+        .from("client_subscriptions")
+        .select("*")
+        .eq("client_id", clientId)
+        .eq("status", "active")
+        .maybeSingle();
+      setSubscription(sub);
+      const { data: c } = await supabase
+        .from("clients")
+        .select("credit_balance")
+        .eq("id", clientId)
+        .single();
+      setCreditBalance(c?.credit_balance || 0);
+    })();
+  }, []);
 
   // Smart routing: subscribers get QuickOrder
-  if(subscription){return <QuickOrder tiers={tiers} clientId={clientId} userId={userId} subscription={subscription} creditBalance={creditBalance}/>;}
+  if (subscription) {
+    return (
+      <QuickOrder
+        tiers={tiers}
+        clientId={clientId}
+        userId={userId}
+        subscription={subscription}
+        creditBalance={creditBalance}
+      />
+    );
+  }
 
-  const catLabel = sel? (sel.category==="digitizing"?"Embroidery Digitizing":sel.category==="vector"?"Vector Redraw":sel.category==="sewout"?"Patch Design":"") : "";
-  const serviceName = catLabel && sel ? catLabel+" — "+sel.label : sel?.label||"";
+  const catLabel = sel
+    ? sel.category === "digitizing"
+      ? "Embroidery Digitizing"
+      : sel.category === "vector"
+        ? "Vector Redraw"
+        : sel.category === "sewout"
+          ? "Patch Design"
+          : ""
+    : "";
+  const serviceName = catLabel && sel ? catLabel + " — " + sel.label : sel?.label || "";
 
-  const grouped:any = {};
-  for(const t of tiers){grouped[t.category]=grouped[t.category]||[];grouped[t.category].push(t);}
-  const isBig=sel?.is_big_design;
-  const selTurn=(TURNS||[]).find(t=>t.id===turn)||TURNS[0];
-  const qty = parseInt(quantity)||1;
-  const totalPrice = Number(sel?.price||0)*qty;
+  const grouped: any = {};
+  for (const t of tiers) {
+    grouped[t.category] = grouped[t.category] || [];
+    grouped[t.category].push(t);
+  }
+  const isBig = sel?.is_big_design;
+  const selTurn = (TURNS || []).find((t) => t.id === turn) || TURNS[0];
+  const qty = parseInt(quantity) || 1;
+  const totalPrice = Number(sel?.price || 0) * qty;
 
-  async function placeOrder(){
-    if(!sel){toast.error("Select a tier");return;}
-    if(!designName.trim()){toast.error("Enter a design name");return;}
-    if(files.length===0){toast.error("Upload at least one reference image");return;}
-    if((w&&!h)||(!w&&h)){toast.error("Enter both width and height, or leave both");return;}
+  async function placeOrder() {
+    if (!sel) {
+      toast.error("Select a tier");
+      return;
+    }
+    if (!designName.trim()) {
+      toast.error("Enter a design name");
+      return;
+    }
+    if (files.length === 0) {
+      toast.error("Upload at least one reference image");
+      return;
+    }
+    if ((w && !h) || (!w && h)) {
+      toast.error("Enter both width and height, or leave both");
+      return;
+    }
     setBusy(true);
     setUploadProgress(0);
     const controller = new AbortController();
     abortRef.current = controller;
-    try{
+    try {
       // The order is created server-side. Price, deadline and the team
       // notification are all decided there from data this browser cannot forge —
       // the insert used to happen here, with the price this component computed,
       // and the notification was a separate call a closed tab would skip.
       const createRes = await fetch("/api/orders/create", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           service_tier_id: sel.id,
           turnaround: turn,
@@ -138,12 +278,12 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
           coupon_code: appliedCoupon?.code ?? null,
           visitor_id: visitorId ?? null,
           file_count: files.length,
-          idempotency_key: idemKeyRef.current ??= crypto.randomUUID(),
+          idempotency_key: (idemKeyRef.current ??= crypto.randomUUID()),
         }),
       });
 
-      const created = await createRes.json().catch(()=>({}));
-      if(!createRes.ok || !created?.order){
+      const created = await createRes.json().catch(() => ({}));
+      if (!createRes.ok || !created?.order) {
         toast.error(created?.error || "Could not place the order. Please try again.");
         setBusy(false);
         return;
@@ -154,93 +294,241 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
       if (controller.signal.aborted) return;
 
       // Upload with progress via XHR
-      const uploadResult = await new Promise<{ok:boolean;error?:string}>((resolve) => {
+      const uploadResult = await new Promise<{ ok: boolean; error?: string }>((resolve) => {
         const xhr = new XMLHttpRequest();
-        xhr.open("POST","/api/upload/artwork");
-        const onAbort = () => { xhr.abort(); resolve({ok:false,error:"Upload cancelled"}); };
-        controller.signal.addEventListener("abort",onAbort,{once:true});
-        xhr.upload.addEventListener("progress",(e) => {
-          if(e.lengthComputable) setUploadProgress(Math.round((e.loaded/e.total)*100));
+        xhr.open("POST", "/api/upload/artwork");
+        const onAbort = () => {
+          xhr.abort();
+          resolve({ ok: false, error: "Upload cancelled" });
+        };
+        controller.signal.addEventListener("abort", onAbort, { once: true });
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
         });
-        xhr.addEventListener("load",() => {
-          controller.signal.removeEventListener("abort",onAbort);
-          if(xhr.status>=200&&xhr.status<300) resolve({ok:true});
+        xhr.addEventListener("load", () => {
+          controller.signal.removeEventListener("abort", onAbort);
+          if (xhr.status >= 200 && xhr.status < 300) resolve({ ok: true });
           else {
             let msg = "Upload failed";
-            try{const e=JSON.parse(xhr.responseText);msg=e.error||msg;}catch{}
-            resolve({ok:false,error:msg});
+            try {
+              const e = JSON.parse(xhr.responseText);
+              msg = e.error || msg;
+            } catch {}
+            resolve({ ok: false, error: msg });
           }
         });
-        xhr.addEventListener("error",() => {
-          controller.signal.removeEventListener("abort",onAbort);
-          resolve({ok:false,error:"Network error — check your connection"});
+        xhr.addEventListener("error", () => {
+          controller.signal.removeEventListener("abort", onAbort);
+          resolve({ ok: false, error: "Network error — check your connection" });
         });
-        xhr.addEventListener("abort",() => {
-          controller.signal.removeEventListener("abort",onAbort);
-          resolve({ok:false,error:"Upload cancelled"});
+        xhr.addEventListener("abort", () => {
+          controller.signal.removeEventListener("abort", onAbort);
+          resolve({ ok: false, error: "Upload cancelled" });
         });
-        const fd=new FormData();fd.append("orderId",order.id);for(const f of files)fd.append("files",f);
+        const fd = new FormData();
+        fd.append("orderId", order.id);
+        for (const f of files) fd.append("files", f);
         xhr.send(fd);
       });
 
-      if(!uploadResult.ok){
+      if (!uploadResult.ok) {
         // Do NOT cancel silently. The order is real and the team has already been
         // notified; the artwork is what is missing. Cancelling here used to leave
         // a dead order nobody was told about (and if the cancel write itself
         // failed, a live order with no files). This way someone owns it, and the
         // SLA monitor covers it because it stays in `submitted`.
-        await fetch(`/api/orders/${order.id}/artwork-failed`,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
+        await fetch(`/api/orders/${order.id}/artwork-failed`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ reason: uploadResult.error || "upload failed" }),
-        }).catch(()=>{});
-        toast.error(`${uploadResult.error||"Upload failed"} — your order was placed and our team will contact you about the artwork.`);
+        }).catch(() => {});
+        toast.error(
+          `${uploadResult.error || "Upload failed"} — your order was placed and our team will contact you about the artwork.`
+        );
         router.push(`/client/my-orders/${order.id}`);
         return;
       }
 
       toast.success("Order placed! Redirecting...");
       router.push(`/client/my-orders/${order.id}`);
-    }catch(err:any){toast.error(err?.message||"Error");}
-    finally{setBusy(false);setUploadProgress(0);abortRef.current=null;}
+    } catch (err: any) {
+      toast.error(err?.message || "Error");
+    } finally {
+      setBusy(false);
+      setUploadProgress(0);
+      abortRef.current = null;
+    }
   }
 
-  if(done) return <DoneScreen done={done} totalPrice={totalPrice} qty={qty} sel={sel} serviceName={serviceName} selTurn={selTurn} router={router} setDone={setDone} setStep={setStep} setSel={setSel} setFiles={setFiles} setNotes={setNotes} setDesignName={setDesignName} setW={setW} setH={setH} setCol={setCol} setQuantity={setQuantity} setStitchCount={setStitchCount} setInstructions={setInstructions}/>;
+  if (done)
+    return (
+      <DoneScreen
+        done={done}
+        totalPrice={totalPrice}
+        qty={qty}
+        sel={sel}
+        serviceName={serviceName}
+        selTurn={selTurn}
+        router={router}
+        setDone={setDone}
+        setStep={setStep}
+        setSel={setSel}
+        setFiles={setFiles}
+        setNotes={setNotes}
+        setDesignName={setDesignName}
+        setW={setW}
+        setH={setH}
+        setCol={setCol}
+        setQuantity={setQuantity}
+        setStitchCount={setStitchCount}
+        setInstructions={setInstructions}
+      />
+    );
 
-  const steps=["Service & Tier","Turnaround","Artwork","Confirm"];
+  const steps = ["Service & Tier", "Turnaround", "Artwork", "Confirm"];
   return (
-    <div className="portal-content" style={{background:"var(--bg)"}}>
+    <div className="portal-content" style={{ background: "var(--bg)" }}>
       <div className="mb-4 sm:mb-5">
-        <h2 className="font-syne font-bold text-xl sm:text-2xl"
-          style={{background:"linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>
+        <h2
+          className="font-syne text-xl font-bold sm:text-2xl"
+          style={{
+            background: "linear-gradient(135deg, #2563EB, #7C3AED, #DB2777)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
           New Order
         </h2>
-        <p className="text-[12px] sm:text-xs mt-1" style={{color:txt3}}>Starts from $5 · All turnaround speeds free</p>
+        <p className="mt-1 text-[12px] sm:text-xs" style={{ color: txt3 }}>
+          Starts from $5 · All turnaround speeds free
+        </p>
       </div>
 
-      <div className="flex items-center gap-2 mb-5">
-        {step>1&&<button onClick={()=>setStep(step-1)} className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center border cursor-pointer active:scale-95" style={{background:"var(--elevated)",borderColor:"var(--border2)",color:txt2}}><ArrowLeft size={16}/></button>}
-        <div className="flex-1 flex items-center justify-center gap-1.5 px-2">
-          {steps.map((l,i)=>(
+      <div className="mb-5 flex items-center gap-2">
+        {step > 1 && (
+          <button
+            onClick={() => setStep(step - 1)}
+            className="flex h-9 w-9 flex-shrink-0 cursor-pointer items-center justify-center rounded-full border active:scale-95"
+            style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: txt2 }}
+          >
+            <ArrowLeft size={16} />
+          </button>
+        )}
+        <div className="flex flex-1 items-center justify-center gap-1.5 px-2">
+          {steps.map((l, i) => (
             <div key={l} className="flex items-center gap-1.5">
-              <button onClick={()=>i+1<step&&setStep(i+1)} className="flex items-center gap-1.5 bg-transparent border-none cursor-pointer p-0" style={{cursor:i+1<step?"pointer":"default"}}>
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                  style={{background:step>i+1?"linear-gradient(135deg,"+GREEN.bg+",#06B6D4)":step===i+1?"linear-gradient(135deg,"+PURPLE.bg+","+PURPLE.icon+")":"var(--border2)"}}>
-                  {step>i+1?<CheckCircle size={15}/>:i+1}
+              <button
+                onClick={() => i + 1 < step && setStep(i + 1)}
+                className="flex cursor-pointer items-center gap-1.5 border-none bg-transparent p-0"
+                style={{ cursor: i + 1 < step ? "pointer" : "default" }}
+              >
+                <div
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white"
+                  style={{
+                    background:
+                      step > i + 1
+                        ? "linear-gradient(135deg," + GREEN.bg + ",#06B6D4)"
+                        : step === i + 1
+                          ? "linear-gradient(135deg," + PURPLE.bg + "," + PURPLE.icon + ")"
+                          : "var(--border2)",
+                  }}
+                >
+                  {step > i + 1 ? <CheckCircle size={15} /> : i + 1}
                 </div>
-                <span className="hidden sm:inline text-xs font-semibold" style={{color:step===i+1?txt:step>i+1?GREEN.text:txt3}}>{l}</span>
+                <span
+                  className="hidden text-xs font-semibold sm:inline"
+                  style={{ color: step === i + 1 ? txt : step > i + 1 ? GREEN.text : txt3 }}
+                >
+                  {l}
+                </span>
               </button>
-              {i<3&&<div className="w-5 sm:w-8 h-px" style={{background:step>i+1?GREEN.icon:"var(--border2)"}}/>}
+              {i < 3 && (
+                <div
+                  className="h-px w-5 sm:w-8"
+                  style={{ background: step > i + 1 ? GREEN.icon : "var(--border2)" }}
+                />
+              )}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="max-w-[720px] mx-auto">
-        {step===1&&<Step1Tier grouped={grouped} sel={sel} serviceName={serviceName} setSel={setSel} designName={designName} setDesignName={setDesignName} fmt={fmt} setFmt={setFmt} extras={extras} setExtras={setExtras} qty={qty} totalPrice={totalPrice} setStep={setStep}/>}
-        {step===2&&<Step2Turnaround turn={turn} setTurn={setTurn} isBig={isBig} setStep={setStep}/>}
-        {step===3&&<Step3Upload files={files} fileRef={fileRef} setFiles={setFiles} w={w} setW={setW} h={h} setH={setH} col={col} setCol={setCol} notes={notes} setNotes={setNotes} stitchCount={stitchCount} setStitchCount={setStitchCount} quantity={quantity} setQuantity={setQuantity} instructions={instructions} setInstructions={setInstructions} setStep={setStep}/>}
-        {step===4&&<Step4Confirm sel={sel} serviceName={serviceName} selTurn={selTurn} fmt={fmt} extras={extras} designName={designName} files={files} w={w} h={h} col={col} notes={notes} qty={qty} stitchCount={stitchCount} instructions={instructions} totalPrice={totalPrice} busy={busy} placeOrder={placeOrder} setStep={setStep} couponCode={couponCode} setCouponCode={setCouponCode} appliedCoupon={appliedCoupon} discount={discount} isApplying={isApplying} couponError={couponError} applyCoupon={applyCoupon} removeCoupon={removeCoupon} uploadProgress={uploadProgress} abortRef={abortRef}/>}
+      <div className="mx-auto max-w-[720px]">
+        {step === 1 && (
+          <Step1Tier
+            grouped={grouped}
+            sel={sel}
+            serviceName={serviceName}
+            setSel={setSel}
+            designName={designName}
+            setDesignName={setDesignName}
+            fmt={fmt}
+            setFmt={setFmt}
+            extras={extras}
+            setExtras={setExtras}
+            qty={qty}
+            totalPrice={totalPrice}
+            setStep={setStep}
+          />
+        )}
+        {step === 2 && (
+          <Step2Turnaround turn={turn} setTurn={setTurn} isBig={isBig} setStep={setStep} />
+        )}
+        {step === 3 && (
+          <Step3Upload
+            files={files}
+            fileRef={fileRef}
+            setFiles={setFiles}
+            w={w}
+            setW={setW}
+            h={h}
+            setH={setH}
+            col={col}
+            setCol={setCol}
+            notes={notes}
+            setNotes={setNotes}
+            stitchCount={stitchCount}
+            setStitchCount={setStitchCount}
+            quantity={quantity}
+            setQuantity={setQuantity}
+            instructions={instructions}
+            setInstructions={setInstructions}
+            setStep={setStep}
+          />
+        )}
+        {step === 4 && (
+          <Step4Confirm
+            sel={sel}
+            serviceName={serviceName}
+            selTurn={selTurn}
+            fmt={fmt}
+            extras={extras}
+            designName={designName}
+            files={files}
+            w={w}
+            h={h}
+            col={col}
+            notes={notes}
+            qty={qty}
+            stitchCount={stitchCount}
+            instructions={instructions}
+            totalPrice={totalPrice}
+            busy={busy}
+            placeOrder={placeOrder}
+            setStep={setStep}
+            couponCode={couponCode}
+            setCouponCode={setCouponCode}
+            appliedCoupon={appliedCoupon}
+            discount={discount}
+            isApplying={isApplying}
+            couponError={couponError}
+            applyCoupon={applyCoupon}
+            removeCoupon={removeCoupon}
+            uploadProgress={uploadProgress}
+            abortRef={abortRef}
+          />
+        )}
       </div>
     </div>
   );

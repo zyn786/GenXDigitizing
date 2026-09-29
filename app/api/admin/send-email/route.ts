@@ -49,7 +49,9 @@ export async function POST(request: NextRequest) {
   try {
     // Identity comes from the session, never from the request body — `sent_by`
     // and the rate-limit key were both previously client-supplied and spoofable.
-    var user = await getAdminUser().catch(function () { return null; });
+    var user = await getAdminUser().catch(function () {
+      return null;
+    });
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -74,12 +76,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (!checkRateLimit(user.id)) {
-      return NextResponse.json({ error: "Rate limit exceeded. Max " + RATE_MAX + " emails per minute." }, { status: 429 });
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Max " + RATE_MAX + " emails per minute." },
+        { status: 429 }
+      );
     }
 
     // Validate emails
     var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    var recipients = to.split(",").map(function (e) { return e.trim(); });
+    var recipients = to.split(",").map(function (e) {
+      return e.trim();
+    });
     for (var i = 0; i < recipients.length; i++) {
       if (!emailRe.test(recipients[i])) {
         return NextResponse.json({ error: "Invalid email: " + recipients[i] }, { status: 400 });
@@ -89,9 +96,14 @@ export async function POST(request: NextRequest) {
     // Validate from address — must be on the verified sending domain.
     // RESEND_FROM_EMAIL may carry a display name ("GenX Digitizing <…>"), so
     // normalise to the bare address before validating or composing From.
-    var senderEmail = bareAddress(from || process.env.RESEND_FROM_EMAIL || "noreply@genxdigitizing.com");
+    var senderEmail = bareAddress(
+      from || process.env.RESEND_FROM_EMAIL || "noreply@genxdigitizing.com"
+    );
     if (!isAllowedSender(senderEmail)) {
-      return NextResponse.json({ error: "Invalid sender address: " + senderEmail }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid sender address: " + senderEmail },
+        { status: 400 }
+      );
     }
     var senderName = process.env.RESEND_FROM_NAME || "GenXdigitizing";
     var fromAddr = senderName + " <" + senderEmail + ">";
@@ -115,7 +127,11 @@ export async function POST(request: NextRequest) {
       var filename = (att && att.filename) || "attachment";
 
       // Guard against attaching arbitrary objects from other buckets/prefixes.
-      if (typeof path !== "string" || path.indexOf(ATTACHMENT_PREFIX) !== 0 || path.indexOf("..") !== -1) {
+      if (
+        typeof path !== "string" ||
+        path.indexOf(ATTACHMENT_PREFIX) !== 0 ||
+        path.indexOf("..") !== -1
+      ) {
         return NextResponse.json({ error: "Invalid attachment reference" }, { status: 400 });
       }
 
@@ -124,7 +140,7 @@ export async function POST(request: NextRequest) {
       if (dl.error || !dl.data) {
         console.error("[admin/send-email] Attachment fetch failed:", path, dl.error?.message);
         return NextResponse.json(
-          { error: "Could not read attachment \"" + filename + "\". Re-attach it and try again." },
+          { error: 'Could not read attachment "' + filename + '". Re-attach it and try again.' },
           { status: 400 }
         );
       }

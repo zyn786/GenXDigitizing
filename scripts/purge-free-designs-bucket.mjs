@@ -125,7 +125,7 @@ async function main() {
     }
     console.log(`Bucket "${BUCKET}" dropped.`);
   } else if (objects.length) {
-    console.log('Bucket left in place. Re-run with --drop-bucket to remove it.');
+    console.log("Bucket left in place. Re-run with --drop-bucket to remove it.");
   }
 }
 

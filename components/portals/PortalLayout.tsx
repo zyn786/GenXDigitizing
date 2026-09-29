@@ -13,13 +13,13 @@ import {
 
 function PortalContentSkeleton() {
   return (
-    <div className="flex-1 overflow-hidden flex flex-col">
+    <div className="flex flex-1 flex-col overflow-hidden">
       {/* Topbar placeholder */}
-      <div className="flex-shrink-0 h-12 sm:h-14 bg-[var(--surface)] border-b border-[var(--border)] flex items-center px-4 sm:px-6">
-        <Skeleton className="h-[18px] w-32 sm:w-40 rounded-md" />
+      <div className="flex h-12 flex-shrink-0 items-center border-b border-[var(--border)] bg-[var(--surface)] px-4 sm:h-14 sm:px-6">
+        <Skeleton className="h-[18px] w-32 rounded-md sm:w-40" />
       </div>
       {/* Content */}
-      <div className="flex-1 p-4 sm:p-6 space-y-4 overflow-y-auto">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
         <SkeletonPageHeader />
         <SkeletonStatRow count={4} />
         <SkeletonContentBlock height={200} />
@@ -31,7 +31,10 @@ function PortalContentSkeleton() {
 type Role = "admin" | "crm" | "client" | "designer";
 
 const PORTAL_HOME: Record<Role, string> = {
-  admin: "/admin", crm: "/crm", client: "/client", designer: "/designer",
+  admin: "/admin",
+  crm: "/crm",
+  client: "/client",
+  designer: "/designer",
 };
 
 interface PortalLayoutProps {
@@ -43,7 +46,9 @@ export async function PortalLayout({ children, requiredRole }: PortalLayoutProps
   const supabase = createClient();
 
   // 1. Check auth
-  const { data: { user: authUser } } = await supabase.auth.getUser();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
   if (!authUser) redirect(`/login?redirect=/${requiredRole}`);
 
   // 2. Fetch profile
@@ -65,11 +70,19 @@ export async function PortalLayout({ children, requiredRole }: PortalLayoutProps
   let clientId: string | undefined;
   let designerId: string | undefined;
   if (profile.role === "client") {
-    const { data } = await supabase.from("clients").select("id").eq("user_id", authUser.id).single();
+    const { data } = await supabase
+      .from("clients")
+      .select("id")
+      .eq("user_id", authUser.id)
+      .single();
     clientId = data?.id;
   }
   if (profile.role === "designer") {
-    const { data } = await supabase.from("designers").select("id").eq("user_id", authUser.id).single();
+    const { data } = await supabase
+      .from("designers")
+      .select("id")
+      .eq("user_id", authUser.id)
+      .single();
     designerId = data?.id;
   }
 
@@ -85,10 +98,24 @@ export async function PortalLayout({ children, requiredRole }: PortalLayoutProps
       { count: unreviewedEdits },
     ] = await Promise.all([
       supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "submitted"),
-      supabase.from("messages").select("*", { count: "exact", head: true }).eq("is_read", false).neq("from_user", authUser.id),
-      supabase.from("reviews").select("*", { count: "exact", head: true }).eq("is_published", false),
-      supabase.from("notifications").select("*", { count: "exact", head: true }).eq("is_read", false).eq("user_id", authUser.id),
-      supabase.from("order_edit_log").select("*", { count: "exact", head: true }).eq("reviewed_by_admin", false),
+      supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .eq("is_read", false)
+        .neq("from_user", authUser.id),
+      supabase
+        .from("reviews")
+        .select("*", { count: "exact", head: true })
+        .eq("is_published", false),
+      supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("is_read", false)
+        .eq("user_id", authUser.id),
+      supabase
+        .from("order_edit_log")
+        .select("*", { count: "exact", head: true })
+        .eq("reviewed_by_admin", false),
     ]);
     badgeCounts = {
       orders: (pendingOrders ?? 0) + (unreviewedEdits ?? 0),
@@ -99,9 +126,12 @@ export async function PortalLayout({ children, requiredRole }: PortalLayoutProps
     };
   }
   if (profile.role === "client" && clientId) {
-    const { data: sub } = await supabase.from("client_subscriptions")
-      .select("status").eq("client_id", clientId)
-      .in("status", ["active", "pending", "cancellation_requested"]).maybeSingle();
+    const { data: sub } = await supabase
+      .from("client_subscriptions")
+      .select("status")
+      .eq("client_id", clientId)
+      .in("status", ["active", "pending", "cancellation_requested"])
+      .maybeSingle();
     subscriptionStatus = sub?.status || null;
   }
 
@@ -116,13 +146,18 @@ export async function PortalLayout({ children, requiredRole }: PortalLayoutProps
   };
 
   return (
-    <PortalProviders userId={user.id} role={user.role} userName={user.full_name} userEmail={user.email}>
+    <PortalProviders
+      userId={user.id}
+      role={user.role}
+      userName={user.full_name}
+      userEmail={user.email}
+    >
       <div className="portal-layout">
-        <div className="hidden lg:flex flex-shrink-0"><Sidebar user={user} badgeCounts={badgeCounts} subscriptionStatus={subscriptionStatus} /></div>
+        <div className="hidden flex-shrink-0 lg:flex">
+          <Sidebar user={user} badgeCounts={badgeCounts} subscriptionStatus={subscriptionStatus} />
+        </div>
         <main className="portal-main">
-          <Suspense fallback={<PortalContentSkeleton />}>
-            {children}
-          </Suspense>
+          <Suspense fallback={<PortalContentSkeleton />}>{children}</Suspense>
         </main>
       </div>
     </PortalProviders>

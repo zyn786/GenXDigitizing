@@ -33,7 +33,8 @@ describe("computeDeadline", () => {
 
   it("matches the client wizards' short-circuit for the real cases", () => {
     // `big ? 12 : urgent ? 3 : rush ? 6 : 24` — the rule this replaces.
-    const legacy = (turn: string, big: boolean) => (big ? 12 : turn === "urgent" ? 3 : turn === "rush" ? 6 : 24);
+    const legacy = (turn: string, big: boolean) =>
+      big ? 12 : turn === "urgent" ? 3 : turn === "rush" ? 6 : 24;
     for (const turn of ["standard", "rush", "urgent"]) {
       for (const big of [true, false]) {
         expect(hoursFrom(computeDeadline(turn, big, NOW))).toBe(legacy(turn, big));

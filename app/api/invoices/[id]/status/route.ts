@@ -2,27 +2,21 @@
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient }         from "@/lib/supabase/server";
-import { getAdminUser }              from "@/lib/supabase/get-user";
-import { generateInvoicePDF }        from "@/lib/pdf/invoice";
-import {
-  emailPaymentConfirmed,
-  emailNewOrderAlert,
-} from "@/lib/email";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getAdminUser } from "@/lib/supabase/get-user";
+import { generateInvoicePDF } from "@/lib/pdf/invoice";
+import { emailPaymentConfirmed, emailNewOrderAlert } from "@/lib/email";
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await getAdminUser().catch(() => null);
     if (!user || !["admin", "crm"].includes(user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const supabase  = createAdminClient();
+    const supabase = createAdminClient();
     const invoiceId = params.id;
-    const body      = await req.json();
+    const body = await req.json();
     const { status, paid_at } = body;
 
     if (!status) {
@@ -32,12 +26,14 @@ export async function PATCH(
     // Fetch invoice
     const { data: invoice, error: invErr } = await supabase
       .from("invoices")
-      .select(`
+      .select(
+        `
         id, invoice_number, amount, status, notes,
         order_id, client_id,
         orders ( id, order_number, status ),
         clients ( id, users ( id, full_name ) )
-      `)
+      `
+      )
       .eq("id", invoiceId)
       .single();
 
@@ -56,10 +52,7 @@ export async function PATCH(
       updates.paid_at = new Date().toISOString();
     }
 
-    const { error: updErr } = await supabase
-      .from("invoices")
-      .update(updates)
-      .eq("id", invoiceId);
+    const { error: updErr } = await supabase.from("invoices").update(updates).eq("id", invoiceId);
 
     if (updErr) {
       return NextResponse.json({ error: "Update failed" }, { status: 500 });
@@ -67,12 +60,15 @@ export async function PATCH(
 
     // When marked as paid: update order to submitted, notify client
     if (status === "paid") {
-      const order      = invoice.orders as any;
-      const client     = invoice.clients as any;
+      const order = invoice.orders as any;
+      const client = invoice.clients as any;
       const clientUser = client?.users;
 
       // Update order status — only if not in a terminal/post-delivery state
-      if (order?.status && !["submitted", "delivered", "cancelled", "refunded"].includes(order.status)) {
+      if (
+        order?.status &&
+        !["submitted", "delivered", "cancelled", "refunded"].includes(order.status)
+      ) {
         await supabase
           .from("orders")
           .update({ status: "submitted", updated_at: new Date().toISOString() })
@@ -102,10 +98,7 @@ export async function PATCH(
             updates.credit_balance = (clientRow.credit_balance ?? 0) + creditCount;
           }
 
-          await supabase
-            .from("clients")
-            .update(updates)
-            .eq("id", invoice.client_id);
+          await supabase.from("clients").update(updates).eq("id", invoice.client_id);
         }
       }
 
@@ -113,9 +106,9 @@ export async function PATCH(
       if (clientUser?.id) {
         const { notifyUser } = await import("@/lib/notify-helpers");
         notifyUser(clientUser.id, {
-          type:       "payment",
-          title:      "Payment confirmed",
-          body:       `Your payment for ${order?.order_number || invoice.invoice_number || "Invoice #" + invoice.id.slice(0, 8)} has been received. Work will begin shortly.`,
+          type: "payment",
+          title: "Payment confirmed",
+          body: `Your payment for ${order?.order_number || invoice.invoice_number || "Invoice #" + invoice.id.slice(0, 8)} has been received. Work will begin shortly.`,
           action_url: "/client/invoices",
         }).catch(console.error);
       }
@@ -123,9 +116,9 @@ export async function PATCH(
       // Notify admins with web push
       const { notifyRole } = await import("@/lib/notify-helpers");
       notifyRole("admin", {
-        type:       "payment",
-        title:      `Payment received — ${order?.order_number || invoice.invoice_number || "Invoice #" + invoice.id.slice(0, 8)}`,
-        body:       `$${Number(invoice.amount).toFixed(0)} — order ready for assignment.`,
+        type: "payment",
+        title: `Payment received — ${order?.order_number || invoice.invoice_number || "Invoice #" + invoice.id.slice(0, 8)}`,
+        body: `$${Number(invoice.amount).toFixed(0)} — order ready for assignment.`,
         action_url: `/admin/orders`,
       }).catch(console.error);
 
@@ -137,36 +130,38 @@ export async function PATCH(
             // Fetch full invoice data for PDF
             const { data: fullInvoice } = await supabase
               .from("invoices")
-              .select(`
+              .select(
+                `
                 *, orders (
                   order_number, turnaround, output_format, created_at,
                   service_tiers ( label, size_desc ),
                   clients ( company_name, country, users ( email, full_name ) )
                 )
-              `)
+              `
+              )
               .eq("id", invoiceId)
               .single();
 
             const o = fullInvoice?.orders as any;
             const pdfData = {
               invoiceNumber: invoice.invoice_number,
-              orderNumber:   o?.order_number ?? invoice.order_id,
-              issuedAt:      invoice.created_at ?? new Date().toISOString(),
-              dueAt:         (invoice as any).due_at ?? new Date().toISOString(),
-              paidAt:        new Date().toISOString(),
-              status:        "paid",
-              clientName:    clientUser?.full_name ?? client?.users?.full_name ?? "Client",
-              clientEmail:   clientEmail,
+              orderNumber: o?.order_number ?? invoice.order_id,
+              issuedAt: invoice.created_at ?? new Date().toISOString(),
+              dueAt: (invoice as any).due_at ?? new Date().toISOString(),
+              paidAt: new Date().toISOString(),
+              status: "paid",
+              clientName: clientUser?.full_name ?? client?.users?.full_name ?? "Client",
+              clientEmail: clientEmail,
               clientCompany: o?.clients?.company_name ?? "Client",
               clientCountry: o?.clients?.country ?? "",
-              serviceName:   o?.service_tiers?.label ?? "Order",
-              serviceSize:   o?.service_tiers?.size_desc ?? "",
-              turnaround:    o?.turnaround ?? "standard",
-              outputFormat:  o?.output_format ?? "",
-              amount:        Number(invoice.amount),
-              currency:      "USD",
-              companyName:   "genxdigitizing",
-              companyEmail:  "support@genxdigitizing.com",
+              serviceName: o?.service_tiers?.label ?? "Order",
+              serviceSize: o?.service_tiers?.size_desc ?? "",
+              turnaround: o?.turnaround ?? "standard",
+              outputFormat: o?.output_format ?? "",
+              amount: Number(invoice.amount),
+              currency: "USD",
+              companyName: "genxdigitizing",
+              companyEmail: "support@genxdigitizing.com",
               companyWebsite: "genxdigitizing.com",
             };
 
@@ -187,13 +182,12 @@ export async function PATCH(
                   .getPublicUrl(`${invoiceId}.pdf`);
                 pdfUrl = urlData?.publicUrl ?? null;
                 if (pdfUrl) {
-                  await supabase
-                    .from("invoices")
-                    .update({ pdf_url: pdfUrl })
-                    .eq("id", invoiceId);
+                  await supabase.from("invoices").update({ pdf_url: pdfUrl }).eq("id", invoiceId);
                 }
               }
-            } catch { /* non-fatal */ }
+            } catch {
+              /* non-fatal */
+            }
 
             // Send payment confirmation with PDF attached
             emailPaymentConfirmed({
@@ -239,12 +233,8 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: true });
-
   } catch (err: any) {
     console.error("[invoice-status] Error:", err);
-    return NextResponse.json(
-      { error: err.message ?? "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err.message ?? "Internal server error" }, { status: 500 });
   }
 }

@@ -20,16 +20,18 @@ describe("normalizeSubject", () => {
   });
 
   it("strips out-of-office autoreply markers", () => {
-    expect(normalizeSubject("Automatic reply: First free design for quality testing."))
-      .toBe("first free design for quality testing.");
+    expect(normalizeSubject("Automatic reply: First free design for quality testing.")).toBe(
+      "first free design for quality testing."
+    );
     expect(normalizeSubject("Auto-Reply: Pricing")).toBe("pricing");
     expect(normalizeSubject("Out of office: Pricing")).toBe("pricing");
   });
 
   it("leaves a plain subject alone", () => {
     expect(normalizeSubject("Indian Applique")).toBe("indian applique");
-    expect(normalizeSubject("First free design for quality testing."))
-      .toBe("first free design for quality testing.");
+    expect(normalizeSubject("First free design for quality testing.")).toBe(
+      "first free design for quality testing."
+    );
   });
 
   it("collapses whitespace and handles empty input", () => {
@@ -56,7 +58,10 @@ describe("extractMessageIds", () => {
   });
 
   it("dedupes ids present in both references and in-reply-to", () => {
-    expect(extractMessageIds("<a@b.com> <c@d.com>", "<c@d.com>")).toEqual(["<a@b.com>", "<c@d.com>"]);
+    expect(extractMessageIds("<a@b.com> <c@d.com>", "<c@d.com>")).toEqual([
+      "<a@b.com>",
+      "<c@d.com>",
+    ]);
   });
 
   it("accepts an array of references", () => {
@@ -95,22 +100,42 @@ function stubClient({ inbound = [], sent = [], sentThreadId = null }: any) {
       const rows = table === "received_emails" ? inbound : sent;
       const builder: any = {
         _rows: rows,
-        select() { return builder; },
+        select() {
+          return builder;
+        },
         in(_col: string, ids: string[]) {
           builder._rows = rows.filter((r: any) => ids.includes(r.message_id));
           return builder;
         },
-        not() { return builder; },
-        gte() { return builder; },
-        order() { return builder; },
-        limit() { return builder; },
-        eq() { return builder; },
-        update(patch: any) { updates.push({ table, patch }); return builder; },
+        not() {
+          return builder;
+        },
+        gte() {
+          return builder;
+        },
+        order() {
+          return builder;
+        },
+        limit() {
+          return builder;
+        },
+        eq() {
+          return builder;
+        },
+        update(patch: any) {
+          updates.push({ table, patch });
+          return builder;
+        },
         maybeSingle() {
           const row = builder._rows[0] || null;
-          return Promise.resolve({ data: row ? { ...row, thread_id: row.thread_id ?? sentThreadId } : null, error: null });
+          return Promise.resolve({
+            data: row ? { ...row, thread_id: row.thread_id ?? sentThreadId } : null,
+            error: null,
+          });
         },
-        then(resolve: any) { return Promise.resolve({ data: builder._rows, error: null }).then(resolve); },
+        then(resolve: any) {
+          return Promise.resolve({ data: builder._rows, error: null }).then(resolve);
+        },
       };
       return builder;
     },
@@ -146,7 +171,14 @@ describe("resolveThreadId", () => {
 
   it("falls back to subject + counterparty for inbound mail", async () => {
     const supabase = stubClient({
-      inbound: [{ message_id: "<a@x.com>", thread_id: "thread-3", subject: "Indian Applique", from_email: "wk@x.com" }],
+      inbound: [
+        {
+          message_id: "<a@x.com>",
+          thread_id: "thread-3",
+          subject: "Indian Applique",
+          from_email: "wk@x.com",
+        },
+      ],
     });
     const id = await resolveThreadId(supabase, {
       messageId: "<b@x.com>",
@@ -174,7 +206,14 @@ describe("resolveThreadId", () => {
 
   it("does not match on subject alone when the counterparty differs", async () => {
     const supabase = stubClient({
-      inbound: [{ message_id: "<a@x.com>", thread_id: "thread-3", subject: "Indian Applique", from_email: "someone-else@x.com" }],
+      inbound: [
+        {
+          message_id: "<a@x.com>",
+          thread_id: "thread-3",
+          subject: "Indian Applique",
+          from_email: "someone-else@x.com",
+        },
+      ],
     });
     const id = await resolveThreadId(supabase, {
       messageId: "<b@x.com>",

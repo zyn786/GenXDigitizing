@@ -77,7 +77,10 @@ export async function POST() {
         batch.map((meta: any) => importReceivedEmail(supabase, meta))
       );
       for (const result of results) {
-        if (result.error) { failures.push(result.error); continue; }
+        if (result.error) {
+          failures.push(result.error);
+          continue;
+        }
         if (result.created) imported++;
         else skipped++;
       }
@@ -97,11 +100,13 @@ export async function POST() {
       skipped,
       failed: failures.length,
       // Surface the first reason so the UI can explain a total failure.
-      error: distinct.length > 0
-        ? distinct[0] + (distinct[0].includes("column") || distinct[0].includes("constraint")
-            ? " — has migration 037 been applied?"
-            : "")
-        : null,
+      error:
+        distinct.length > 0
+          ? distinct[0] +
+            (distinct[0].includes("column") || distinct[0].includes("constraint")
+              ? " — has migration 037 been applied?"
+              : "")
+          : null,
     });
   } catch (err: any) {
     console.error("[admin/email/sync] Unexpected error:", err);

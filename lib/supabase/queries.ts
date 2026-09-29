@@ -25,11 +25,7 @@ export async function getCurrentUser(supabase: DB) {
     return null;
   }
 
-  const { data: profile } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const { data: profile } = await supabase.from("users").select("*").eq("id", user.id).single();
 
   return profile;
 }
@@ -40,20 +36,12 @@ export async function getCurrentUserRole(supabase: DB): Promise<UserRole | null>
 }
 
 export async function getClientProfile(supabase: DB, userId: string) {
-  const { data } = await supabase
-    .from("clients")
-    .select("*")
-    .eq("user_id", userId)
-    .single();
+  const { data } = await supabase.from("clients").select("*").eq("user_id", userId).single();
   return data;
 }
 
 export async function getDesignerProfile(supabase: DB, userId: string) {
-  const { data } = await supabase
-    .from("designers")
-    .select("*")
-    .eq("user_id", userId)
-    .single();
+  const { data } = await supabase.from("designers").select("*").eq("user_id", userId).single();
   return data;
 }
 
@@ -141,11 +129,13 @@ export async function getRecentOrdersForLiveToast(supabase: DB, since: string) {
   try {
     const { data } = await supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         id, created_at, status,
         clients ( users ( full_name ) ),
         service_tiers ( label )
-      `)
+      `
+      )
       .not("status", "in", '("pending","draft","cancelled")')
       .gte("created_at", since)
       .order("created_at", { ascending: false })
@@ -269,11 +259,7 @@ export async function getServiceTiers(supabase: DB) {
   return { data, error };
 }
 
-export async function updateServiceTierPrice(
-  supabase: DB,
-  tierId: string,
-  price: number
-) {
+export async function updateServiceTierPrice(supabase: DB, tierId: string, price: number) {
   const { data, error } = await supabase
     .from("service_tiers")
     .update({ price, updated_at: new Date().toISOString() })
@@ -307,11 +293,7 @@ export async function getAllReviews(supabase: DB) {
 export async function getAdminDashStats(supabase: DB) {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const startOfLastMonth = new Date(
-    now.getFullYear(),
-    now.getMonth() - 1,
-    1
-  ).toISOString();
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
   const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString();
 
   const [
@@ -332,11 +314,7 @@ export async function getAdminDashStats(supabase: DB) {
       .select("*", { count: "exact", head: true })
       .gte("created_at", startOfLastMonth)
       .lte("created_at", endOfLastMonth),
-    supabase
-      .from("invoices")
-      .select("amount")
-      .eq("status", "paid")
-      .gte("paid_at", startOfMonth),
+    supabase.from("invoices").select("amount").eq("status", "paid").gte("paid_at", startOfMonth),
     supabase
       .from("invoices")
       .select("amount")

@@ -74,7 +74,9 @@ export function useUpload(opts: UseUploadOptions = {}) {
         existingPrints.add(fp);
 
         const entry: UploadFile = {
-          id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          id: crypto.randomUUID
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
           file: f,
         };
 
@@ -147,56 +149,58 @@ export function useUpload(opts: UseUploadOptions = {}) {
         }
 
         // Use XMLHttpRequest for progress tracking
-        const result = await new Promise<{ ok: boolean; data?: any; error?: string }>(
-          (resolve) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", url);
+        const result = await new Promise<{ ok: boolean; data?: any; error?: string }>((resolve) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", url);
 
-            // Abort handling
-            const onAbort = () => {
-              xhr.abort();
-              resolve({ ok: false, error: "Upload cancelled" });
-            };
-            controller.signal.addEventListener("abort", onAbort, { once: true });
+          // Abort handling
+          const onAbort = () => {
+            xhr.abort();
+            resolve({ ok: false, error: "Upload cancelled" });
+          };
+          controller.signal.addEventListener("abort", onAbort, { once: true });
 
-            // Progress
-            xhr.upload.addEventListener("progress", (e) => {
-              if (e.lengthComputable) {
-                setProgress({ percent: Math.round((e.loaded / e.total) * 100), loaded: e.loaded, total: e.total });
+          // Progress
+          xhr.upload.addEventListener("progress", (e) => {
+            if (e.lengthComputable) {
+              setProgress({
+                percent: Math.round((e.loaded / e.total) * 100),
+                loaded: e.loaded,
+                total: e.total,
+              });
+            }
+          });
+
+          xhr.addEventListener("load", () => {
+            controller.signal.removeEventListener("abort", onAbort);
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                resolve({ ok: true, data: JSON.parse(xhr.responseText) });
+              } catch {
+                resolve({ ok: true, data: xhr.responseText });
               }
-            });
+            } else {
+              let msg = `Upload failed (${xhr.status})`;
+              try {
+                const e = JSON.parse(xhr.responseText);
+                msg = e.error || e.message || msg;
+              } catch {}
+              resolve({ ok: false, error: msg });
+            }
+          });
 
-            xhr.addEventListener("load", () => {
-              controller.signal.removeEventListener("abort", onAbort);
-              if (xhr.status >= 200 && xhr.status < 300) {
-                try {
-                  resolve({ ok: true, data: JSON.parse(xhr.responseText) });
-                } catch {
-                  resolve({ ok: true, data: xhr.responseText });
-                }
-              } else {
-                let msg = `Upload failed (${xhr.status})`;
-                try {
-                  const e = JSON.parse(xhr.responseText);
-                  msg = e.error || e.message || msg;
-                } catch {}
-                resolve({ ok: false, error: msg });
-              }
-            });
+          xhr.addEventListener("error", () => {
+            controller.signal.removeEventListener("abort", onAbort);
+            resolve({ ok: false, error: "Network error — check your connection" });
+          });
 
-            xhr.addEventListener("error", () => {
-              controller.signal.removeEventListener("abort", onAbort);
-              resolve({ ok: false, error: "Network error — check your connection" });
-            });
+          xhr.addEventListener("abort", () => {
+            controller.signal.removeEventListener("abort", onAbort);
+            resolve({ ok: false, error: "Upload cancelled" });
+          });
 
-            xhr.addEventListener("abort", () => {
-              controller.signal.removeEventListener("abort", onAbort);
-              resolve({ ok: false, error: "Upload cancelled" });
-            });
-
-            xhr.send(fd);
-          }
-        );
+          xhr.send(fd);
+        });
 
         return result;
       } catch (err: any) {

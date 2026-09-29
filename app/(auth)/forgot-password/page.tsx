@@ -13,12 +13,16 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 export default function ForgotPasswordPage() {
-  const supabase   = createClient();
-  const [done, setDone]       = useState(false);
+  const supabase = createClient();
+  const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { register, handleSubmit, getValues, formState: { errors } } =
-    useForm<ForgotPasswordInput>({ resolver: zodResolver(forgotPasswordSchema) });
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { errors },
+  } = useForm<ForgotPasswordInput>({ resolver: zodResolver(forgotPasswordSchema) });
 
   const onSubmit = async (data: ForgotPasswordInput) => {
     setLoading(true);
@@ -40,33 +44,41 @@ export default function ForgotPasswordPage() {
   return (
     <div className="animate-fade-in">
       {/* Logo */}
-      <div className="flex items-center justify-center gap-3 mb-8">
+      <div className="mb-8 flex items-center justify-center gap-3">
         <div
-          className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white font-syne font-bold text-xl"
+          className="flex h-10 w-10 items-center justify-center rounded-[10px] font-syne text-xl font-bold text-white"
           style={{ background: "linear-gradient(135deg,#2563EB,#F97316)" }}
         >
           ✦
         </div>
         <span
-          className="font-syne font-bold text-[18px]"
-          style={{ background: "linear-gradient(135deg,#2563EB,#F97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+          className="font-syne text-[18px] font-bold"
+          style={{
+            background: "linear-gradient(135deg,#2563EB,#F97316)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
         >
           GENX DIGITIZING
         </span>
       </div>
 
-      <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-2xl p-6">
+      <div className="rounded-2xl border border-[var(--border2)] bg-[var(--surface)] p-6">
         {done ? (
-          <div className="text-center py-4">
-            <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg,#2563EB22,#F9731622)" }}>
+          <div className="py-4 text-center">
+            <div
+              className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
+              style={{ background: "linear-gradient(135deg,#2563EB22,#F9731622)" }}
+            >
               <CheckCircle2 size={26} className="text-[#16A34A]" />
             </div>
-            <h2 className="font-syne font-bold text-[17px] text-[var(--txt)] mb-2">Check your email</h2>
-            <p className="text-[13px] text-[var(--txt2)] leading-relaxed">
+            <h2 className="mb-2 font-syne text-[17px] font-bold text-[var(--txt)]">
+              Check your email
+            </h2>
+            <p className="text-[13px] leading-relaxed text-[var(--txt2)]">
               We sent a password reset link to{" "}
-              <strong className="text-[var(--txt)]">{getValues("email")}</strong>.
-              It expires in 1 hour.
+              <strong className="text-[var(--txt)]">{getValues("email")}</strong>. It expires in 1
+              hour.
             </p>
             <Link href="/login">
               <Button variant="ghost" size="sm" className="mt-5" leftIcon={<ArrowLeft size={13} />}>
@@ -76,8 +88,10 @@ export default function ForgotPasswordPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <h2 className="font-syne font-bold text-[17px] text-[var(--txt)] mb-1">Forgot password?</h2>
-            <p className="text-[13px] text-[var(--txt2)] mb-5 leading-snug">
+            <h2 className="mb-1 font-syne text-[17px] font-bold text-[var(--txt)]">
+              Forgot password?
+            </h2>
+            <p className="mb-5 text-[13px] leading-snug text-[var(--txt2)]">
               Enter your email and we&apos;ll send you a reset link.
             </p>
             <div className="mb-5">
@@ -98,8 +112,11 @@ export default function ForgotPasswordPage() {
         )}
       </div>
 
-      <div className="text-center mt-4">
-        <Link href="/login" className="text-xs text-[var(--txt3)] hover:text-[#2563EB] transition-colors inline-flex items-center gap-1">
+      <div className="mt-4 text-center">
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-1 text-xs text-[var(--txt3)] transition-colors hover:text-[#2563EB]"
+        >
           <ArrowLeft size={12} /> Back to sign in
         </Link>
       </div>

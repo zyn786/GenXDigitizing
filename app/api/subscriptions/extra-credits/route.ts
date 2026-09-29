@@ -10,7 +10,9 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { clientId, credits, amount } = await req.json();
@@ -32,8 +34,11 @@ export async function POST(req: NextRequest) {
     const admin = createAdminClient();
 
     // Fetch universal subscription payment link
-    const { data: payLink } = await admin.from("platform_settings")
-      .select("value").eq("key", "subscription_payment_link").maybeSingle();
+    const { data: payLink } = await admin
+      .from("platform_settings")
+      .select("value")
+      .eq("key", "subscription_payment_link")
+      .maybeSingle();
     const universalLink = payLink?.value || null;
 
     // Create invoice with payment link attached
@@ -47,7 +52,11 @@ export async function POST(req: NextRequest) {
     };
     if (universalLink) invoiceData.payoneer_checkout_url = universalLink;
 
-    const { data: invoice, error: invErr } = await admin.from("invoices").insert(invoiceData).select("id, invoice_number").single();
+    const { data: invoice, error: invErr } = await admin
+      .from("invoices")
+      .insert(invoiceData)
+      .select("id, invoice_number")
+      .single();
 
     if (invErr) {
       console.error("[extra-credits] Invoice insert error:", invErr);
@@ -61,7 +70,7 @@ export async function POST(req: NextRequest) {
       title: `Extra credits requested — ${user.email}`,
       body: `${user.email} wants ${credits} extra design credits for $${amount}.`,
       action_url: "/admin/invoices",
-    }).catch(e => console.error("[extra-credits] Admin notify error:", e));
+    }).catch((e) => console.error("[extra-credits] Admin notify error:", e));
 
     // Notify client with payment link
     const paymentMsg = universalLink
@@ -72,7 +81,7 @@ export async function POST(req: NextRequest) {
       title: `Extra credits requested — ${credits} credits`,
       body: paymentMsg,
       action_url: universalLink || "/client/subscribe",
-    }).catch(e => console.error("[extra-credits] Client notify error:", e));
+    }).catch((e) => console.error("[extra-credits] Client notify error:", e));
 
     return NextResponse.json({ ok: true, paymentLink: universalLink });
   } catch (err) {

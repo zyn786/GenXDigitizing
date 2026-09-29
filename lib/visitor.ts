@@ -9,7 +9,9 @@ const VISITOR_ID_KEY = "gx_visitor_id";
 const OFFER_DISMISSED_KEY = "gx_offer_dismissed_at";
 
 function generateId(): string {
-  return crypto.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  return (
+    crypto.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+  );
 }
 
 export interface VisitorState {
@@ -44,7 +46,10 @@ export function markVisited(): void {
 }
 
 /** Check if a specific offer type was dismissed within the cooldown (default 24h). */
-export function isOfferDismissed(offerType: string, cooldownMs: number = 24 * 60 * 60 * 1000): boolean {
+export function isOfferDismissed(
+  offerType: string,
+  cooldownMs: number = 24 * 60 * 60 * 1000
+): boolean {
   if (typeof window === "undefined") return true;
   const raw = localStorage.getItem(`${OFFER_DISMISSED_KEY}_${offerType}`);
   if (!raw) return false;

@@ -1,9 +1,5 @@
 // @ts-nocheck
-import {
-  PortalSkeleton,
-  SkeletonStatRow,
-  SkeletonTable,
-} from "@/components/ui/Skeleton";
+import { PortalSkeleton, SkeletonStatRow, SkeletonTable } from "@/components/ui/Skeleton";
 
 export default function CRMLoading() {
   return (

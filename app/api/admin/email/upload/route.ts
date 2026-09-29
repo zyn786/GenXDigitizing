@@ -38,7 +38,9 @@ export async function POST(req: NextRequest) {
 
     if (file.size > MAX_BYTES) {
       return NextResponse.json(
-        { error: `"${file.name}" is ${(file.size / 1048576).toFixed(1)}MB — the limit is 4MB per file.` },
+        {
+          error: `"${file.name}" is ${(file.size / 1048576).toFixed(1)}MB — the limit is 4MB per file.`,
+        },
         { status: 413 }
       );
     }

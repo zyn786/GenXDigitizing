@@ -24,7 +24,9 @@ import { notifyUsers } from "@/lib/notify-server";
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const db = createAdminClient();
@@ -53,14 +55,21 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     // Tell the team. This is the whole point — a failed upload must not be
     // something only the customer knows about.
-    const { data: admins } = await db.from("users").select("id").eq("role", "admin").eq("is_active", true);
+    const { data: admins } = await db
+      .from("users")
+      .select("id")
+      .eq("role", "admin")
+      .eq("is_active", true);
     if (admins?.length) {
-      await notifyUsers(admins.map((a: any) => a.id), {
-        type: "system",
-        title: `Artwork missing — ${orderNumber}`,
-        body: `${clientUser?.full_name ?? "Client"} placed an order but the artwork upload failed (${reason}). Contact them to collect the files.`,
-        action_url: `/admin/orders/${order.id}`,
-      });
+      await notifyUsers(
+        admins.map((a: any) => a.id),
+        {
+          type: "system",
+          title: `Artwork missing — ${orderNumber}`,
+          body: `${clientUser?.full_name ?? "Client"} placed an order but the artwork upload failed (${reason}). Contact them to collect the files.`,
+          action_url: `/admin/orders/${order.id}`,
+        }
+      );
     }
 
     // Leave a trace on the order itself for whoever opens it.

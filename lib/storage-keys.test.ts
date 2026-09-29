@@ -62,7 +62,8 @@ describe("isServableKey — allowlist is the security boundary", () => {
   });
 
   it("rejects a full URL — normalisation must not be reachable from here", () => {
-    const url = "https://abcdefg.supabase.co/storage/v1/object/sign/outputs/orders/8f1c/output/final.dst?token=x";
+    const url =
+      "https://abcdefg.supabase.co/storage/v1/object/sign/outputs/orders/8f1c/output/final.dst?token=x";
     expect(isServableKey(url, CHAT)).toBe(false);
   });
 

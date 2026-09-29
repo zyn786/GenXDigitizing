@@ -8,8 +8,8 @@ export const runtime = "nodejs";
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient }         from "@/lib/supabase/server";
-import { getAdminUser }              from "@/lib/supabase/get-user";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getAdminUser } from "@/lib/supabase/get-user";
 
 /**
  * POST /api/designers/[id]/payout
@@ -18,19 +18,16 @@ import { getAdminUser }              from "@/lib/supabase/get-user";
  * Actual payouts are sent via Payoneer dashboard (Payments → Make a Payment).
  * This endpoint records the payout details for bookkeeping.
  */
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await getAdminUser().catch(() => null);
     if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const supabase    = createAdminClient();
-    const designerId  = params.id;
-    const body        = await req.json();
+    const supabase = createAdminClient();
+    const designerId = params.id;
+    const body = await req.json();
     const { amount, currency = "USD", description, reference_id } = body;
 
     if (!amount || amount <= 0) {
@@ -53,26 +50,25 @@ export async function POST(
 
     // Log in audit (payout executed manually via Payoneer dashboard)
     await supabase.from("audit_logs").insert({
-      action:    "designer_payout",
-      entity:    "designers",
+      action: "designer_payout",
+      entity: "designers",
       entity_id: designerId,
-      user_id:   user.id,
-      new_data:  { amount, currency, reference_id: refId, method: "manual_payoneer" },
+      user_id: user.id,
+      new_data: { amount, currency, reference_id: refId, method: "manual_payoneer" },
     });
 
     // Notify designer
     if (designerUser?.id) {
       await supabase.from("notifications").insert({
-        user_id:    designerUser.id,
-        type:       "payment",
-        title:      `Payout recorded — $${Number(amount).toFixed(2)} ${currency}`,
-        body:       `${description ?? "Payout"} · Ref: ${refId}`,
+        user_id: designerUser.id,
+        type: "payment",
+        title: `Payout recorded — $${Number(amount).toFixed(2)} ${currency}`,
+        body: `${description ?? "Payout"} · Ref: ${refId}`,
         action_url: "/designer/settings",
       });
     }
 
     return NextResponse.json({ success: true, reference_id: refId });
-
   } catch (err: any) {
     console.error("[designer-payout]", err);
     return NextResponse.json({ error: err.message ?? "Payout failed" }, { status: 500 });

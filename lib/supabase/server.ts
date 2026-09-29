@@ -26,7 +26,7 @@ function getEnv(): { url: string; anonKey: string; serviceKey: string } {
   if (!url || !anonKey) {
     throw new Error(
       "@supabase/ssr: Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. " +
-      "Set them in your Vercel project dashboard or .env.local file."
+        "Set them in your Vercel project dashboard or .env.local file."
     );
   }
 
@@ -42,12 +42,12 @@ export function createClient() {
 
   return createServerClient<Database>(url, anonKey, {
     cookies: {
-      getAll() { return cookieStore.getAll(); },
+      getAll() {
+        return cookieStore.getAll();
+      },
       setAll(cookiesToSet) {
         try {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
         } catch {}
       },
     },
@@ -66,12 +66,14 @@ export function createAdminClient() {
   // RLS evaluates against that user instead of the service role.
   return createServerClient<Database>(url, serviceKey, {
     cookies: {
-      getAll() { return []; },
+      getAll() {
+        return [];
+      },
       setAll() {},
     },
     auth: {
       autoRefreshToken: false,
-      persistSession:   false,
+      persistSession: false,
     },
   });
 }

@@ -22,7 +22,10 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (!lead_id || !service_tier_id || !price || !design_name) {
-      return NextResponse.json({ error: "lead_id, service_tier_id, price, and design_name are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "lead_id, service_tier_id, price, and design_name are required" },
+        { status: 400 }
+      );
     }
 
     const admin = createAdminClient();
@@ -39,7 +42,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (!lead.email) {
-      return NextResponse.json({ error: "Lead has no email — cannot create order" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Lead has no email — cannot create order" },
+        { status: 400 }
+      );
     }
 
     // 2. Find or create user by email
@@ -63,7 +69,10 @@ export async function POST(req: NextRequest) {
       });
 
       if (createUserErr || !newUser?.user) {
-        return NextResponse.json({ error: "Failed to create user: " + (createUserErr?.message || "unknown") }, { status: 500 });
+        return NextResponse.json(
+          { error: "Failed to create user: " + (createUserErr?.message || "unknown") },
+          { status: 500 }
+        );
       }
 
       userId = newUser.user.id;
@@ -116,7 +125,13 @@ export async function POST(req: NextRequest) {
     // Parse clean message from lead notes (strip Service/Artwork/Download metadata lines)
     const leadMessage = (lead.notes || "")
       .split("\n")
-      .filter((l: string) => !l.startsWith("Service:") && !l.startsWith("Artwork:") && !l.startsWith("Download:") && !l.startsWith("["))
+      .filter(
+        (l: string) =>
+          !l.startsWith("Service:") &&
+          !l.startsWith("Artwork:") &&
+          !l.startsWith("Download:") &&
+          !l.startsWith("[")
+      )
       .join("\n")
       .trim();
 
@@ -142,20 +157,28 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (orderErr || !order) {
-      return NextResponse.json({ error: "Failed to create order: " + (orderErr?.message || "unknown") }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to create order: " + (orderErr?.message || "unknown") },
+        { status: 500 }
+      );
     }
 
-    const orderNumber = order.order_number || `OD-GX${String(Date.now() % 100000).padStart(5, '0')}`;
+    const orderNumber =
+      order.order_number || `OD-GX${String(Date.now() % 100000).padStart(5, "0")}`;
 
     // 6. Copy artwork from lead's upload to order_files table (storage path stored in file_url)
     const artworkMatch = (lead.notes || "").match(/Artwork:\s*(.+?)\s*\(([^)]+)\)/);
-    const artworkKeyMatch = (lead.notes || "").match(/Download:\s*\/api\/chat\/upload\?key=([^\s]+)/);
+    const artworkKeyMatch = (lead.notes || "").match(
+      /Download:\s*\/api\/chat\/upload\?key=([^\s]+)/
+    );
     if (artworkKeyMatch) {
       const artworkKey = decodeURIComponent(artworkKeyMatch[1]);
       const artworkFileName = artworkMatch ? artworkMatch[1] : "artwork-from-lead";
       const artworkSizeMatch = artworkMatch ? artworkMatch[2] : null;
       const fileSizeBytes = artworkSizeMatch
-        ? (artworkSizeMatch.toLowerCase().includes("mb") ? parseFloat(artworkSizeMatch) * 1024 * 1024 : parseFloat(artworkSizeMatch) * 1024)
+        ? artworkSizeMatch.toLowerCase().includes("mb")
+          ? parseFloat(artworkSizeMatch) * 1024 * 1024
+          : parseFloat(artworkSizeMatch) * 1024
         : 0;
 
       await admin.from("order_files").insert({
@@ -194,15 +217,23 @@ export async function POST(req: NextRequest) {
 
     // 9. Send password reset email for newly created users (so they can log in)
     if (!existingUser) {
-      admin.auth.resetPasswordForEmail(lead.email, {
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "https://genxdigitizing.com"}/reset-password`,
-      }).catch((err) => console.error("[convert-to-order] Password reset email failed:", err));
+      admin.auth
+        .resetPasswordForEmail(lead.email, {
+          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "https://genxdigitizing.com"}/reset-password`,
+        })
+        .catch((err) => console.error("[convert-to-order] Password reset email failed:", err));
     }
 
     // 10. Send order confirmation email to client
-    const turnaroundLabels: Record<string, string> = { standard: "12–24h", rush: "6h", urgent: "3h" };
+    const turnaroundLabels: Record<string, string> = {
+      standard: "12–24h",
+      rush: "6h",
+      urgent: "3h",
+    };
     const slaHoursMap: Record<string, number> = { standard: 24, rush: 6, urgent: 3 };
-    const estDelivery = new Date(Date.now() + (slaHoursMap[turnaround || "standard"] || 24) * 3600000).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+    const estDelivery = new Date(
+      Date.now() + (slaHoursMap[turnaround || "standard"] || 24) * 3600000
+    ).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
     emailOrderSubmitted({
       to: lead.email,

@@ -65,15 +65,38 @@ export function generateBlurPlaceholder(color: string, blurhash?: string): strin
 
 // Default categories (fallback when DB empty)
 export const DEFAULT_CATEGORIES: PortfolioCategory[] = [
-  { id: "all",         name: "All Work",              slug: "all",        emoji: "✦",  color: "#2563EB", sortOrder: 0 },
-  { id: "digitizing",  name: "Embroidery Digitizing", slug: "digitizing", emoji: "🧵", color: "#2563EB", sortOrder: 1 },
-  { id: "vector",      name: "Vector Art",            slug: "vector",     emoji: "✏️", color: "#F97316", sortOrder: 2 },
-  { id: "patches",     name: "Patch Design",          slug: "patches",    emoji: "🏷️", color: "#16A34A", sortOrder: 3 },
+  { id: "all", name: "All Work", slug: "all", emoji: "✦", color: "#2563EB", sortOrder: 0 },
+  {
+    id: "digitizing",
+    name: "Embroidery Digitizing",
+    slug: "digitizing",
+    emoji: "🧵",
+    color: "#2563EB",
+    sortOrder: 1,
+  },
+  { id: "vector", name: "Vector Art", slug: "vector", emoji: "✏️", color: "#F97316", sortOrder: 2 },
+  {
+    id: "patches",
+    name: "Patch Design",
+    slug: "patches",
+    emoji: "🏷️",
+    color: "#16A34A",
+    sortOrder: 3,
+  },
 ];
 
 // Sub-categories (tags for admin to assign per project)
 export const SUB_CATEGORIES: Record<string, string[]> = {
-  digitizing: ["Left Chest", "Cap", "Jacket Back", "Sleeve", "Puff 3D", "Flat", "Applique", "Full Back"],
+  digitizing: [
+    "Left Chest",
+    "Cap",
+    "Jacket Back",
+    "Sleeve",
+    "Puff 3D",
+    "Flat",
+    "Applique",
+    "Full Back",
+  ],
   vector: ["Logo", "Mascot", "Illustration", "Typography", "Print-Ready"],
   patches: ["Merit Badge", "Tactical", "PVC-Style", "Name Patch", "Club Patch", "Event Patch"],
 };

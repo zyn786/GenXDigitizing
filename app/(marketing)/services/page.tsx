@@ -6,7 +6,8 @@ import { ServicesContent } from "./ServicesContent";
 
 export const metadata: Metadata = {
   title: "Services — Embroidery Digitizing, Vector Art & Custom Patches",
-  description: "Production-ready embroidery digitizing for caps, jackets, and more. Vector art conversion and custom patch design. Proof-first workflow, free revisions, 12hr turnaround.",
+  description:
+    "Production-ready embroidery digitizing for caps, jackets, and more. Vector art conversion and custom patch design. Proof-first workflow, free revisions, 12hr turnaround.",
 };
 
 export default async function ServicesPage() {
@@ -24,7 +25,12 @@ export default async function ServicesPage() {
         description="Production-ready embroidery digitizing, vector art conversion, and custom patch design. Manual digitizing, free revisions, all machine formats supported."
         url="/services"
       />
-      <BreadcrumbSchema items={[{ name: "Home", url: "/" }, { name: "Services", url: "/services" }]} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", url: "/" },
+          { name: "Services", url: "/services" },
+        ]}
+      />
       <ServicesContent tiers={tiers || []} />
     </>
   );

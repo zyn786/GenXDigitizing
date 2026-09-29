@@ -2,13 +2,13 @@ import { describe, it, expect } from "vitest";
 
 // Extracted from app/api/orders/[id]/status/route.ts
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-  submitted:   ["assigned", "cancelled"],
-  assigned:    ["in_progress", "submitted"],
+  submitted: ["assigned", "cancelled"],
+  assigned: ["in_progress", "submitted"],
   in_progress: ["review", "assigned"],
-  review:      ["approved", "revision", "in_progress"],
-  approved:    ["delivered", "revision"],
-  delivered:   ["revision", "delivered"],
-  revision:    ["in_progress", "submitted"],
+  review: ["approved", "revision", "in_progress"],
+  approved: ["delivered", "revision"],
+  delivered: ["revision", "delivered"],
+  revision: ["in_progress", "submitted"],
 };
 
 function isValidTransition(currentStatus: string, newStatus: string): boolean {
@@ -32,7 +32,8 @@ function validateRevisionInput(input: {
   if (!input.orderId) return { valid: false, error: "orderId is required" };
   if (!input.orderNumber) return { valid: false, error: "orderNumber is required" };
   if (!input.revisionNotes?.trim()) return { valid: false, error: "revisionNotes is required" };
-  if (input.revisionNotes.trim().length > 2000) return { valid: false, error: "revisionNotes must be under 2000 characters" };
+  if (input.revisionNotes.trim().length > 2000)
+    return { valid: false, error: "revisionNotes must be under 2000 characters" };
   return { valid: true };
 }
 
@@ -298,7 +299,8 @@ describe("Revision Request — Client Initiated", () => {
       expect(canClientRequestRevision(status)).toBe(true);
       expect(isAuthorizedForRevision(userRole, userId, orderOwnerId)).toBe(true);
       // Together: user is authorized AND state allows revision
-      const canRevise = canClientRequestRevision(status) && isAuthorizedForRevision(userRole, userId, orderOwnerId);
+      const canRevise =
+        canClientRequestRevision(status) && isAuthorizedForRevision(userRole, userId, orderOwnerId);
       expect(canRevise).toBe(true);
     });
 
@@ -310,7 +312,8 @@ describe("Revision Request — Client Initiated", () => {
 
       expect(canClientRequestRevision(status)).toBe(false);
       expect(isAuthorizedForRevision(userRole, userId, orderOwnerId)).toBe(true);
-      const canRevise = canClientRequestRevision(status) && isAuthorizedForRevision(userRole, userId, orderOwnerId);
+      const canRevise =
+        canClientRequestRevision(status) && isAuthorizedForRevision(userRole, userId, orderOwnerId);
       expect(canRevise).toBe(false);
     });
 

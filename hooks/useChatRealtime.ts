@@ -18,7 +18,9 @@ function parseMessageBody(rawBody: string) {
         const replyMeta = JSON.parse(body.slice(10, endIdx));
         replyTo = { id: replyMeta.id, content: replyMeta.c, senderName: replyMeta.n };
         body = body.slice(endIdx + 11);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
   }
 
@@ -29,9 +31,17 @@ function parseMessageBody(rawBody: string) {
     try {
       attachments = attSplit[1].split("||").map((s: string) => {
         const meta = JSON.parse(s);
-        return { id: `att-${Date.now()}-${Math.random()}`, name: meta.n, url: meta.u, type: meta.t, size: meta.s };
+        return {
+          id: `att-${Date.now()}-${Math.random()}`,
+          name: meta.n,
+          url: meta.u,
+          type: meta.t,
+          size: meta.s,
+        };
       });
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   return { body, replyTo, attachments };
@@ -82,10 +92,12 @@ export function useChatRealtime({
               .eq("id", newMsg.from_user)
               .single();
             if (sender) {
-              senderName = sender.role === "admin" ? "Support Team" : (sender.full_name || "Client");
+              senderName = sender.role === "admin" ? "Support Team" : sender.full_name || "Client";
               senderRole = sender.role || "client";
             }
-          } catch { /* use defaults */ }
+          } catch {
+            /* use defaults */
+          }
 
           const partnerId = newMsg.from_user;
           const key = `conv-${partnerId}`;
@@ -118,15 +130,28 @@ export function useChatRealtime({
                 c.id === key
                   ? {
                       ...c,
-                      clientName: senderRole === "admin" ? "Support Team" : (existing.clientName !== "New Message" ? existing.clientName : senderName),
+                      clientName:
+                        senderRole === "admin"
+                          ? "Support Team"
+                          : existing.clientName !== "New Message"
+                            ? existing.clientName
+                            : senderName,
                       messages: [...c.messages, chatMsg],
                       lastMessage: newMsg.body?.slice(0, 80) ?? "New message",
                       lastMessageAt: new Date(newMsg.created_at),
                       unreadCount: c.unreadCount + 1,
                       orderId: newMsg.order_id || c.orderId,
-                      ...(newMsg.order_id ? {
-                        linkedOrder: c.linkedOrder || { id: newMsg.order_id, orderNumber: "#"+String(newMsg.order_id).slice(0,8), status: "pending", service: "", turnaround: "Standard" },
-                      } : {}),
+                      ...(newMsg.order_id
+                        ? {
+                            linkedOrder: c.linkedOrder || {
+                              id: newMsg.order_id,
+                              orderNumber: "#" + String(newMsg.order_id).slice(0, 8),
+                              status: "pending",
+                              service: "",
+                              turnaround: "Standard",
+                            },
+                          }
+                        : {}),
                     }
                   : c
               );
@@ -140,7 +165,12 @@ export function useChatRealtime({
               companyName: "",
               recipientId: partnerId,
               recipientRole: senderRole as Conversation["recipientRole"],
-              sectionLabel: senderRole === "designer" ? "Designers" : senderRole === "crm" ? "CRM Team" : "Clients",
+              sectionLabel:
+                senderRole === "designer"
+                  ? "Designers"
+                  : senderRole === "crm"
+                    ? "CRM Team"
+                    : "Clients",
               category: "order",
               priority: "normal",
               lastMessage: newMsg.body?.slice(0, 80),
@@ -150,7 +180,15 @@ export function useChatRealtime({
               messages: [chatMsg],
               isPinned: false,
               orderId: newMsg.order_id || undefined,
-              linkedOrder: newMsg.order_id ? { id: newMsg.order_id, orderNumber: "#"+String(newMsg.order_id).slice(0,8), status: "pending", service: "", turnaround: "Standard" } : undefined,
+              linkedOrder: newMsg.order_id
+                ? {
+                    id: newMsg.order_id,
+                    orderNumber: "#" + String(newMsg.order_id).slice(0, 8),
+                    status: "pending",
+                    service: "",
+                    turnaround: "Standard",
+                  }
+                : undefined,
             };
 
             return [newConv, ...prev];
@@ -172,9 +210,7 @@ export function useChatRealtime({
             prev.map((c) => ({
               ...c,
               messages: c.messages.map((m) =>
-                m.id === updated.id
-                  ? { ...m, status: "read" as Message["status"] }
-                  : m
+                m.id === updated.id ? { ...m, status: "read" as Message["status"] } : m
               ),
             }))
           );

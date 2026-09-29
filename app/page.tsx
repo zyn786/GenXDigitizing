@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 const PORTAL: Record<string, string> = {
-  admin: "/admin", crm: "/crm", client: "/client", designer: "/designer",
+  admin: "/admin",
+  crm: "/crm",
+  client: "/client",
+  designer: "/designer",
 };
 
 export default async function RootPage() {
@@ -24,8 +27,7 @@ export default async function RootPage() {
     redirect("/home");
   }
 
-  const { data: profile } = await supabase
-    .from("users").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("users").select("role").eq("id", user.id).single();
 
   redirect(PORTAL[profile?.role] ?? "/client");
 }

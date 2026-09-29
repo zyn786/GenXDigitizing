@@ -5,11 +5,13 @@ export async function getCRMContacts() {
   const supabase = createClient();
   const { data } = await supabase
     .from("clients")
-    .select(`
+    .select(
+      `
       id, company_name, country, phone, tier, ltv, credit_balance,
       is_active, joined_at,
       users ( id, full_name, email, last_sign_in_at )
-    `)
+    `
+    )
     .order("ltv", { ascending: false });
   return data ?? [];
 }
@@ -19,19 +21,23 @@ export async function getCRMContactWithOrders(clientId: string) {
   const [{ data: client }, { data: orders }] = await Promise.all([
     supabase
       .from("clients")
-      .select(`
+      .select(
+        `
         id, company_name, country, phone, tier, ltv, credit_balance, is_active, joined_at,
         users ( id, full_name, email, last_sign_in_at )
-      `)
+      `
+      )
       .eq("id", clientId)
       .single(),
     supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         id, order_number, status, price, turnaround, created_at, delivered_at,
         service_tiers ( label, category ),
         reviews ( stars )
-      `)
+      `
+      )
       .eq("client_id", clientId)
       .order("created_at", { ascending: false })
       .limit(20),
@@ -55,10 +61,13 @@ export async function getCRMLeads() {
     if (staleLeads?.length) {
       for (const lead of staleLeads) {
         const activityNote = `\n[${new Date().toISOString()}] Auto moved to Lost — no client login for 3+ days`;
-        await admin.from("crm_leads").update({
-          stage: "lost",
-          notes: (lead.notes || "") + activityNote,
-        }).eq("id", lead.id);
+        await admin
+          .from("crm_leads")
+          .update({
+            stage: "lost",
+            notes: (lead.notes || "") + activityNote,
+          })
+          .eq("id", lead.id);
       }
     }
   } catch (e) {
@@ -93,9 +102,9 @@ export async function getCRMStats() {
   const totalRevenue = (revenueData ?? []).reduce((s: number, i: any) => s + Number(i.amount), 0);
 
   return {
-    totalClients:  totalClients  ?? 0,
+    totalClients: totalClients ?? 0,
     activeClients: activeClients ?? 0,
-    totalLeads:    totalLeads    ?? 0,
+    totalLeads: totalLeads ?? 0,
     totalRevenue,
   };
 }
@@ -104,11 +113,13 @@ export async function getCRMReviews() {
   const supabase = createClient();
   const { data } = await supabase
     .from("reviews")
-    .select(`
+    .select(
+      `
       id, stars, text, is_published, created_at,
       clients ( company_name, users ( full_name ) ),
       orders ( order_number, service_tiers ( label ) )
-    `)
+    `
+    )
     .order("created_at", { ascending: false });
   return data ?? [];
 }
@@ -117,11 +128,13 @@ export async function getCRMMessages() {
   const supabase = createClient();
   const { data } = await supabase
     .from("messages")
-    .select(`
+    .select(
+      `
       id, body, is_read, created_at,
       sender:from_user   ( id, full_name, role ),
       recipient:to_user  ( id, full_name, role )
-    `)
+    `
+    )
     .order("created_at", { ascending: false })
     .limit(200);
   return data ?? [];

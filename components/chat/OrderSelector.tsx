@@ -28,8 +28,12 @@ export function OrderSelector({ orders }: OrderSelectorProps) {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
-          buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -47,17 +51,18 @@ export function OrderSelector({ orders }: OrderSelectorProps) {
       <button
         ref={buttonRef}
         onClick={() => setIsOpen((v) => !v)}
-        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer
-          bg-transparent border-none
-          ${hasSelection
+        className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-none bg-transparent transition-all ${
+          hasSelection
             ? "text-[#A855F7]"
-            : "text-[var(--txt3)] hover:text-[var(--txt)] hover:bg-[var(--border)]"
-          }`}
-        title={hasSelection ? `Order: ${activeConversation?.linkedOrder?.orderNumber}` : "Link an order"}
+            : "text-[var(--txt3)] hover:bg-[var(--border)] hover:text-[var(--txt)]"
+        }`}
+        title={
+          hasSelection ? `Order: ${activeConversation?.linkedOrder?.orderNumber}` : "Link an order"
+        }
       >
         <Package size={18} />
         {hasSelection && (
-          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#A855F7]" />
+          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[#A855F7]" />
         )}
       </button>
 
@@ -68,11 +73,9 @@ export function OrderSelector({ orders }: OrderSelectorProps) {
             initial={{ opacity: 0, y: 8, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
-            className="absolute bottom-full left-0 mb-2 w-72 z-50
-              bg-[var(--surface)] border border-[var(--border2)] rounded-xl shadow-xl
-              overflow-hidden max-h-[320px] overflow-y-auto"
+            className="absolute bottom-full left-0 z-50 mb-2 max-h-[320px] w-72 overflow-hidden overflow-y-auto rounded-xl border border-[var(--border2)] bg-[var(--surface)] shadow-xl"
           >
-            <div className="px-3 py-2 border-b border-[var(--border)]">
+            <div className="border-b border-[var(--border)] px-3 py-2">
               <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--txt3)]">
                 Your Orders
               </p>
@@ -84,9 +87,7 @@ export function OrderSelector({ orders }: OrderSelectorProps) {
                   if (activeConversation) linkOrder(activeConversation.id, null);
                   setIsOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-left
-                  hover:bg-[var(--border)] transition-colors cursor-pointer
-                  border-b border-[var(--border)] bg-transparent border-x-0 border-t-0"
+                className="flex w-full cursor-pointer items-center gap-2 border-x-0 border-b border-t-0 border-[var(--border)] bg-transparent px-3 py-2.5 text-left transition-colors hover:bg-[var(--border)]"
               >
                 <span className="text-[12px] text-[var(--txt3)]">✕ No order</span>
               </button>
@@ -102,27 +103,26 @@ export function OrderSelector({ orders }: OrderSelectorProps) {
                     }
                     setIsOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-left
-                    transition-colors cursor-pointer border-b border-[var(--border)] last:border-b-0
-                    bg-transparent border-x-0 border-t-0
-                    ${isSelected ? "bg-[#A855F7]/5" : "hover:bg-[var(--border)]"}`}
+                  className={`flex w-full cursor-pointer items-center gap-3 border-x-0 border-b border-t-0 border-[var(--border)] bg-transparent px-3 py-2.5 text-left transition-colors last:border-b-0 ${isSelected ? "bg-[#A855F7]/5" : "hover:bg-[var(--border)]"}`}
                 >
-                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${STATUS_DOT[order.status] ?? "bg-[var(--txt3)]"}`} />
-                  <div className="flex-1 min-w-0">
+                  <div
+                    className={`h-2 w-2 flex-shrink-0 rounded-full ${STATUS_DOT[order.status] ?? "bg-[var(--txt3)]"}`}
+                  />
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[12px] font-semibold text-[var(--txt)] truncate">
+                      <span className="truncate text-[12px] font-semibold text-[var(--txt)]">
                         {order.orderNumber}
                       </span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0
-                        bg-[var(--border)] text-[var(--txt3)] capitalize">
+                      <span className="flex-shrink-0 rounded-full bg-[var(--border)] px-1.5 py-0.5 text-[10px] font-medium capitalize text-[var(--txt3)]">
                         {order.status.replace("_", " ")}
                       </span>
                     </div>
-                    <p className="text-[11px] text-[var(--txt3)] truncate">
-                      {order.service}{order.designName ? ` · ${order.designName}` : ""}
+                    <p className="truncate text-[11px] text-[var(--txt3)]">
+                      {order.service}
+                      {order.designName ? ` · ${order.designName}` : ""}
                     </p>
                   </div>
-                  {isSelected && <Check size={14} className="text-[#A855F7] flex-shrink-0" />}
+                  {isSelected && <Check size={14} className="flex-shrink-0 text-[#A855F7]" />}
                 </button>
               );
             })}

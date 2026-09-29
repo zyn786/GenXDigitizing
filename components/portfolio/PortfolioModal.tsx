@@ -22,7 +22,9 @@ export function PortfolioModal({
     if (!item) return;
     const original = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = original; };
+    return () => {
+      document.body.style.overflow = original;
+    };
   }, [item]);
 
   const handleClose = useCallback(() => {
@@ -31,7 +33,9 @@ export function PortfolioModal({
   }, [onClose]);
 
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   if (!item || !mounted) return null;
 
@@ -40,14 +44,22 @@ export function PortfolioModal({
   const current = images[activeIdx];
   const accent = item.accent || item.category?.color || "#2563EB";
 
-  function goPrev() { setActiveIdx((p) => (p === 0 ? total - 1 : p - 1)); }
-  function goNext() { setActiveIdx((p) => (p === total - 1 ? 0 : p + 1)); }
+  function goPrev() {
+    setActiveIdx((p) => (p === 0 ? total - 1 : p - 1));
+  }
+  function goNext() {
+    setActiveIdx((p) => (p === total - 1 ? 0 : p + 1));
+  }
 
-  function handleTouchStart(e: React.TouchEvent) { setTouchStart(e.touches[0].clientX); }
+  function handleTouchStart(e: React.TouchEvent) {
+    setTouchStart(e.touches[0].clientX);
+  }
   function handleTouchEnd(e: React.TouchEvent) {
     if (touchStart === null || total <= 1) return;
     const diff = e.changedTouches[0].clientX - touchStart;
-    if (Math.abs(diff) > 50) { diff > 0 ? goPrev() : goNext(); }
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? goPrev() : goNext();
+    }
     setTouchStart(null);
   }
 
@@ -58,28 +70,37 @@ export function PortfolioModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[999] bg-black/95  flex flex-col"
-        style={{ paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        className="fixed inset-0 z-[999] flex flex-col bg-black/95"
+        style={{
+          paddingTop: "env(safe-area-inset-top, 0px)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
         onClick={handleClose}
       >
         {/* ── Top bar (in flow) ────────────────────────── */}
-        <div className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="flex flex-shrink-0 items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex min-w-0 items-center gap-2">
             {item.category && (
               <span
-                className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.04em] px-2.5 py-1 rounded-full"
-                style={{ background: `${accent}30`, color: "white", border: `1px solid ${accent}50` }}
+                className="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.04em] sm:text-[11px]"
+                style={{
+                  background: `${accent}30`,
+                  color: "white",
+                  border: `1px solid ${accent}50`,
+                }}
               >
                 {item.category.emoji} {item.category.name}
               </span>
             )}
             {total > 1 && (
-              <span className="text-white/50 text-xs font-semibold tabular-nums">{activeIdx + 1}/{total}</span>
+              <span className="text-xs font-semibold tabular-nums text-white/50">
+                {activeIdx + 1}/{total}
+              </span>
             )}
           </div>
           <button
             onClick={handleClose}
-            className="p-2 rounded-full text-white/70 hover:text-white hover:bg-white/20transition-colors"
+            className="hover:bg-white/20transition-colors rounded-full p-2 text-white/70 hover:text-white"
           >
             <X size={20} />
           </button>
@@ -91,7 +112,7 @@ export function PortfolioModal({
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.96 }}
-          className="relative flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden px-4 sm:px-12"
+          className="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden px-4 sm:px-12"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
@@ -103,7 +124,7 @@ export function PortfolioModal({
                 alt={current.alt || item.title}
                 width={1200}
                 height={900}
-                className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg"
+                className="h-auto max-h-full w-auto max-w-full rounded-lg object-contain"
                 draggable={false}
                 onClick={(e) => e.stopPropagation()}
               />
@@ -112,14 +133,20 @@ export function PortfolioModal({
               {total > 1 && (
                 <>
                   <button
-                    onClick={(e) => { e.stopPropagation(); goPrev(); }}
-                    className="hidden sm:flex absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20text-white hover:bg-white/20 items-center justify-center transition-colors "
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goPrev();
+                    }}
+                    className="bg-white/20text-white absolute left-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full transition-colors hover:bg-white/20 sm:left-5 sm:flex"
                   >
                     <ChevronLeft size={20} />
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); goNext(); }}
-                    className="hidden sm:flex absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20text-white hover:bg-white/20 items-center justify-center transition-colors "
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goNext();
+                    }}
+                    className="bg-white/20text-white absolute right-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full transition-colors hover:bg-white/20 sm:right-5 sm:flex"
                   >
                     <ChevronRight size={20} />
                   </button>
@@ -130,16 +157,19 @@ export function PortfolioModal({
         </motion.div>
 
         {/* ── Bottom info (in flow) ───────────────────── */}
-        <div className="flex-shrink-0 px-4 sm:px-6 pb-4 sm:pb-5 pt-3 sm:pt-4">
+        <div className="flex-shrink-0 px-4 pb-4 pt-3 sm:px-6 sm:pb-5 sm:pt-4">
           {/* Title + tags */}
-          <div className="text-center max-w-lg mx-auto mb-3">
-            <p className="text-white text-sm sm:text-base font-syne font-bold leading-tight mb-2">
+          <div className="mx-auto mb-3 max-w-lg text-center">
+            <p className="mb-2 font-syne text-sm font-bold leading-tight text-white sm:text-base">
               {item.title}
             </p>
             {item.tags && item.tags.length > 0 && (
               <div className="flex flex-wrap items-center justify-center gap-1.5">
                 {item.tags.map((tag: string) => (
-                  <span key={tag} className="text-[10px] sm:text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-white/8 text-white/60 border border-white/10">
+                  <span
+                    key={tag}
+                    className="bg-white/8 rounded-full border border-white/10 px-2.5 py-0.5 text-[10px] font-medium text-white/60 sm:text-[11px]"
+                  >
                     {tag}
                   </span>
                 ))}
@@ -150,26 +180,42 @@ export function PortfolioModal({
               <div className="mt-2 grid grid-cols-2 gap-1.5 text-left">
                 {item.industry && (
                   <div className="bg-white/8 rounded-lg px-3 py-2">
-                    <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-white/40 font-bold mb-0.5">Industry</p>
-                    <p className="text-[11px] sm:text-xs text-white/80 leading-snug">{item.industry}</p>
+                    <p className="mb-0.5 text-[9px] font-bold uppercase tracking-wider text-white/40 sm:text-[10px]">
+                      Industry
+                    </p>
+                    <p className="text-[11px] leading-snug text-white/80 sm:text-xs">
+                      {item.industry}
+                    </p>
                   </div>
                 )}
                 {item.challenge && (
                   <div className="bg-white/8 rounded-lg px-3 py-2">
-                    <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-red-300 font-bold mb-0.5">Challenge</p>
-                    <p className="text-[11px] sm:text-xs text-white/80 leading-snug">{item.challenge}</p>
+                    <p className="mb-0.5 text-[9px] font-bold uppercase tracking-wider text-red-300 sm:text-[10px]">
+                      Challenge
+                    </p>
+                    <p className="text-[11px] leading-snug text-white/80 sm:text-xs">
+                      {item.challenge}
+                    </p>
                   </div>
                 )}
                 {item.solution && (
                   <div className="bg-white/8 rounded-lg px-3 py-2">
-                    <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-blue-300 font-bold mb-0.5">Solution</p>
-                    <p className="text-[11px] sm:text-xs text-white/80 leading-snug">{item.solution}</p>
+                    <p className="mb-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-300 sm:text-[10px]">
+                      Solution
+                    </p>
+                    <p className="text-[11px] leading-snug text-white/80 sm:text-xs">
+                      {item.solution}
+                    </p>
                   </div>
                 )}
                 {item.result && (
                   <div className="bg-white/8 rounded-lg px-3 py-2">
-                    <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-green-300 font-bold mb-0.5">Result</p>
-                    <p className="text-[11px] sm:text-xs text-white/80 leading-snug">{item.result}</p>
+                    <p className="mb-0.5 text-[9px] font-bold uppercase tracking-wider text-green-300 sm:text-[10px]">
+                      Result
+                    </p>
+                    <p className="text-[11px] leading-snug text-white/80 sm:text-xs">
+                      {item.result}
+                    </p>
                   </div>
                 )}
               </div>
@@ -178,19 +224,28 @@ export function PortfolioModal({
 
           {/* Thumbnails */}
           {total > 1 && (
-            <div className="flex gap-2 overflow-x-auto justify-center pb-1">
+            <div className="flex justify-center gap-2 overflow-x-auto pb-1">
               {images.map((img, i) => (
                 <button
                   key={img.url}
-                  onClick={(e) => { e.stopPropagation(); setActiveIdx(i); }}
-                  className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden transition-all duration-200 ${
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveIdx(i);
+                  }}
+                  className={`h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg transition-all duration-200 sm:h-14 sm:w-14 ${
                     i === activeIdx
-                      ? "ring-2 ring-white scale-105 opacity-100"
+                      ? "scale-105 opacity-100 ring-2 ring-white"
                       : "opacity-50 hover:opacity-80"
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <Image src={img.thumbnailUrl || img.url} alt="" width={80} height={60} className="object-cover" />
+                  <Image
+                    src={img.thumbnailUrl || img.url}
+                    alt=""
+                    width={80}
+                    height={60}
+                    className="object-cover"
+                  />
                 </button>
               ))}
             </div>

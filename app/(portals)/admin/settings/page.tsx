@@ -1,12 +1,11 @@
 // @ts-nocheck
-import { createClient }    from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { getAdminUser } from "@/lib/supabase/get-user";
-import { Topbar }           from "@/components/portals/Topbar";
-import { AdminSettingsUI }  from "./SettingsUI";
+import { Topbar } from "@/components/portals/Topbar";
+import { AdminSettingsUI } from "./SettingsUI";
 import { composeFrom, composeReplyTo, bareAddress, displayName } from "@/lib/email/address";
 
 export const dynamic = "force-dynamic";
-
 
 export default async function AdminSettingsPage() {
   const user = await getAdminUser();
@@ -16,10 +15,11 @@ export default async function AdminSettingsPage() {
   // through so the UI can show what is actually configured rather than the
   // hardcoded defaults it used to display.
   const sender = {
-    from:    composeFrom(),
+    from: composeFrom(),
     replyTo: composeReplyTo(),
     fromEnv: bareAddress(process.env.RESEND_FROM_EMAIL) || "(not set)",
-    nameEnv: displayName(process.env.RESEND_FROM_EMAIL) || process.env.RESEND_FROM_NAME || "(not set)",
+    nameEnv:
+      displayName(process.env.RESEND_FROM_EMAIL) || process.env.RESEND_FROM_NAME || "(not set)",
     replyEnv: process.env.RESEND_REPLY_TO || "(not set — defaulting to support@)",
   };
 

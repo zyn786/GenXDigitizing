@@ -9,20 +9,14 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyRecord = Record<string, any>;
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {
   public: {
     Tables: Record<
       string,
       {
-        Row:    AnyRecord;
+        Row: AnyRecord;
         Insert: AnyRecord;
         Update: AnyRecord;
         Relationships: unknown[];

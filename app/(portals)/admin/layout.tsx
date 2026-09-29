@@ -4,7 +4,8 @@ import { PortalLayout } from "@/components/portals/PortalLayout";
 
 export const metadata: Metadata = {
   title: { default: "Admin Dashboard", template: "%s | Admin — genxdigitizing" },
-  description: "Admin portal for genxdigitizing — manage orders, clients, subscriptions, and reports.",
+  description:
+    "Admin portal for genxdigitizing — manage orders, clients, subscriptions, and reports.",
   robots: { index: false, follow: false },
 };
 

@@ -34,14 +34,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "revisionNotes is required" }, { status: 400 });
     }
     if (revisionNotes.length > 2000) {
-      return NextResponse.json({ error: "revisionNotes must be under 2000 characters" }, { status: 400 });
+      return NextResponse.json(
+        { error: "revisionNotes must be under 2000 characters" },
+        { status: 400 }
+      );
     }
 
     // 2. Auth — use the standard server client (anon key, reads session cookie)
     let user: any = null;
     try {
       const supabase = createClient();
-      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
       if (authUser) {
         const { data: profile } = await supabase
           .from("users")
@@ -63,11 +68,13 @@ export async function POST(req: NextRequest) {
     // 3. Fetch order with client and designer info
     const { data: order, error: fetchErr } = await admin
       .from("orders")
-      .select(`
+      .select(
+        `
         id, status, client_id, designer_id,
         clients ( user_id, company_name, users ( full_name ) ),
         designers ( users ( id, full_name, email ) )
-      `)
+      `
+      )
       .eq("id", orderId)
       .single();
 
@@ -87,9 +94,12 @@ export async function POST(req: NextRequest) {
 
     // 5. Validate state transition
     if (!REVISION_ALLOWED_STATUSES.includes(orderData.status)) {
-      return NextResponse.json({
-        error: `Cannot request revision on an order with status "${orderData.status}"`,
-      }, { status: 422 });
+      return NextResponse.json(
+        {
+          error: `Cannot request revision on an order with status "${orderData.status}"`,
+        },
+        { status: 422 }
+      );
     }
 
     // 6. Update order status to revision
@@ -99,10 +109,11 @@ export async function POST(req: NextRequest) {
       .eq("id", orderId);
 
     // 7. Build display info
-    const clientFullName = orderData.clients?.users?.full_name
-      || orderData.clients?.company_name
-      || user.full_name
-      || "Client";
+    const clientFullName =
+      orderData.clients?.users?.full_name ||
+      orderData.clients?.company_name ||
+      user.full_name ||
+      "Client";
     const designerUser = orderData.designers?.users;
 
     // 8. Messages to all active admins
@@ -159,13 +170,20 @@ export async function POST(req: NextRequest) {
     }
 
     // 12. Audit log
-    await admin.from("audit_logs").insert({
-      action: "revision_requested",
-      entity: "orders",
-      entity_id: orderId,
-      user_id: user.id,
-      new_data: { orderNumber, revisionNotes: revisionNotes.slice(0, 500), previousStatus: orderData.status },
-    }).catch(console.error);
+    await admin
+      .from("audit_logs")
+      .insert({
+        action: "revision_requested",
+        entity: "orders",
+        entity_id: orderId,
+        user_id: user.id,
+        new_data: {
+          orderNumber,
+          revisionNotes: revisionNotes.slice(0, 500),
+          previousStatus: orderData.status,
+        },
+      })
+      .catch(console.error);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

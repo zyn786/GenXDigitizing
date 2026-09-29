@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     console.error("[coupons/validate] Error:", error);
     return NextResponse.json(
       { valid: false, error: "Failed to validate coupon. Please try again." },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

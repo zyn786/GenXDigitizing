@@ -3,16 +3,48 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Send, Paperclip, Mic, Smile, X, Zap, FileText, Loader2, Square, Plus, Reply,
+  Send,
+  Paperclip,
+  Mic,
+  Smile,
+  X,
+  Zap,
+  FileText,
+  Loader2,
+  Square,
+  Plus,
+  Reply,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useChat } from "./ChatProvider";
 import { OrderSelector } from "./OrderSelector";
 import { QUICK_REPLIES, SAVED_RESPONSES } from "./config";
 
-const EMOJIS = ["😊","👍","🎉","🧵","✨","🔥","💯","🙏","❤️","😂","🤩","👋","💪","⭐","📎","🎯","⚡","🪡","✏️","🧢"];
+const EMOJIS = [
+  "😊",
+  "👍",
+  "🎉",
+  "🧵",
+  "✨",
+  "🔥",
+  "💯",
+  "🙏",
+  "❤️",
+  "😂",
+  "🤩",
+  "👋",
+  "💪",
+  "⭐",
+  "📎",
+  "🎯",
+  "⚡",
+  "🪡",
+  "✏️",
+  "🧢",
+];
 
-const ACCEPTED_FILES = ".dst,.emb,.pes,.jef,.xxx,.vip,.hus,.exp,.jpg,.jpeg,.png,.webp,.gif,.svg,.avif,.ai,.eps,.pdf,.zip,.rar";
+const ACCEPTED_FILES =
+  ".dst,.emb,.pes,.jef,.xxx,.vip,.hus,.exp,.jpg,.jpeg,.png,.webp,.gif,.svg,.avif,.ai,.eps,.pdf,.zip,.rar";
 
 interface MessageInputProps {
   showQuickReplies?: boolean;
@@ -81,7 +113,7 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
   };
 
   const addIncomingFiles = (incoming: File[]) => {
-    const existingPrints = new Set(files.map(f => `${f.name}::${f.size}::${f.lastModified}`));
+    const existingPrints = new Set(files.map((f) => `${f.name}::${f.size}::${f.lastModified}`));
     const validFiles: File[] = [];
     for (const f of incoming) {
       if (f.size > 250 * 1024 * 1024) {
@@ -125,7 +157,7 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
   };
 
   return (
-    <div className="border-t border-[var(--border)] bg-[var(--surface)] lg:pb-0 safe-area-bottom sticky bottom-2 lg:relative z-10">
+    <div className="safe-area-bottom sticky bottom-2 z-10 border-t border-[var(--border)] bg-[var(--surface)] lg:relative lg:pb-0">
       {/* Files preview */}
       <AnimatePresence>
         {files.length > 0 && (
@@ -133,13 +165,12 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="px-4 pt-3 flex gap-2 flex-wrap"
+            className="flex flex-wrap gap-2 px-4 pt-3"
           >
             {files.map((file, i) => (
               <div
                 key={i}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px]
-                  bg-[var(--elevated)] border border-[var(--border2)] text-[#374151]"
+                className="flex items-center gap-1.5 rounded-lg border border-[var(--border2)] bg-[var(--elevated)] px-2.5 py-1.5 text-[11px] text-[#374151]"
               >
                 <FileText size={12} />
                 <span className="max-w-[100px] truncate">{file.name}</span>
@@ -148,9 +179,7 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
                 </span>
                 <button
                   onClick={() => removeFile(i)}
-                  className="w-4 h-4 rounded flex items-center justify-center
-                    hover:bg-[var(--border3)] text-[#4B5563] hover:text-[#1F2937]
-                    bg-transparent border-none cursor-pointer"
+                  className="flex h-4 w-4 cursor-pointer items-center justify-center rounded border-none bg-transparent text-[#4B5563] hover:bg-[var(--border3)] hover:text-[#1F2937]"
                 >
                   <X size={10} />
                 </button>
@@ -167,15 +196,17 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="px-4 py-2.5 bg-[#7C3AED]/5 border-b border-[#7C3AED]/15 flex items-center gap-3"
+            className="flex items-center gap-3 border-b border-[#7C3AED]/15 bg-[#7C3AED]/5 px-4 py-2.5"
           >
-            <Loader2 size={14} className="animate-spin text-[#7C3AED] flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
+            <Loader2 size={14} className="flex-shrink-0 animate-spin text-[#7C3AED]" />
+            <div className="min-w-0 flex-1">
+              <div className="mb-1 flex items-center justify-between">
                 <span className="text-[11px] font-semibold text-[#7C3AED]">Uploading file...</span>
-                <span className="text-[11px] font-bold text-[#7C3AED] tabular-nums">{uploadProgress}%</span>
+                <span className="text-[11px] font-bold tabular-nums text-[#7C3AED]">
+                  {uploadProgress}%
+                </span>
               </div>
-              <div className="h-1.5 rounded-full bg-[var(--elevated)] overflow-hidden">
+              <div className="h-1.5 overflow-hidden rounded-full bg-[var(--elevated)]">
                 <motion.div
                   className="h-full rounded-full bg-gradient-to-r from-[#7C3AED] to-[#0E7490]"
                   initial={{ width: 0 }}
@@ -183,7 +214,9 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
                   transition={{ duration: 0.3, ease: "easeOut" }}
                 />
               </div>
-              <p className="text-[10px] text-[#4B5563] mt-1">Please wait while your file uploads...</p>
+              <p className="mt-1 text-[10px] text-[#4B5563]">
+                Please wait while your file uploads...
+              </p>
             </div>
           </motion.div>
         )}
@@ -196,20 +229,17 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="px-4 py-2 bg-[#DC2626]/5 border-b border-[#DC2626]/15
-              flex items-center gap-3"
+            className="flex items-center gap-3 border-b border-[#DC2626]/15 bg-[#DC2626]/5 px-4 py-2"
           >
             <motion.div
               animate={{ scale: [1, 1.3, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
-              className="w-2.5 h-2.5 rounded-full bg-[#DC2626]"
+              className="h-2.5 w-2.5 rounded-full bg-[#DC2626]"
             />
             <span className="text-[12px] font-semibold text-[#DC2626]">
               Recording {formatRecordingTime(recordingTime)}
             </span>
-            <span className="text-[11px] text-[#4B5563]">
-              Speak now — click stop when done
-            </span>
+            <span className="text-[11px] text-[#4B5563]">Speak now — click stop when done</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -221,42 +251,36 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-b border-[var(--border)] overflow-hidden"
+            className="overflow-hidden border-b border-[var(--border)]"
           >
-            <div className="px-4 py-3 flex flex-col gap-2 max-h-[200px] overflow-y-auto">
+            <div className="flex max-h-[200px] flex-col gap-2 overflow-y-auto px-4 py-3">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-[#4B5563]">
                 Quick Replies
               </p>
-              <div className="flex gap-1.5 flex-wrap">
+              <div className="flex flex-wrap gap-1.5">
                 {QUICK_REPLIES.map((qr) => (
                   <button
                     key={qr.id}
                     onClick={() => insertQuickReply(qr.content)}
-                    className="text-[11px] px-2.5 py-1.5 rounded-lg text-left
-                      bg-[var(--elevated)] border border-[var(--border2)]
-                      text-[#374151] hover:text-[#1F2937] hover:border-[#7C3AED]/30
-                      transition-all cursor-pointer max-w-[200px] truncate"
+                    className="max-w-[200px] cursor-pointer truncate rounded-lg border border-[var(--border2)] bg-[var(--elevated)] px-2.5 py-1.5 text-left text-[11px] text-[#374151] transition-all hover:border-[#7C3AED]/30 hover:text-[#1F2937]"
                     title={qr.content}
                   >
-                    <span className="text-[#7C3AED] font-semibold">{qr.label}</span>
+                    <span className="font-semibold text-[#7C3AED]">{qr.label}</span>
                   </button>
                 ))}
               </div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#4B5563] mt-1">
+              <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-[#4B5563]">
                 Saved Responses
               </p>
-              <div className="flex gap-1.5 flex-wrap">
+              <div className="flex flex-wrap gap-1.5">
                 {SAVED_RESPONSES.map((sr) => (
                   <button
                     key={sr.id}
                     onClick={() => insertQuickReply(sr.content)}
-                    className="text-[11px] px-2.5 py-1.5 rounded-lg text-left
-                      bg-[var(--elevated)] border border-[var(--border2)]
-                      text-[#374151] hover:text-[#1F2937] hover:border-[#7C3AED]/30
-                      transition-all cursor-pointer max-w-[200px] truncate"
+                    className="max-w-[200px] cursor-pointer truncate rounded-lg border border-[var(--border2)] bg-[var(--elevated)] px-2.5 py-1.5 text-left text-[11px] text-[#374151] transition-all hover:border-[#7C3AED]/30 hover:text-[#1F2937]"
                     title={sr.content}
                   >
-                    <span className="text-[#0E7490] font-semibold">{sr.title}</span>
+                    <span className="font-semibold text-[#0E7490]">{sr.title}</span>
                   </button>
                 ))}
               </div>
@@ -272,9 +296,9 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-b border-[var(--border)] overflow-hidden"
+            className="overflow-hidden border-b border-[var(--border)]"
           >
-            <div className="px-4 py-2.5 flex gap-1.5 flex-wrap">
+            <div className="flex flex-wrap gap-1.5 px-4 py-2.5">
               {EMOJIS.map((emoji) => (
                 <button
                   key={emoji}
@@ -283,9 +307,7 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
                     setShowEmoji(false);
                     inputRef.current?.focus();
                   }}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-lg
-                    hover:bg-[var(--border)] transition-colors cursor-pointer
-                    bg-transparent border-none"
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent text-lg transition-colors hover:bg-[var(--border)]"
                 >
                   {emoji}
                 </button>
@@ -302,19 +324,19 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-b border-[var(--border)] bg-[var(--elevated)]/80 overflow-hidden"
+            className="bg-[var(--elevated)]/80 overflow-hidden border-b border-[var(--border)]"
           >
-            <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5">
-              <div className="w-1 h-8 rounded-full bg-[#7C3AED] flex-shrink-0" />
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <p className="text-[10px] font-bold text-[#7C3AED] truncate">Replying to {replyTo.senderName}</p>
-                <p className="text-[11px] text-[#374151] truncate mt-0.5">{replyTo.content}</p>
+            <div className="flex items-center gap-2 px-3 py-2.5 sm:px-4">
+              <div className="h-8 w-1 flex-shrink-0 rounded-full bg-[#7C3AED]" />
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <p className="truncate text-[10px] font-bold text-[#7C3AED]">
+                  Replying to {replyTo.senderName}
+                </p>
+                <p className="mt-0.5 truncate text-[11px] text-[#374151]">{replyTo.content}</p>
               </div>
               <button
                 onClick={() => setReplyTo(null)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0
-                  text-[#4B5563] hover:text-[#1F2937] hover:bg-[var(--border)]
-                  transition-all cursor-pointer bg-transparent border-none"
+                className="flex h-7 w-7 flex-shrink-0 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent text-[#4B5563] transition-all hover:bg-[var(--border)] hover:text-[#1F2937]"
               >
                 <X size={14} />
               </button>
@@ -324,9 +346,13 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
       </AnimatePresence>
 
       {/* Input bar */}
-      <div className="flex items-center gap-1 px-1 sm:px-2 py-0.5 sm:py-1 min-w-0"
-        onDragOver={(e) => { e.preventDefault(); }}
-        onDrop={handleDrop}>
+      <div
+        className="flex min-w-0 items-center gap-1 px-1 py-0.5 sm:px-2 sm:py-1"
+        onDragOver={(e) => {
+          e.preventDefault();
+        }}
+        onDrop={handleDrop}
+      >
         {/* Toolbar */}
         <div className="flex items-center gap-0.5">
           <input
@@ -339,76 +365,80 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
           />
           {/* Paperclip — clients only (admin uses + menu) */}
           {currentUserRole === "client" && (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            className="w-8 h-8 rounded-full flex items-center justify-center
-              text-[#4B5563] hover:text-[#1F2937] hover:bg-[var(--border)]
-              transition-all cursor-pointer bg-transparent border-none
-              disabled:opacity-40 disabled:cursor-not-allowed"
-            title="Attach files"
-          >
-            {isUploading ? <Loader2 size={18} className="animate-spin" /> : <Paperclip size={18} />}
-          </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-transparent text-[#4B5563] transition-all hover:bg-[var(--border)] hover:text-[#1F2937] disabled:cursor-not-allowed disabled:opacity-40"
+              title="Attach files"
+            >
+              {isUploading ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Paperclip size={18} />
+              )}
+            </button>
           )}
           {currentUserRole !== "client" && <OrderSelector orders={clientOrders} />}
           {currentUserRole !== "client" && showQuickReplies && (
-          <div className="relative">
-            <button
-              onClick={() => setShowPlusMenu((v) => !v)}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer
-                bg-transparent border-none ${showPlusMenu ? "text-[#7C3AED] bg-[#7C3AED]/10 rotate-45" : "text-[#4B5563] hover:text-[#1F2937] hover:bg-[var(--border)]"}`}
-              title="More options"
-            >
-              <Plus size={20} />
-            </button>
-            {/* Dropup menu — 2 options only */}
-            <AnimatePresence>
-              {showPlusMenu && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  className="absolute bottom-full left-0 mb-2 flex flex-col gap-1 p-1.5 rounded-2xl
-                    bg-[var(--surface)] border border-[var(--border)] shadow-lg min-w-[160px] z-20"
-                >
-                  <button
-                    onClick={() => { fileInputRef.current?.click(); setShowPlusMenu(false); }}
-                    disabled={isUploading}
-                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium
-                      text-[#374151] hover:bg-[var(--elevated)] hover:text-[#1F2937]
-                      transition-all cursor-pointer bg-transparent border-none text-left
-                      disabled:opacity-40 disabled:cursor-not-allowed"
+            <div className="relative">
+              <button
+                onClick={() => setShowPlusMenu((v) => !v)}
+                className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-transparent transition-all ${showPlusMenu ? "rotate-45 bg-[#7C3AED]/10 text-[#7C3AED]" : "text-[#4B5563] hover:bg-[var(--border)] hover:text-[#1F2937]"}`}
+                title="More options"
+              >
+                <Plus size={20} />
+              </button>
+              {/* Dropup menu — 2 options only */}
+              <AnimatePresence>
+                {showPlusMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    className="absolute bottom-full left-0 z-20 mb-2 flex min-w-[160px] flex-col gap-1 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-1.5 shadow-lg"
                   >
-                    {isUploading ? <Loader2 size={14} className="animate-spin" /> : <Paperclip size={14} />}
-                    <span>Attach Files</span>
-                  </button>
-                  {showQuickReplies && (
                     <button
-                      onClick={() => { setShowPlusMenu(false); setShowQuick((v) => !v); }}
-                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium
-                        transition-all cursor-pointer bg-transparent border-none text-left
-                        ${showQuick ? "text-[#7C3AED] bg-[#7C3AED]/10" : "text-[#374151] hover:bg-[var(--elevated)] hover:text-[#1F2937]"}`}
+                      onClick={() => {
+                        fileInputRef.current?.click();
+                        setShowPlusMenu(false);
+                      }}
+                      disabled={isUploading}
+                      className="flex cursor-pointer items-center gap-2.5 rounded-xl border-none bg-transparent px-3 py-2.5 text-left text-xs font-medium text-[#374151] transition-all hover:bg-[var(--elevated)] hover:text-[#1F2937] disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      <Zap size={14} />
-                      <span>Quick Replies</span>
+                      {isUploading ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <Paperclip size={14} />
+                      )}
+                      <span>Attach Files</span>
                     </button>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                    {showQuickReplies && (
+                      <button
+                        onClick={() => {
+                          setShowPlusMenu(false);
+                          setShowQuick((v) => !v);
+                        }}
+                        className={`flex cursor-pointer items-center gap-2.5 rounded-xl border-none bg-transparent px-3 py-2.5 text-left text-xs font-medium transition-all ${showQuick ? "bg-[#7C3AED]/10 text-[#7C3AED]" : "text-[#374151] hover:bg-[var(--elevated)] hover:text-[#1F2937]"}`}
+                      >
+                        <Zap size={14} />
+                        <span>Quick Replies</span>
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           )}
         </div>
 
         {/* Text input — premium pill */}
-        <div className="flex-1 flex items-center gap-1 bg-[var(--elevated)] border border-[var(--border2)]
-          rounded-2xl px-1.5 sm:px-2 py-0.5 sm:py-1 focus-within:border-[#7C3AED]/40 focus-within:ring-1 focus-within:ring-[#7C3AED]/10 transition-all">
+        <div className="flex flex-1 items-center gap-1 rounded-2xl border border-[var(--border2)] bg-[var(--elevated)] px-1.5 py-0.5 transition-all focus-within:border-[#7C3AED]/40 focus-within:ring-1 focus-within:ring-[#7C3AED]/10 sm:px-2 sm:py-1">
           <button
-            onClick={() => { setShowEmoji((v) => !v); setShowQuick(false); }}
-            className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0
-              text-[#4B5563] hover:text-[#1F2937] transition-colors
-              cursor-pointer bg-transparent border-none"
+            onClick={() => {
+              setShowEmoji((v) => !v);
+              setShowQuick(false);
+            }}
+            className="flex h-6 w-6 flex-shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-transparent text-[#4B5563] transition-colors hover:text-[#1F2937]"
             title="Emoji"
           >
             <Smile size={16} />
@@ -423,17 +453,13 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
             onKeyDown={handleKey}
             placeholder={isRecording ? "Recording..." : isUploading ? "Uploading..." : "Message"}
             disabled={isRecording || isUploading}
-            className="flex-1 bg-transparent border-none outline-none text-[13px] text-[#1F2937]
-              placeholder:text-[#4B5563] disabled:opacity-50 px-1"
+            className="flex-1 border-none bg-transparent px-1 text-[13px] text-[#1F2937] outline-none placeholder:text-[#4B5563] disabled:opacity-50"
           />
           <button
             onClick={handleVoiceToggle}
-            className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all cursor-pointer
-              bg-transparent border-none ${
-                isRecording
-                  ? "text-[#DC2626]"
-                  : "text-[#4B5563] hover:text-[#1F2937]"
-              }`}
+            className={`flex h-6 w-6 flex-shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-transparent transition-all ${
+              isRecording ? "text-[#DC2626]" : "text-[#4B5563] hover:text-[#1F2937]"
+            }`}
             title={isRecording ? "Stop" : "Mic"}
           >
             {isRecording ? <Square size={12} /> : <Mic size={15} />}
@@ -444,11 +470,7 @@ export function MessageInput({ showQuickReplies = false }: MessageInputProps) {
         <button
           onClick={handleSend}
           disabled={(!text.trim() && files.length === 0) || isUploading}
-          className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0
-            bg-[#7C3AED] text-white shadow-[0_1px_4px_rgba(109,40,217,0.25)]
-            hover:bg-[#5B21B6] hover:shadow-[0_2px_8px_rgba(109,40,217,0.3)]
-            active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none
-            transition-all cursor-pointer border-none"
+          className="flex h-8 w-8 flex-shrink-0 cursor-pointer items-center justify-center rounded-xl border-none bg-[#7C3AED] text-white shadow-[0_1px_4px_rgba(109,40,217,0.25)] transition-all hover:bg-[#5B21B6] hover:shadow-[0_2px_8px_rgba(109,40,217,0.3)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 disabled:shadow-none"
         >
           <Send size={16} />
         </button>

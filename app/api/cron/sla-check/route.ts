@@ -22,10 +22,10 @@ export const dynamic = "force-dynamic";
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient }  from "@/lib/supabase/server";
-import { emailSLAWarning }    from "@/lib/email";
-import { isAuthorizedCron }   from "@/lib/cron-auth";
-import { createCronMonitor }  from "@/lib/cron-monitor";
+import { createAdminClient } from "@/lib/supabase/server";
+import { emailSLAWarning } from "@/lib/email";
+import { isAuthorizedCron } from "@/lib/cron-auth";
+import { createCronMonitor } from "@/lib/cron-monitor";
 import { notifyUser, notifyRole } from "@/lib/notify-helpers";
 
 /**
@@ -41,12 +41,12 @@ const ACTIVE_STATUSES = ["submitted", "assigned", "in_progress", "review"];
 
 const HOUR = 3600000;
 const WARNING_MS = 2 * HOUR;
-const URGENT_MS  = 30 * 60 * 1000;
+const URGENT_MS = 30 * 60 * 1000;
 
 /** How long to stay quiet about the same order+stage before repeating. */
 const REPEAT_MS = {
   warning: 1 * HOUR,
-  urgent:  1 * HOUR,
+  urgent: 1 * HOUR,
   overdue: 6 * HOUR,
 } as const;
 
@@ -62,7 +62,7 @@ function stageFor(deadline: number, now: number): Stage | null {
 
 const LABEL: Record<Stage, string> = {
   warning: "SLA Warning",
-  urgent:  "SLA Urgent",
+  urgent: "SLA Urgent",
   overdue: "SLA OVERDUE",
 };
 
@@ -81,11 +81,13 @@ export async function GET(req: NextRequest) {
     // window — including anything past its deadline, which used to be excluded.
     const { data: orders, error } = await supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         id, order_number, sla_deadline, turnaround, status,
         designers ( users ( id, full_name, email ) ),
         clients   ( company_name )
-      `)
+      `
+      )
       .in("status", ACTIVE_STATUSES)
       .not("sla_deadline", "is", null)
       .lte("sla_deadline", new Date(now + WARNING_MS).toISOString())
@@ -122,9 +124,7 @@ export async function GET(req: NextRequest) {
       const clientName = (order.clients as any)?.company_name ?? "Client";
       const hoursLeft = Math.round(((deadline - now) / HOUR) * 10) / 10;
       const timing =
-        stage === "overdue"
-          ? `${Math.abs(hoursLeft)}h overdue`
-          : `${hoursLeft}h until deadline`;
+        stage === "overdue" ? `${Math.abs(hoursLeft)}h overdue` : `${hoursLeft}h until deadline`;
       const body = `${timing} · ${clientName} · ${order.turnaround}`;
 
       // The designer owns the work, but an unassigned order has no designer —

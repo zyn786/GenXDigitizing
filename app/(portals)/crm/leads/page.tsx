@@ -2,9 +2,9 @@
 export const dynamic = "force-dynamic";
 
 import { getAdminUser } from "@/lib/supabase/get-user";
-import { getCRMLeads }  from "@/lib/supabase/crm-queries";
-import { Topbar }       from "@/components/portals/Topbar";
-import { CRMLeadsUI }   from "./LeadsUI";
+import { getCRMLeads } from "@/lib/supabase/crm-queries";
+import { Topbar } from "@/components/portals/Topbar";
+import { CRMLeadsUI } from "./LeadsUI";
 
 export default async function CRMLeadsPage() {
   const user = await getAdminUser();
@@ -20,7 +20,11 @@ export default async function CRMLeadsPage() {
 
   return (
     <>
-      <Topbar title="Sales Pipeline" subtitle={fetchError ? "Error loading leads" : `${leads.length} leads across all stages`} user={user} />
+      <Topbar
+        title="Sales Pipeline"
+        subtitle={fetchError ? "Error loading leads" : `${leads.length} leads across all stages`}
+        user={user}
+      />
       <CRMLeadsUI leads={leads} userId={user.id} fetchError={fetchError} />
     </>
   );

@@ -11,17 +11,19 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 export default function ResetPasswordPage() {
-  const router   = useRouter();
+  const router = useRouter();
   const supabase = createClient();
 
   const [password, setPassword] = useState("");
-  const [confirm,  setConfirm]  = useState("");
-  const [loading,  setLoading]  = useState(false);
-  const [ready,    setReady]    = useState(false);
-  const [done,     setDone]     = useState(false);
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         setReady(true);
       }
@@ -34,8 +36,14 @@ export default function ResetPasswordPage() {
 
   async function handleReset(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 8) { toast.error("Password must be at least 8 characters"); return; }
-    if (password !== confirm) { toast.error("Passwords don't match"); return; }
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    if (password !== confirm) {
+      toast.error("Passwords don't match");
+      return;
+    }
 
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
@@ -52,33 +60,41 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--bg)]">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--bg)] p-6">
       {/* Background glow */}
-      <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute top-[10%] left-[20%] w-[500px] h-[500px] rounded-full blur-[80px]"
-          style={{ background: "radial-gradient(circle,rgba(37,99,235,0.08),transparent 70%)" }} />
-        <div className="absolute bottom-[10%] right-[15%] w-[400px] h-[400px] rounded-full blur-[80px]"
-          style={{ background: "radial-gradient(circle,rgba(249,115,22,0.05),transparent 70%)" }} />
+      <div className="pointer-events-none fixed inset-0" aria-hidden="true">
+        <div
+          className="absolute left-[20%] top-[10%] h-[500px] w-[500px] rounded-full blur-[80px]"
+          style={{ background: "radial-gradient(circle,rgba(37,99,235,0.08),transparent 70%)" }}
+        />
+        <div
+          className="absolute bottom-[10%] right-[15%] h-[400px] w-[400px] rounded-full blur-[80px]"
+          style={{ background: "radial-gradient(circle,rgba(249,115,22,0.05),transparent 70%)" }}
+        />
       </div>
 
-      <div className="w-full max-w-[420px] relative z-10">
+      <div className="relative z-10 w-full max-w-[420px]">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="mb-8 text-center">
           <Link href="/" className="no-underline">
-            <Image src="/images/black_logo.png" alt="GENX DIGITIZING" width={150} height={40} className="w-auto mx-auto" />
+            <Image
+              src="/images/black_logo.png"
+              alt="GENX DIGITIZING"
+              width={150}
+              height={40}
+              className="mx-auto w-auto"
+            />
           </Link>
         </div>
 
-        <div className="bg-[var(--surface)] border border-[var(--border2)] rounded-2xl p-8 ">
-
+        <div className="rounded-2xl border border-[var(--border2)] bg-[var(--surface)] p-8">
           {done ? (
             <div className="text-center">
-              <div className="text-[52px] mb-4">✅</div>
-              <h2 className="font-syne font-bold text-[22px] mb-2.5
-                bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
+              <div className="mb-4 text-[52px]">✅</div>
+              <h2 className="mb-2.5 bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text font-syne text-[22px] font-bold text-transparent">
                 Password Updated!
               </h2>
-              <p className="text-sm text-[var(--txt2)] mb-5">
+              <p className="mb-5 text-sm text-[var(--txt2)]">
                 Your password has been changed. Redirecting you to login…
               </p>
               <Link href="/login">
@@ -87,22 +103,26 @@ export default function ResetPasswordPage() {
             </div>
           ) : !ready ? (
             <div className="text-center">
-              <div className="text-[40px] mb-4">🔐</div>
-              <h2 className="font-syne font-bold text-xl text-[var(--txt)] mb-2.5">
+              <div className="mb-4 text-[40px]">🔐</div>
+              <h2 className="mb-2.5 font-syne text-xl font-bold text-[var(--txt)]">
                 Verifying Reset Link…
               </h2>
-              <p className="text-sm text-[var(--txt2)] leading-relaxed">
+              <p className="text-sm leading-relaxed text-[var(--txt2)]">
                 If this takes more than a few seconds, your link may have expired.{" "}
-                <Link href="/forgot-password" className="text-[#2563EB] no-underline hover:underline">
+                <Link
+                  href="/forgot-password"
+                  className="text-[#2563EB] no-underline hover:underline"
+                >
                   Request a new one
-                </Link>.
+                </Link>
+                .
               </p>
             </div>
           ) : (
             <>
               <div className="mb-7 text-center">
-                <div className="text-[40px] mb-3.5">🔑</div>
-                <h1 className="font-syne font-bold text-2xl text-[var(--txt)] mb-2">
+                <div className="mb-3.5 text-[40px]">🔑</div>
+                <h1 className="mb-2 font-syne text-2xl font-bold text-[var(--txt)]">
                   Set New Password
                 </h1>
                 <p className="text-sm text-[var(--txt2)]">
@@ -128,7 +148,7 @@ export default function ResetPasswordPage() {
                         return (
                           <div
                             key={i}
-                            className="flex-1 h-1 rounded-sm transition-colors"
+                            className="h-1 flex-1 rounded-sm transition-colors"
                             style={{
                               background: i <= score ? colors[score - 1] : "var(--border2)",
                             }}
@@ -151,14 +171,14 @@ export default function ResetPasswordPage() {
                 <Button
                   type="submit"
                   variant="grad"
-                  className="w-full mt-2"
+                  className="mt-2 w-full"
                   disabled={loading || !password || !confirm || password !== confirm}
                 >
                   {loading ? "Updating password…" : "Update Password →"}
                 </Button>
               </form>
 
-              <p className="text-center text-[13px] text-[var(--txt3)] mt-5">
+              <p className="mt-5 text-center text-[13px] text-[var(--txt3)]">
                 <Link href="/login" className="text-[#2563EB] no-underline hover:underline">
                   ← Back to login
                 </Link>

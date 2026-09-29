@@ -7,9 +7,12 @@ import { uploadToStorage } from "@/lib/storage";
 import { notifyUsers } from "@/lib/notify-server";
 
 const ALLOWED_TYPES = [
-  "image/png", "image/jpeg", "image/webp",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
   "application/pdf",
-  "image/vnd.adobe.photoshop", "application/postscript",
+  "image/vnd.adobe.photoshop",
+  "application/postscript",
   "application/illustrator",
 ];
 
@@ -33,7 +36,10 @@ function checkRateLimit(ip: string): boolean {
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (!checkRateLimit(ip)) {
-    return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
   }
 
   try {
@@ -44,8 +50,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true }); // silently accept, don't reveal detection
     }
 
-    const name    = formData.get("name") as string;
-    const email   = formData.get("email") as string;
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
     const company = formData.get("company") as string;
     const service = formData.get("service") as string;
     const message = formData.get("message") as string;
@@ -60,7 +66,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (!ALLOWED_TYPES.includes(artwork.type)) {
-      return NextResponse.json({ error: "Invalid file type. Upload PNG, JPG, WEBP, PDF, AI, or PSD." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid file type. Upload PNG, JPG, WEBP, PDF, AI, or PSD." },
+        { status: 400 }
+      );
     }
 
     if (artwork.size > 20 * 1024 * 1024) {
@@ -102,20 +111,21 @@ export async function POST(req: NextRequest) {
     }
 
     // Notify admins
-    const { data: admins } = await supabase
-      .from("users").select("id").eq("role", "admin");
+    const { data: admins } = await supabase.from("users").select("id").eq("role", "admin");
 
     if (admins?.length) {
-      await notifyUsers(admins.map((a: any) => a.id), {
-        type: "system",
-        title: `New request from ${name}`,
-        body: `${email} · ${company} · ${service} · Artwork attached`,
-        action_url: "/admin/leads",
-      });
+      await notifyUsers(
+        admins.map((a: any) => a.id),
+        {
+          type: "system",
+          title: `New request from ${name}`,
+          body: `${email} · ${company} · ${service} · Artwork attached`,
+          action_url: "/admin/leads",
+        }
+      );
     }
 
     return NextResponse.json({ success: true });
-
   } catch (err: any) {
     console.error("[contact] Error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

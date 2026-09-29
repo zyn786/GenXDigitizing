@@ -33,8 +33,22 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "email and planLabel required" }, { status: 400 });
       }
       await Promise.all([
-        emailSubscriptionApproved(email, planLabel, Number(price) || 0, Number(designs) || 0, link || undefined, features),
-        emailSubscriptionReceipt(email, planLabel, invoiceNumber || "N/A", Number(price) || 0, Number(designs) || 0, features),
+        emailSubscriptionApproved(
+          email,
+          planLabel,
+          Number(price) || 0,
+          Number(designs) || 0,
+          link || undefined,
+          features
+        ),
+        emailSubscriptionReceipt(
+          email,
+          planLabel,
+          invoiceNumber || "N/A",
+          Number(price) || 0,
+          Number(designs) || 0,
+          features
+        ),
       ]);
       return NextResponse.json({ success: true });
     }

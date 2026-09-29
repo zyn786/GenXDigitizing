@@ -7,7 +7,10 @@ export async function POST(req: NextRequest) {
     // Rate limit: 5 subscriptions per IP per 15 minutes
     const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
     if (!checkRateLimit("subscribe", ip, 5)) {
-      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
     }
 
     const { email, source } = await req.json();
@@ -20,12 +23,14 @@ export async function POST(req: NextRequest) {
     try {
       const { createAdminClient } = await import("@/lib/supabase/server");
       const supabase = createAdminClient();
-      const { error } = await supabase
-        .from("subscribers")
-        .upsert(
-          { email: email.toLowerCase().trim(), source: source || "website", subscribed_at: new Date().toISOString() },
-          { onConflict: "email" }
-        );
+      const { error } = await supabase.from("subscribers").upsert(
+        {
+          email: email.toLowerCase().trim(),
+          source: source || "website",
+          subscribed_at: new Date().toISOString(),
+        },
+        { onConflict: "email" }
+      );
       if (error && error.code !== "23505") {
         console.log("[subscribe] DB insert failed (non-critical):", error.message);
       }
@@ -33,7 +38,12 @@ export async function POST(req: NextRequest) {
       console.log("[subscribe] DB unavailable, email logged:", email.toLowerCase().trim());
     }
 
-    console.log("[subscribe] New subscriber:", email.toLowerCase().trim(), "| source:", source || "website");
+    console.log(
+      "[subscribe] New subscriber:",
+      email.toLowerCase().trim(),
+      "| source:",
+      source || "website"
+    );
     return NextResponse.json({ success: true, message: "Subscribed" });
   } catch (err) {
     console.error("[subscribe] Fatal error:", err);

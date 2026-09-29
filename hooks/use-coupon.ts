@@ -5,7 +5,13 @@
 // ============================================================
 
 import { useState, useEffect, useCallback } from "react";
-import { getVisitorState, markVisited, getCouponCookie, setCouponCookie, clearCouponCookie } from "@/lib/visitor";
+import {
+  getVisitorState,
+  markVisited,
+  getCouponCookie,
+  setCouponCookie,
+  clearCouponCookie,
+} from "@/lib/visitor";
 import type { Coupon, CouponValidationResult, CouponOffer } from "@/types/coupon";
 
 export interface UseCouponReturn {

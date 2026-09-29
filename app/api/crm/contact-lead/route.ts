@@ -69,7 +69,11 @@ export async function POST(req: NextRequest) {
     const admin = createAdminClient();
 
     // Get current notes
-    const { data: currentLead } = await admin.from("crm_leads").select("notes").eq("id", leadId).single();
+    const { data: currentLead } = await admin
+      .from("crm_leads")
+      .select("notes")
+      .eq("id", leadId)
+      .single();
     const activityNote = `\n[${new Date().toISOString()}] Email sent to ${to} - "${subject}"`;
     const newNotes = (currentLead?.notes || "") + activityNote;
 
@@ -78,11 +82,14 @@ export async function POST(req: NextRequest) {
     // unknown column, so the stage change and the note were silently lost —
     // leads never left the "lead" stage. Keep the column list to real ones and
     // check the error.
-    const { error: leadUpdateError } = await admin.from("crm_leads").update({
-      stage: "contacted",
-      notes: newNotes,
-      updated_at: new Date().toISOString(),
-    }).eq("id", leadId);
+    const { error: leadUpdateError } = await admin
+      .from("crm_leads")
+      .update({
+        stage: "contacted",
+        notes: newNotes,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", leadId);
     if (leadUpdateError) {
       console.error(
         isMissingColumn(leadUpdateError)
@@ -95,7 +102,11 @@ export async function POST(req: NextRequest) {
     const { data: leadUser } = await admin.from("users").select("id").eq("email", to).maybeSingle();
     if (leadUser?.id) {
       try {
-        const { data: admins } = await admin.from("users").select("id").eq("role", "admin").limit(1);
+        const { data: admins } = await admin
+          .from("users")
+          .select("id")
+          .eq("role", "admin")
+          .limit(1);
         const senderId = admins?.[0]?.id;
         if (senderId) {
           await admin.from("messages").insert({

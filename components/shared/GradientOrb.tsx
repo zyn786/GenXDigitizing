@@ -12,9 +12,9 @@ export function GradientOrb({
   style,
 }: GradientOrbProps) {
   return (
-    <div className={`absolute pointer-events-none ${className}`} style={style} aria-hidden="true">
+    <div className={`pointer-events-none absolute ${className}`} style={style} aria-hidden="true">
       <div
-        className="rounded-full animate-float"
+        className="animate-float rounded-full"
         style={{
           width: size,
           height: size,

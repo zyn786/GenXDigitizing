@@ -172,9 +172,15 @@ describe("calculateSLADeadline", () => {
   });
 
   it("big designs always get 12h", () => {
-    expect(calculateSLADeadline("standard", true).getTime() - Date.now()).toBeCloseTo(12 * 3600000, -2);
+    expect(calculateSLADeadline("standard", true).getTime() - Date.now()).toBeCloseTo(
+      12 * 3600000,
+      -2
+    );
     expect(calculateSLADeadline("rush", true).getTime() - Date.now()).toBeCloseTo(12 * 3600000, -2);
-    expect(calculateSLADeadline("urgent", true).getTime() - Date.now()).toBeCloseTo(12 * 3600000, -2);
+    expect(calculateSLADeadline("urgent", true).getTime() - Date.now()).toBeCloseTo(
+      12 * 3600000,
+      -2
+    );
   });
 });
 
@@ -221,7 +227,17 @@ describe("truncate", () => {
 
 describe("STATUS_LABEL", () => {
   it("has labels for all statuses", () => {
-    const statuses = ["submitted", "assigned", "in_progress", "review", "approved", "delivered", "revision", "refunded", "cancelled"];
+    const statuses = [
+      "submitted",
+      "assigned",
+      "in_progress",
+      "review",
+      "approved",
+      "delivered",
+      "revision",
+      "refunded",
+      "cancelled",
+    ];
     for (const s of statuses) {
       expect(STATUS_LABEL[s]).toBeTruthy();
     }

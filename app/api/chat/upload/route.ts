@@ -37,18 +37,27 @@ function storedKey(fileUrl: string | null): string {
   if (!fileUrl) return "";
   const m = fileUrl.match(/[?&]key=([^&\s]+)/);
   if (!m) return fileUrl;
-  try { return decodeURIComponent(m[1]); } catch { return m[1]; }
+  try {
+    return decodeURIComponent(m[1]);
+  } catch {
+    return m[1];
+  }
 }
 
 export async function POST(req: NextRequest) {
   try {
     // Auth — this route writes into shared storage.
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     if (!checkRateLimit("chat-file-post", user.id, 30, 60 * 1000)) {
-      return NextResponse.json({ error: "Too many uploads. Please wait a moment." }, { status: 429 });
+      return NextResponse.json(
+        { error: "Too many uploads. Please wait a moment." },
+        { status: 429 }
+      );
     }
 
     const formData = await req.formData();
@@ -59,7 +68,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (file.size > 250 * 1024 * 1024) {
-      return NextResponse.json({ error: "File too large. Maximum 250MB allowed." }, { status: 413 });
+      return NextResponse.json(
+        { error: "File too large. Maximum 250MB allowed." },
+        { status: 413 }
+      );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -73,7 +85,12 @@ export async function POST(req: NextRequest) {
     // Permanent URL — resolves via this API to a fresh signed URL
     const permanentUrl = `/api/chat/upload?key=${encodeURIComponent(key)}`;
 
-    return NextResponse.json({ url: permanentUrl, path: key, fileName: file.name, size: file.size });
+    return NextResponse.json({
+      url: permanentUrl,
+      path: key,
+      fileName: file.name,
+      size: file.size,
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message ?? "Upload failed" }, { status: 500 });
   }
@@ -89,7 +106,9 @@ export async function GET(req: NextRequest) {
 
     // Auth — signing with the service-role client bypasses storage RLS.
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     if (!checkRateLimit("chat-file-get", user.id, 120, 60 * 1000)) {

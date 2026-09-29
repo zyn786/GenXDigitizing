@@ -44,7 +44,9 @@ function asText(v: unknown): string {
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const db = createAdminClient();
@@ -66,9 +68,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: "Not your order" }, { status: 403 });
     }
     if (!EDITABLE_STATUSES.includes(order.status)) {
-      return NextResponse.json({
-        error: `This order is ${order.status} and can no longer be edited. Message us instead.`,
-      }, { status: 422 });
+      return NextResponse.json(
+        {
+          error: `This order is ${order.status} and can no longer be edited. Message us instead.`,
+        },
+        { status: 422 }
+      );
     }
 
     const body = await req.json();
@@ -81,9 +86,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       const prev = (order as any)[field] ?? null;
 
       // Compare on a normalised form so [] vs null or "1" vs 1 don't log noise.
-      const same = field === "additional_formats"
-        ? asText(next) === asText(prev)
-        : asText(next) === asText(prev);
+      const same =
+        field === "additional_formats"
+          ? asText(next) === asText(prev)
+          : asText(next) === asText(prev);
       if (same) continue;
 
       updates[field] = next;
@@ -106,7 +112,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const { error: updErr } = await db.from("orders").update(updates).eq("id", order.id);
     if (updErr) {
       console.error("[orders/edit] update failed:", updErr);
-      return NextResponse.json({ error: "Could not save changes. Please try again." }, { status: 500 });
+      return NextResponse.json(
+        { error: "Could not save changes. Please try again." },
+        { status: 500 }
+      );
     }
 
     const { error: logErr } = await db.from("order_edit_log").insert(logRows);
@@ -119,14 +128,21 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const orderNumber = order.order_number || order.id;
     const changed = logRows.map((r) => label(String(r.field_name))).join(", ");
 
-    const { data: admins } = await db.from("users").select("id").eq("role", "admin").eq("is_active", true);
+    const { data: admins } = await db
+      .from("users")
+      .select("id")
+      .eq("role", "admin")
+      .eq("is_active", true);
     if (admins?.length && !logErr) {
-      await notifyUsers(admins.map((a: any) => a.id), {
-        type: "order_update",
-        title: `Order edited — ${orderNumber}`,
-        body: `${(client as any).users?.full_name ?? "Client"} changed: ${changed}. Review before production.`,
-        action_url: `/admin/orders/${order.id}`,
-      });
+      await notifyUsers(
+        admins.map((a: any) => a.id),
+        {
+          type: "order_update",
+          title: `Order edited — ${orderNumber}`,
+          body: `${(client as any).users?.full_name ?? "Client"} changed: ${changed}. Review before production.`,
+          action_url: `/admin/orders/${order.id}`,
+        }
+      );
     }
 
     return NextResponse.json({

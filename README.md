@@ -4,11 +4,11 @@ Full-stack SaaS for professional embroidery digitizing. **Next.js 14 · Supabase
 
 ## Portals
 
-| Portal | Route | Role |
-|---|---|---|
-| Admin | `/admin` | `admin` |
-| CRM | `/crm` | `crm` |
-| Client | `/client` | `client` |
+| Portal   | Route       | Role       |
+| -------- | ----------- | ---------- |
+| Admin    | `/admin`    | `admin`    |
+| CRM      | `/crm`      | `crm`      |
+| Client   | `/client`   | `client`   |
 | Designer | `/designer` | `designer` |
 
 Public site: `/home` · `/pricing` · `/services` · `/contact`
@@ -33,16 +33,16 @@ Run SQL files in order in Supabase SQL Editor:
 2. `supabase/setup/step2_core_tables.sql`
 3. `supabase/setup/step3_remaining_tables.sql`
 4. `supabase/setup/step4_triggers.sql`
-5. `supabase/setup/step5_rls_and_fix.sql`  ← fixes your admin account
+5. `supabase/setup/step5_rls_and_fix.sql` ← fixes your admin account
 
 ### Storage Buckets (create in Supabase Dashboard → Storage)
 
-| Bucket | Type | Max |
-|---|---|---|
-| `artwork` | Private | 50MB |
-| `outputs` | Private | 20MB |
-| `invoices` | Private | 5MB |
-| `avatars` | Public | 2MB |
+| Bucket     | Type    | Max  |
+| ---------- | ------- | ---- |
+| `artwork`  | Private | 50MB |
+| `outputs`  | Private | 20MB |
+| `invoices` | Private | 5MB  |
+| `avatars`  | Public  | 2MB  |
 
 ---
 
@@ -84,6 +84,7 @@ npm i -g vercel && vercel
 ```
 
 **After deploying:**
+
 1. Set `NEXT_PUBLIC_APP_URL` to your production domain
 2. Supabase → Authentication → URL Configuration → add your domain
 3. Supabase → Authentication → Redirect URLs → add `https://yourdomain.com/auth/callback`
@@ -93,14 +94,14 @@ npm i -g vercel && vercel
 
 ## API Routes
 
-| Route | Method | Purpose |
-|---|---|---|
-| `/api/contact` | POST | Contact form → CRM lead |
-| `/api/invoices/[id]/checkout` | POST | Create Payoneer checkout session |
-| `/api/invoices/[id]/pdf` | GET | Generate + download PDF invoice |
-| `/api/orders/[id]/status` | PATCH | Update status → triggers emails |
-| `/api/notifications` | GET/PATCH | Fetch / mark-read notifications |
-| `/api/webhooks/payoneer` | POST | Payment events → mark invoice paid |
+| Route                         | Method    | Purpose                            |
+| ----------------------------- | --------- | ---------------------------------- |
+| `/api/contact`                | POST      | Contact form → CRM lead            |
+| `/api/invoices/[id]/checkout` | POST      | Create Payoneer checkout session   |
+| `/api/invoices/[id]/pdf`      | GET       | Generate + download PDF invoice    |
+| `/api/orders/[id]/status`     | PATCH     | Update status → triggers emails    |
+| `/api/notifications`          | GET/PATCH | Fetch / mark-read notifications    |
+| `/api/webhooks/payoneer`      | POST      | Payment events → mark invoice paid |
 
 ---
 
@@ -123,17 +124,17 @@ INSERT INTO public.designers (user_id)
 
 Live-editable via **Admin → Pricing** (no code changes needed).
 
-| Service | Size | Price |
-|---|---|---|
-| Digitizing | Small <5k st | $7 |
-| Digitizing | Medium <15k st | $18 |
-| Digitizing | Large 15k+ st | $25 |
-| Vector | Simple | $8 |
-| Vector | Medium | $15 |
-| Vector | Complex | $30 |
-| Sewout | Small | $5 |
-| Sewout | Medium | $10 |
-| Sewout | Large | $15 |
+| Service    | Size           | Price |
+| ---------- | -------------- | ----- |
+| Digitizing | Small <5k st   | $7    |
+| Digitizing | Medium <15k st | $18   |
+| Digitizing | Large 15k+ st  | $25   |
+| Vector     | Simple         | $8    |
+| Vector     | Medium         | $15   |
+| Vector     | Complex        | $30   |
+| Sewout     | Small          | $5    |
+| Sewout     | Medium         | $10   |
+| Sewout     | Large          | $15   |
 
 **Always free:** Revisions · Format conversion · Rush (6h) · Urgent (3h)
 

@@ -43,9 +43,9 @@ jobs:
     needs: lint
     env:
       # Dummy values so Next.js build doesn't fail without real env
-      NEXT_PUBLIC_SUPABASE_URL:      https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder_anon_key
-      NEXT_PUBLIC_APP_URL:           https://stitchpro.com
+      NEXT_PUBLIC_APP_URL: https://stitchpro.com
 
     steps:
       - name: Checkout
@@ -105,10 +105,10 @@ jobs:
       - name: Deploy to Vercel (Preview)
         uses: amondnet/vercel-action@v25
         with:
-          vercel-token:   ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id:  ${{ secrets.VERCEL_ORG_ID }}
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          scope:          ${{ secrets.VERCEL_ORG_ID }}
+          scope: ${{ secrets.VERCEL_ORG_ID }}
 
   # ── Deploy to Vercel production ────────────────────────────
   deploy-production:
@@ -123,8 +123,8 @@ jobs:
       - name: Deploy to Vercel (Production)
         uses: amondnet/vercel-action@v25
         with:
-          vercel-token:      ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id:     ${{ secrets.VERCEL_ORG_ID }}
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args:       "--prod"
-          scope:             ${{ secrets.VERCEL_ORG_ID }}
+          vercel-args: "--prod"
+          scope: ${{ secrets.VERCEL_ORG_ID }}

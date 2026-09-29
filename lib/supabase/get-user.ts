@@ -4,12 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/types";
 
 export interface SimpleUser {
-  id:           string;
-  email:        string;
-  full_name:    string;
-  role:         UserRole | string;
-  avatar_url?:  string | null;
-  client_id?:   string;
+  id: string;
+  email: string;
+  full_name: string;
+  role: UserRole | string;
+  avatar_url?: string | null;
+  client_id?: string;
   designer_id?: string;
 }
 
@@ -40,26 +40,28 @@ export async function getAdminUser(): Promise<SimpleUser> {
   if (!p) redirect("/login?error=profile_missing");
 
   // Fetch extended ID if needed
-  let client_id:   string | undefined;
+  let client_id: string | undefined;
   let designer_id: string | undefined;
 
   if (p.role === "client") {
-    const { data: c } = await supabase
-      .from("clients").select("id").eq("user_id", user.id).single();
+    const { data: c } = await supabase.from("clients").select("id").eq("user_id", user.id).single();
     client_id = c?.id;
   }
   if (p.role === "designer") {
     const { data: d } = await supabase
-      .from("designers").select("id").eq("user_id", user.id).single();
+      .from("designers")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
     designer_id = d?.id;
   }
 
   return {
-    id:          p.id,
-    email:       p.email,
-    full_name:   p.full_name ?? "",
-    role:        p.role,
-    avatar_url:  p.avatar_url ?? null,
+    id: p.id,
+    email: p.email,
+    full_name: p.full_name ?? "",
+    role: p.role,
+    avatar_url: p.avatar_url ?? null,
     client_id,
     designer_id,
   };

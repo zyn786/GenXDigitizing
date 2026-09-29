@@ -5,7 +5,9 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Parse body
@@ -37,7 +39,10 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (!callerProfile || callerProfile.role !== "admin") {
-        return NextResponse.json({ error: "Only admins can cancel subscriptions for other clients" }, { status: 403 });
+        return NextResponse.json(
+          { error: "Only admins can cancel subscriptions for other clients" },
+          { status: 403 }
+        );
       }
 
       clientId = adminClientId;
@@ -80,7 +85,7 @@ export async function POST(req: NextRequest) {
       }
 
       if (subs?.length) {
-        const planNames = subs.map(s => s.plan).join(", ");
+        const planNames = subs.map((s) => s.plan).join(", ");
         const { notifyRole } = await import("@/lib/notify-helpers");
         // Notify admins: review needed
         notifyRole("admin", {
@@ -88,12 +93,14 @@ export async function POST(req: NextRequest) {
           title: "Cancellation review needed",
           body: `${clientEmail} wants to cancel their ${planNames} subscription.${reason ? ` Reason: ${reason}` : ""}`,
           action_url: "/admin/subscriptions",
-        }).catch(e => console.error("[cancel] Admin notify error:", e));
+        }).catch((e) => console.error("[cancel] Admin notify error:", e));
 
         // Send "request received" email to client
         const planLabel = subs[0].plan.toUpperCase();
         const { emailCancelRequested } = await import("@/lib/email/subscription");
-        emailCancelRequested(clientEmail, planLabel, reason || undefined, notes).catch(e => console.error("[cancel] Email failed:", e));
+        emailCancelRequested(clientEmail, planLabel, reason || undefined, notes).catch((e) =>
+          console.error("[cancel] Email failed:", e)
+        );
       }
 
       return NextResponse.json({ ok: true, status: "cancellation_requested" });
@@ -129,7 +136,9 @@ export async function POST(req: NextRequest) {
       const planLabel = subs[0].plan.toUpperCase();
       const reasonLabel = reason || "Not specified";
       const { emailSubscriptionCancelled } = await import("@/lib/email/subscription");
-      emailSubscriptionCancelled(clientEmail, planLabel, reasonLabel, notes).catch(e => console.error("[cancel] Email failed:", e));
+      emailSubscriptionCancelled(clientEmail, planLabel, reasonLabel, notes).catch((e) =>
+        console.error("[cancel] Email failed:", e)
+      );
     }
 
     return NextResponse.json({ ok: true });

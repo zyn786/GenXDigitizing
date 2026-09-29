@@ -42,8 +42,11 @@ export async function POST(req: NextRequest) {
         .update({ is_read: body.is_read !== false })
         .eq("thread_id", body.threadId);
       if (res.error) {
-        console.error("[admin/email/read] Thread update failed:", res.error.message,
-          "— if this mentions thread_id, apply migration 038.");
+        console.error(
+          "[admin/email/read] Thread update failed:",
+          res.error.message,
+          "— if this mentions thread_id, apply migration 038."
+        );
         return NextResponse.json({ error: res.error.message }, { status: 500 });
       }
       return NextResponse.json({ success: true });
@@ -59,8 +62,11 @@ export async function POST(req: NextRequest) {
       .eq("id", body.id);
 
     if (res.error) {
-      console.error("[admin/email/read] Update failed:", res.error.message,
-        "— if this mentions is_read, apply migration 037.");
+      console.error(
+        "[admin/email/read] Update failed:",
+        res.error.message,
+        "— if this mentions is_read, apply migration 037."
+      );
       return NextResponse.json({ error: res.error.message }, { status: 500 });
     }
 

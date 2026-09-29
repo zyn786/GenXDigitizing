@@ -23,7 +23,13 @@ export function useNotificationContext() {
   return c;
 }
 
-export function NotificationProvider({ userId, children }: { userId: string | undefined; children: React.ReactNode }) {
+export function NotificationProvider({
+  userId,
+  children,
+}: {
+  userId: string | undefined;
+  children: React.ReactNode;
+}) {
   const supabase = useRef(createClient());
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +52,9 @@ export function NotificationProvider({ userId, children }: { userId: string | un
 
   const markAllRead = useCallback(async () => {
     if (!userId) return;
-    setNotifications((p) => p.map((n) => ({ ...n, is_read: true, read_at: new Date().toISOString() })));
+    setNotifications((p) =>
+      p.map((n) => ({ ...n, is_read: true, read_at: new Date().toISOString() }))
+    );
     await supabase.current
       .from("notifications")
       .update({ is_read: true, read_at: new Date().toISOString() })
@@ -75,7 +83,12 @@ export function NotificationProvider({ userId, children }: { userId: string | un
     channel
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${userId}`,
+        },
         (payload) => {
           const n = payload.new as Notification;
           setNotifications((prev) => {
@@ -116,7 +129,16 @@ export function NotificationProvider({ userId, children }: { userId: string | un
   }, [fetchNotifications]);
 
   return (
-    <Ctx.Provider value={{ notifications, unreadCount, loading, markAllRead, markRead, refetch: fetchNotifications }}>
+    <Ctx.Provider
+      value={{
+        notifications,
+        unreadCount,
+        loading,
+        markAllRead,
+        markRead,
+        refetch: fetchNotifications,
+      }}
+    >
       {children}
     </Ctx.Provider>
   );

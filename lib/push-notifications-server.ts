@@ -24,7 +24,13 @@ export interface PushResult {
   expiredCleanedUp: number;
 }
 
-const EMPTY: PushResult = { configured: false, subscriptions: 0, sent: 0, failed: 0, expiredCleanedUp: 0 };
+const EMPTY: PushResult = {
+  configured: false,
+  subscriptions: 0,
+  sent: 0,
+  failed: 0,
+  expiredCleanedUp: 0,
+};
 
 function getVapidKeys() {
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -41,22 +47,25 @@ async function sendToSubscription(
   const keys = getVapidKeys();
   if (!keys) return "failed";
 
-  webpush.setVapidDetails(
-    "mailto:order@genxdigitizing.com",
-    keys.publicKey,
-    keys.privateKey
-  );
+  webpush.setVapidDetails("mailto:order@genxdigitizing.com", keys.publicKey, keys.privateKey);
 
   try {
     await webpush.sendNotification(
-      { endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } },
+      {
+        endpoint: subscription.endpoint,
+        keys: { p256dh: subscription.p256dh, auth: subscription.auth },
+      },
       JSON.stringify({ ...payload, url: payload.url || "/" })
     );
     return "sent";
   } catch (err: any) {
     // 410 = subscription expired/unsubscribed; 404 = no longer registered.
     if (err?.statusCode === 410 || err?.statusCode === 404) return "expired";
-    console.error("[sendToSubscription] web-push failed:", err?.statusCode, err?.body || err?.message || err);
+    console.error(
+      "[sendToSubscription] web-push failed:",
+      err?.statusCode,
+      err?.body || err?.message || err
+    );
     return "failed";
   }
 }
@@ -112,7 +121,11 @@ export async function sendPushToUsers(
 }
 
 /** Send a push notification to all active admins. */
-export async function sendPushToAdmins(payload: { title: string; body: string; url?: string }): Promise<PushResult> {
+export async function sendPushToAdmins(payload: {
+  title: string;
+  body: string;
+  url?: string;
+}): Promise<PushResult> {
   const keys = getVapidKeys();
   if (!keys) {
     console.error("[sendPushToAdmins] VAPID keys not configured — push is disabled.");
@@ -122,8 +135,15 @@ export async function sendPushToAdmins(payload: { title: string; body: string; u
   const { createAdminClient } = await import("@/lib/supabase/server");
   const db = createAdminClient();
 
-  const { data: admins } = await db.from("users").select("id").eq("role", "admin").eq("is_active", true);
+  const { data: admins } = await db
+    .from("users")
+    .select("id")
+    .eq("role", "admin")
+    .eq("is_active", true);
   if (!admins?.length) return { ...EMPTY, configured: true };
 
-  return sendPushToUsers(admins.map((a: any) => a.id), payload);
+  return sendPushToUsers(
+    admins.map((a: any) => a.id),
+    payload
+  );
 }

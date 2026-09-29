@@ -13,7 +13,7 @@ function getEnv() {
     // Vercel dashboard env vars are not set for this environment.
     throw new Error(
       "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. " +
-      "Add them in Vercel project settings → Environment Variables."
+        "Add them in Vercel project settings → Environment Variables."
     );
   }
 

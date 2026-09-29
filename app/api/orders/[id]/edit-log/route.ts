@@ -2,13 +2,10 @@
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient }         from "@/lib/supabase/server";
-import { getAdminUser }              from "@/lib/supabase/get-user";
+import { createAdminClient } from "@/lib/supabase/server";
+import { getAdminUser } from "@/lib/supabase/get-user";
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await getAdminUser().catch(() => null);
     if (!user || !["admin", "crm"].includes(user.role)) {
@@ -16,8 +13,8 @@ export async function PATCH(
     }
 
     const supabase = createAdminClient();
-    const orderId  = params.id;
-    const body     = await req.json();
+    const orderId = params.id;
+    const body = await req.json();
     const { log_id, reviewed } = body;
 
     if (!log_id) {
@@ -33,7 +30,10 @@ export async function PATCH(
       .single();
 
     if (fetchErr || !logEntry) {
-      return NextResponse.json({ error: "Edit log entry not found for this order" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Edit log entry not found for this order" },
+        { status: 404 }
+      );
     }
 
     if (reviewed === true) {
@@ -52,12 +52,8 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: true });
-
   } catch (err: any) {
     console.error("[edit-log] Error:", err);
-    return NextResponse.json(
-      { error: err.message ?? "Internal error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err.message ?? "Internal error" }, { status: 500 });
   }
 }

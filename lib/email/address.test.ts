@@ -25,7 +25,9 @@ afterEach(() => {
 
 describe("bareAddress", () => {
   it("extracts the address from a name/address pair", () => {
-    expect(bareAddress("GenX Digitizing <order@genxdigitizing.com>")).toBe("order@genxdigitizing.com");
+    expect(bareAddress("GenX Digitizing <order@genxdigitizing.com>")).toBe(
+      "order@genxdigitizing.com"
+    );
     expect(bareAddress("<order@genxdigitizing.com>")).toBe("order@genxdigitizing.com");
   });
 
@@ -75,7 +77,9 @@ describe("composeFrom — the malformed-header regression", () => {
 
   it("prefers an explicit display name argument over the env default", () => {
     process.env.RESEND_FROM_NAME = "Ignored";
-    expect(composeFrom("order@genxdigitizing.com", "Billing")).toBe("Billing <order@genxdigitizing.com>");
+    expect(composeFrom("order@genxdigitizing.com", "Billing")).toBe(
+      "Billing <order@genxdigitizing.com>"
+    );
   });
 
   it("falls back to a working sender when the env value is empty or junk", () => {

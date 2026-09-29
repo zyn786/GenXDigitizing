@@ -1,10 +1,10 @@
 // @ts-nocheck
 export const runtime = "nodejs";
 
-import { NextRequest, NextResponse }         from "next/server";
-import { createAdminClient }                 from "@/lib/supabase/server";
-import { notifyUsers }                       from "@/lib/notify-server";
-import { getAdminUser }                      from "@/lib/supabase/get-user";
+import { NextRequest, NextResponse } from "next/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { notifyUsers } from "@/lib/notify-server";
+import { getAdminUser } from "@/lib/supabase/get-user";
 import {
   emailOrderDelivered,
   emailDesignerTaskAssigned,
@@ -23,36 +23,34 @@ import {
  * cancel their own in-production order by direct write.
  */
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-  submitted:   ["assigned", "cancelled"],
-  assigned:    ["in_progress", "submitted", "cancelled"],
+  submitted: ["assigned", "cancelled"],
+  assigned: ["in_progress", "submitted", "cancelled"],
   in_progress: ["review", "assigned", "cancelled"],
-  review:      ["approved", "revision", "in_progress", "cancelled"],
-  approved:    ["delivered", "revision", "refunded"],
-  delivered:   ["revision", "delivered", "refunded"],
-  revision:    ["in_progress", "submitted"],
-  cancelled:   [],
-  refunded:    [],
+  review: ["approved", "revision", "in_progress", "cancelled"],
+  approved: ["delivered", "revision", "refunded"],
+  delivered: ["revision", "delivered", "refunded"],
+  revision: ["in_progress", "submitted"],
+  cancelled: [],
+  refunded: [],
 };
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await getAdminUser().catch(() => null);
-    if (!user || !["admin","crm"].includes(user.role)) {
+    if (!user || !["admin", "crm"].includes(user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const supabase = createAdminClient();
-    const orderId  = params.id;
-    const body     = await req.json();
+    const orderId = params.id;
+    const body = await req.json();
     const { status: newStatus, designer_id, admin_notes } = body;
 
     // Fetch current order
     const { data: order, error: fetchErr } = await supabase
       .from("orders")
-      .select(`
+      .select(
+        `
         id, order_number, status, turnaround, output_format, price, sla_deadline,
         service_tier_id,
         service_tiers ( label ),
@@ -64,7 +62,8 @@ export async function PATCH(
           id,
           users ( id, full_name, email )
         )
-      `)
+      `
+      )
       .eq("id", orderId)
       .single();
 
@@ -75,9 +74,12 @@ export async function PATCH(
     // Validate transition
     const allowed = ALLOWED_TRANSITIONS[order.status] ?? [];
     if (newStatus && !allowed.includes(newStatus)) {
-      return NextResponse.json({
-        error: `Cannot transition from ${order.status} to ${newStatus}`,
-      }, { status: 422 });
+      return NextResponse.json(
+        {
+          error: `Cannot transition from ${order.status} to ${newStatus}`,
+        },
+        { status: 422 }
+      );
     }
 
     // Guard: an order cannot be delivered without a file to deliver. This state
@@ -92,9 +94,12 @@ export async function PATCH(
         .eq("file_type", "output");
 
       if (!outputCount) {
-        return NextResponse.json({
-          error: "Cannot mark as delivered — no output file has been uploaded for this order.",
-        }, { status: 422 });
+        return NextResponse.json(
+          {
+            error: "Cannot mark as delivered — no output file has been uploaded for this order.",
+          },
+          { status: 422 }
+        );
       }
     }
 
@@ -103,17 +108,28 @@ export async function PATCH(
       updated_at: new Date().toISOString(),
     };
 
-    if (newStatus)    { updates.status      = newStatus; }
-    if (designer_id)  { updates.designer_id = designer_id; updates.assigned_at = new Date().toISOString(); }
-    if (admin_notes)  { updates.admin_notes = admin_notes; }
+    if (newStatus) {
+      updates.status = newStatus;
+    }
+    if (designer_id) {
+      updates.designer_id = designer_id;
+      updates.assigned_at = new Date().toISOString();
+    }
+    if (admin_notes) {
+      updates.admin_notes = admin_notes;
+    }
 
     // Timestamp fields
-    if (newStatus === "assigned")    { updates.assigned_at     = new Date().toISOString(); }
-    if (newStatus === "in_progress") { updates.in_progress_at  = new Date().toISOString(); }
+    if (newStatus === "assigned") {
+      updates.assigned_at = new Date().toISOString();
+    }
+    if (newStatus === "in_progress") {
+      updates.in_progress_at = new Date().toISOString();
+    }
     // completed_at was never written by this route, so the "QA Review" timeline
     // entry in AdminOrderDetail.tsx could never render. delivered is the final
     // state in this lifecycle, so it doubles as completion.
-    if (newStatus === "delivered")   {
+    if (newStatus === "delivered") {
       updates.delivered_at = new Date().toISOString();
       updates.completed_at = new Date().toISOString();
     }
@@ -132,11 +148,11 @@ export async function PATCH(
 
     // Audit log
     await supabase.from("audit_logs").insert({
-      action:    `order_status:${order.status}→${newStatus ?? order.status}`,
-      entity:    "orders",
+      action: `order_status:${order.status}→${newStatus ?? order.status}`,
+      entity: "orders",
       entity_id: orderId,
-      user_id:   user.id,
-      new_data:  updates,
+      user_id: user.id,
+      new_data: updates,
     });
 
     // ── Auto-generate invoice when order reaches QA Review ──────
@@ -182,9 +198,9 @@ export async function PATCH(
       }
     }
 
-    const clientUser   = (order.clients as any)?.users;
+    const clientUser = (order.clients as any)?.users;
     const designerUser = (order.designers as any)?.users;
-    const serviceName  = (order.service_tiers as any)?.label ?? "Order";
+    const serviceName = (order.service_tiers as any)?.label ?? "Order";
 
     // ── Notifications + Emails per status ─────────────────────
 
@@ -200,20 +216,20 @@ export async function PATCH(
       if (designerUserNew) {
         const { notifyUser } = await import("@/lib/notify-helpers");
         notifyUser(designerUserNew.id, {
-          type:       "order_update",
-          title:      `New assignment — ${order.order_number}`,
-          body:       `${serviceName} · ${order.turnaround} turnaround`,
+          type: "order_update",
+          title: `New assignment — ${order.order_number}`,
+          body: `${serviceName} · ${order.turnaround} turnaround`,
           action_url: `/designer/tasks`,
         }).catch(console.error);
 
         // Email designer
         emailDesignerTaskAssigned({
-          to:            designerUserNew.email,
-          designerName:  designerUserNew.full_name ?? "Designer",
-          orderNumber:   order.order_number,
+          to: designerUserNew.email,
+          designerName: designerUserNew.full_name ?? "Designer",
+          orderNumber: order.order_number,
           serviceName,
-          turnaround:    order.turnaround,
-          deadline:      order.sla_deadline ?? "Not set",
+          turnaround: order.turnaround,
+          deadline: order.sla_deadline ?? "Not set",
         }).catch(console.error);
 
         // Email client: designer assigned
@@ -307,13 +323,16 @@ export async function PATCH(
         .select("version")
         .eq("order_id", orderId)
         .eq("file_type", "output");
-      const maxVersion = outputVersions?.reduce((max: number, f: any) => Math.max(max, f.version ?? 1), 1) ?? 1;
+      const maxVersion =
+        outputVersions?.reduce((max: number, f: any) => Math.max(max, f.version ?? 1), 1) ?? 1;
       const isRevisionDelivery = maxVersion > 1;
 
       // Notify client
       await notifyUsers([clientUser.id], {
         type: "order_update",
-        title: isRevisionDelivery ? `Revision files ready — ${order.order_number}` : `Order ready — ${order.order_number}`,
+        title: isRevisionDelivery
+          ? `Revision files ready — ${order.order_number}`
+          : `Order ready — ${order.order_number}`,
         body: isRevisionDelivery
           ? `Your requested changes are complete! Tap to download.`
           : `Your ${serviceName} is ready! Tap to review and pay.`,
@@ -323,19 +342,19 @@ export async function PATCH(
       // Send payment-required email if invoice is unpaid
       if (invoiceForEmail && invoiceForEmail.status !== "paid") {
         emailPaymentRequired({
-          to:          clientUser.email,
-          clientName:  clientUser.full_name ?? "there",
+          to: clientUser.email,
+          clientName: clientUser.full_name ?? "there",
           orderNumber: order.order_number,
           serviceName,
-          amount:      Number(order.price),
-          portalUrl:   `${process.env.NEXT_PUBLIC_APP_URL}/client/my-orders`,
+          amount: Number(order.price),
+          portalUrl: `${process.env.NEXT_PUBLIC_APP_URL}/client/my-orders`,
         }).catch(console.error);
       }
 
       // Also send delivery email with payment note
       emailOrderDelivered({
-        to:          clientUser.email,
-        clientName:  clientUser.full_name ?? "there",
+        to: clientUser.email,
+        clientName: clientUser.full_name ?? "there",
         orderNumber: order.order_number,
         serviceName,
         downloadUrl: `${process.env.NEXT_PUBLIC_APP_URL}/client/my-orders`,
@@ -346,23 +365,26 @@ export async function PATCH(
       // key left serviceName undefined, so the customer received
       // "your undefined for order …" and the order number was dropped.
       emailReviewRequest({
-        to:           clientUser.email,
-        clientName:   clientUser.full_name ?? "there",
-        orderNumber:  order.order_number,
-        serviceName:  (order as any).service_tiers?.label ?? "order",
+        to: clientUser.email,
+        clientName: clientUser.full_name ?? "there",
+        orderNumber: order.order_number,
+        serviceName: (order as any).service_tiers?.label ?? "order",
       }).catch(console.error);
     }
 
     // When admin approves designer work (internal, NOT visible to client)
     if (newStatus === "approved") {
       if (designerUser) {
-        await supabase.from("notifications").insert({
-          user_id:    designerUser.id,
-          type:       "order_update",
-          title:      `Design approved — ${order.order_number}`,
-          body:       "Your work has been approved by admin. Pending client release.",
-          action_url: `/designer/tasks`,
-        }).catch(console.error);
+        await supabase
+          .from("notifications")
+          .insert({
+            user_id: designerUser.id,
+            type: "order_update",
+            title: `Design approved — ${order.order_number}`,
+            body: "Your work has been approved by admin. Pending client release.",
+            action_url: `/designer/tasks`,
+          })
+          .catch(console.error);
       }
       // Notify admins that order is ready for client release
       const { data: admins } = await supabase
@@ -373,10 +395,10 @@ export async function PATCH(
       if (admins?.length) {
         await supabase.from("notifications").insert(
           admins.map((a: any) => ({
-            user_id:    a.id,
-            type:       "order_update",
-            title:      `Ready for release — ${order.order_number}`,
-            body:       `Design approved. Release to client from the order detail page.`,
+            user_id: a.id,
+            type: "order_update",
+            title: `Ready for release — ${order.order_number}`,
+            body: `Design approved. Release to client from the order detail page.`,
             action_url: `/admin/orders/${orderId}`,
           }))
         );
@@ -391,30 +413,29 @@ export async function PATCH(
           ? `Revision notes: ${admin_notes}`
           : "Changes requested. Check task details.";
 
-        await supabase.from("notifications").insert({
-          user_id:    designerUser.id,
-          type:       "order_update",
-          title:      `Revision requested — ${order.order_number}`,
-          body:       revisionBody,
-          action_url: `/designer/tasks`,
-        }).catch(console.error);
+        await supabase
+          .from("notifications")
+          .insert({
+            user_id: designerUser.id,
+            type: "order_update",
+            title: `Revision requested — ${order.order_number}`,
+            body: revisionBody,
+            action_url: `/designer/tasks`,
+          })
+          .catch(console.error);
 
         emailRevisionRequested({
-          to:            designerUser.email,
-          clientName:    (order.clients as any)?.company_name ?? "Client",
-          orderNumber:   order.order_number,
+          to: designerUser.email,
+          clientName: (order.clients as any)?.company_name ?? "Client",
+          orderNumber: order.order_number,
           revisionNotes: admin_notes ?? "See task details for revision instructions.",
         }).catch(console.error);
       }
     }
 
     return NextResponse.json({ success: true, order: updated });
-
   } catch (err: any) {
     console.error("[order-status] Error:", err);
-    return NextResponse.json(
-      { error: err.message ?? "Internal error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err.message ?? "Internal error" }, { status: 500 });
   }
 }

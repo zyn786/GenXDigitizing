@@ -4,17 +4,37 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { uploadToStorage } from "@/lib/storage";
 import { notifyUsers } from "@/lib/notify-server";
 
-const VALID_FORMATS = new Set(["DST","PES","EMB","JEF","XXX","VIP","HUS","EXP","VP3","SEW","AI","SVG","EPS","PDF"]);
+const VALID_FORMATS = new Set([
+  "DST",
+  "PES",
+  "EMB",
+  "JEF",
+  "XXX",
+  "VIP",
+  "HUS",
+  "EXP",
+  "VP3",
+  "SEW",
+  "AI",
+  "SVG",
+  "EPS",
+  "PDF",
+]);
 
 export async function POST(req: NextRequest) {
   // Auth with standard client
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: profile } = await supabase.from("users").select("role").eq("id", user.id).single();
   if (!profile || (profile.role !== "designer" && profile.role !== "admin")) {
-    return NextResponse.json({ error: "Only designers and admins can upload outputs" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Only designers and admins can upload outputs" },
+      { status: 403 }
+    );
   }
 
   try {
@@ -31,10 +51,19 @@ export async function POST(req: NextRequest) {
 
     // Verify designer assignment (or admin)
     if (profile.role === "designer") {
-      const { data: designerData } = await db.from("designers").select("id").eq("user_id", user.id).single();
-      if (!designerData) return NextResponse.json({ error: "Designer profile not found" }, { status: 403 });
+      const { data: designerData } = await db
+        .from("designers")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+      if (!designerData)
+        return NextResponse.json({ error: "Designer profile not found" }, { status: 403 });
 
-      const { data: order } = await db.from("orders").select("designer_id, status").eq("id", orderId).single();
+      const { data: order } = await db
+        .from("orders")
+        .select("designer_id, status")
+        .eq("id", orderId)
+        .single();
       if (!order || order.designer_id !== designerData.id) {
         return NextResponse.json({ error: "You are not assigned to this order" }, { status: 403 });
       }
@@ -46,7 +75,10 @@ export async function POST(req: NextRequest) {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.size > 100 * 1024 * 1024) {
-        return NextResponse.json({ error: `File ${file.name} exceeds 100MB limit` }, { status: 413 });
+        return NextResponse.json(
+          { error: `File ${file.name} exceeds 100MB limit` },
+          { status: 413 }
+        );
       }
 
       // Upload to Supabase Storage
@@ -69,8 +101,12 @@ export async function POST(req: NextRequest) {
       // Resolve valid format
       const uiFormat = formats[i];
       const ext = file.name.split(".").pop()?.toUpperCase();
-      const resolvedFormat = (uiFormat && VALID_FORMATS.has(uiFormat)) ? uiFormat
-        : (ext && VALID_FORMATS.has(ext)) ? ext : null;
+      const resolvedFormat =
+        uiFormat && VALID_FORMATS.has(uiFormat)
+          ? uiFormat
+          : ext && VALID_FORMATS.has(ext)
+            ? ext
+            : null;
 
       // Insert file record
       const { data: fileRecord, error } = await db
@@ -115,14 +151,21 @@ export async function POST(req: NextRequest) {
       const orderNumber = (orderData as any).order_number || `#${orderId.slice(0, 8)}`;
       const companyName = (orderData as any).clients?.company_name || "Client";
 
-      const { data: admins } = await db.from("users").select("id").eq("role", "admin").eq("is_active", true);
+      const { data: admins } = await db
+        .from("users")
+        .select("id")
+        .eq("role", "admin")
+        .eq("is_active", true);
       if (admins?.length) {
-        await notifyUsers(admins.map((a: any) => a.id), {
-          type: "order_update",
-          title: `QA Submission — ${orderNumber}`,
-          body: `${user.email || "Designer"} submitted ${results.length} file(s) for ${companyName}. Ready for review.`,
-          action_url: `/admin/orders/${orderId}`,
-        });
+        await notifyUsers(
+          admins.map((a: any) => a.id),
+          {
+            type: "order_update",
+            title: `QA Submission — ${orderNumber}`,
+            body: `${user.email || "Designer"} submitted ${results.length} file(s) for ${companyName}. Ready for review.`,
+            action_url: `/admin/orders/${orderId}`,
+          }
+        );
       }
     }
 

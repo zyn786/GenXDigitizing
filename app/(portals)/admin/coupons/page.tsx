@@ -32,7 +32,13 @@ export default async function AdminCouponsPage() {
     .limit(200);
 
   // Deduplicate by client_id
-  const clients: Array<{ id: string; userId: string; email: string | null; company: string | null; lastOrder: string | null }> = [];
+  const clients: Array<{
+    id: string;
+    userId: string;
+    email: string | null;
+    company: string | null;
+    lastOrder: string | null;
+  }> = [];
   const seen = new Set();
   for (const o of clientOrders || []) {
     if (!seen.has(o.client_id)) {

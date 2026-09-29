@@ -38,7 +38,7 @@ Start from these, because they recur:
    including customer emails and order references.
 
 4. **Views and trigger functions need explicit grants.** A `CREATE OR REPLACE
-   VIEW` does not carry grants forward, and a trigger's function needs `EXECUTE`
+VIEW` does not carry grants forward, and a trigger's function needs `EXECUTE`
    for the role that fires it (`supabase_auth_admin` for `auth.users` triggers)
    or every insert fails with a generic 500.
 
@@ -51,7 +51,7 @@ real requests:
 - `GET {URL}/rest/v1/<table>?select=*&limit=1` — a 200 with rows means anon
   reads that table. A 200 with `[]` means RLS filtered it (fine).
 - `POST {URL}/rest/v1/rpc/<fn>` with plausible args — a `42501 permission
-  denied` means it is properly locked. **Any other error means it executed**,
+denied` means it is properly locked. **Any other error means it executed**,
   which is the finding. This distinction matters: an error like
   `relation "x" does not exist` is proof of execution, not proof of safety.
 - `GET {URL}/rest/v1/` returns the OpenAPI spec, but only for a **secret** key.

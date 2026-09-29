@@ -15,7 +15,11 @@ function NavIcon({ name, size = 16 }: { name: string; size?: number }) {
   return Icon ? <Icon size={size} /> : null;
 }
 
-interface SidebarProps { user: AuthUser; badgeCounts?: Record<string, number>; subscriptionStatus?: string | null; }
+interface SidebarProps {
+  user: AuthUser;
+  badgeCounts?: Record<string, number>;
+  subscriptionStatus?: string | null;
+}
 
 export function Sidebar({ user, badgeCounts = {}, subscriptionStatus }: SidebarProps) {
   const pathname = usePathname();
@@ -24,7 +28,16 @@ export function Sidebar({ user, badgeCounts = {}, subscriptionStatus }: SidebarP
 
   // Merge server initial counts with client real-time counts
   let liveBadges: Record<string, number> = badgeCounts;
-  try { const b = useBadges(); liveBadges = { ...badgeCounts, orders: b.orders || badgeCounts.orders || 0, invoices: b.invoices || badgeCounts.invoices || 0, messages: b.messages || badgeCounts.messages || 0, notifications: b.notifications || badgeCounts.notifications || 0 }; } catch {}
+  try {
+    const b = useBadges();
+    liveBadges = {
+      ...badgeCounts,
+      orders: b.orders || badgeCounts.orders || 0,
+      invoices: b.invoices || badgeCounts.invoices || 0,
+      messages: b.messages || badgeCounts.messages || 0,
+      notifications: b.notifications || badgeCounts.notifications || 0,
+    };
+  } catch {}
 
   const isActive = (href: string) => {
     if (href === `/${user.role}`) return pathname === href;
@@ -34,13 +47,21 @@ export function Sidebar({ user, badgeCounts = {}, subscriptionStatus }: SidebarP
   return (
     <aside className="portal-sidebar">
       {/* Logo */}
-      <div className="px-4 pt-5 pb-4">
-        <Link href={`/${user.role}`} className="flex items-center gap-2.5 mb-3.5">
-          <Image src="/images/black_logo.png" alt="genxdigitizing" width={2000} height={1000} className="h-8 w-auto" />
+      <div className="px-4 pb-4 pt-5">
+        <Link href={`/${user.role}`} className="mb-3.5 flex items-center gap-2.5">
+          <Image
+            src="/images/black_logo.png"
+            alt="genxdigitizing"
+            width={2000}
+            height={1000}
+            className="h-8 w-auto"
+          />
         </Link>
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.5px]"
-          style={{ background: portal.light, color: portal.color }}>
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: portal.color }} />
+        <div
+          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.5px]"
+          style={{ background: portal.light, color: portal.color }}
+        >
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: portal.color }} />
           {PORTAL_LABELS[user.role]} Portal
         </div>
       </div>
@@ -49,7 +70,7 @@ export function Sidebar({ user, badgeCounts = {}, subscriptionStatus }: SidebarP
       <div className="mx-4 border-t border-[var(--border)]" />
 
       {/* Nav */}
-      <nav className="flex-1 min-h-0 py-2 overflow-y-auto">
+      <nav className="min-h-0 flex-1 overflow-y-auto py-2">
         {sections.map((section, si) => (
           <div key={section.title} className={cn(si > 0 && "mt-3")}>
             <p className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-[var(--txt3)]">
@@ -60,30 +81,55 @@ export function Sidebar({ user, badgeCounts = {}, subscriptionStatus }: SidebarP
               return (
                 <Link key={item.href} href={item.href} className="no-underline">
                   <div
-                    className="relative mx-2 my-0.5 flex items-center gap-3 px-3 py-2 rounded-xl
-                      text-[13px] font-medium transition-all duration-150 cursor-pointer
-                      hover:bg-[var(--elevated)] group"
+                    className="group relative mx-2 my-0.5 flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-all duration-150 hover:bg-[var(--elevated)]"
                     style={{
                       color: active ? portal.text : "var(--txt2)",
                       background: active ? portal.light : "transparent",
                       borderLeft: active ? `2px solid ${portal.color}` : "2px solid transparent",
-                    }}>
-                    <span className="flex-shrink-0 transition-colors relative" style={{ color: active ? portal.color : "var(--txt3)" }}>
+                    }}
+                  >
+                    <span
+                      className="relative flex-shrink-0 transition-colors"
+                      style={{ color: active ? portal.color : "var(--txt3)" }}
+                    >
                       <NavIcon name={item.iconName} />
                       {/* Subscription status indicator on Plans & Billing */}
                       {item.href === "/client/subscribe" && subscriptionStatus && (
-                        <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full border border-[var(--bg)]"
-                          style={{ background: subscriptionStatus === "active" ? "#16A34A" : subscriptionStatus === "pending" ? "#F59E0B" : subscriptionStatus === "cancellation_requested" ? "#F97316" : "var(--txt3)" }}
-                          title={subscriptionStatus === "active" ? "Active plan" : subscriptionStatus === "pending" ? "Pending approval" : subscriptionStatus === "cancellation_requested" ? "Cancellation under review" : ""} />
+                        <span
+                          className="absolute -right-1 -top-0.5 h-2 w-2 rounded-full border border-[var(--bg)]"
+                          style={{
+                            background:
+                              subscriptionStatus === "active"
+                                ? "#16A34A"
+                                : subscriptionStatus === "pending"
+                                  ? "#F59E0B"
+                                  : subscriptionStatus === "cancellation_requested"
+                                    ? "#F97316"
+                                    : "var(--txt3)",
+                          }}
+                          title={
+                            subscriptionStatus === "active"
+                              ? "Active plan"
+                              : subscriptionStatus === "pending"
+                                ? "Pending approval"
+                                : subscriptionStatus === "cancellation_requested"
+                                  ? "Cancellation under review"
+                                  : ""
+                          }
+                        />
                       )}
                     </span>
-                    <span className="flex-1 min-w-0 truncate">{item.label}</span>
+                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
                     {(() => {
-                      const count: number = item.badgeKey ? (liveBadges[item.badgeKey] || 0) : 0;
+                      const count: number = item.badgeKey ? liveBadges[item.badgeKey] || 0 : 0;
                       if (count > 0) {
                         return (
-                          <span className="ml-auto min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white px-1"
-                            style={{ background: portal.color }}>{count > 99 ? "99+" : count}</span>
+                          <span
+                            className="ml-auto flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+                            style={{ background: portal.color }}
+                          >
+                            {count > 99 ? "99+" : count}
+                          </span>
                         );
                       }
                       return null;
@@ -97,12 +143,19 @@ export function Sidebar({ user, badgeCounts = {}, subscriptionStatus }: SidebarP
       </nav>
 
       {/* User footer */}
-      <div className="p-3 mx-2 mb-2 rounded-xl" style={{ background: "var(--elevated)" }}>
+      <div className="mx-2 mb-2 rounded-xl p-3" style={{ background: "var(--elevated)" }}>
         <div className="flex items-center gap-2.5">
-          <Avatar name={user.full_name || user.email} src={user.avatar_url} role={user.role} size={32} />
-          <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-semibold text-[var(--txt)] truncate">{user.full_name || "User"}</p>
-            <p className="text-[10px] text-[var(--txt3)] truncate">{user.email}</p>
+          <Avatar
+            name={user.full_name || user.email}
+            src={user.avatar_url}
+            role={user.role}
+            size={32}
+          />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[12px] font-semibold text-[var(--txt)]">
+              {user.full_name || "User"}
+            </p>
+            <p className="truncate text-[10px] text-[var(--txt3)]">{user.email}</p>
           </div>
         </div>
       </div>

@@ -12,10 +12,13 @@ import { RealtimeRefresher } from "@/components/RealtimeRefresher";
 const PAGE_SIZE = 50;
 
 /** Columns added by migration 037 and 038, with the pre-migration fallbacks. */
-const SENT_COLUMNS_FULL = "id, to_email, from_email, subject, body, sent_at, resend_id, attachments_meta, message_id, thread_id, in_reply_to, references";
+const SENT_COLUMNS_FULL =
+  "id, to_email, from_email, subject, body, sent_at, resend_id, attachments_meta, message_id, thread_id, in_reply_to, references";
 const SENT_COLUMNS_LEGACY = "id, to_email, from_email, subject, body, sent_at, resend_id";
-const INBOX_COLUMNS_FULL = "id, from_email, to_email, cc_emails, subject, body_html, body_text, received_at, attachments_meta, is_read, sender_name, message_id, resend_id, thread_id, in_reply_to, references";
-const INBOX_COLUMNS_LEGACY = "id, from_email, to_email, cc_emails, subject, body_html, body_text, received_at, attachments_meta, resend_id";
+const INBOX_COLUMNS_FULL =
+  "id, from_email, to_email, cc_emails, subject, body_html, body_text, received_at, attachments_meta, is_read, sender_name, message_id, resend_id, thread_id, in_reply_to, references";
+const INBOX_COLUMNS_LEGACY =
+  "id, from_email, to_email, cc_emails, subject, body_html, body_text, received_at, attachments_meta, resend_id";
 
 const THREAD_COLUMNS = "thread_id, last_at, first_at, message_count, unread_count";
 
@@ -127,9 +130,9 @@ async function getEmailHistory(sentPage: number, inboxPage: number, repliesPage:
 
   // Messages for every conversation on either tab's page — the reading pane
   // needs the whole exchange regardless of which list the row came from.
-  const threadIds = Array.from(new Set(
-    [...threads, ...replies].map((t: any) => t.thread_id).filter(Boolean)
-  ));
+  const threadIds = Array.from(
+    new Set([...threads, ...replies].map((t: any) => t.thread_id).filter(Boolean))
+  );
   let messages: any[] = [];
 
   if (threadIds.length > 0) {
@@ -149,7 +152,11 @@ async function getEmailHistory(sentPage: number, inboxPage: number, repliesPage:
         .order("sent_at", { ascending: true });
 
       messages = [
-        ...(inboxMessages.data ?? []).map((m: any) => ({ ...m, direction: "in", at: m.received_at })),
+        ...(inboxMessages.data ?? []).map((m: any) => ({
+          ...m,
+          direction: "in",
+          at: m.received_at,
+        })),
         ...(sentMessages.data ?? []).map((m: any) => ({ ...m, direction: "out", at: m.sent_at })),
       ].sort((a: any, b: any) => new Date(a.at).getTime() - new Date(b.at).getTime());
     }
@@ -222,7 +229,11 @@ async function getEmailHistory(sentPage: number, inboxPage: number, repliesPage:
   };
 }
 
-export default async function AdminEmailPage({ searchParams }: { searchParams: { sentPage?: string; inboxPage?: string; repliesPage?: string } }) {
+export default async function AdminEmailPage({
+  searchParams,
+}: {
+  searchParams: { sentPage?: string; inboxPage?: string; repliesPage?: string };
+}) {
   const user = await getAdminUser();
 
   // Required: this page reads with the service-role client, which bypasses RLS
@@ -248,7 +259,7 @@ export default async function AdminEmailPage({ searchParams }: { searchParams: {
       <RealtimeRefresher
         configs={[
           { table: "received_emails", events: ["INSERT", "UPDATE", "DELETE"] },
-          { table: "sent_emails",     events: ["INSERT", "UPDATE", "DELETE"] },
+          { table: "sent_emails", events: ["INSERT", "UPDATE", "DELETE"] },
         ]}
         debounceMs={600}
       />

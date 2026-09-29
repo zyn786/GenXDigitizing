@@ -11,9 +11,9 @@ import { formatCurrency } from "@/lib/utils";
 const TIERS = [
   { count: 1, price: 7.0, save: null },
   { count: 3, price: 5.95, save: "15%" },
-  { count: 5, price: 5.60, save: "20%" },
-  { count: 10, price: 4.90, save: "30%" },
-  { count: 20, price: 3.50, save: "50%" },
+  { count: 5, price: 5.6, save: "20%" },
+  { count: 10, price: 4.9, save: "30%" },
+  { count: 20, price: 3.5, save: "50%" },
 ];
 
 interface TieredPricingTableProps {
@@ -23,49 +23,60 @@ interface TieredPricingTableProps {
 export function TieredPricingTable({ fileCount }: TieredPricingTableProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const currentTier = [...TIERS].reverse().find(t => fileCount >= t.count) || TIERS[0];
+  const currentTier = [...TIERS].reverse().find((t) => fileCount >= t.count) || TIERS[0];
 
   return (
-    <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between gap-3 p-3 sm:p-4 text-left hover:bg-[var(--elevated)]/50 transition-colors"
+        className="hover:bg-[var(--elevated)]/50 flex w-full items-center justify-between gap-3 p-3 text-left transition-colors sm:p-4"
       >
         <div className="flex items-center gap-2">
           <span className="text-sm">📊</span>
           <div>
-            <p className="text-[12px] sm:text-[13px] font-semibold text-[var(--txt)]">
+            <p className="text-[12px] font-semibold text-[var(--txt)] sm:text-[13px]">
               Volume pricing — save up to 50%
             </p>
             {fileCount > 1 && currentTier.save && (
-              <p className="text-[11px] text-[#16A34A] font-medium">
+              <p className="text-[11px] font-medium text-[#16A34A]">
                 {fileCount} designs → ${currentTier.price}/design (save {currentTier.save})
               </p>
             )}
           </div>
         </div>
-        {expanded ? <ChevronUp size={15} className="text-[var(--txt3)] flex-shrink-0" /> : <ChevronDown size={15} className="text-[var(--txt3)] flex-shrink-0" />}
+        {expanded ? (
+          <ChevronUp size={15} className="flex-shrink-0 text-[var(--txt3)]" />
+        ) : (
+          <ChevronDown size={15} className="flex-shrink-0 text-[var(--txt3)]" />
+        )}
       </button>
 
       {expanded && (
-        <div className="border-t border-[var(--border)] px-3 sm:px-4 py-3 sm:py-4">
+        <div className="border-t border-[var(--border)] px-3 py-3 sm:px-4 sm:py-4">
           <div className="space-y-1">
             {TIERS.map((tier, i) => {
-              const isCurrent = fileCount >= tier.count && (i === TIERS.length - 1 || fileCount < TIERS[i + 1].count);
+              const isCurrent =
+                fileCount >= tier.count &&
+                (i === TIERS.length - 1 || fileCount < TIERS[i + 1].count);
               const isReached = fileCount >= tier.count;
               return (
                 <div
                   key={tier.count}
-                  className={`flex items-center justify-between px-3 py-2 rounded-lg text-[12px] sm:text-[13px] transition-all ${
-                    isCurrent ? "bg-[#2563EB]/8 border border-[#2563EB]/15 font-semibold" :
-                    isReached ? "bg-[#16A34A]/5" : ""
+                  className={`flex items-center justify-between rounded-lg px-3 py-2 text-[12px] transition-all sm:text-[13px] ${
+                    isCurrent
+                      ? "bg-[#2563EB]/8 border border-[#2563EB]/15 font-semibold"
+                      : isReached
+                        ? "bg-[#16A34A]/5"
+                        : ""
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                      isReached ? "bg-[#16A34A]/15 text-[#16A34A]" : "bg-gray-100 text-gray-400"
-                    }`}>
+                    <span
+                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                        isReached ? "bg-[#16A34A]/15 text-[#16A34A]" : "bg-gray-100 text-gray-400"
+                      }`}
+                    >
                       {isReached ? "✓" : tier.count}
                     </span>
                     <span className={isCurrent ? "text-[var(--txt)]" : "text-[var(--txt2)]"}>
@@ -73,13 +84,19 @@ export function TieredPricingTable({ fileCount }: TieredPricingTableProps) {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={isCurrent ? "text-[#2563EB] font-bold" : "text-[var(--txt)] font-medium"}>
+                    <span
+                      className={
+                        isCurrent ? "font-bold text-[#2563EB]" : "font-medium text-[var(--txt)]"
+                      }
+                    >
                       {formatCurrency(tier.price)}/ea
                     </span>
                     {tier.save && (
-                      <span className={`text-[10px] sm:text-[11px] px-1.5 py-0.5 rounded-md font-bold ${
-                        isCurrent ? "bg-[#2563EB] text-white" : "bg-[#16A34A]/10 text-[#16A34A]"
-                      }`}>
+                      <span
+                        className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold sm:text-[11px] ${
+                          isCurrent ? "bg-[#2563EB] text-white" : "bg-[#16A34A]/10 text-[#16A34A]"
+                        }`}
+                      >
                         Save {tier.save}
                       </span>
                     )}
@@ -88,7 +105,7 @@ export function TieredPricingTable({ fileCount }: TieredPricingTableProps) {
               );
             })}
           </div>
-          <p className="text-[10px] sm:text-[11px] text-[var(--txt3)] mt-3 text-center">
+          <p className="mt-3 text-center text-[10px] text-[var(--txt3)] sm:text-[11px]">
             Prices shown per design. Exact quote after file review.
           </p>
         </div>

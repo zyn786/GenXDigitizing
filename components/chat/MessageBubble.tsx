@@ -1,7 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, CheckCheck, FileText, Image, FileArchive, Play, Pause, Trash2, Download, Reply, Edit2 } from "lucide-react";
+import {
+  Check,
+  CheckCheck,
+  FileText,
+  Image,
+  FileArchive,
+  Play,
+  Pause,
+  Trash2,
+  Download,
+  Reply,
+  Edit2,
+} from "lucide-react";
 import { useState, useRef, useCallback, memo } from "react";
 import { useChat } from "./ChatProvider";
 import type { Message, Attachment } from "./types";
@@ -41,29 +53,41 @@ function cleanContent(raw: string): string {
 }
 
 // ReplyPreview component - Telegram-style reply block
-function ReplyPreview({ replyTo, isOwn, onClick }: {
+function ReplyPreview({
+  replyTo,
+  isOwn,
+  onClick,
+}: {
   replyTo: { id: string; content: string; senderName: string };
   isOwn: boolean;
   onClick: () => void;
 }) {
-  const preview = replyTo.content?.length > 60
-    ? replyTo.content.slice(0, 60) + "…"
-    : replyTo.content || "Attachment";
+  const preview =
+    replyTo.content?.length > 60
+      ? replyTo.content.slice(0, 60) + "…"
+      : replyTo.content || "Attachment";
 
   return (
     <button
       onClick={onClick}
-      className="w-full text-left rounded-lg mb-2 overflow-hidden cursor-pointer border-none p-0 active:scale-[0.98] transition-transform"
-      style={{ background: isOwn ? "rgba(255,255,255,0.1)" : "var(--elevated)" }}>
-      <div className="flex items-stretch"
-        style={{ borderLeft: isOwn ? "3px solid rgba(255,255,255,0.25)" : "3px solid #7C3AED" }}>
-        <div className="flex-1 min-w-0 px-2.5 py-1.5 overflow-hidden">
-          <p className="text-[11px] font-semibold truncate leading-tight"
-            style={{ color: isOwn ? "rgba(255,255,255,0.8)" : "#7C3AED" }}>
+      className="mb-2 w-full cursor-pointer overflow-hidden rounded-lg border-none p-0 text-left transition-transform active:scale-[0.98]"
+      style={{ background: isOwn ? "rgba(255,255,255,0.1)" : "var(--elevated)" }}
+    >
+      <div
+        className="flex items-stretch"
+        style={{ borderLeft: isOwn ? "3px solid rgba(255,255,255,0.25)" : "3px solid #7C3AED" }}
+      >
+        <div className="min-w-0 flex-1 overflow-hidden px-2.5 py-1.5">
+          <p
+            className="truncate text-[11px] font-semibold leading-tight"
+            style={{ color: isOwn ? "rgba(255,255,255,0.8)" : "#7C3AED" }}
+          >
             {replyTo.senderName || "User"}
           </p>
-          <p className="text-[11px] truncate leading-tight mt-0.5"
-            style={{ color: isOwn ? "rgba(255,255,255,0.6)" : "var(--txt2)" }}>
+          <p
+            className="mt-0.5 truncate text-[11px] leading-tight"
+            style={{ color: isOwn ? "rgba(255,255,255,0.6)" : "var(--txt2)" }}
+          >
             {preview}
           </p>
         </div>
@@ -75,22 +99,33 @@ function ReplyPreview({ replyTo, isOwn, onClick }: {
 const FilePreview = memo(function FilePreview({ att }: { att: Attachment }) {
   const { name, type, size, url } = att;
   const ext = name.split(".").pop()?.toUpperCase() ?? "";
-  const sizeStr = size > 1_000_000 ? `${(size / 1_000_000).toFixed(1)} MB` : `${Math.round(size / 1000)} KB`;
+  const sizeStr =
+    size > 1_000_000 ? `${(size / 1_000_000).toFixed(1)} MB` : `${Math.round(size / 1000)} KB`;
   const isImage = IMG_EXTENSIONS.test(name);
 
   const icon =
-    type === "image" || isImage ? <Image size={16} /> :
-    type === "embroidery" ? "🧵" :
-    type === "vector" ? "✏️" :
-    type === "archive" ? <FileArchive size={16} /> :
-    <FileText size={16} />;
+    type === "image" || isImage ? (
+      <Image size={16} />
+    ) : type === "embroidery" ? (
+      "🧵"
+    ) : type === "vector" ? (
+      "✏️"
+    ) : type === "archive" ? (
+      <FileArchive size={16} />
+    ) : (
+      <FileText size={16} />
+    );
 
   const accent =
-    type === "image" || isImage ? "#0E7490" :
-    type === "embroidery" ? "#7C3AED" :
-    type === "vector" ? "#D97706" :
-    type === "archive" ? "#E11D48" :
-    "#4B5563";
+    type === "image" || isImage
+      ? "#0E7490"
+      : type === "embroidery"
+        ? "#7C3AED"
+        : type === "vector"
+          ? "#D97706"
+          : type === "archive"
+            ? "#E11D48"
+            : "#4B5563";
 
   const [showFull, setShowFull] = useState(false);
   const [longPress, setLongPress] = useState(false);
@@ -129,13 +164,15 @@ const FilePreview = memo(function FilePreview({ att }: { att: Attachment }) {
     return (
       <div className="relative">
         {showFull ? (
-          <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4"
-            onClick={() => setShowFull(false)}>
-            <NextImage src={url} alt={name} fill className="object-contain rounded-lg" />
+          <div
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 p-4"
+            onClick={() => setShowFull(false)}
+          >
+            <NextImage src={url} alt={name} fill className="rounded-lg object-contain" />
           </div>
         ) : null}
         <div
-          className="relative rounded-xl overflow-hidden cursor-pointer group/img border border-[var(--border2)]"
+          className="group/img relative cursor-pointer overflow-hidden rounded-xl border border-[var(--border2)]"
           onMouseDown={handleTouchStart}
           onMouseUp={handleTouchEnd}
           onMouseLeave={handleTouchEnd}
@@ -148,18 +185,19 @@ const FilePreview = memo(function FilePreview({ att }: { att: Attachment }) {
             alt={name}
             width={240}
             height={240}
-            className="w-full max-w-[240px] max-h-[240px] object-cover"
+            className="max-h-[240px] w-full max-w-[240px] object-cover"
           />
           {/* Download button on hover/long press */}
           <button
-            onClick={(e) => { e.stopPropagation(); downloadFile(); }}
-            className={`absolute bottom-2 right-2 w-8 h-8 rounded-lg flex items-center justify-center
-              bg-black/50 text-white border-none cursor-pointer transition-opacity
-              ${longPress ? "opacity-100" : "opacity-0 group-hover/img:opacity-100"}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              downloadFile();
+            }}
+            className={`absolute bottom-2 right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-none bg-black/50 text-white transition-opacity ${longPress ? "opacity-100" : "opacity-0 group-hover/img:opacity-100"}`}
           >
             <Download size={14} />
           </button>
-          <div className="absolute bottom-2 left-2 text-[10px] font-medium px-2 py-0.5 rounded-md bg-black/50 text-white">
+          <div className="absolute bottom-2 left-2 rounded-md bg-black/50 px-2 py-0.5 text-[10px] font-medium text-white">
             {sizeStr}
           </div>
         </div>
@@ -170,25 +208,24 @@ const FilePreview = memo(function FilePreview({ att }: { att: Attachment }) {
   // Non-image file — download card
   return (
     <div
-      className="flex items-center gap-2.5 px-3 py-2 rounded-lg no-underline cursor-pointer
-        bg-[var(--elevated)] border border-[var(--border2)]
-        hover:border-[var(--border3)] transition-all group/file"
+      className="group/file flex cursor-pointer items-center gap-2.5 rounded-lg border border-[var(--border2)] bg-[var(--elevated)] px-3 py-2 no-underline transition-all hover:border-[var(--border3)]"
       onClick={downloadFile}
     >
       <div
-        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm"
+        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-sm"
         style={{ background: `${accent}15`, color: accent }}
       >
         {icon}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[11px] font-semibold text-[#1F2937] truncate max-w-[200px] sm:max-w-[280px]">{name}</p>
+      <div className="min-w-0 flex-1">
+        <p className="max-w-[200px] truncate text-[11px] font-semibold text-[#1F2937] sm:max-w-[280px]">
+          {name}
+        </p>
         <p className="text-[10px] text-[#4B5563]">
           {ext} · {sizeStr}
         </p>
       </div>
-      <div className="w-7 h-7 rounded-md flex items-center justify-center
-        bg-[var(--border)] text-[#4B5563] opacity-0 group-hover/file:opacity-100 transition-opacity flex-shrink-0">
+      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-[var(--border)] text-[#4B5563] opacity-0 transition-opacity group-hover/file:opacity-100">
         <Download size={12} />
       </div>
     </div>
@@ -208,7 +245,11 @@ function VoiceNotePlayer({ duration, played }: { duration: number; played: boole
     setProgress(0);
     const interval = setInterval(() => {
       setProgress((p) => {
-        if (p >= 100) { clearInterval(interval); setIsPlaying(false); return 100; }
+        if (p >= 100) {
+          clearInterval(interval);
+          setIsPlaying(false);
+          return 100;
+        }
         return p + 1;
       });
     }, duration * 10);
@@ -218,23 +259,22 @@ function VoiceNotePlayer({ duration, played }: { duration: number; played: boole
   const secs = duration % 60;
 
   return (
-    <div className="flex items-center gap-2.5 min-w-[160px]">
+    <div className="flex min-w-[160px] items-center gap-2.5">
       <button
         onClick={togglePlay}
-        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-          bg-[#7C3AED] text-white border-none cursor-pointer hover:bg-[#7C3AED] transition-colors"
+        className="flex h-8 w-8 flex-shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-[#7C3AED] text-white transition-colors hover:bg-[#7C3AED]"
       >
         {isPlaying ? <Pause size={13} /> : <Play size={13} className="ml-0.5" />}
       </button>
-      <div className="flex-1 min-w-0">
-        <div className="h-1.5 rounded-full bg-[var(--border2)] overflow-hidden">
+      <div className="min-w-0 flex-1">
+        <div className="h-1.5 overflow-hidden rounded-full bg-[var(--border2)]">
           <motion.div
             className="h-full rounded-full bg-gradient-to-r from-[#7C3AED] to-[#0891B2]"
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.1 }}
           />
         </div>
-        <p className="text-[10px] text-[#4B5563] mt-0.5">
+        <p className="mt-0.5 text-[10px] text-[#4B5563]">
           {isPlaying ? "Playing..." : `${mins}:${secs.toString().padStart(2, "0")}`}
           {played && !isPlaying && " · Played"}
         </p>
@@ -244,7 +284,14 @@ function VoiceNotePlayer({ duration, played }: { duration: number; played: boole
 }
 
 export function MessageBubble({ message, isOwn }: { message: Message; isOwn: boolean }) {
-  const { deleteMessage, editMessage, setReplyTo, canDeleteMessage, canEditMessage, currentUserRole } = useChat();
+  const {
+    deleteMessage,
+    editMessage,
+    setReplyTo,
+    canDeleteMessage,
+    canEditMessage,
+    currentUserRole,
+  } = useChat();
   const [showActions, setShowActions] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState("");
@@ -298,99 +345,127 @@ export function MessageBubble({ message, isOwn }: { message: Message; isOwn: boo
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className={`flex gap-2 mb-1.5 ${isOwn ? "flex-row-reverse" : "flex-row"}`}
+      className={`mb-1.5 flex gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}
     >
       {/* Avatar — incoming only */}
       {!isOwn && (
-        <div className="flex-shrink-0 self-end mb-0.5">
-          <div className="w-7 h-7 rounded-full flex items-center justify-center
-            text-[10px] font-bold text-white select-none
-            bg-gradient-to-br from-[#4B5563] to-[#1F2937]">
+        <div className="mb-0.5 flex-shrink-0 self-end">
+          <div className="flex h-7 w-7 select-none items-center justify-center rounded-full bg-gradient-to-br from-[#4B5563] to-[#1F2937] text-[10px] font-bold text-white">
             {initials}
           </div>
         </div>
       )}
 
       <div
-        className={`flex flex-col max-w-[75%] min-w-0 ${isOwn ? "items-end" : "items-start"}`}
+        className={`flex min-w-0 max-w-[75%] flex-col ${isOwn ? "items-end" : "items-start"}`}
         onMouseEnter={() => setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
       >
         {/* Linked order badge */}
         {message.linkedOrder && currentUserRole !== "client" && (
-          <div
-            className="text-[10px] px-2.5 py-1 rounded-xl mb-1.5 font-medium inline-flex items-center gap-1.5
-              bg-[var(--surface)] border border-[var(--border)] shadow-sm text-[#374151] max-w-full cursor-pointer
-              hover:border-[var(--border3)] transition-all"
-          >
-            <span className="font-mono font-bold text-[#1F2937] text-[11px]">{message.linkedOrder.orderNumber}</span>
+          <div className="mb-1.5 inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-[10px] font-medium text-[#374151] shadow-sm transition-all hover:border-[var(--border3)]">
+            <span className="font-mono text-[11px] font-bold text-[#1F2937]">
+              {message.linkedOrder.orderNumber}
+            </span>
             <span className="text-[#4B5563]">·</span>
-            <span className="truncate text-[#374151]">{message.linkedOrder.designName || message.linkedOrder.service}</span>
+            <span className="truncate text-[#374151]">
+              {message.linkedOrder.designName || message.linkedOrder.service}
+            </span>
             <span
-              className="w-2 h-2 rounded-full flex-shrink-0 ring-1 ring-white/20"
+              className="h-2 w-2 flex-shrink-0 rounded-full ring-1 ring-white/20"
               style={{
                 background:
-                  message.linkedOrder.status === "delivered" ? "#16A34A" :
-                  message.linkedOrder.status === "revision" ? "#DC2626" :
-                  message.linkedOrder.status === "review" ? "#D97706" :
-                  message.linkedOrder.status === "in_progress" ? "#7C3AED" :
-                  message.linkedOrder.status === "approved" ? "#0891B2" :
-                  "#D97706",
+                  message.linkedOrder.status === "delivered"
+                    ? "#16A34A"
+                    : message.linkedOrder.status === "revision"
+                      ? "#DC2626"
+                      : message.linkedOrder.status === "review"
+                        ? "#D97706"
+                        : message.linkedOrder.status === "in_progress"
+                          ? "#7C3AED"
+                          : message.linkedOrder.status === "approved"
+                            ? "#0891B2"
+                            : "#D97706",
               }}
             />
           </div>
         )}
 
         {/* Bubble — WhatsApp-style image messages */}
-        {message.attachments && message.attachments.length > 0 &&
-          message.attachments.every(a => IMG_EXTENSIONS.test(a.name)) &&
-          !cleanContent(message.content || "").trim() ? (
+        {message.attachments &&
+        message.attachments.length > 0 &&
+        message.attachments.every((a) => IMG_EXTENSIONS.test(a.name)) &&
+        !cleanContent(message.content || "").trim() ? (
           // Pure image message — WhatsApp style gallery
-          <div className={`flex flex-col gap-1 max-w-[75%] ${isOwn ? "items-end" : "items-start"}`}>
+          <div className={`flex max-w-[75%] flex-col gap-1 ${isOwn ? "items-end" : "items-start"}`}>
             {/* Reply preview for image messages */}
             {message.replyTo?.senderName && (
-              <ReplyPreview replyTo={message.replyTo} isOwn={isOwn} onClick={() => {
-                const el = document.getElementById(`msg-${message.replyTo!.id}`);
-                if (el) {
-                  el.scrollIntoView({ behavior: "smooth", block: "center" });
-                  el.classList.add("ring-2", "ring-[#7C3AED]", "ring-offset-2", "rounded-lg");
-                  setTimeout(() => el.classList.remove("ring-2", "ring-[#7C3AED]", "ring-offset-2", "rounded-lg"), 2000);
-                }
-              }} />
+              <ReplyPreview
+                replyTo={message.replyTo}
+                isOwn={isOwn}
+                onClick={() => {
+                  const el = document.getElementById(`msg-${message.replyTo!.id}`);
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    el.classList.add("ring-2", "ring-[#7C3AED]", "ring-offset-2", "rounded-lg");
+                    setTimeout(
+                      () =>
+                        el.classList.remove(
+                          "ring-2",
+                          "ring-[#7C3AED]",
+                          "ring-offset-2",
+                          "rounded-lg"
+                        ),
+                      2000
+                    );
+                  }
+                }}
+              />
             )}
             {message.attachments.map((att) => (
               <FilePreview key={att.id} att={att} />
             ))}
             {/* Time + ticks for image messages */}
-            <span className={`inline-flex items-center gap-1 px-1 text-[10px] leading-none
-              ${isOwn ? "text-[#4B5563] self-end" : "text-[#4B5563] self-start"}`}
+            <span
+              className={`inline-flex items-center gap-1 px-1 text-[10px] leading-none ${isOwn ? "self-end text-[#4B5563]" : "self-start text-[#4B5563]"}`}
             >
               <span>{timeStr}</span>
               {isOwn && tick}
             </span>
             {/* Reply + Edit + Delete for image messages */}
             {showActions && (
-              <div className={`flex items-center justify-center ${isOwn ? "self-end" : "self-start"}`}>
-                <div className="flex items-center gap-0.5 px-2 py-1 rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm">
-                  <button onClick={(e) => { e.stopPropagation(); handleReply(); }}
-                    className="inline-flex items-center justify-center w-7 h-7 rounded-lg
-                      cursor-pointer border-none bg-transparent
-                      text-[#4B5563] hover:text-[#7C3AED] hover:bg-[#7C3AED]/10 transition-all">
+              <div
+                className={`flex items-center justify-center ${isOwn ? "self-end" : "self-start"}`}
+              >
+                <div className="flex items-center gap-0.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-2 py-1 shadow-sm">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleReply();
+                    }}
+                    className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent text-[#4B5563] transition-all hover:bg-[#7C3AED]/10 hover:text-[#7C3AED]"
+                  >
                     <Reply size={13} />
                   </button>
                   {canEdit && (
-                    <button onClick={(e) => { e.stopPropagation(); handleStartEdit(); }}
-                      className="inline-flex items-center justify-center w-7 h-7 rounded-lg
-                        cursor-pointer border-none bg-transparent
-                        text-[#4B5563] hover:text-[#7C3AED] hover:bg-[#7C3AED]/10 transition-all">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStartEdit();
+                      }}
+                      className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent text-[#4B5563] transition-all hover:bg-[#7C3AED]/10 hover:text-[#7C3AED]"
+                    >
                       <Edit2 size={13} />
                     </button>
                   )}
                   {canDelete && (
-                    <button onClick={(e) => { e.stopPropagation(); if (confirm("Delete this message?")) deleteMessage(message.id); }}
-                      className="inline-flex items-center justify-center w-7 h-7 rounded-lg
-                        cursor-pointer border-none bg-transparent
-                        text-[#4B5563] hover:text-[#DC2626] hover:bg-[#DC2626]/10 transition-all">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm("Delete this message?")) deleteMessage(message.id);
+                      }}
+                      className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent text-[#4B5563] transition-all hover:bg-[#DC2626]/10 hover:text-[#DC2626]"
+                    >
                       <Trash2 size={13} />
                     </button>
                   )}
@@ -399,105 +474,142 @@ export function MessageBubble({ message, isOwn }: { message: Message; isOwn: boo
             )}
           </div>
         ) : (
-        // Normal text bubble
-        <div
-          className={`relative px-3.5 pb-2 pt-2 text-sm leading-[1.5] min-w-0 overflow-hidden [overflow-wrap:anywhere]
-            ${isOwn
-              ? "rounded-[16px_16px_4px_16px] bg-[#7C3AED] text-white shadow-[0_1px_3px_rgba(109,40,217,0.2)]"
-              : "rounded-[16px_16px_16px_4px] bg-[var(--surface)] text-[#1F2937] border border-[var(--border)] shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+          // Normal text bubble
+          <div
+            className={`relative min-w-0 overflow-hidden px-3.5 pb-2 pt-2 text-sm leading-[1.5] [overflow-wrap:anywhere] ${
+              isOwn
+                ? "rounded-[16px_16px_4px_16px] bg-[#7C3AED] text-white shadow-[0_1px_3px_rgba(109,40,217,0.2)]"
+                : "rounded-[16px_16px_16px_4px] border border-[var(--border)] bg-[var(--surface)] text-[#1F2937] shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
             }`}
-        >
-          {/* Reply preview inside bubble */}
-          {message.replyTo?.senderName && (
-            <ReplyPreview replyTo={message.replyTo} isOwn={isOwn} onClick={() => {
-              const el = document.getElementById(`msg-${message.replyTo!.id}`);
-              if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "center" });
-                el.classList.add("ring-2", "ring-[#7C3AED]", "ring-offset-2", "rounded-lg");
-                setTimeout(() => el.classList.remove("ring-2", "ring-[#7C3AED]", "ring-offset-2", "rounded-lg"), 2000);
-              }
-            }} />
-          )}
-
-          {/* Edit mode or normal display */}
-          {isEditing ? (
-            <div className="flex flex-col gap-1.5">
-              <input
-                value={editText}
-                onChange={e => setEditText(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter") handleSaveEdit(); if (e.key === "Escape") setIsEditing(false); }}
-                className={`w-full bg-transparent border-b pb-1 outline-none text-sm ${isOwn ? "text-white border-white/30 placeholder-white/40" : "text-[#1F2937] border-[var(--border3)] placeholder-[var(--txt3)]"}`}
-                placeholder="Edit message..."
-                autoFocus
-              />
-              <div className="flex gap-2 text-[10px]">
-                <button onClick={handleSaveEdit} className={`${isOwn ? "text-white/80" : "text-[#7C3AED]"} font-semibold`}>Save</button>
-                <button onClick={() => setIsEditing(false)} className="text-[#4B5563]">Cancel</button>
-                <span className="text-[#4B5563] ml-auto">esc to cancel</span>
-              </div>
-            </div>
-          ) : (
-            cleanContent(message.content || "")
-          )}
-
-          {/* Attachments — non-image or mixed */}
-          {message.attachments && message.attachments.length > 0 && (
-            <div className="mt-1.5 flex flex-col gap-1.5">
-              {message.attachments.map((att) => (
-                <FilePreview key={att.id} att={att} />
-              ))}
-            </div>
-          )}
-
-          {/* Voice note */}
-          {message.voiceNote && (
-            <div className="mt-1.5">
-              <VoiceNotePlayer duration={message.voiceNote.duration} played={message.voiceNote.played} />
-            </div>
-          )}
-
-          {/* Floating action bar — Reply / Edit / Delete */}
-          {showActions && !isEditing && (
-            <div className={`flex items-center justify-center mt-1 mb-1 ${isOwn ? "self-end" : "self-start"}`}>
-              <div className="flex items-center gap-0.5 px-2 py-1 rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm">
-                <button onClick={(e) => { e.stopPropagation(); handleReply(); }}
-                  className="inline-flex items-center justify-center w-7 h-7 rounded-lg
-                    cursor-pointer border-none bg-transparent
-                    text-[#4B5563] hover:text-[#7C3AED] hover:bg-[#7C3AED]/10 transition-all"
-                  title="Reply">
-                  <Reply size={13} />
-                </button>
-                {canEdit && (
-                  <button onClick={(e) => { e.stopPropagation(); handleStartEdit(); }}
-                    className="inline-flex items-center justify-center w-7 h-7 rounded-lg
-                      cursor-pointer border-none bg-transparent
-                      text-[#4B5563] hover:text-[#7C3AED] hover:bg-[#7C3AED]/10 transition-all"
-                    title="Edit">
-                    <Edit2 size={13} />
-                  </button>
-                )}
-                {canDelete && (
-                  <button onClick={(e) => { e.stopPropagation(); if (confirm("Delete this message?")) deleteMessage(message.id); }}
-                    className="inline-flex items-center justify-center w-7 h-7 rounded-lg
-                      cursor-pointer border-none bg-transparent
-                      text-[#4B5563] hover:text-[#DC2626] hover:bg-[#DC2626]/10 transition-all"
-                    title="Delete">
-                    <Trash2 size={13} />
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Time + ticks + edited — inside bubble */}
-          <span className={`inline-flex items-center gap-1 ml-2 float-right mt-1 relative -bottom-0.5 -right-0.5
-            ${isOwn ? "text-white/60" : "text-[#4B5563]"}`}
           >
-            {message.edited && <span className="text-[9px] italic">edited</span>}
-            <span className="text-[10px] leading-none">{timeStr}</span>
-            {isOwn && tick}
-          </span>
-        </div>
+            {/* Reply preview inside bubble */}
+            {message.replyTo?.senderName && (
+              <ReplyPreview
+                replyTo={message.replyTo}
+                isOwn={isOwn}
+                onClick={() => {
+                  const el = document.getElementById(`msg-${message.replyTo!.id}`);
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    el.classList.add("ring-2", "ring-[#7C3AED]", "ring-offset-2", "rounded-lg");
+                    setTimeout(
+                      () =>
+                        el.classList.remove(
+                          "ring-2",
+                          "ring-[#7C3AED]",
+                          "ring-offset-2",
+                          "rounded-lg"
+                        ),
+                      2000
+                    );
+                  }
+                }}
+              />
+            )}
+
+            {/* Edit mode or normal display */}
+            {isEditing ? (
+              <div className="flex flex-col gap-1.5">
+                <input
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveEdit();
+                    if (e.key === "Escape") setIsEditing(false);
+                  }}
+                  className={`w-full border-b bg-transparent pb-1 text-sm outline-none ${isOwn ? "border-white/30 text-white placeholder-white/40" : "border-[var(--border3)] text-[#1F2937] placeholder-[var(--txt3)]"}`}
+                  placeholder="Edit message..."
+                  autoFocus
+                />
+                <div className="flex gap-2 text-[10px]">
+                  <button
+                    onClick={handleSaveEdit}
+                    className={`${isOwn ? "text-white/80" : "text-[#7C3AED]"} font-semibold`}
+                  >
+                    Save
+                  </button>
+                  <button onClick={() => setIsEditing(false)} className="text-[#4B5563]">
+                    Cancel
+                  </button>
+                  <span className="ml-auto text-[#4B5563]">esc to cancel</span>
+                </div>
+              </div>
+            ) : (
+              cleanContent(message.content || "")
+            )}
+
+            {/* Attachments — non-image or mixed */}
+            {message.attachments && message.attachments.length > 0 && (
+              <div className="mt-1.5 flex flex-col gap-1.5">
+                {message.attachments.map((att) => (
+                  <FilePreview key={att.id} att={att} />
+                ))}
+              </div>
+            )}
+
+            {/* Voice note */}
+            {message.voiceNote && (
+              <div className="mt-1.5">
+                <VoiceNotePlayer
+                  duration={message.voiceNote.duration}
+                  played={message.voiceNote.played}
+                />
+              </div>
+            )}
+
+            {/* Floating action bar — Reply / Edit / Delete */}
+            {showActions && !isEditing && (
+              <div
+                className={`mb-1 mt-1 flex items-center justify-center ${isOwn ? "self-end" : "self-start"}`}
+              >
+                <div className="flex items-center gap-0.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-2 py-1 shadow-sm">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleReply();
+                    }}
+                    className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent text-[#4B5563] transition-all hover:bg-[#7C3AED]/10 hover:text-[#7C3AED]"
+                    title="Reply"
+                  >
+                    <Reply size={13} />
+                  </button>
+                  {canEdit && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStartEdit();
+                      }}
+                      className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent text-[#4B5563] transition-all hover:bg-[#7C3AED]/10 hover:text-[#7C3AED]"
+                      title="Edit"
+                    >
+                      <Edit2 size={13} />
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm("Delete this message?")) deleteMessage(message.id);
+                      }}
+                      className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent text-[#4B5563] transition-all hover:bg-[#DC2626]/10 hover:text-[#DC2626]"
+                      title="Delete"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Time + ticks + edited — inside bubble */}
+            <span
+              className={`relative -bottom-0.5 -right-0.5 float-right ml-2 mt-1 inline-flex items-center gap-1 ${isOwn ? "text-white/60" : "text-[#4B5563]"}`}
+            >
+              {message.edited && <span className="text-[9px] italic">edited</span>}
+              <span className="text-[10px] leading-none">{timeStr}</span>
+              {isOwn && tick}
+            </span>
+          </div>
         )}
       </div>
     </motion.div>

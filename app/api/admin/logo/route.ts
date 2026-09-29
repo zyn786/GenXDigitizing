@@ -20,17 +20,19 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     const result = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        {
-          folder: "genxdigitizing/logos",
-          resource_type: "image",
-          transformation: [{ quality: "auto", fetch_format: "auto" }],
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      ).end(buffer);
+      cloudinary.uploader
+        .upload_stream(
+          {
+            folder: "genxdigitizing/logos",
+            resource_type: "image",
+            transformation: [{ quality: "auto", fetch_format: "auto" }],
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        )
+        .end(buffer);
     });
 
     const url = getThumbnailUrl(result.public_id);
@@ -56,7 +58,11 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   try {
     const admin = createAdminClient();
-    const { data, error } = await admin.from("platform_settings").select("value").eq("key", "logo_url").maybeSingle();
+    const { data, error } = await admin
+      .from("platform_settings")
+      .select("value")
+      .eq("key", "logo_url")
+      .maybeSingle();
     if (error) {
       console.error("[logo] GET error (run migration?):", error.message);
       return NextResponse.json({ url: null });

@@ -17,7 +17,12 @@ interface OfferBannerProps {
   fileCount?: number;
 }
 
-export function OfferBanner({ autoOffers = [], isFirstVisitor = false, appliedCoupon = null, fileCount = 0 }: OfferBannerProps) {
+export function OfferBanner({
+  autoOffers = [],
+  isFirstVisitor = false,
+  appliedCoupon = null,
+  fileCount = 0,
+}: OfferBannerProps) {
   const [dismissed, setDismissed] = useState(true);
   const [currentOffer, setCurrentOffer] = useState<CouponOffer | null>(null);
 
@@ -31,14 +36,14 @@ export function OfferBanner({ autoOffers = [], isFirstVisitor = false, appliedCo
     // Pick best offer
     // Priority: bulk > first_order > time_urgent > rush
     if (!autoOffers?.length) return;
-    const bulk = autoOffers.find(o => o.type === "bulk");
+    const bulk = autoOffers.find((o) => o.type === "bulk");
     if (bulk && fileCount >= 5) {
       setCurrentOffer(bulk);
       setDismissed(false);
       return;
     }
 
-    const firstOrder = autoOffers.find(o => o.type === "first_order");
+    const firstOrder = autoOffers.find((o) => o.type === "first_order");
     if (firstOrder && isFirstVisitor) {
       setCurrentOffer(firstOrder);
       setDismissed(false);
@@ -78,45 +83,57 @@ export function OfferBanner({ autoOffers = [], isFirstVisitor = false, appliedCo
         initial={{ opacity: 0, height: 0 }}
         animate={{ opacity: 1, height: "auto" }}
         exit={{ opacity: 0, height: 0 }}
-        className="mb-4 sm:mb-5 overflow-hidden"
+        className="mb-4 overflow-hidden sm:mb-5"
       >
-        <div className={`rounded-xl px-4 py-3 sm:py-3.5 flex items-center gap-3 ${
-          currentOffer.type === "bulk"
-            ? "bg-[#16A34A]/5 border border-[#16A34A]/15"
-            : currentOffer.type === "first_order"
-              ? "bg-[#2563EB]/5 border border-[#2563EB]/15"
-              : "bg-[#F97316]/5 border border-[#F97316]/15"
-        }`}>
-          <span className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/80 flex items-center justify-center">
-            {currentOffer.type === "bulk" ? <Sparkles size={15} className="text-[#16A34A]" /> :
-             currentOffer.type === "time_urgent" ? <Zap size={15} className="text-[#F97316]" /> :
-             <Sparkles size={15} className="text-[#2563EB]" />}
+        <div
+          className={`flex items-center gap-3 rounded-xl px-4 py-3 sm:py-3.5 ${
+            currentOffer.type === "bulk"
+              ? "border border-[#16A34A]/15 bg-[#16A34A]/5"
+              : currentOffer.type === "first_order"
+                ? "border border-[#2563EB]/15 bg-[#2563EB]/5"
+                : "border border-[#F97316]/15 bg-[#F97316]/5"
+          }`}
+        >
+          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-white/80 sm:h-9 sm:w-9">
+            {currentOffer.type === "bulk" ? (
+              <Sparkles size={15} className="text-[#16A34A]" />
+            ) : currentOffer.type === "time_urgent" ? (
+              <Zap size={15} className="text-[#F97316]" />
+            ) : (
+              <Sparkles size={15} className="text-[#2563EB]" />
+            )}
           </span>
 
-          <div className="flex-1 min-w-0">
-            <p className="text-[12px] sm:text-[13px] font-semibold text-[var(--txt)]">
+          <div className="min-w-0 flex-1">
+            <p className="text-[12px] font-semibold text-[var(--txt)] sm:text-[13px]">
               {currentOffer.title}
               {currentOffer.discountLabel && (
-                <span className={`ml-2 inline-block px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold ${
-                  currentOffer.type === "bulk"
-                    ? "bg-[#16A34A] text-white"
-                    : currentOffer.type === "first_order"
-                      ? "bg-[#2563EB] text-white"
-                      : "bg-[#F97316] text-white"
-                }`}>{currentOffer.discountLabel}</span>
+                <span
+                  className={`ml-2 inline-block rounded-md px-1.5 py-0.5 text-[10px] font-bold sm:text-[11px] ${
+                    currentOffer.type === "bulk"
+                      ? "bg-[#16A34A] text-white"
+                      : currentOffer.type === "first_order"
+                        ? "bg-[#2563EB] text-white"
+                        : "bg-[#F97316] text-white"
+                  }`}
+                >
+                  {currentOffer.discountLabel}
+                </span>
               )}
             </p>
-            <p className="text-[11px] sm:text-[12px] text-[var(--txt2)]">
+            <p className="text-[11px] text-[var(--txt2)] sm:text-[12px]">
               {currentOffer.description}
               {currentOffer.couponCode && !currentOffer.isAutoApplied && (
-                <span className="ml-1 font-mono font-bold text-[var(--txt)]">{currentOffer.couponCode}</span>
+                <span className="ml-1 font-mono font-bold text-[var(--txt)]">
+                  {currentOffer.couponCode}
+                </span>
               )}
             </p>
           </div>
 
           <button
             onClick={handleDismiss}
-            className="p-1.5 rounded-lg hover:bg-black/5 text-[var(--txt3)] flex-shrink-0"
+            className="flex-shrink-0 rounded-lg p-1.5 text-[var(--txt3)] hover:bg-black/5"
             aria-label="Dismiss offer"
           >
             <X size={13} />
