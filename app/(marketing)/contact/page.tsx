@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SITE_INFO, SITE_STATS } from "@/lib/site-config";
+import { SITE_INFO } from "@/lib/site-config";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { ContactForm } from "./ContactForm";
 import { FreeSampleBanner } from "@/components/marketing/FreeSampleBanner";
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const CONTACT_INFO = [
   { emoji: "⚡", title: "Fast Replies", desc: "We respond within 1 hour" },
-  { emoji: "🌍", title: "Worldwide Service", desc: `Clients in ${SITE_STATS.countriesServed}+ countries — no matter the timezone` },
+  { emoji: "🌍", title: "Worldwide Service", desc: "Any timezone — files delivered digitally, no shipping involved" },
   { emoji: "💬", title: "Live Chat Available", desc: "Already a client? Message us directly from your portal" },
   { emoji: "📧", title: "Email Support", desc: `${SITE_INFO.email} — detailed questions welcome` },
 ];

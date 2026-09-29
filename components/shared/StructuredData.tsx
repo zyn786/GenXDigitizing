@@ -1,4 +1,4 @@
-import { SITE_INFO, SITE_STATS } from "@/lib/site-config";
+import { SITE_INFO } from "@/lib/site-config";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com";
 
@@ -24,7 +24,12 @@ export function OrganizationSchema() {
       },
     } : {}),
     foundingDate: String(SITE_INFO.founded),
-    description: `Production-ready embroidery digitizing, vector art, and custom patches. ${SITE_STATS.ordersCompleted.toLocaleString()}+ orders completed. Free revisions. Fast turnaround.`,
+    // No aggregateRating here. It previously carried a fabricated 4.9/5 from
+    // 500 invented reviews, which is deceptive advertising and a Google
+    // structured-data violation that risks a manual action. Only add
+    // aggregateRating when the `reviews` table actually has published rows.
+    priceRange: "$5-$30",
+    description: "Production-ready embroidery digitizing, vector art, and custom patches. From $7, 12-hour turnaround, unlimited free revisions, every major machine format.",
     ...(SITE_INFO.social ? {
       sameAs: Object.values(SITE_INFO.social),
     } : {}),
@@ -137,7 +142,12 @@ export function WebSiteSchema() {
     "@type": "WebSite",
     name: SITE_INFO.name,
     url: BASE_URL,
-    description: `Production-ready embroidery digitizing, vector art, and custom patches. ${SITE_STATS.ordersCompleted.toLocaleString()}+ orders completed. Free revisions. Fast turnaround.`,
+    // No aggregateRating here. It previously carried a fabricated 4.9/5 from
+    // 500 invented reviews, which is deceptive advertising and a Google
+    // structured-data violation that risks a manual action. Only add
+    // aggregateRating when the `reviews` table actually has published rows.
+    priceRange: "$5-$30",
+    description: "Production-ready embroidery digitizing, vector art, and custom patches. From $7, 12-hour turnaround, unlimited free revisions, every major machine format.",
     potentialAction: {
       "@type": "SearchAction",
       "target": {

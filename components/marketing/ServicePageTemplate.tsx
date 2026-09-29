@@ -7,7 +7,6 @@ import { ArrowRight, Upload, Check, Star, Clock, Shield, Zap, Layers, Download, 
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { GradientOrb } from "@/components/shared/GradientOrb";
 import { Button } from "@/components/ui/Button";
-import { SITE_STATS, fmtPlus } from "@/lib/site-config";
 import { fetchPortfolio } from "@/components/portfolio/data";
 import type { PortfolioItem } from "@/components/portfolio/data";
 import { PortfolioModal } from "@/components/portfolio/PortfolioModal";
@@ -28,7 +27,10 @@ export interface ServicePageData {
   shortName?: string; // e.g. "Digitizing", "Vector Art", "Patches" — for "The Art of Perfect ___" heading
   benefits: { icon: string; title: string; desc: string }[];
   faqs: { q: string; a: string }[];
-  testimonials: { name: string; company: string; text: string }[];
+  // Was required; the fabricated arrays were stripped from all 15 service
+  // pages. Optional so the pages keep type-checking. Re-add only with real
+  // data from the `reviews` table.
+  testimonials?: { name: string; company: string; text: string }[];
   portfolioSlug?: string;
   portfolioTag?: string;
   cta: { text: string; href: string };
@@ -184,28 +186,15 @@ export function ServicePageTemplate({ data }: { data: ServicePageData }) {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ────────────────────────────── */}
-      <section className="py-10 sm:py-14">
-        <div className="max-w-[1000px] mx-auto px-4 sm:px-6">
-          <AnimatedSection>
-            <div className="text-center mb-8">
-              <h2 className="font-syne font-bold text-2xl sm:text-3xl mb-2">What Our Clients Say</h2>
-              <p className="text-sm text-[var(--txt2)]">Real feedback from professionals who trust us</p>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
-              {data.testimonials.map((t) => (
-                <div key={t.name} className="bg-[var(--surface)] rounded-2xl p-4 sm:p-5 border border-[var(--border)]">
-                  <div className="flex items-center gap-0.5 mb-2">
-                    {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="#F59E0B" stroke="none" />)}
-                  </div>
-                  <p className="text-sm text-[var(--txt2)] leading-relaxed mb-3">&ldquo;{t.text}&rdquo;</p>
-                  <p className="text-xs font-semibold text-[var(--txt)]">{t.name} — {t.company}</p>
-                </div>
-              ))}
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
+      {/* ── TESTIMONIALS — REMOVED ──────────────────────
+          This block rendered invented quotes on all fifteen service pages:
+          "Marcus Rivera", "Sarah Kim", "David Chen", "Linda Martinez",
+          "James Okafor", "Priya Mehta", "Angela Foster", "Tomás Rivera",
+          "James T." — none of them real customers, all shown with five stars.
+          The `testimonials` arrays have been stripped from every service page.
+
+          Do not re-add fabricated quotes here. When the `reviews` table has
+          published rows, render those instead. */}
 
       {/* ── GUARANTEE ──────────────────────────────── */}
       <SewOutGuarantee variant="banner" />

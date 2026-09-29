@@ -6,7 +6,7 @@ import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Upload, Star } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { SITE_STATS, fmtPlus } from "@/lib/site-config";
+import { SITE_CLAIMS } from "@/lib/site-config";
 
 /* ── Device + accessibility detection ──────────── */
 function usePrefs() {
@@ -65,10 +65,10 @@ function SimpleHero() {
         </div>
         <div className="relative z-10 text-center w-full max-w-[500px]">
           <div className="inline-flex flex-wrap items-center justify-center gap-1.5 mb-3 text-[11px] font-medium bg-white/10 px-3 py-1.5 rounded-full border border-white/15 text-white">
-            <span className="font-bold">{SITE_STATS.avgRating}</span>
-            {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={10} fill="#F59E0B" stroke="none" />)}
+            <span className="font-bold">{SITE_CLAIMS.price.value}</span>
+            <span>Standard Designs</span>
             <span className="text-white/25">|</span>
-            <span>{fmtPlus(SITE_STATS.ordersCompleted)} Orders</span>
+            <span>{SITE_CLAIMS.turnaround.value} Turnaround</span>
             <span className="text-white/25">|</span>
             <span className="text-[#4ADE80] flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-[#4ADE80] animate-pulse" />Free Revisions</span>
           </div>
@@ -183,12 +183,10 @@ export function MobileHeroScroll() {
 
           {/* Trust bar */}
           <div className="inline-flex flex-wrap items-center justify-center gap-1.5 mt-2 mb-3 text-[11px] font-medium bg-white/10 px-3 py-1.5 rounded-full border border-white/15 text-white">
-            <span className="flex items-center gap-0.5">
-              <span className="font-bold">{SITE_STATS.avgRating}</span>
-              {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={10} fill="#F59E0B" stroke="none" />)}
-            </span>
+            <span className="font-bold">{SITE_CLAIMS.price.value}</span>
+            <span>Standard Designs</span>
             <span className="text-white/25">|</span>
-            <span className="text-white/85"><span className="font-semibold">{fmtPlus(SITE_STATS.ordersCompleted)}</span> Orders</span>
+            <span className="text-white/85"><span className="font-semibold">{SITE_CLAIMS.turnaround.value}</span> Turnaround</span>
             <span className="text-white/25">|</span>
             <span className="text-[#4ADE80] flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-[#4ADE80] animate-pulse" />Free Revisions</span>
           </div>

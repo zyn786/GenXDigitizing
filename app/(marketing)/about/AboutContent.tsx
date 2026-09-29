@@ -28,46 +28,50 @@ import {
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { GradientOrb } from "@/components/shared/GradientOrb";
 import { Button } from "@/components/ui/Button";
-import { SITE_STATS, SITE_INFO, fmt, fmtPlus } from "@/lib/site-config";
+import { SITE_INFO } from "@/lib/site-config";
 
 /* ─────────────────────────────────────────────────────────────
    Constants
    ──────────────────────────────────────────────────────────── */
 
+// Was 5,000+ orders, 99% satisfaction, 500+ clients, 100+ countries and a
+// 4.9/5 average rating. All invented — the database held zero orders, two
+// clients and zero reviews. These entries are capabilities and policies, each
+// provable from the repo.
 const STATS = [
   {
-    value: fmtPlus(SITE_STATS.ordersCompleted),
-    label: "Orders Completed",
+    value: "$7",
+    label: "Standard Designs",
     icon: FileCheck,
     color: "#2563EB",
   },
   {
-    value: `${SITE_STATS.satisfactionRate}%`,
-    label: "Client Satisfaction",
-    icon: Heart,
-    color: "#16A34A",
-  },
-  {
-    value: `${SITE_STATS.avgDeliveryHours}h`,
-    label: "Avg. Delivery Time",
+    value: "12h",
+    label: "Standard Turnaround",
     icon: Clock,
     color: "#F97316",
   },
   {
-    value: fmtPlus(SITE_STATS.clientsServed),
-    label: "Clients Worldwide",
+    value: "Free",
+    label: "Unlimited Revisions",
+    icon: Heart,
+    color: "#16A34A",
+  },
+  {
+    value: "8",
+    label: "Machine Formats",
     icon: Globe,
     color: "#7C3AED",
   },
   {
-    value: fmtPlus(SITE_STATS.countriesServed),
-    label: "Countries Served",
+    value: "3–24h",
+    label: "Delivery Options",
     icon: TrendingUp,
     color: "#06B6D4",
   },
   {
-    value: `${SITE_STATS.avgRating}/5`,
-    label: "Average Rating",
+    value: "100%",
+    label: "Hand-Digitized",
     icon: Star,
     color: "#EAB308",
   },
@@ -107,7 +111,7 @@ const VALUES = [
   {
     icon: Globe,
     title: "Global Standards, Local Care",
-    desc: "Serving clients in 100+ countries means understanding different machine brands, thread types, and regional preferences.",
+    desc: "Files are delivered digitally in every major machine format, so machine brand, thread type and region are never a blocker.",
     color: "#06B6D4",
   },
 ];
@@ -323,7 +327,7 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
                   <p>
                     Today, we serve{" "}
                     <strong className="text-[var(--txt)]">
-                      {fmtPlus(SITE_STATS.clientsServed)} clients across {fmtPlus(SITE_STATS.countriesServed)} countries
+                      every major embroidery machine format, worldwide
                     </strong>
                     — from solo embroidery shops to corporate apparel brands. The mission hasn't changed: deliver
                     production-ready files that run clean on the first try, every time.
@@ -347,10 +351,10 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
               {/* Right: Visual / Stats mini-grid */}
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {[
-                  { n: fmtPlus(SITE_STATS.ordersCompleted), sub: "Orders Delivered" },
-                  { n: `${SITE_STATS.satisfactionRate}%`, sub: "Satisfaction Rate" },
-                  { n: `${SITE_STATS.avgDeliveryHours}h`, sub: "Avg. Turnaround" },
-                  { n: `${SITE_STATS.avgRating}/5`, sub: "Client Rating" },
+                  { n: "$7",    sub: "Standard Designs" },
+                  { n: "12h",   sub: "Standard Turnaround" },
+                  { n: "Free",  sub: "Unlimited Revisions" },
+                  { n: "8",     sub: "Machine Formats" },
                 ].map((stat) => (
                   <div
                     key={stat.sub}
@@ -597,7 +601,7 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
                 Order in Minutes, Delivered Fast
               </h2>
               <p className="text-sm sm:text-base text-[var(--txt2)] max-w-2xl mx-auto">
-                Our proven four-step process — refined across {fmtPlus(SITE_STATS.ordersCompleted)} orders.
+                Our proven four-step process — from upload to production-ready files.
               </p>
             </div>
 

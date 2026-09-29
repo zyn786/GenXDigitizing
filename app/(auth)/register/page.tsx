@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { registerSchema, type RegisterInput } from "@/lib/validations";
-import { SITE_STATS, fmtPlus } from "@/lib/site-config";
+import { SITE_CLAIMS } from "@/lib/site-config";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
@@ -254,7 +254,7 @@ export default function RegisterPage() {
                   Create your account
                 </h2>
                 <p className="text-xs text-[var(--txt3)] mb-5">
-                  Join {SITE_STATS.verifiedReviews}+ businesses who trust us with their embroidery digitizing.
+                  Track orders, proofs and revisions in one place — free to create.
                 </p>
 
                 <div className="space-y-4">
@@ -412,22 +412,22 @@ export default function RegisterPage() {
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-white/50">
                       <Star size={14} className="text-[#F59E0B] fill-[#F59E0B] flex-shrink-0" />
                       <div>
-                        <p className="text-xs font-bold text-[var(--txt)]">{SITE_STATS.avgRating}/5</p>
-                        <p className="text-[10px] text-[var(--txt3)]">{fmtPlus(SITE_STATS.verifiedReviews)} verified reviews</p>
+                        <p className="text-xs font-bold text-[var(--txt)]">{SITE_CLAIMS.price.value}</p>
+                        <p className="text-[10px] text-[var(--txt3)]">Standard designs</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-white/50">
                       <Users size={14} className="text-[#2563EB] flex-shrink-0" />
                       <div>
-                        <p className="text-xs font-bold text-[var(--txt)]">{fmtPlus(SITE_STATS.ordersCompleted)}+</p>
-                        <p className="text-[10px] text-[var(--txt3)]">Happy clients</p>
+                        <p className="text-xs font-bold text-[var(--txt)]">{SITE_CLAIMS.formats.value}</p>
+                        <p className="text-[10px] text-[var(--txt3)]">Machine formats</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-white/50">
                       <Clock size={14} className="text-[#7C3AED] flex-shrink-0" />
                       <div>
-                        <p className="text-xs font-bold text-[var(--txt)]">{SITE_STATS.avgDeliveryHours}h</p>
-                        <p className="text-[10px] text-[var(--txt3)]">Avg delivery time</p>
+                        <p className="text-xs font-bold text-[var(--txt)]">{SITE_CLAIMS.turnaround.value}</p>
+                        <p className="text-[10px] text-[var(--txt3)]">Turnaround</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-white/50">

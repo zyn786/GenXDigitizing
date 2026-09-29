@@ -7,7 +7,7 @@ import { GradientOrb } from "@/components/shared/GradientOrb";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { SERVICE_CATEGORIES } from "@/lib/utils";
-import { SITE_STATS, fmtPlus } from "@/lib/site-config";
+import { SITE_CLAIMS, SITE_CLAIM_LIST } from "@/lib/site-config";
 import { PriceEstimator } from "@/components/marketing/PriceEstimator";
 import type { ServiceCategory } from "@/types";
 
@@ -101,8 +101,8 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
         {/* Social proof strip */}
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-3 mt-8 px-4 sm:px-0">
           {[
-            { emoji: "⭐", label: `${SITE_STATS.avgRating} / 5 Rating`, sub: `${fmtPlus(SITE_STATS.verifiedReviews)} reviews` },
-            { emoji: "📦", label: `${fmtPlus(SITE_STATS.ordersCompleted)} Orders`, sub: "Delivered worldwide" },
+            { emoji: "💵", label: `${SITE_CLAIMS.price.value} Standard Designs`, sub: "No hidden fees" },
+            { emoji: "📦", label: `${SITE_CLAIMS.formats.value} Machine Formats`, sub: "All conversions free" },
             { emoji: "⚡", label: "3–24h Average", sub: "Turnaround time" },
             { emoji: "💳", label: "Pay When Satisfied", sub: "No risk to you" },
           ].map((s) => (
@@ -116,20 +116,10 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
           ))}
         </div>
 
-        {/* Testimonial quote */}
-        <div className="mt-5 max-w-[600px] mx-auto px-4 sm:px-0">
-          <div className="flex items-start gap-3 p-4 sm:p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
-            <span className="text-xl sm:text-2xl flex-shrink-0 mt-0.5">💬</span>
-            <div>
-              <p className="text-[13px] sm:text-sm text-[var(--txt2)] italic leading-relaxed">
-                &ldquo;genxdigitizing digitized 200+ designs for our streetwear brand. Zero errors, always on time, and the free format conversion saves us hours every week.&rdquo;
-              </p>
-              <p className="text-[11px] sm:text-xs text-[var(--txt3)] mt-2">
-                — <strong className="text-[var(--txt)]">Marcus R.</strong>, Streetwear Brand Owner, USA
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* REMOVED: an invented testimonial attributed to "Marcus R.,
+            Streetwear Brand Owner, USA", claiming 200+ designs digitized for a
+            streetwear brand. There is no such customer. Do not re-add invented
+            quotes here — render real rows from the `reviews` table instead. */}
       </section>
 
       {/* PRICING CARDS */}
@@ -269,50 +259,24 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
           </AnimatedSection>
         </div>
 
-        {/* Testimonials */}
+        {/* Was "What Our Clients Say" with three invented quotes — David K.,
+            Sarah M. and James T., none of whom exist. Replaced with what we can
+            actually stand behind until the reviews table has published rows.
+            To restore real reviews: select from `reviews` where is_published. */}
         <div className="pt-4 sm:pt-6">
           <div className="text-center mb-6 sm:mb-8">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#F59E0B]/10 text-[#92400E] border border-[#F59E0B]/20 mb-3">
-{`⭐ Trusted by ${fmtPlus(SITE_STATS.clientsServed)} Clients`}
+              ⭐ What You Get
             </span>
-            <h2 className="font-syne font-bold text-xl sm:text-3xl mb-2">What Our Clients Say</h2>
-            <p className="text-sm text-[var(--txt2)] max-w-lg mx-auto">Real feedback from real clients who trust us with their embroidery digitizing.</p>
+            <h2 className="font-syne font-bold text-xl sm:text-3xl mb-2">Why Order From Us</h2>
+            <p className="text-sm text-[var(--txt2)] max-w-lg mx-auto">Clear pricing, real turnaround times, and revisions until the file runs right.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
-            {[
-              {
-                quote: "Fastest turnaround I've seen. Submitted 15 cap logos at 10pm — all 15 were in my inbox by morning. The stitch quality is flawless.",
-                name: "David K.",
-                role: "Promotional Products Distributor, Canada",
-                stars: 5,
-              },
-              {
-                quote: "We switched from a $25/design service to genxdigitizing at $7. Better quality, faster delivery, and free revisions. Best vendor decision we've made.",
-                name: "Sarah M.",
-                role: "Corporate Apparel Brand, UK",
-                stars: 5,
-              },
-              {
-                quote: "Their vector redraw service is incredible. We send hand-drawn sketches and get back production-ready vectors. Saves our design team days of work.",
-                name: "James T.",
-                role: "Screen Printing Shop, Australia",
-                stars: 5,
-              },
-            ].map((t) => (
-              <div key={t.name} className="rounded-2xl p-5 bg-[var(--surface)] border border-[var(--border)] flex flex-col">
-                <div className="flex gap-0.5 mb-3">
-                  {Array.from({ length: t.stars }).map((_, i) => (
-                    <span key={i} className="text-sm" style={{ color: "#F59E0B" }}>★</span>
-                  ))}
-                </div>
-                <p className="text-[13px] text-[var(--txt2)] leading-relaxed italic mb-4 flex-1">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-                <div>
-                  <p className="text-xs font-semibold text-[var(--txt)]">{t.name}</p>
-                  <p className="text-[10px] text-[var(--txt3)]">{t.role}</p>
-                </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4">
+            {SITE_CLAIM_LIST.map((c) => (
+              <div key={c.label} className="rounded-2xl p-5 bg-[var(--surface)] border border-[var(--border)] flex flex-col items-center text-center">
+                <p className="font-syne font-bold text-2xl sm:text-3xl text-[var(--txt)] mb-1">{c.value}</p>
+                <p className="text-[11px] sm:text-xs text-[var(--txt3)]">{c.label}</p>
               </div>
             ))}
           </div>
@@ -323,7 +287,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
               "🧵 Hand-digitized by professionals",
               "✅ Machine-tested before delivery",
               "🔄 All embroidery formats supported",
-              `🌍 Clients in ${fmtPlus(SITE_STATS.countriesServed)} countries`,
+              "🌍 Worldwide — files delivered digitally",
             ].map((b) => (
               <span key={b} className="text-[11px] sm:text-xs text-[var(--txt2)] px-3 py-1.5 rounded-full bg-[var(--elevated)] border border-[var(--border2)]">
                 {b}
@@ -390,7 +354,7 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
             {/* Guarantees */}
             <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5 mt-4">
               <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-[var(--txt2)]">
-                <span className="text-xs">🛡️</span> {SITE_STATS.satisfactionRate}% satisfaction guarantee
+                <span className="text-xs">🛡️</span> Revisions until it runs right
               </span>
               <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-[var(--txt2)]">
                 <span className="text-xs">♾️</span> Free unlimited revisions

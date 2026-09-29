@@ -1,5 +1,5 @@
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
-import { SITE_STATS, fmtPlus } from "@/lib/site-config";
+import { SITE_CLAIMS } from "@/lib/site-config";
 
 function TrustStat({
   value,
@@ -47,21 +47,28 @@ export function TrustStatsSection() {
 
             {/* Big numbers row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 max-w-3xl mx-auto mb-10 sm:mb-12">
-              <TrustStat value={SITE_STATS.ordersCompleted} suffix="+" label="Orders Completed" />
-              <TrustStat value={SITE_STATS.clientsServed} suffix="+" label="Clients Worldwide" />
-              <TrustStat value={`${SITE_STATS.avgDeliveryHours}`} suffix="h" label="Avg. Delivery" />
-              <TrustStat value={SITE_STATS.satisfactionRate} suffix="%" label="Satisfaction Rate" />
+              {/* Was 5,000+ orders / 500+ clients / 4h / 99% satisfaction, all
+                  invented. These are provable instead: price from
+                  service_tiers, turnaround and revisions from published policy,
+                  format count from the output_fmt enum. */}
+              <TrustStat value={SITE_CLAIMS.price.value} label="Standard Designs" />
+              <TrustStat value="12" suffix="h" label="Standard Turnaround" />
+              <TrustStat value={SITE_CLAIMS.revisions.value} label="Unlimited Revisions" />
+              <TrustStat value={SITE_CLAIMS.formats.value} label="Machine Formats" />
             </div>
 
             {/* Operational details — compact grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 max-w-4xl mx-auto mb-8">
               {[
+                // "1.2 Avg Revisions / 98% first-pass approval" was invented — a
+                // performance metric for work that had never been done. The
+                // replacements are capabilities and policies, not results.
                 { icon: "⚡", label: "3–24h Delivery", sub: "Rush in 6h, urgent in 3h" },
-                { icon: "🔄", label: "1.2 Avg Revisions", sub: "98% first-pass approval" },
+                { icon: "🔄", label: "Unlimited Revisions", sub: "Free, until it's right" },
                 { icon: "💬", label: "< 1hr Response", sub: "Support 7 days a week" },
-                { icon: "⭐", label: `${SITE_STATS.avgRating}/5 Rating`, sub: `${fmtPlus(SITE_STATS.verifiedReviews)} verified reviews` },
+                { icon: "♻️", label: "All Formats Free", sub: "DST, PES, EMB, JEF + more" },
                 { icon: "🛡️", label: "100% Guarantee", sub: "Free revisions until perfect" },
-                { icon: "🌍", label: `${SITE_STATS.countriesServed}+ Countries`, sub: `${fmtPlus(SITE_STATS.ordersCompleted)} orders delivered` },
+                { icon: "🌍", label: "Worldwide", sub: "Files delivered digitally" },
               ].map((s) => (
                 <div key={s.label} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10">
                   <span className="text-lg flex-shrink-0">{s.icon}</span>

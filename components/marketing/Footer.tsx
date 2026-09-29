@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { SITE_STATS, SITE_INFO, fmtPlus } from "@/lib/site-config";
+import { SITE_INFO, SITE_CLAIM_TAGS } from "@/lib/site-config";
 import { Button } from "@/components/ui/Button";
 import { FreeSampleBanner } from "@/components/marketing/FreeSampleBanner";
 
@@ -47,7 +47,7 @@ export function Footer() {
               Premium embroidery digitizing, vector art, and custom patches — delivered production-ready.
             </p>
             <div className="flex flex-wrap justify-center md:justify-start gap-1.5 mb-3">
-              {[`🌍 ${SITE_STATS.countriesServed}+ Countries`, `⭐ ${SITE_STATS.avgRating}/5`, `✅ ${fmtPlus(SITE_STATS.ordersCompleted)} Orders`].map((t) => (
+              {SITE_CLAIM_TAGS.map((t) => (
                 <span key={t} className="inline-flex px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--elevated)] md:bg-[var(--border)] text-[var(--txt2)] border border-[var(--border)] md:border-[var(--border2)]">
                   {t}
                 </span>
