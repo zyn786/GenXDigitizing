@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
@@ -143,6 +143,80 @@ function parseAttachments(raw?: string): Array<{ filename: string; size?: number
   return text.split(",").map(function (n) { return { filename: n.trim() }; }).filter(function (a) { return a.filename; });
 }
 
+/**
+ * Is this attachment something a browser can render inline?
+ *
+ * Prefers the stored content_type — Resend gives one for every inbound file —
+ * and falls back to the extension, because older sent rows carry only a
+ * filename. SVG is deliberately excluded: it can carry script.
+ */
+function isImageAttachment(f: any): boolean {
+  var name = String((f && f.filename) || "").toLowerCase();
+  if (/\.svg$/.test(name)) return false;
+  if (f && typeof f.content_type === "string" && f.content_type.indexOf("image/") === 0) {
+    return f.content_type !== "image/svg+xml";
+  }
+  return /\.(png|jpe?g|gif|webp|bmp|avif|heic|heif)$/.test(name);
+}
+
+/**
+ * Thumbnail for an image attachment. `src` serves the bytes same-origin, so the
+ * session cookie authorises it; the anchor adds inline=1 so the full-size view
+ * opens in a tab instead of downloading.
+ */
+function AttachThumb({ src, href, filename, size }: { src: string; href: string; filename: string; size?: number }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" title={"Open " + filename}
+       style={{ display: "block", width: 190, textDecoration: "none", border: "1px solid " + cBord2, borderRadius: 10, overflow: "hidden", background: "var(--surface)" }}>
+      <img src={src} alt={filename} loading="lazy"
+           style={{ display: "block", width: "100%", height: 132, objectFit: "cover", background: "#0b1220" }} />
+      <span style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 9px", fontSize: 11, fontWeight: 600, color: cTxt2 }}>
+        <Paperclip size={11} style={{ flexShrink: 0 }} />
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{filename}</span>
+        {size ? <span style={{ color: cTxt3, fontWeight: 400, marginLeft: "auto", flexShrink: 0 }}>{fmtSize(size)}</span> : null}
+      </span>
+    </a>
+  );
+}
+
+/**
+ * A file staged for sending — uploading, ready, or failed. Images show a
+ * thumbnail once the upload has produced a storage path; everything else stays
+ * a compact chip. Used by both the compose form and the inline reply box.
+ */
+function PendingAttachChip({ a, onRemove }: { a: any; onRemove: () => void }) {
+  var removeBtn = (
+    <button type="button" onClick={onRemove} title="Remove"
+      style={{ background: "none", border: "none", cursor: "pointer", color: cTxt3, padding: "0 2px", display: "flex" }}>
+      <X size={12} />
+    </button>
+  );
+
+  if (a.status === "ready" && a.path && isImageAttachment(a)) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "flex-start" }}>
+        <AttachThumb src={"/api/admin/email/attachment?path=" + encodeURIComponent(a.path)}
+          filename={a.filename} size={a.size}
+          href={"/api/admin/email/attachment?path=" + encodeURIComponent(a.path) + "&inline=1"} />
+        <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: cTxt3 }}>
+          Ready to send {removeBtn}
+        </span>
+      </div>
+    );
+  }
+
+  var tint = a.status === "error" ? CLR.red : (a.status === "uploading" ? CLR.amber : CLR.blue);
+  return (
+    <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 10px", background: tint.bg, borderRadius: 8, border: "1px solid " + tint.icon + "33", fontSize: 11, color: tint.text, fontWeight: 600 }}>
+      {a.status === "uploading" ? <Loader2 size={11} className="animate-spin" /> : <Paperclip size={11} />}
+      {a.filename}
+      <span style={{ color: cTxt3, fontWeight: 400 }}>({fmtSize(a.size)})</span>
+      {a.status === "error" && <span style={{ fontWeight: 700 }}>{a.error}</span>}
+      {removeBtn}
+    </div>
+  );
+}
+
 function AttachmentChips({ message }: { message: any }) {
   var files = parseAttachments(message.attachments_meta);
   if (files.length === 0) return null;
@@ -156,6 +230,17 @@ function AttachmentChips({ message }: { message: any }) {
         } else if (f.path) {
           href = "/api/admin/email/attachment?path=" + encodeURIComponent(f.path);
         }
+
+        // Images preview inline. Only when we can actually resolve the bytes —
+        // legacy sent rows store a bare filename with no storage path, and
+        // there is nothing to point an <img> at.
+        if (href && isImageAttachment(f)) {
+          return (
+            <AttachThumb key={i} src={href} filename={f.filename} size={f.size}
+              href={href + (href.indexOf("?") === -1 ? "?" : "&") + "inline=1"} />
+          );
+        }
+
         var inner = (
           <>
             <Paperclip size={12} />
@@ -196,7 +281,7 @@ function Pagination({ page, total, pageSize, onPage }: {
 
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 2, padding: "10px 12px", borderTop: "1px solid " + cBord, flexWrap: "wrap" }}>
-      <button type="button" disabled={page <= 1} onClick={function(){onPage(page-1);}}
+      <button type="button" className="email-tap" disabled={page <= 1} onClick={function(){onPage(page-1);}}
         style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 8, border: "none", background: "transparent", color: page <= 1 ? cBord2 : cTxt2, cursor: page <= 1 ? "default" : "pointer", fontSize: 13 }}>
         <ChevronLeft size={15} />
       </button>
@@ -204,7 +289,7 @@ function Pagination({ page, total, pageSize, onPage }: {
         if (p === -1) return <span key={"dots"+idx} style={{ width: 30, textAlign: "center", color: cTxt3, fontSize: 12 }}>…</span>;
         var active = p === page;
         return (
-          <button key={p} type="button" onClick={function(){onPage(p);}}
+          <button key={p} type="button" onClick={function(){onPage(p);}} className="email-tap"
             style={{ minWidth: 30, height: 30, borderRadius: 8, border: "none",
               background: active ? CLR.blue.icon : "transparent",
               color: active ? "#fff" : cTxt2, cursor: "pointer",
@@ -214,7 +299,7 @@ function Pagination({ page, total, pageSize, onPage }: {
           </button>
         );
       })}
-      <button type="button" disabled={page >= totalPages} onClick={function(){onPage(page+1);}}
+      <button type="button" className="email-tap" disabled={page >= totalPages} onClick={function(){onPage(page+1);}}
         style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 8, border: "none", background: "transparent", color: page >= totalPages ? cBord2 : cTxt2, cursor: page >= totalPages ? "default" : "pointer", fontSize: 13 }}>
         <ChevronRight size={15} />
       </button>
@@ -226,6 +311,9 @@ function Pagination({ page, total, pageSize, onPage }: {
 }
 
 /* ── component ──────────────────────────────────────── */
+/** Stable identity for defaulted array props — see the destructuring below. */
+const EMPTY_ARRAY: never[] = [];
+
 interface Props {
   userId: string;
   sentEmails: SentEmail[];
@@ -250,7 +338,11 @@ interface Props {
 
 export function EmailComposer({
   userId, sentEmails: initSent, receivedEmails: initRecv,
-  threads: initThreads = [], replies: initReplies = [], threadMessages: initMessages = [], addresses = [],
+  // Default to a shared constant rather than a fresh `[]`. A new array literal
+  // in a default parameter is a NEW identity on every render, which would make
+  // the resync effects below fire on every render and loop forever.
+  threads: initThreads = EMPTY_ARRAY, replies: initReplies = EMPTY_ARRAY,
+  threadMessages: initMessages = EMPTY_ARRAY, addresses = EMPTY_ARRAY,
   sentTotal, receivedTotal, repliesTotal = 0,
   unreadCount: initUnread = 0, unreadReplies: initUnreadReplies = 0,
   migrationMissing = false, loadError = null,
@@ -258,6 +350,8 @@ export function EmailComposer({
 }: Props) {
   var router = useRouter();
   var searchParams = useSearchParams();
+  // Drives the progress bar during server round trips (pagination, resend sync).
+  var [isPending, startTx] = useTransition();
 
   /* state */
   var [folder, setFolder] = useState("inbox");
@@ -292,6 +386,32 @@ export function EmailComposer({
   var [unreadReplies, setUnreadReplies] = useState(initUnreadReplies);
   var [sentOffset, setSentOffset] = useState(0);
   var [syncing, setSyncing] = useState(false);
+
+  /* ── Keeping local state in step with the server ────────────────────────
+     The lists below are seeded from props but also mutated locally for
+     optimistic updates, so the UI responds before the server round trip lands:
+     a just-sent mail is prepended, an unread count decrements, a reply is
+     appended.
+
+     The page used to paper over the resulting staleness by passing a `key` that
+     remounted this entire component whenever a page number changed. That worked,
+     at the cost of scroll position, any open draft, and the selected folder —
+     `folder` re-initialised to "inbox", so paginating while in Sent bounced you
+     back to the inbox.
+
+     Re-seeding from props when the server sends new data keeps the optimistic
+     behaviour and drops the remount. Each effect keys on the prop identity the
+     server component hands down, which changes only when the data does.
+
+     `sentOffset` is the one piece of pure local bookkeeping: it bumps the sent
+     total so a new mail is counted immediately. It must reset whenever the
+     server's own count arrives, or the total double-counts. */
+  useEffect(function () { setSentList(initSent); setSentOffset(0); }, [initSent]);
+  useEffect(function () { setThreadList(initThreads); }, [initThreads]);
+  useEffect(function () { setReplyList(initReplies); }, [initReplies]);
+  useEffect(function () { setMessages(initMessages); }, [initMessages]);
+  useEffect(function () { setUnread(initUnread); }, [initUnread]);
+  useEffect(function () { setUnreadReplies(initUnreadReplies); }, [initUnreadReplies]);
   var fileRef = useRef(null);
 
   /* ── derived: which conversations exist, and their display fields ── */
@@ -689,7 +809,8 @@ export function EmailComposer({
         if (!res.ok || d.error) { toast.error(d.error || "Sync failed"); return; }
         if (d.imported > 0) {
           toast.success("Imported " + d.imported + " email" + (d.imported === 1 ? "" : "s"));
-          router.refresh();
+          // Inside a transition so the spinner below has something to report.
+          startTx(function () { router.refresh(); });
         } else {
           toast.success("Already up to date — " + d.seen + " checked");
         }
@@ -717,7 +838,10 @@ export function EmailComposer({
     var params = new URLSearchParams(searchParams.toString());
     var key = folder === "replies" ? "repliesPage" : (folder === "inbox" ? "inboxPage" : "sentPage");
     if (p <= 1) params.delete(key); else params.set(key, String(p));
-    router.push("?" + params.toString(), { scroll: false });
+    // Pagination is a server round trip. Wrapping it in a transition gives
+    // isPending a value to drive the progress bar — previously the list just sat
+    // there with no indication anything was happening.
+    startTx(function () { router.push("?" + params.toString(), { scroll: false }); });
   }, [folder, searchParams, router]);
 
   var showCompose = folder === "compose";
@@ -730,7 +854,54 @@ export function EmailComposer({
      ═══════════════════════════════════════════════════ */
   return (
     <div className="email-client">
-      <style dangerouslySetInnerHTML={{ __html: "\n.email-client { display:flex; height:calc(100vh - 140px); position:relative; min-height:560px; border-radius:16px; overflow:hidden; background:" + cSurf + "; border:1px solid " + cBord + "; }\n.email-sidebar { width:200px; flex-shrink:0; border-right:1px solid " + cBord + "; display:flex; flex-direction:column; background:rgba(0,0,0,0.01); }\n.email-main { flex:1; display:flex; flex-direction:column; min-width:0; }\n.email-list-panel { width:400px; flex-shrink:0; border-right:1px solid " + cBord + "; display:flex; flex-direction:column; }\n.email-detail-panel { flex:1; display:flex; flex-direction:column; min-width:0; }\n.email-body img { max-width:100%; height:auto; }\n.email-body table { max-width:100%; }\n.email-body a { word-break:break-word; }\n.email-body { overflow-wrap:anywhere; }\n\n@media (max-width: 768px) {\n  .email-client { flex-direction:column; height:calc(100dvh - 100px); border-radius:12px; }\n  .email-sidebar { display:none; }\n  .email-sidebar.open { display:flex; position:fixed; z-index:40; top:0; left:0; bottom:0; width:240px; box-shadow:4px 0 20px rgba(0,0,0,0.2); }\n  .email-list-panel { width:100%; border-right:none; }\n  .email-detail-panel { width:100%; position:absolute; inset:0; z-index:10; background:" + cSurf + "; }\n}\n@media (min-width: 769px) and (max-width: 1100px) {\n  .email-list-panel { width:300px; }\n}\n" }} />
+      {/*
+        One style block, deliberately. This markup previously carried three
+        separate <style> injections with overlapping rules — the mobile overrides
+        were split across all three, two of them using !important to fight each
+        other, so the effective layout could not be read from any single place.
+
+        Two real bugs fixed here:
+          · `min-height: 560px` was never unset on mobile. `height` shrank to
+            100dvh-100px but the floor stayed, so once the on-screen keyboard
+            opened (or on a short viewport) the container refused to shrink and
+            `overflow: hidden` clipped the composer with no way to scroll to it.
+          · Icon-only buttons were 16-30px, well under a comfortable touch
+            target, which is most of why the mobile view felt fiddly.
+      */}
+      <style dangerouslySetInnerHTML={{ __html:
+        "\n.email-client { display:flex; height:calc(100vh - 140px); position:relative; min-height:560px; border-radius:16px; overflow:hidden; background:" + cSurf + "; border:1px solid " + cBord + "; }\n" +
+        ".email-sidebar { width:200px; flex-shrink:0; border-right:1px solid " + cBord + "; display:flex; flex-direction:column; background:rgba(0,0,0,0.01); }\n" +
+        ".email-main { flex:1; display:flex; flex-direction:column; min-width:0; }\n" +
+        ".email-list-panel { width:400px; flex-shrink:0; border-right:1px solid " + cBord + "; display:flex; flex-direction:column; }\n" +
+        ".email-detail-panel { flex:1; display:flex; flex-direction:column; min-width:0; }\n" +
+        ".email-body img { max-width:100%; height:auto; }\n" +
+        ".email-body table { max-width:100%; }\n" +
+        ".email-body a { word-break:break-word; }\n" +
+        ".email-body { overflow-wrap:anywhere; }\n" +
+        ".efld { display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:" + cTxt3 + "; margin-bottom:5px; }\n" +
+        ".email-row { transition: background-color 0.12s; }\n" +
+        // Indeterminate progress bar for server round trips.
+        ".email-progress { height:2px; flex-shrink:0; background-image:linear-gradient(90deg, transparent, #2563EB, transparent); background-size:40% 100%; background-repeat:no-repeat; animation:email-progress 1.1s linear infinite; }\n" +
+        "@keyframes email-progress { 0% { background-position:-40% 0 } 100% { background-position:140% 0 } }\n" +
+        "@media (prefers-reduced-motion: reduce) { .email-progress { animation:none; background-image:linear-gradient(90deg, transparent, #2563EB, transparent); background-size:100% 100%; } }\n" +
+        // Rows carry their state in an inline `background`, which a class rule
+        // cannot override. background-IMAGE composites on top of background-COLOR,
+        // so this tints any row on hover without fighting the selected/unread fill.
+        ".email-row:hover { background-image: linear-gradient(rgba(0,0,0,0.04), rgba(0,0,0,0.04)); }\n" +
+        "\n@media (max-width: 768px) {\n" +
+        "  .email-client { flex-direction:column; height:calc(100dvh - 100px); min-height:0; border-radius:12px; }\n" +
+        "  .email-sidebar { display:none; }\n" +
+        "  .email-sidebar.open { display:flex; position:fixed; z-index:40; top:0; left:0; bottom:0; width:264px; box-shadow:4px 0 20px rgba(0,0,0,0.2); padding-bottom:env(safe-area-inset-bottom); }\n" +
+        "  .email-sidebar-backdrop { display:block !important; }\n" +
+        "  .email-mobile-header { display:flex !important; }\n" +
+        "  .email-list-panel { width:100%; border-right:none; }\n" +
+        // padding-bottom keeps the composer's action row clear of the iOS home indicator
+        "  .email-detail-panel { width:100%; position:absolute; inset:0; z-index:10; background:" + cSurf + "; padding-bottom:env(safe-area-inset-bottom); }\n" +
+        // Comfortable touch targets for icon-only controls
+        "  .email-tap { min-width:44px; min-height:44px; display:inline-flex; align-items:center; justify-content:center; }\n" +
+        "}\n" +
+        "@media (min-width: 769px) and (max-width: 1100px) {\n  .email-list-panel { width:300px; }\n}\n"
+      }} />
 
       {/* ═══ SIDEBAR BACKDROP (mobile) ═══ */}
       {sidebarOpen && (
@@ -740,22 +911,24 @@ export function EmailComposer({
 
       {/* ═══ MOBILE HEADER ═══════════════════════ */}
       <div className="email-mobile-header" style={{ display: "none", padding: "8px 12px", borderBottom: "1px solid " + cBord, alignItems: "center", gap: 8 }}>
-        <button type="button" onClick={function(){setSidebarOpen(!sidebarOpen)}} style={{ background: "none", border: "none", cursor: "pointer", color: cTxt, padding: 4, display: "flex" }}><Menu size={20} /></button>
-        <span style={{ fontSize: 15, fontWeight: 700, color: cTxt, fontFamily: "Syne, sans-serif" }}>
+        <button type="button" onClick={function(){setSidebarOpen(!sidebarOpen)}} className="email-tap" style={{ background: "none", border: "none", cursor: "pointer", color: cTxt, padding: 4, display: "flex" }} aria-label="Open folders"><Menu size={20} /></button>
+        {/* The title takes the free space so the actions land on the right. They
+            used to sit INSIDE this span, where marginLeft:auto does nothing —
+            a span is inline, so it was never a flex child. */}
+        <span style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 700, color: cTxt, fontFamily: "Syne, sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {showCompose ? "Compose" : folder === "inbox" ? "Inbox" : folder === "replies" ? "Replies" : "Sent"}
+        </span>
         {!showCompose && showList && (
-          <button type="button" onClick={startCompose} style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 4, background: CLR.blue.icon, border: "none", cursor: "pointer", color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "Inter, sans-serif", padding: "6px 12px", borderRadius: 8 }}>
+          <button type="button" onClick={startCompose} className="email-tap" style={{ display: "inline-flex", alignItems: "center", gap: 4, background: CLR.blue.icon, border: "none", cursor: "pointer", color: "#fff", fontSize: 11, fontWeight: 700, fontFamily: "Inter, sans-serif", padding: "6px 12px", borderRadius: 8 }}>
             <Mail size={13} /> Compose
           </button>
         )}
-        </span>
         {!showCompose && !showList && (
-          <button type="button" onClick={goToList} style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", color: CLR.blue.icon, fontSize: 12, fontWeight: 600, fontFamily: "Inter, sans-serif", padding: 0 }}>
+          <button type="button" onClick={goToList} className="email-tap" style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", color: CLR.blue.icon, fontSize: 12, fontWeight: 600, fontFamily: "Inter, sans-serif", padding: 0 }}>
             <ArrowLeft size={14} /> List
           </button>
         )}
       </div>
-      <style dangerouslySetInnerHTML={{ __html: "@media (max-width: 768px) { .email-mobile-header { display:flex !important; } .email-sidebar { display:none !important; } .email-sidebar.open { display:flex !important; } .email-sidebar-backdrop { display:block !important; } }\n" }} />
 
       {/* ═══ SIDEBAR ══════════════════════════════ */}
       <div className={"email-sidebar" + (sidebarOpen ? " open" : "")}>
@@ -890,16 +1063,7 @@ export function EmailComposer({
                     {attachments.length > 0 && (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                         {attachments.map(function(a){
-                          var tint = a.status === "error" ? CLR.red : (a.status === "uploading" ? CLR.amber : CLR.blue);
-                          return (
-                            <div key={a.key} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 10px", background: tint.bg, borderRadius: 8, border: "1px solid " + tint.icon + "33", fontSize: 11, color: tint.text, fontWeight: 600 }}>
-                              {a.status === "uploading" ? <Loader2 size={11} className="animate-spin" /> : <Paperclip size={11} />}
-                              {a.filename}
-                              <span style={{ color: cTxt3, fontWeight: 400 }}>({fmtSize(a.size)})</span>
-                              {a.status === "error" && <span style={{ fontWeight: 700 }}>{a.error}</span>}
-                              <button type="button" onClick={function(){removeAttach(a.key);}} style={{ background: "none", border: "none", cursor: "pointer", color: cTxt3, padding: "0 2px", display: "flex" }}><X size={12} /></button>
-                            </div>
-                          );
+                          return <PendingAttachChip key={a.key} a={a} onRemove={function(){removeAttach(a.key);}} />;
                         })}
                       </div>
                     )}
@@ -923,6 +1087,8 @@ export function EmailComposer({
         {!showCompose && (
           <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
             <div className="email-list-panel" style={{ display: (showList || !showDetail) ? "flex" : "none" }}>
+              {isPending && <div className="email-progress" aria-hidden="true" />}
+
               {/* Search + actions */}
               <div style={{ padding: "10px 12px", borderBottom: "1px solid " + cBord, display: "flex", gap: 8, alignItems: "center" }}>
                 <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
@@ -1000,11 +1166,11 @@ export function EmailComposer({
                     var isSel = openThreadId === c.thread_id;
                     var isUnread = c.unread > 0;
                     return (
-                      <div key={c.thread_id} onClick={function(){openThreadById(c.thread_id);}} style={{
+                      <div key={c.thread_id} onClick={function(){openThreadById(c.thread_id);}} className="email-row" style={{
                         padding: "12px 14px", borderBottom: "1px solid " + cBord,
                         background: isSel ? CLR.blue.bg : (isUnread ? "rgba(59,130,246,0.035)" : "transparent"),
                         cursor: "pointer",
-                        borderLeft: isSel ? "3px solid " + CLR.blue.icon : "3px solid transparent", transition: "background 0.1s",
+                        borderLeft: isSel ? "3px solid " + CLR.blue.icon : "3px solid transparent",
                       }}>
                         <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                           <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, background: avColor(c.partyEmail), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700 }}>{avLetter(c.partyEmail)}</div>
@@ -1023,9 +1189,14 @@ export function EmailComposer({
                                   </span>
                                 )}
                               </span>
-                              <span style={{ fontSize: 10, color: cTxt3, flexShrink: 0 }}>{fmtDate(c.last_at)}</span>
+                              <span style={{ fontSize: 11, color: cTxt3, flexShrink: 0 }}>{fmtDate(c.last_at)}</span>
                             </div>
-                            <div style={{ fontSize: 12, fontWeight: isUnread ? 700 : 600, color: isSel ? CLR.blue.text : cTxt, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.subject}</div>
+                            {/* Three levels, so the eye has something to land on:
+                                bold sender → medium subject → muted preview. The
+                                subject used to go bold for unread too, which made
+                                two lines compete — unread is already carried by the
+                                dot, the tinted row and the sender weight. */}
+                            <div style={{ fontSize: 12.5, fontWeight: 500, color: isSel ? CLR.blue.text : cTxt, marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.subject}</div>
                             <div style={{ fontSize: 11, color: cTxt3, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               {c.lastFrom === "You" ? <span style={{ color: cTxt3 }}>You: </span> : null}
                               {trunc(c.preview, 70)}
@@ -1043,16 +1214,16 @@ export function EmailComposer({
                   ) : filteredSent.map(function(email){
                     var isSel = openSentId === email.id;
                     return (
-                      <div key={email.id} onClick={function(){setOpenSentId(email.id); setOpenThreadId(null); setShowList(false);}} style={{
+                      <div key={email.id} onClick={function(){setOpenSentId(email.id); setOpenThreadId(null); setShowList(false);}} className="email-row" style={{
                         padding: "12px 14px", borderBottom: "1px solid " + cBord,
                         background: isSel ? CLR.blue.bg : "transparent", cursor: "pointer",
                         borderLeft: isSel ? "3px solid " + CLR.blue.icon : "3px solid transparent",
                       }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
                           <span style={{ fontSize: 13, fontWeight: isSel ? 700 : 600, color: cTxt, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.to_email}</span>
-                          <span style={{ fontSize: 10, color: cTxt3, flexShrink: 0 }}>{fmtDate(email.sent_at)}</span>
+                          <span style={{ fontSize: 11, color: cTxt3, flexShrink: 0 }}>{fmtDate(email.sent_at)}</span>
                         </div>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: cTxt, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.subject || "(no subject)"}</div>
+                        <div style={{ fontSize: 12.5, fontWeight: 500, color: cTxt, marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.subject || "(no subject)"}</div>
                         <div style={{ fontSize: 11, color: cTxt3, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{trunc(stripTags(email.body) || "", 70)}</div>
                       </div>
                     );
@@ -1098,7 +1269,6 @@ export function EmailComposer({
         )}
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: ".efld{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:" + cTxt3 + ";margin-bottom:5px;}\n@media (max-width: 768px) {\n  .email-list-panel { width:100% !important; border-right:none !important; }\n  .email-detail-panel { width:100% !important; }\n}\n@media (min-width: 769px) and (max-width: 1100px) {\n  .email-list-panel { width:300px !important; }\n}\n" }} />
     </div>
   );
 }
@@ -1115,7 +1285,7 @@ function ThreadDetail({ thread, onBack, onUnread, replySlot }: {
   return (
     <>
       <div style={{ padding: "12px 18px", borderBottom: "1px solid " + cBord, display: "flex", alignItems: "center", gap: 10 }}>
-        <button type="button" onClick={onBack} style={{ display: "inline-flex", alignItems: "center", background: "none", border: "none", cursor: "pointer", color: cTxt2, padding: 0 }}><ArrowLeft size={16} /></button>
+        <button type="button" onClick={onBack} className="email-tap" aria-label="Back to list" style={{ display: "inline-flex", alignItems: "center", background: "none", border: "none", cursor: "pointer", color: cTxt2, padding: 0 }}><ArrowLeft size={16} /></button>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: cTxt, fontFamily: "Syne, sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{thread.subject}</div>
           <div style={{ fontSize: 11, color: cTxt3, marginTop: 1 }}>
@@ -1266,16 +1436,7 @@ function InlineReply({
         {attachments.length > 0 && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: "0 12px 10px" }}>
             {attachments.map(function (a) {
-              var tint = a.status === "error" ? CLR.red : (a.status === "uploading" ? CLR.amber : CLR.blue);
-              return (
-                <div key={a.key} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 9px", background: tint.bg, borderRadius: 8, border: "1px solid " + tint.icon + "33", fontSize: 11, color: tint.text, fontWeight: 600 }}>
-                  {a.status === "uploading" ? <Loader2 size={11} className="animate-spin" /> : <Paperclip size={11} />}
-                  {a.filename}
-                  <span style={{ color: cTxt3, fontWeight: 400 }}>({fmtSize(a.size)})</span>
-                  {a.status === "error" && <span style={{ fontWeight: 700 }}>{a.error}</span>}
-                  <button type="button" onClick={function(){ onRemoveAttachment(a.key); }} style={{ background: "none", border: "none", cursor: "pointer", color: cTxt3, padding: "0 2px", display: "flex" }}><X size={12} /></button>
-                </div>
-              );
+              return <PendingAttachChip key={a.key} a={a} onRemove={function(){ onRemoveAttachment(a.key); }} />;
             })}
           </div>
         )}
@@ -1319,7 +1480,7 @@ function SentDetail({ email, onBack }: { email: any; onBack: () => void }) {
   return (
     <>
       <div style={{ padding: "12px 18px", borderBottom: "1px solid " + cBord, display: "flex", alignItems: "center", gap: 10 }}>
-        <button type="button" onClick={onBack} style={{ display: "inline-flex", alignItems: "center", background: "none", border: "none", cursor: "pointer", color: cTxt2, padding: 0 }}><ArrowLeft size={16} /></button>
+        <button type="button" onClick={onBack} className="email-tap" aria-label="Back to list" style={{ display: "inline-flex", alignItems: "center", background: "none", border: "none", cursor: "pointer", color: cTxt2, padding: 0 }}><ArrowLeft size={16} /></button>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: cTxt, fontFamily: "Syne, sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email.subject || "(no subject)"}</div>
         </div>

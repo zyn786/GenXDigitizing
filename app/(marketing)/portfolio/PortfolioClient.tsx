@@ -26,7 +26,7 @@ import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { Button } from "@/components/ui/Button";
 import { PortfolioModal } from "@/components/portfolio/PortfolioModal";
 import { fetchPortfolio, DEFAULT_CATEGORIES, SUB_CATEGORIES } from "@/components/portfolio/data";
-import { SITE_STATS, fmt, fmtPlus } from "@/lib/site-config";
+import { SITE_CLAIMS } from "@/lib/site-config";
 import type { PortfolioItem, PortfolioCategory } from "@/components/portfolio/data";
 import Image from "next/image";
 
@@ -311,7 +311,7 @@ function ClientResultCard({ item }: { item: PortfolioItem }) {
       }}
     >
       <div
-        className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden border"
+        className="relative w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden border"
         style={{ borderColor: `${accent}25` }}
       >
         {firstImg ? (
@@ -424,7 +424,6 @@ export function PortfolioClient() {
           className="text-base sm:text-lg text-[var(--txt2)] max-w-2xl mx-auto leading-relaxed mb-6"
         >
           Every project below was hand-digitized by our team. Real files. Real results. No stock photography.
-          Browse {fmtPlus(SITE_STATS.ordersCompleted)} orders worth of embroidery quality.
         </motion.p>
 
         {/* Trust stats bar */}
@@ -434,10 +433,10 @@ export function PortfolioClient() {
           transition={{ delay: 0.15 }}
           className="flex flex-wrap items-center justify-center gap-2 sm:gap-3"
         >
-          <StatPill icon={Star} value={`${SITE_STATS.avgRating}/5`} label="Rating" />
-          <StatPill icon={FileCheck} value={fmtPlus(SITE_STATS.ordersCompleted)} label="Orders" />
-          <StatPill icon={Clock} value={`${SITE_STATS.avgDeliveryHours}h`} label="Delivery" />
-          <StatPill icon={Globe} value={fmtPlus(SITE_STATS.countriesServed)} label="Countries" />
+          <StatPill icon={Star} value={SITE_CLAIMS.price.value} label="Standard Designs" />
+          <StatPill icon={FileCheck} value={SITE_CLAIMS.turnaround.value} label="Turnaround" />
+          <StatPill icon={Clock} value={SITE_CLAIMS.revisions.value} label="Revisions" />
+          <StatPill icon={Globe} value={SITE_CLAIMS.formats.value} label="Formats" />
         </motion.div>
       </section>
 

@@ -153,7 +153,6 @@ const SEED_POSTS = [
         { text: "What Is Embroidery Digitizing? Complete Guide", href: "/blog/what-is-embroidery-digitizing" },
         { text: "Manual vs Auto Digitizing: Full Comparison", href: "/blog/manual-vs-auto-digitizing" },
         { text: "Services — All Formats Included Free", href: "/services" },
-        { text: "Free Designs — Download Sample Files", href: "/free-designs" },
       ],
       cta: { text: "Get Files in Any Format — Free Quote", href: "/contact", label: "Upload Design" },
     },

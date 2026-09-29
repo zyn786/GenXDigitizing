@@ -30,13 +30,12 @@ import {
   Download,
   Trophy,
 } from "lucide-react";
-import { SITE_STATS, SITE_INFO, fmtPlus, fmt } from "@/lib/site-config";
+import { SITE_INFO, SITE_CLAIMS, SITE_CLAIM_LIST } from "@/lib/site-config";
 import { Button } from "@/components/ui/Button";
 import { GradientOrb } from "@/components/shared/GradientOrb";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { SectionHeading } from "@/components/shared/SectionHeading";
 import { TrustStatsSection } from "@/components/shared/TrustStatsSection";
-import { FreeDesignsPreview } from "@/components/free-designs/FreeDesignsPreview";
 import { SewOutGuarantee } from "@/components/marketing/SewOutGuarantee";
 import { MobileHeroScroll } from "@/components/marketing/MobileHeroScroll";
 
@@ -51,15 +50,6 @@ const PortfolioPreview = dynamic(
 /* ═══════════════════════════════════════════════════════════════
    CONSTANTS
    ═══════════════════════════════════════════════════════════════ */
-
-const TRUST_BADGES = [
-  { icon: Star, label: `${SITE_STATS.avgRating}/5 Rating`, sub: `${fmtPlus(SITE_STATS.verifiedReviews)} verified reviews` },
-  { icon: FileCheck, label: fmtPlus(SITE_STATS.ordersCompleted), sub: "Orders completed" },
-  { icon: Clock, label: `${SITE_STATS.avgDeliveryHours}h`, sub: "Avg. delivery time" },
-  { icon: Globe, label: fmtPlus(SITE_STATS.countriesServed), sub: "Countries served" },
-  { icon: Shield, label: "100%", sub: "Satisfaction guaranteed" },
-  { icon: RefreshCw, label: "Unlimited", sub: "Free revisions" },
-];
 
 const SERVICE_CARDS = [
   { emoji: "🧵", title: "Embroidery Digitizing", label: "DST / PES Ready" },
@@ -547,19 +537,16 @@ function HeroSection() {
       <div className="relative z-10 w-full max-w-[900px] mx-auto px-4 sm:px-6 text-center">
         {/* Mini trust bar */}
         <div className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 mb-2.5 sm:mb-6 text-[11px] sm:text-[13px] font-medium bg-white/10 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full border border-white/15 w-auto max-w-full">
-          <span className="flex items-center gap-0.5" aria-label={`${SITE_STATS.avgRating} out of 5 stars`}>
-            <span className="font-bold text-white mr-0.5">{SITE_STATS.avgRating}</span>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} size={11} className="sm:size-3" fill="#F59E0B" stroke="none" />
-            ))}
+          <span className="text-white/85">
+            <span className="font-bold text-white">{SITE_CLAIMS.price.value}</span> Standard Designs
           </span>
           <span className="text-white/25">|</span>
           <span className="text-white/85">
-            <span className="font-semibold text-white">{fmtPlus(SITE_STATS.ordersCompleted)}</span> Orders
+            <span className="font-semibold text-white">{SITE_CLAIMS.turnaround.value}</span> Turnaround
           </span>
           <span className="text-white/25 hidden sm:inline">|</span>
           <span className="hidden sm:inline text-white/85">
-            <span className="font-semibold text-white">{fmtPlus(SITE_STATS.countriesServed)}</span> Countries
+            <span className="font-semibold text-white">{SITE_CLAIMS.formats.value}</span> Formats
           </span>
           <span className="text-white/25">|</span>
           <span className="text-[#4ADE80] font-semibold flex items-center gap-1">
@@ -632,12 +619,14 @@ function HeroSection() {
         {/* Hero stats — 6 separate cards */}
         <div className="hidden sm:grid mt-5 sm:mt-6 w-full grid-cols-2 md:grid-cols-6 gap-3 sm:gap-4">
           {[
-            { value: `${SITE_STATS.avgRating}/5`, sub: `${fmtPlus(SITE_STATS.verifiedReviews)} verified reviews`, icon: Star },
-            { value: fmtPlus(SITE_STATS.ordersCompleted), sub: "Orders completed", icon: FileCheck },
-            { value: `${SITE_STATS.avgDeliveryHours}h`, sub: "Avg. delivery time", icon: Clock },
-            { value: fmtPlus(SITE_STATS.countriesServed), sub: "Countries served", icon: Globe },
-            { value: "100%", sub: "Satisfaction guaranteed", icon: Shield },
-            { value: "Unlimited", sub: "Free revisions", icon: RefreshCw },
+            // Was a 4.9/5 rating, 5,000+ orders and 100+ countries — all
+            // invented. These are capabilities and published policies.
+            { value: SITE_CLAIMS.price.value, sub: "Standard designs", icon: Star },
+            { value: SITE_CLAIMS.turnaround.value, sub: "Turnaround", icon: Clock },
+            { value: SITE_CLAIMS.revisions.value, sub: "Unlimited revisions", icon: RefreshCw },
+            { value: SITE_CLAIMS.formats.value, sub: "Machine formats", icon: Globe },
+            { value: "100%", sub: "Hand-digitized", icon: Shield },
+            { value: "3–24h", sub: "Delivery options", icon: FileCheck },
           ].map((stat) => {
             const Icon = stat.icon;
             return (
@@ -943,7 +932,7 @@ function HowItWorksSection() {
           label="How It Works"
           title="Order in Minutes,"
           gradientTitle="Delivered Fast"
-          description={`Your design goes through ${fmt(SITE_STATS.ordersCompleted)}+ orders worth of refined process. Simple, fast, reliable.`}
+          description="Your design goes through the same four-step process every time. Simple, fast, reliable."
         />
 
         {/* Responsive: single DOM, adapts layout via grid */}
@@ -1061,59 +1050,43 @@ function __unused_case_studies() {
    SECTION 10: REVIEWS / TESTIMONIALS
    ═══════════════════════════════════════════════════════════════ */
 
-function TestimonialsSection({ testimonials }: { testimonials: { name: string; company: string; text: string; stars: number; country: string; date?: string }[] }) {
+// Was TestimonialsSection, rendering six invented reviews — named people at
+// named companies in named countries, with a "Verified" badge, for customers
+// who never existed. The `reviews` table has always been empty.
+//
+// Replaced with claims we can prove. To restore real reviews, query the
+// `reviews` table (it has stars, text, client_id and an is_published gate) and
+// render those instead — and do not reintroduce a hardcoded array here.
+function WhyUsSection() {
   return (
-    <section className="py-12 sm:py-16 md:py-20 lg:py-24" aria-labelledby="reviews-heading">
+    <section className="py-12 sm:py-16 md:py-20 lg:py-24" aria-labelledby="why-heading">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-12">
         <AnimatedSection>
           <div className="text-center mb-10 sm:mb-12">
-            <SectionBadge color="#EAB308">Client Reviews</SectionBadge>
-            <h2 id="reviews-heading" className="font-syne font-bold text-3xl md:text-5xl mt-3 mb-3 leading-[1.15]">
+            <SectionBadge color="#EAB308">Why GenX</SectionBadge>
+            <h2 id="why-heading" className="font-syne font-bold text-3xl md:text-5xl mt-3 mb-3 leading-[1.15]">
               <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
-                Loved by {fmtPlus(SITE_STATS.clientsServed)}
+                Built For Production
               </span>{" "}
-              Embroidery Pros
+              Embroidery
             </h2>
             <p className="text-sm sm:text-base text-[var(--txt2)] max-w-xl mx-auto">
-              Real feedback from real embroidery professionals who run our files on production machines every day.
+              What you get on every order — before you've placed one.
             </p>
-
-            {/* Aggregate rating */}
-            <div className="flex items-center justify-center gap-3 mt-4">
-              <div className="flex items-center gap-0.5">
-                {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={18} fill="#F59E0B" stroke="none" />)}
-              </div>
-              <span className="font-syne font-bold text-lg text-[var(--txt)]">{SITE_STATS.avgRating}/5</span>
-              <span className="text-sm text-[var(--txt3)]">— {fmtPlus(SITE_STATS.verifiedReviews)} verified reviews</span>
-            </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 max-w-6xl mx-auto">
-            {testimonials.slice(0, 6).map((t) => (
-              <div key={t.name} className="bg-[var(--surface)] rounded-2xl p-5 sm:p-6 border border-[var(--border)] hover:border-[var(--border3)] transition-all duration-200">
-                <div className="flex items-center gap-0.5 mb-3" aria-label={`${t.stars} out of 5 stars`}>
-                  {Array.from({ length: t.stars }).map((_, i) => <Star key={i} size={14} fill="#F59E0B" stroke="none" />)}
-                </div>
-                <blockquote className="text-sm text-[var(--txt2)] leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</blockquote>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center text-white text-xs font-bold">{t.name.charAt(0)}</div>
-                  <div>
-                    <div className="text-xs font-semibold text-[var(--txt)]">{t.name}</div>
-                    <div className="flex items-center gap-1.5 text-[10px] text-[var(--txt3)]">
-                      <span>{t.company}</span><span>·</span><span>{t.country}</span>
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#16A34A]/10 text-[#16A34A] text-[9px] font-medium">
-                        <Shield size={9} /> Verified
-                      </span>
-                    </div>
-                  </div>
-                </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 max-w-4xl mx-auto">
+            {SITE_CLAIM_LIST.map((c) => (
+              <div key={c.label} className="bg-[var(--surface)] rounded-2xl p-5 sm:p-6 border border-[var(--border)] flex flex-col items-center text-center">
+                <div className="font-syne font-bold text-3xl sm:text-4xl text-[var(--txt)] mb-1.5">{c.value}</div>
+                <div className="text-[11px] sm:text-xs text-[var(--txt3)]">{c.label}</div>
               </div>
             ))}
           </div>
 
           <div className="text-center mt-8">
             <Link href="/portfolio">
-              <Button variant="outline" size="sm" className="rounded-full" rightIcon={<ArrowRight size={14} />}>See More Client Stories</Button>
+              <Button variant="outline" size="sm" className="rounded-full" rightIcon={<ArrowRight size={14} />}>See Our Work</Button>
             </Link>
           </div>
         </AnimatedSection>
@@ -1366,7 +1339,9 @@ function FinalCTASection() {
 interface Props {
   services: any[];
   process: any[];
-  testimonials: any[];
+  // `testimonials` removed — it fed the invented reviews block above. Re-add
+  // only when it is backed by real rows from the `reviews` table.
+  liveStats?: { totalOrders: number; activeOrders: number; deliveredOrders: number; reviewCount: number };
   faqs: { q: string; a: string }[];
 }
 
@@ -1520,7 +1495,7 @@ function BeforeAfterShowcaseSection() {
   );
 }
 
-export function LandingClient({ services, process, testimonials, faqs }: Props) {
+export function LandingClient({ services, process, faqs }: Props) {
   const tiers: Record<string, { size: string; price: string }[]> = {};
   for (const svc of services) {
     const cat = svc.title.toLowerCase().includes("vector") ? "vector" : svc.title.toLowerCase().includes("patch") ? "sewout" : "digitizing";
@@ -1555,10 +1530,7 @@ export function LandingClient({ services, process, testimonials, faqs }: Props) 
       <PricingSection tiers={tiers} />
 
       {/* 10. REVIEWS / TESTIMONIALS */}
-      <TestimonialsSection testimonials={testimonials} />
-
-      {/* FREE DESIGNS (lead magnet) */}
-      <FreeDesignsPreview />
+      <WhyUsSection />
 
       {/* 11. FAQ */}
       <FAQSection faqs={faqs} />

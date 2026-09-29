@@ -21,6 +21,7 @@ import { PLAN_CONFIG } from "@/lib/plans";
 import { emailSubscriptionExpiring } from "@/lib/email/subscription";
 import { notifyUser, notifyRole } from "@/lib/notify-helpers";
 import { createCronMonitor } from "@/lib/cron-monitor";
+import { isAuthorizedCron } from "@/lib/cron-auth";
 
 const GRACE_DAYS = 7;
 const ABANDON_DAYS = 30;
@@ -29,8 +30,9 @@ const PRE_RENEWAL_DAYS = 3; // Alert 3 days before period ends
 export async function GET(req: NextRequest) {
   const monitor = createCronMonitor("subscription-renewal");
   try {
-  const secret = req.headers.get("x-cron-secret");
-  if (process.env.CRON_SECRET && secret !== process.env.CRON_SECRET) {
+  // Vercel Cron sends `Authorization: Bearer $CRON_SECRET`; this used to read
+  // only x-cron-secret and fail open when the secret was unset. See lib/cron-auth.
+  if (!isAuthorizedCron(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

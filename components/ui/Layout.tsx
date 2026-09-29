@@ -71,10 +71,10 @@ export function PageHeader({
       <Section>
         <div className="px-4 py-3 rounded-2xl bg-[var(--surface)] border border-[var(--border)]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+            <div className="relative w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden"
               style={{ background: grad }}>
               {avatar
-                ? <Image fill src={avatar} alt={name} className="rounded-full object-cover"  sizes="(max-width: 768px) 100vw, 800px" />
+                ? <Image fill src={avatar} alt={name} className="rounded-full object-cover" sizes="36px" />
                 : (name?.charAt(0)?.toUpperCase() || "U")}
             </div>
             <div className="flex-1 min-w-0">

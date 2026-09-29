@@ -437,9 +437,14 @@ export function UploadWizard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {files.map((f, i) => (
               <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] group hover:border-[#2563EB]/30 hover:shadow-sm transition-all">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-[var(--elevated)] flex-shrink-0 border border-[var(--border)]">
+                {/* `relative` is required: next/image `fill` sets position:absolute
+                    with inset:0, so without a positioned ancestor the thumbnail
+                    escapes this box and overlaps the page. `sizes` matches the
+                    real rendered size — 100vw here made Next fetch an 800px-wide
+                    image to paint a 56px thumbnail. */}
+                <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-[var(--elevated)] flex-shrink-0 border border-[var(--border)]">
                   {f.file.type.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(f.file.name)
-                    ? <NextImage fill src={f.preview} alt={f.file.name} className="object-cover"  sizes="(max-width: 768px) 100vw, 800px" />
+                    ? <NextImage fill src={f.preview} alt={f.file.name} className="object-cover" sizes="56px" />
                     : <div className="w-full h-full flex items-center justify-center"><ImageIcon size={18} className="text-[var(--txt3)]" /></div>}
                 </div>
                 <div className="flex-1 min-w-0">

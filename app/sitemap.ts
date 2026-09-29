@@ -45,7 +45,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     u("/portfolio",     { freq: "weekly",  pri: 0.9 }),
     u("/pricing",       { freq: "weekly",  pri: 0.95 }),
     u("/blog",          { freq: "weekly",  pri: 0.9 }),
-    u("/free-designs",  { freq: "weekly",  pri: 0.85 }),
     u("/upload",        { freq: "monthly", pri: 0.9 }),
     u("/contact",       { freq: "monthly", pri: 0.85 }),
     u("/subscribe",     { freq: "monthly", pri: 0.85 }),

@@ -96,15 +96,21 @@ export async function POST(req: NextRequest) {
       results.push(fileRecord);
     }
 
-    // Update status + notify
+    // Move to QA and notify admins.
+    //
+    // The status transition is conditional but the notification is not: the old
+    // version wrapped both in the same guard, so a re-upload while the order was
+    // already in `review` (or `approved`) replaced the files and told nobody.
     const { data: orderData } = await db
       .from("orders")
       .select("status, order_number, clients(company_name)")
       .eq("id", orderId)
       .single();
 
-    if (orderData && (orderData.status === "in_progress" || orderData.status === "revision" || orderData.status === "assigned")) {
-      await db.from("orders").update({ status: "review" }).eq("id", orderId);
+    if (orderData) {
+      if (["in_progress", "revision", "assigned"].includes(orderData.status)) {
+        await db.from("orders").update({ status: "review" }).eq("id", orderId);
+      }
 
       const orderNumber = (orderData as any).order_number || `#${orderId.slice(0, 8)}`;
       const companyName = (orderData as any).clients?.company_name || "Client";
@@ -114,7 +120,7 @@ export async function POST(req: NextRequest) {
         await notifyUsers(admins.map((a: any) => a.id), {
           type: "order_update",
           title: `QA Submission — ${orderNumber}`,
-          body: `${user.email || "Designer"} submitted files for ${companyName}. Ready for review.`,
+          body: `${user.email || "Designer"} submitted ${results.length} file(s) for ${companyName}. Ready for review.`,
           action_url: `/admin/orders/${orderId}`,
         });
       }

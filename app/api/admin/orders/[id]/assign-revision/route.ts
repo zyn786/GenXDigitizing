@@ -33,7 +33,7 @@ export async function POST(
     const { data: order } = await admin
       .from("orders")
       .select(`
-        id, order_number, status,
+        id, order_number, status, turnaround,
         clients ( company_name, users ( full_name ) ),
         designers ( users ( id, full_name, email ) )
       `)
@@ -73,10 +73,18 @@ export async function POST(
       is_read: false,
     });
 
-    // Update order status back to in_progress
+    // Back into production. The original sla_deadline predates delivery, so it is
+    // stale by now — reset it from the turnaround the customer actually paid for,
+    // otherwise the order surfaces as instantly overdue the moment it re-enters
+    // the SLA window.
+    const slaHours = order.turnaround === "urgent" ? 3 : order.turnaround === "rush" ? 6 : 24;
     await admin
       .from("orders")
-      .update({ status: "in_progress", updated_at: new Date().toISOString() })
+      .update({
+        status: "in_progress",
+        sla_deadline: new Date(Date.now() + slaHours * 3600000).toISOString(),
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", orderId);
 
     // Audit log

@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import NextImage from "next/image";
-import { Bell, X, LogOut, LayoutDashboard, FileText, Users, BarChart3, Settings, MessageSquare, UserCircle, TrendingUp, Receipt, Star, Tag, Image as ImageIcon, Download, PlusCircle, AlertCircle, CheckSquare, Upload, Home, Crown, Ticket } from "lucide-react";
+import { Bell, X, LogOut, LayoutDashboard, FileText, Users, BarChart3, Settings, MessageSquare, UserCircle, TrendingUp, Receipt, Star, Tag, Image as ImageIcon, PlusCircle, AlertCircle, CheckSquare, Upload, Home, Crown, Ticket } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useNotificationContext } from "@/hooks/NotificationProvider";
@@ -74,7 +74,6 @@ function MobileSidebarDrawer({ user }: { user: AuthUser }) {
       ]},
       { title: "Content", items: [
         { href: "/admin/portfolio", label: "Portfolio", icon: <ImageIcon size={17}/> },
-        { href: "/admin/free-designs", label: "Free Designs", icon: <Download size={17}/> },
         { href: "/admin/pricing", label: "Pricing", icon: <Tag size={17}/> },
         { href: "/admin/blog", label: "Blog", icon: <FileText size={17}/> },
       ]},

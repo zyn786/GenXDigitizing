@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { notifyUsers } from "@/lib/notify-server";
+import { computeDeadline } from "@/lib/sla";
 import { emailOrderSubmitted } from "@/lib/email";
 
 // POST /api/crm/convert-to-order
@@ -102,9 +103,15 @@ export async function POST(req: NextRequest) {
       clientId = newClient.id;
     }
 
-    // 4. Calculate SLA deadline
-    const slaHours = turnaround === "urgent" ? 3 : turnaround === "rush" ? 6 : 24;
-    const slaDeadline = new Date(Date.now() + slaHours * 3600000).toISOString();
+    // 4. Calculate SLA deadline via the shared rule. This path used to ignore
+    // big designs, giving a Jumbo standard order 24h where the client wizards
+    // gave 12h for the same order.
+    const { data: slaTier } = await admin
+      .from("service_tiers")
+      .select("is_big_design")
+      .eq("id", service_tier_id)
+      .maybeSingle();
+    const slaDeadline = computeDeadline(turnaround, (slaTier as any)?.is_big_design);
 
     // Parse clean message from lead notes (strip Service/Artwork/Download metadata lines)
     const leadMessage = (lead.notes || "")

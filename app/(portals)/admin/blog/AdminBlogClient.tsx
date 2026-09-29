@@ -711,7 +711,13 @@ export default function AdminBlogPage() {
                       </label>
                     </div>
                     {form.heroImage && (
-                      <Image fill src={form.heroImage} alt="Preview" className="mt-2 w-full max-h-36 object-cover rounded-xl border border-[var(--border)]"  sizes="(max-width: 768px) 100vw, 800px" />
+                      // `fill` ignores width/height/max-height classes — it sets
+                      // position:absolute with inset:0. The image was positioned
+                      // against an ancestor outside this form and overflowed it,
+                      // so it needs a real sized, positioned box.
+                      <div className="relative mt-2 w-full aspect-[16/9] max-h-36 rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
+                        <Image fill src={form.heroImage} alt="Preview" className="object-cover" sizes="(max-width: 768px) 100vw, 400px" />
+                      </div>
                     )}
                   </div>
                   {/* Publish toggle */}

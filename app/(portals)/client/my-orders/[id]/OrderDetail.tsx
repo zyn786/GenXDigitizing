@@ -45,7 +45,7 @@ function FileCard({ file, icon, onPreview, onDownload }: any) {
     <div className="flex items-center justify-between flex-wrap gap-2 p-3 rounded-xl mb-2 border" style={{background:"var(--elevated)",borderColor:"var(--border)"}}>
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {isArtwork ? (
-          <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer" style={{background:"var(--elevated2)"}}
+          <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer" style={{background:"var(--elevated2)"}}
             onClick={()=>onPreview?.(url)}>
             <NextImage fill src={url} alt={file.file_name} className="object-cover" onError={(e:any)=>{e.target.style.display="none";}} sizes="(max-width: 768px) 100vw, 800px" />
           </div>
@@ -141,10 +141,23 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
     let newFileRecord=null;
     if(editFile){const fd=new FormData();fd.append("orderId",order.id);fd.append("files",editFile);const res=await fetch("/api/upload/artwork",{method:"POST",body:fd});if(!res.ok){const e=await res.json().catch(()=>({}));toast.error(e.error||"Upload failed");return;}const {files:uploaded}=await res.json();newFileRecord=uploaded?.[0]||null;changed.push("artwork_file");}
     if(changed.length===0){toast.error("No changes detected");return;}
-    if(Object.keys(updates).length>0){updates.updated_at=new Date().toISOString();const {error:updErr}=await supabase.from("orders").update(updates).eq("id",order.id);if(updErr){toast.error("Update failed: "+updErr.message);return;}}
+    // Spec fields save server-side. Writing to `orders` from the browser never
+    // worked: the only UPDATE policy a client holds is orders_client_cancel,
+    // whose WITH CHECK (status = 'cancelled') rejected every spec edit — so this
+    // always failed with an RLS error and the edit log was never written either.
+    if(Object.keys(updates).length>0){
+      const res=await fetch(`/api/orders/${order.id}/edit`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({output_format:editFmt,additional_formats:editExtras.length?editExtras:null,width_inches:editW?parseFloat(editW):null,height_inches:editH?parseFloat(editH):null,color_count:editCol?parseInt(editCol):null,placement_notes:editNotes||null})});
+      const result=await res.json().catch(()=>({}));
+      if(!res.ok){toast.error(result?.error||"Could not save changes");return;}
+      if(result?.teamNotified===false){toast.warning("Changes saved, but our team was not notified automatically — please message us about this order.");setEditOpen(false);startTx(()=>router.refresh());return;}
+    }
     const editLogRows=changed.filter(f=>f!=="artwork_file").map((field)=>({order_id:order.id,field_name:field,old_value:field==="output_format"?order.output_format:field==="additional_formats"?JSON.stringify(order.additional_formats??[]):field==="width_inches"?String(order.width_inches??""):field==="height_inches"?String(order.height_inches??""):field==="color_count"?String(order.color_count??""):field==="placement_notes"?(order.placement_notes??""):"",new_value:field==="output_format"?editFmt:field==="additional_formats"?JSON.stringify(editExtras):field==="width_inches"?editW:field==="height_inches"?editH:field==="color_count"?editCol:field==="placement_notes"?editNotes:"",changed_by:userId,reviewed_by_admin:false}));
-    if(editFile){editLogRows.push({order_id:order.id,field_name:"artwork_file",old_value:"",new_value:editFile.name,changed_by:userId,reviewed_by_admin:false});}
-    await supabase.from("order_edit_log").insert(editLogRows);
+    // Only the artwork entry is logged here; spec-field rows are written by the
+    // server route from the values it read itself.
+    if(editFile){
+      const {error:logErr}=await supabase.from("order_edit_log").insert([{order_id:order.id,field_name:"artwork_file",old_value:"",new_value:editFile.name,changed_by:userId,reviewed_by_admin:false}]);
+      if(logErr){toast.warning("Artwork uploaded, but the change log could not be written — please message us about this order.");setEditOpen(false);startTx(()=>router.refresh());return;}
+    }
     // Note: admin/designer notifications for edits are handled server-side via order_edit_log
     toast.success("Changes saved — team notified");setEditOpen(false);startTx(()=>router.refresh());}
     catch(err:any){toast.error(err?.message??"Save failed");}

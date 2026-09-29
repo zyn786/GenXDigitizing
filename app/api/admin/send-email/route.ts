@@ -19,29 +19,11 @@ import { Resend } from "resend";
 import { baseLayout } from "@/lib/email/index";
 import { isMissingColumn } from "@/lib/db-errors";
 import { toHtmlBody } from "@/lib/email-text";
+import { bareAddress, composeReplyTo, isAllowedSender } from "@/lib/email/address";
 
-var REPLY = process.env.RESEND_REPLY_TO || "support@genxdigitizing.com";
-
-/**
- * Senders are restricted to the verified domain rather than a fixed list, so an
- * address added in the Resend dashboard (billing@, info@, …) can be replied
- * from immediately without a code change. Anything off-domain is still refused,
- * which is what the old four-address allow-list was protecting against.
- */
-var FROM_DOMAIN = (process.env.RESEND_FROM_DOMAIN || "genxdigitizing.com").toLowerCase();
-
-/** Pull the bare address out of `Name <addr@x.com>` or `addr@x.com`. */
-function bareAddress(value: string): string {
-  var m = /<([^>]+)>/.exec(value || "");
-  return (m ? m[1] : (value || "")).trim().toLowerCase();
-}
-
-function isAllowedSender(value: string): boolean {
-  var email = bareAddress(value);
-  var at = email.lastIndexOf("@");
-  if (at <= 0) return false;
-  return email.slice(at + 1) === FROM_DOMAIN;
-}
+// Address handling lives in lib/email/address so this route, lib/email/index.ts
+// and lib/email/subscription.ts cannot drift apart again.
+var REPLY = composeReplyTo();
 
 /** Only attachments written by the composer's upload route may be attached. */
 var ATTACHMENT_PREFIX = "email-attachments/";

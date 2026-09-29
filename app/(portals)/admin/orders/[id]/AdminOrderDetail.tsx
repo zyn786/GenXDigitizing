@@ -104,7 +104,7 @@ function FileCard({ file, onPreview, onDelete }: { file: any; onPreview?: (url: 
       style={{ background: "var(--elevated)", border: "1px solid var(--border)" }}>
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {isArtwork ? (
-          <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer" style={{ background:"var(--elevated2)" }}
+          <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer" style={{ background:"var(--elevated2)" }}
             onClick={() => onPreview?.(url)}>
             <Image fill src={url} alt={file.file_name} className="object-cover"
               onError={(e:any)=>{ e.target.style.display="none"; }} sizes="(max-width: 768px) 100vw, 800px" />

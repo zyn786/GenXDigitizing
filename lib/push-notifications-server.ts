@@ -16,7 +16,7 @@ async function sendToSubscription(
   if (!keys) { console.warn("[sendToSubscription] VAPID keys not configured."); return; }
 
   webpush.setVapidDetails(
-    "mailto:hello@genxdigitizing.com",
+    "mailto:order@genxdigitizing.com",
     keys.publicKey,
     keys.privateKey
   );

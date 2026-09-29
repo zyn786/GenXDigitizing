@@ -359,39 +359,6 @@ export interface AuthUser {
   designer_id?: string;  // set if role === 'designer'
 }
 
-// ── Free Designs ─────────────────────────────────────────────
-
-export interface FreeDesignImage {
-  id?: string;
-  url: string;
-  thumbnailUrl?: string;
-  blurhash?: string;
-  alt?: string;
-  width?: number;
-  height?: number;
-  sortOrder: number;
-}
-
-export interface FreeDesign {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  stitchCount: number;
-  colors: number;
-  designSize: string;
-  formats: string[];
-  machines: string[];
-  downloadUrl?: string | null;
-  downloadCount: number;
-  featured: boolean;
-  visible: boolean;
-  sortOrder: number;
-  images: FreeDesignImage[];
-  createdAt?: string;
-  updatedAt?: string;
-}
-
 export type Json =
   | string
   | number

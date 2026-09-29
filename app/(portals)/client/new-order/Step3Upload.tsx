@@ -130,7 +130,7 @@ export function Step3Upload({files,fileRef,setFiles,w,setW,h,setH,col,setCol,not
             return (
               <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-lg border" style={{background:"var(--elevated)",borderColor:"var(--border)"}}>
                 {/* Thumbnail */}
-                <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center border" style={{background:"var(--bg)",borderColor:"var(--border2)"}}>
+                <div className="relative w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center border" style={{background:"var(--bg)",borderColor:"var(--border2)"}}>
                   {previewUrl ? (
                     <NextImage fill src={previewUrl} alt={f.name} className="object-cover" onLoad={() => URL.revokeObjectURL(previewUrl)} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}  sizes="(max-width: 768px) 100vw, 800px" />
                   ) : (

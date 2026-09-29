@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { Topbar } from "@/components/portals/Topbar";
 import { isMissingColumn } from "@/lib/db-errors";
 import { EmailComposer } from "./EmailComposer";
+import { RealtimeRefresher } from "@/components/RealtimeRefresher";
 
 const PAGE_SIZE = 50;
 
@@ -237,10 +238,28 @@ export default async function AdminEmailPage({ searchParams }: { searchParams: {
   return (
     <>
       <Topbar title="Send Email" subtitle="Compose, sent history, and inbox" user={user} />
+
+      {/* New mail and new sends now appear on their own. Previously the only way
+          to learn something had arrived was pressing "Sync from Resend", which
+          made the inbox feel like a snapshot rather than a mailbox.
+          Subscribes to the base tables rather than the email_thread_summary view
+          — realtime does not fire for views. Requires migration 048, which adds
+          both tables to the supabase_realtime publication. */}
+      <RealtimeRefresher
+        configs={[
+          { table: "received_emails", events: ["INSERT", "UPDATE", "DELETE"] },
+          { table: "sent_emails",     events: ["INSERT", "UPDATE", "DELETE"] },
+        ]}
+        debounceMs={600}
+      />
+
+      {/* No `key` here on purpose. It used to force a full remount on every page
+          change to clear the stale lists EmailComposer keeps in useState — which
+          also discarded scroll position, any open draft, and the selected folder
+          (folder re-initialised to "inbox", so paginating in Sent bounced you to
+          the inbox). The component now re-seeds each list from props when the
+          server sends new data, so it can stay mounted. */}
       <EmailComposer
-        // key forces remount on page change — EmailComposer keeps lists in useState,
-        // so without a remount it shows stale page-1 data after paginating
-        key={`email-${history.sentPage}-${history.inboxPage}-${history.repliesPage}`}
         userId={user.id}
         sentEmails={history.sent}
         receivedEmails={history.received}

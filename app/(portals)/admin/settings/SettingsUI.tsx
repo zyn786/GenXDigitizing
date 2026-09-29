@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { Save, Eye, EyeOff, Settings, CreditCard, Mail, Clock, Shield, User, Palette } from "lucide-react";
@@ -87,7 +87,7 @@ function ToggleRow({ label, value, onChange }: { label: string; value: boolean; 
   );
 }
 
-export function AdminSettingsUI({ user }: { user: any }) {
+export function AdminSettingsUI({ user, sender, payoneerEnv }: { user: any; sender?: any; payoneerEnv?: any }) {
   const [tab, setTab] = useState("company");
   const [showSecret, setShowSecret] = useState(false);
   const [company, setCompany] = useState({ name: "genxdigitizing", email: "support@genxdigitizing.com", whatsapp: "", timezone: "Asia/Karachi (UTC+5)", country: "Pakistan" });
@@ -102,20 +102,114 @@ export function AdminSettingsUI({ user }: { user: any }) {
   const [clientAccess, setClientAccess] = useState({ place_orders: true, upload_artwork: true, view_invoices: true, download_files: true, request_revisions: true });
   const [platformToggles, setPlatformToggles] = useState({ accept_new_orders: true, client_registrations: true, maintenance_mode: false });
 
+  /**
+   * Persist the non-secret sections.
+   *
+   * The previous version referenced `companyName`, `resendKey`, `slaStandard` and
+   * five other identifiers that were never declared — every call threw
+   * ReferenceError straight into the bare `catch`, so no section had ever saved
+   * and the toast reported a failure with no cause.
+   *
+   * Secrets are deliberately NOT persisted here: platform_settings has a
+   * `FOR SELECT USING (true)` policy, so writing an API key or a Payoneer secret
+   * into it would publish it to anyone holding the anon key. Those values come
+   * from the deployment environment.
+   */
   async function save(section: string) {
     try {
-      // Persist key settings to platform_settings
       const settings: Record<string, string> = {};
-      if (section === "Company") { settings["company_name"] = companyName; settings["company_email"] = companyEmail; settings["company_phone"] = companyPhone; }
-      if (section === "Payoneer") { settings["payoneer_api_key"] = payoneerKey; settings["payoneer_merchant_id"] = payoneerMerchant; }
-      if (section === "Email") { settings["resend_api_key"] = resendKey; }
-      if (section === "SLA") { settings["sla_standard_hours"] = String(slaStandard); settings["sla_rush_hours"] = String(slaRush); settings["sla_urgent_hours"] = String(slaUrgent); }
-      if (section === "Account") { /* account handled by auth */ }
-      for (const [key, value] of Object.entries(settings)) {
-        await supabase.from("platform_settings").upsert({ key, value }, { onConflict: "key" });
+
+      if (section === "Company") {
+        settings["company_name"]  = company.name;
+        settings["company_email"] = company.email;
+        settings["company_phone"] = company.whatsapp;
+      }
+      if (section === "SLA") {
+        settings["sla_standard_hours"]   = String(sla.standard_h);
+        settings["sla_rush_hours"]       = String(sla.rush_h);
+        settings["sla_urgent_hours"]     = String(sla.urgent_h);
+        settings["sla_big_design_hours"] = String(sla.big_design_h);
+      }
+      if (section === "Access") {
+        settings["access_controls"] = JSON.stringify({
+          designerAccess, crmAccess, clientAccess, platformToggles,
+        });
+      }
+      if (section === "Account") { /* handled by auth */ }
+
+      const rows = Object.entries(settings).map(([key, value]) => ({ key, value }));
+      if (rows.length) {
+        const { error } = await supabase.from("platform_settings").upsert(rows, { onConflict: "key" });
+        if (error) throw error;
       }
       toast.success(`${section} settings saved`);
-    } catch { toast.error("Failed to save settings"); }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to save settings");
+    }
+  }
+
+  // Load what is actually stored, so the form shows real values instead of the
+  // hardcoded defaults it used to display regardless of the saved state.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("platform_settings").select("key, value");
+      if (cancelled || !data) return;
+      const map: Record<string, string> = {};
+      for (const row of data) map[row.key] = row.value;
+
+      if (map.company_name || map.company_email || map.company_phone) {
+        setCompany(p => ({
+          ...p,
+          name:  map.company_name  ?? p.name,
+          email: map.company_email ?? p.email,
+          whatsapp: map.company_phone ?? p.whatsapp,
+        }));
+      }
+      const num = (v: string | undefined, fallback: number) => {
+        const n = Number(v);
+        return Number.isFinite(n) && n > 0 ? n : fallback;
+      };
+      if (map.sla_standard_hours || map.sla_rush_hours || map.sla_urgent_hours || map.sla_big_design_hours) {
+        setSla(p => ({
+          standard_h:   num(map.sla_standard_hours,   p.standard_h),
+          rush_h:       num(map.sla_rush_hours,       p.rush_h),
+          urgent_h:     num(map.sla_urgent_hours,     p.urgent_h),
+          big_design_h: num(map.sla_big_design_hours, p.big_design_h),
+        }));
+      }
+      if (map.access_controls) {
+        try {
+          const a = JSON.parse(map.access_controls);
+          if (a.designerAccess)    setDesignerAccess(a.designerAccess);
+          if (a.crmAccess)         setCRMAccess(a.crmAccess);
+          if (a.clientAccess)      setClientAccess(a.clientAccess);
+          if (a.platformToggles)   setPlatformToggles(a.platformToggles);
+        } catch { /* malformed row — keep defaults */ }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // ── Password change — the button used to just toast "Password updated"
+  //    without touching anything, leaving the admin believing it had changed.
+  const [pw, setPw] = useState({ next: "", confirm: "" });
+  const [pwBusy, setPwBusy] = useState(false);
+
+  async function changePassword() {
+    if (pw.next.length < 8) { toast.error("Password must be at least 8 characters"); return; }
+    if (pw.next !== pw.confirm) { toast.error("Passwords do not match"); return; }
+    setPwBusy(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: pw.next });
+      if (error) throw error;
+      setPw({ next: "", confirm: "" });
+      toast.success("Password updated");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not update password");
+    } finally {
+      setPwBusy(false);
+    }
   }
 
   return (
@@ -218,23 +312,27 @@ export function AdminSettingsUI({ user }: { user: any }) {
                 <h3 className="font-syne font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
                   <CreditCard size={15} style={{ color: clr[3].icon }} /> Payoneer API
                 </h3>
+                <div className="rounded-xl p-3 text-[12px] leading-relaxed border mb-3"
+                  style={{ background: clr[3].bgSoft, color: clr[3].text, borderColor: clr[3].border }}>
+                  Read-only. Credentials are read from the deployment environment by
+                  <code className="font-mono"> lib/payoneer/client.ts</code> — the fields that used to be here
+                  were never read by anything, and saving them would have written payment
+                  secrets into a world-readable table.
+                </div>
                 <Field label="Environment">
-                  <select style={{ ...inpStyle, cursor: "pointer" }} value={payoneer.env} onChange={e => setPayoneer(p => ({ ...p, env: e.target.value }))}>
-                    <option value="sandbox">Sandbox (testing)</option>
-                    <option value="production">Production (live payments)</option>
-                  </select>
+                  <input style={{ ...inpStyle, opacity: 0.75, cursor: "not-allowed", fontFamily: "monospace" }}
+                    value={payoneerEnv?.env ?? "sandbox"} disabled readOnly />
                 </Field>
-                <Field label="Client ID"><input style={inpStyle} placeholder="pay_client_xxxxxxxx" value={payoneer.client_id} onChange={e => setPayoneer(p => ({ ...p, client_id: e.target.value }))} /></Field>
-                <Field label="Secret Key">
-                  <div className="relative">
-                    <input style={{ ...inpStyle, paddingRight: 40, fontFamily: showSecret ? "monospace" : "Inter,sans-serif" }} type={showSecret ? "text" : "password"} placeholder="•••••••••••••••" value={payoneer.secret_key} onChange={e => setPayoneer(p => ({ ...p, secret_key: e.target.value }))} />
-                    <button onClick={() => setShowSecret(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer" style={{ color: txt3 }}>
-                      {showSecret ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
-                  </div>
-                </Field>
-                <Field label="Program ID"><input style={inpStyle} placeholder="PRG-xxxxxxx" value={payoneer.program_id} onChange={e => setPayoneer(p => ({ ...p, program_id: e.target.value }))} /></Field>
-                <div className="mt-2"><SaveBtn onClick={() => save("Payoneer")} /></div>
+                {[
+                  { label: "Client ID",  set: payoneerEnv?.clientConfigured },
+                  { label: "Secret Key", set: payoneerEnv?.secretConfigured },
+                  { label: "Program ID", set: payoneerEnv?.programConfigured },
+                ].map(row => (
+                  <Field key={row.label} label={row.label}>
+                    <input style={{ ...inpStyle, opacity: 0.75, cursor: "not-allowed", fontFamily: "monospace" }}
+                      value={row.set ? "✓ configured" : "not set"} disabled readOnly />
+                  </Field>
+                ))}
               </div>
               <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
                 <h3 className="font-syne font-bold text-[13px] mb-3 flex items-center gap-2" style={{ color: txt }}>🌐 Webhook</h3>
@@ -267,11 +365,28 @@ export function AdminSettingsUI({ user }: { user: any }) {
                 <h3 className="font-syne font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>
                   <Mail size={15} style={{ color: clr[4].icon }} /> Resend Configuration
                 </h3>
-                <Field label="API Key"><input style={{ ...inpStyle, fontFamily: "monospace" }} type="password" placeholder="re_xxxxxxxxxxxxxxxx" value={resend.api_key} onChange={e => setResend(p => ({ ...p, api_key: e.target.value }))} /></Field>
-                <Field label="From Email"><input style={inpStyle} type="email" value={resend.from_email} onChange={e => setResend(p => ({ ...p, from_email: e.target.value }))} /></Field>
-                <Field label="From Name"><input style={inpStyle} value={resend.from_name} onChange={e => setResend(p => ({ ...p, from_name: e.target.value }))} /></Field>
-                <Field label="Reply-To"><input style={inpStyle} type="email" value={resend.reply_to} onChange={e => setResend(p => ({ ...p, reply_to: e.target.value }))} /></Field>
-                <div className="mt-2"><SaveBtn onClick={() => save("Email")} /></div>
+                <Field label="API Key">
+                  <input style={{ ...inpStyle, opacity: 0.6, cursor: "not-allowed", fontFamily: "monospace" }} type="password" value="configured via environment" disabled readOnly />
+                </Field>
+                <div className="rounded-xl p-3 text-[12px] leading-relaxed border mb-3"
+                  style={{ background: clr[4].bgSoft, color: clr[4].text, borderColor: clr[4].border }}>
+                  Read-only. Sender identity comes from the deployment environment
+                  (<code className="font-mono">RESEND_FROM_EMAIL</code>, <code className="font-mono">RESEND_FROM_NAME</code>, <code className="font-mono">RESEND_REPLY_TO</code>).
+                  It is not editable here — <code className="font-mono">platform_settings</code> is world-readable,
+                  so secrets must never be written to it.
+                </div>
+                {[
+                  { label: "Sends as",        value: sender?.from ?? "—" },
+                  { label: "Replies go to",   value: sender?.replyTo ?? "—" },
+                  { label: "From Email (env)", value: sender?.fromEnv ?? "—" },
+                  { label: "From Name (env)",  value: sender?.nameEnv ?? "—" },
+                  { label: "Reply-To (env)",   value: sender?.replyEnv ?? "—" },
+                ].map(row => (
+                  <Field key={row.label} label={row.label}>
+                    <input style={{ ...inpStyle, opacity: 0.75, cursor: "not-allowed", fontFamily: "monospace" }}
+                      value={row.value} disabled readOnly />
+                  </Field>
+                ))}
               </div>
               <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
                 <h3 className="font-syne font-bold text-[13px] mb-3 flex items-center gap-2" style={{ color: txt }}>📧 Notification Templates</h3>
@@ -352,7 +467,7 @@ export function AdminSettingsUI({ user }: { user: any }) {
                   );
                 })}
               </div>
-              <SaveBtn onClick={() => toast.success("Access controls saved")} />
+              <SaveBtn onClick={() => save("Access")} />
             </div>
           )}
 
@@ -369,9 +484,19 @@ export function AdminSettingsUI({ user }: { user: any }) {
               </div>
               <div className="rounded-2xl p-4 sm:p-5" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
                 <h3 className="font-syne font-bold text-[13px] mb-4 flex items-center gap-2" style={{ color: txt }}>🔑 Change Password</h3>
-                <Field label="New Password"><input style={inpStyle} type="password" placeholder="Minimum 8 characters" /></Field>
-                <Field label="Confirm Password"><input style={inpStyle} type="password" placeholder="Re-enter password" /></Field>
-                <div className="mt-2"><SaveBtn onClick={() => toast.success("Password updated")} /></div>
+                <Field label="New Password">
+                  <input style={inpStyle} type="password" placeholder="Minimum 8 characters"
+                    value={pw.next} onChange={e => setPw(p => ({ ...p, next: e.target.value }))} />
+                </Field>
+                <Field label="Confirm Password">
+                  <input style={inpStyle} type="password" placeholder="Re-enter password"
+                    value={pw.confirm} onChange={e => setPw(p => ({ ...p, confirm: e.target.value }))} />
+                </Field>
+                <div className="mt-2">
+                  {pwBusy
+                    ? <SaveBtn onClick={() => {}} loading />
+                    : <SaveBtn onClick={changePassword} />}
+                </div>
               </div>
             </div>
           )}

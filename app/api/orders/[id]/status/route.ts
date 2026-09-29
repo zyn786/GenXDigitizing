@@ -13,14 +13,25 @@ import {
   emailPaymentRequired,
 } from "@/lib/email";
 
+/**
+ * Terminal states map to an empty list, so nothing can leave them.
+ *
+ * `refunded` previously appeared in no transition list at all, yet both admin
+ * status dropdowns offered it — selecting it always returned 422. It is now
+ * reachable from the paid states. `cancelled` was only reachable from
+ * `submitted`, which was stricter than the database: RLS already lets a client
+ * cancel their own in-production order by direct write.
+ */
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   submitted:   ["assigned", "cancelled"],
-  assigned:    ["in_progress", "submitted"],
-  in_progress: ["review", "assigned"],
-  review:      ["approved", "revision", "in_progress"],
-  approved:    ["delivered", "revision"],
-  delivered:   ["revision", "delivered"],
+  assigned:    ["in_progress", "submitted", "cancelled"],
+  in_progress: ["review", "assigned", "cancelled"],
+  review:      ["approved", "revision", "in_progress", "cancelled"],
+  approved:    ["delivered", "revision", "refunded"],
+  delivered:   ["revision", "delivered", "refunded"],
   revision:    ["in_progress", "submitted"],
+  cancelled:   [],
+  refunded:    [],
 };
 
 export async function PATCH(
@@ -69,6 +80,24 @@ export async function PATCH(
       }, { status: 422 });
     }
 
+    // Guard: an order cannot be delivered without a file to deliver. This state
+    // was reachable — AdminOrderDetail.tsx even renders "No output files
+    // uploaded" for it — meaning a customer could be marked delivered with
+    // nothing attached, and nothing recorded that anything was wrong.
+    if (newStatus === "delivered") {
+      const { count: outputCount } = await supabase
+        .from("order_files")
+        .select("*", { count: "exact", head: true })
+        .eq("order_id", orderId)
+        .eq("file_type", "output");
+
+      if (!outputCount) {
+        return NextResponse.json({
+          error: "Cannot mark as delivered — no output file has been uploaded for this order.",
+        }, { status: 422 });
+      }
+    }
+
     // Build update payload
     const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
@@ -81,7 +110,13 @@ export async function PATCH(
     // Timestamp fields
     if (newStatus === "assigned")    { updates.assigned_at     = new Date().toISOString(); }
     if (newStatus === "in_progress") { updates.in_progress_at  = new Date().toISOString(); }
-    if (newStatus === "delivered")   { updates.delivered_at    = new Date().toISOString(); }
+    // completed_at was never written by this route, so the "QA Review" timeline
+    // entry in AdminOrderDetail.tsx could never render. delivered is the final
+    // state in this lifecycle, so it doubles as completion.
+    if (newStatus === "delivered")   {
+      updates.delivered_at = new Date().toISOString();
+      updates.completed_at = new Date().toISOString();
+    }
 
     // Apply update
     const { data: updated, error: updErr } = await supabase
@@ -307,11 +342,14 @@ export async function PATCH(
       }).catch(console.error);
 
       // Send review request
+      // emailReviewRequest takes serviceName, not reviewUrl — passing the wrong
+      // key left serviceName undefined, so the customer received
+      // "your undefined for order …" and the order number was dropped.
       emailReviewRequest({
-        to:          clientUser.email,
-        clientName:  clientUser.full_name ?? "there",
-        orderNumber: order.order_number,
-        reviewUrl:   `${process.env.NEXT_PUBLIC_APP_URL}/client/my-orders`,
+        to:           clientUser.email,
+        clientName:   clientUser.full_name ?? "there",
+        orderNumber:  order.order_number,
+        serviceName:  (order as any).service_tiers?.label ?? "order",
       }).catch(console.error);
     }
 

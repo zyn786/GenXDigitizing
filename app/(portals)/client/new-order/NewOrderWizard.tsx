@@ -22,7 +22,7 @@ const TURNS = [
   {id:"urgent",label:"Urgent",time:"3h",icon:"🔥"},
 ];
 
-function calcDeadline(turn:any, big:any){const h=big?12:turn==="urgent"?3:turn==="rush"?6:24;return new Date(Date.now()+h*3600000).toISOString();}
+// Deadline rule lives in lib/sla so this file, QuickOrder and the CRM path agree.
 
 function DoneScreen({done,totalPrice,qty,sel,serviceName,selTurn,router,setDone,setStep,setSel,setFiles,setNotes,setDesignName,setW,setH,setCol,setQuantity,setStitchCount,setInstructions}:any){
   return(
@@ -73,6 +73,9 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
   const [done,setDone]=useState<any>(null);
   const [uploadProgress,setUploadProgress]=useState(0);
   const abortRef = useRef<AbortController|null>(null);
+  // Stable per submission, cleared once the order exists, so a double-click or a
+  // retry after a dropped connection reuses the same order instead of creating two.
+  const idemKeyRef = useRef<string|null>(null);
   const [stitchCount,setStitchCount]=useState("");
   const [quantity,setQuantity]=useState("1");
   const [instructions,setInstructions]=useState("");
@@ -85,6 +88,7 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
     appliedCoupon, discount,
     isApplying, error: couponError,
     applyCoupon, removeCoupon,
+    visitorId,
   } = useCoupon(1);
 
   // Load subscription
@@ -113,26 +117,41 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
     const controller = new AbortController();
     abortRef.current = controller;
     try{
-      const {data:order,error:oErr}=await supabase.from("orders").insert({
-        client_id:clientId,service_tier_id:sel.id,output_format:fmt,
-        additional_formats:extras.length?extras:null,turnaround:turn,
-        price:totalPrice,currency:"USD",
-        width_inches:w?parseFloat(w):null,height_inches:h?parseFloat(h):null,
-        color_count:col?parseInt(col):null,placement_notes:notes.trim()||null,
-        design_name:designName.trim()||null,sla_deadline:calcDeadline(turn,isBig),
-      }).select().single();
-      if(oErr||!order){toast.error("Failed: "+(oErr?.message||"error"));setBusy(false);return;}
+      // The order is created server-side. Price, deadline and the team
+      // notification are all decided there from data this browser cannot forge —
+      // the insert used to happen here, with the price this component computed,
+      // and the notification was a separate call a closed tab would skip.
+      const createRes = await fetch("/api/orders/create", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          service_tier_id: sel.id,
+          turnaround: turn,
+          output_format: fmt,
+          additional_formats: extras,
+          width_inches: w || null,
+          height_inches: h || null,
+          color_count: col || null,
+          placement_notes: notes,
+          design_name: designName,
+          quantity: qty,
+          coupon_code: appliedCoupon?.code ?? null,
+          visitor_id: visitorId ?? null,
+          file_count: files.length,
+          idempotency_key: idemKeyRef.current ??= crypto.randomUUID(),
+        }),
+      });
+
+      const created = await createRes.json().catch(()=>({}));
+      if(!createRes.ok || !created?.order){
+        toast.error(created?.error || "Could not place the order. Please try again.");
+        setBusy(false);
+        return;
+      }
+      const order = created.order;
+      idemKeyRef.current = null; // consumed — a later order is a new one
 
       if (controller.signal.aborted) return;
-
-      // Attach coupon if applied
-      if (appliedCoupon) {
-        await supabase.from("orders").update({
-          coupon_code: appliedCoupon.code,
-          coupon_id: appliedCoupon.id,
-          discount_amount: discount,
-        }).eq("id", order.id);
-      }
 
       // Upload with progress via XHR
       const uploadResult = await new Promise<{ok:boolean;error?:string}>((resolve) => {
@@ -165,13 +184,21 @@ export function NewOrderWizard({tiers,clientId,userId}:any){
       });
 
       if(!uploadResult.ok){
-        await supabase.from("orders").update({status:"cancelled"}).eq("id",order.id);
-        toast.error(uploadResult.error||"Upload failed");
-        setBusy(false);
+        // Do NOT cancel silently. The order is real and the team has already been
+        // notified; the artwork is what is missing. Cancelling here used to leave
+        // a dead order nobody was told about (and if the cancel write itself
+        // failed, a live order with no files). This way someone owns it, and the
+        // SLA monitor covers it because it stays in `submitted`.
+        await fetch(`/api/orders/${order.id}/artwork-failed`,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ reason: uploadResult.error || "upload failed" }),
+        }).catch(()=>{});
+        toast.error(`${uploadResult.error||"Upload failed"} — your order was placed and our team will contact you about the artwork.`);
+        router.push(`/client/my-orders/${order.id}`);
         return;
       }
 
-      fetch("/api/order-confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId,orderNumber:order.order_number,service:sel.label,price:totalPrice,turnaround:turn})}).catch(()=>{});
       toast.success("Order placed! Redirecting...");
       router.push(`/client/my-orders/${order.id}`);
     }catch(err:any){toast.error(err?.message||"Error");}

@@ -211,7 +211,14 @@ export async function PATCH(
               },
             }).catch(console.error);
 
-            // Notify admins via email
+            // Notify admins via email. `admins` was referenced here but never
+            // defined anywhere in this file — the ReferenceError was swallowed by
+            // the catch below, so this alert silently never sent.
+            const { data: admins } = await supabase
+              .from("users")
+              .select("email")
+              .eq("role", "admin")
+              .eq("is_active", true);
             const adminEmails = admins?.map((a: any) => a.email).filter(Boolean) ?? [];
             if (adminEmails.length > 0) {
               emailNewOrderAlert({

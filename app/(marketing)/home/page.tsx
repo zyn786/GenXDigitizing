@@ -1,7 +1,6 @@
 // @ts-nocheck
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/server";
-import { SITE_STATS, fmtPlus } from "@/lib/site-config";
 import { FAQSchema, BreadcrumbSchema, VideoObjectSchema } from "@/components/shared/StructuredData";
 import { LandingClient } from "./LandingClient";
 
@@ -16,7 +15,7 @@ async function getLiveStats() {
 
 export const metadata: Metadata = {
   title: "Professional Embroidery Digitizing Services — genxdigitizing",
-  description: "Professional embroidery digitizing services. Fast turnaround, machine-ready files, unlimited revisions. Trusted by embroidery businesses worldwide. Get a free quote today.",
+  description: "Professional embroidery digitizing services. Fast turnaround, machine-ready files, unlimited revisions. Get a free quote today.",
   keywords: [
     "embroidery digitizing service","DST file","PES file","EMB file",
     "embroidery digitizing online","cap logo digitizing","left chest digitizing",
@@ -24,7 +23,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "genxdigitizing — Production-Ready Embroidery Files",
-    description: `Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. ${fmtPlus(SITE_STATS.ordersCompleted)} orders completed.`,
+    description: "Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. Every major machine format.",
     type: "website",
   },
   alternates: {
@@ -42,8 +41,10 @@ const SERVICE_META = {
     tags: ["JPG to Vector", "Logo Redraw", "Print-Ready", "DTF / DTG"],
     color: "#F97316", grad: "linear-gradient(135deg, #F97316, #EA580C)" },
   sewout: { emoji: "🏷️", title: "Patch Design",
-    desc: "Structured patch planning for embroidered, woven, PVC, leather, and specialty patch production. 500+ patches — up to 50% off.",
-    tags: ["Embroidered", "Chenille", "PVC / Woven", "Leather", "Bulk 50% Off"],
+    desc: "Structured patch planning for embroidered, woven, PVC, leather, and specialty patch production. Bulk discounts from 20%.",
+    // "500+ patches" was invented and "Bulk 50% Off" overstated the coupons
+    // table, which carries BULK20 (5+ designs) and BULK30 (10+ designs).
+    tags: ["Embroidered", "Chenille", "PVC / Woven", "Leather", "Bulk Discounts"],
     color: "#16A34A", grad: "linear-gradient(135deg, #16A34A, #15803D)" },
 };
 
@@ -54,14 +55,17 @@ const PROCESS = [
   { n: "04", title: "Download Files", desc: "Receive DST, PES, EMB and production-ready files.", icon: "📥" },
 ];
 
-const TESTIMONIALS = [
-  { name: "Marcus Rivera",   company: "ProStitch Apparel",    text: "Files run clean on first load. Tight stitch paths and correct density for my Brother machine. Will use genxdigitizing for all future orders.", stars: 5, country: "USA", date: "2025" },
-  { name: "Sarah Kim",        company: "Branded Threads Co.",   text: "High-volume cap orders needed consistent 3D puff handling. genxdigitizing delivered proper underlay and height on every file with under 12-hour turnaround.", stars: 5, country: "UK", date: "2025" },
-  { name: "David Chen",       company: "The Embroidery House",  text: "Proof approval step caught a color merge issue before production. Fast communication and friction-free revisions.", stars: 5, country: "Canada", date: "2025" },
-  { name: "Linda Martinez",   company: "ThreadWorks Studio",    text: "Switched from my previous service. Better stitch quality. Underlay and density handled properly here.", stars: 5, country: "USA", date: "2025" },
-  { name: "James Okafor",     company: "Victory Sportswear",    text: "Cap digitizing is tricky. genxdigitizing got it right first try. Structural underlay perfect for curved surfaces.", stars: 5, country: "Nigeria", date: "2024" },
-  { name: "Priya Mehta",      company: "Monogram Collective",   text: "Fast, affordable, and the free format conversion saves me time. I get DST, PES, and JEF all in one order.", stars: 5, country: "India", date: "2025" },
-];
+// REMOVED: a six-entry TESTIMONIALS array that was invented wholesale — named
+// people, companies, countries and star ratings for customers who never existed.
+// The reviews table has always held zero rows and the orders table zero orders.
+// Publishing fabricated testimonials is deceptive advertising (FTC Act §5 and
+// equivalents) and, when it reaches schema.org markup, a Google structured-data
+// violation that risks a manual action.
+//
+// Do not reintroduce this array. Render REAL reviews from the `reviews` table
+// once they exist — it already has `stars`, `text` and `client_id`, and the
+// column `is_published` exists to gate what shows. Until then, show portfolio
+// work instead: 23 real images beat six testimonials nobody can verify.
 
 const FAQS = [
   { q: "What file formats do you deliver?", a: "DST, PES, EMB, JEF, XXX, VIP, HUS, EXP — we cover every major machine format. Extra formats are always free." },
@@ -109,7 +113,7 @@ export default async function HomePage() {
         thumbnailUrl="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:low,so_0,w_1200/v1781040748/hero-bg-desktop_ogydtd.jpg"
         uploadDate="2025-06-01T00:00:00+00:00"
       />
-      <LandingClient liveStats={await getLiveStats()} services={services} process={PROCESS} testimonials={TESTIMONIALS} faqs={FAQS} />
+      <LandingClient liveStats={await getLiveStats()} services={services} process={PROCESS} faqs={FAQS} />
     </>
   );
 }

@@ -5,6 +5,8 @@
  */
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/server";
+import { bareAddress, composeFrom, composeReplyTo } from "@/lib/email/address";
+import { logEmailFailure } from "@/lib/email/log";
 
 let _resend: Resend | null = null;
 function getResend() {
@@ -15,16 +17,31 @@ function getResend() {
   }
   return _resend;
 }
-const FROM = `${process.env.RESEND_FROM_NAME || "GenXdigitizing"} <${process.env.RESEND_FROM_EMAIL || "noreply@genxdigitizing.com"}>`;
+// Composed through lib/email/address so the header can never nest brackets, and
+// so this file and lib/email/index.ts share one fallback instead of disagreeing
+// on both the display name and the mailbox.
+const FROM = composeFrom();
+// Previously unset, so replies went to the sending address. Point them at a
+// monitored mailbox instead.
+const REPLY = composeReplyTo();
 
 function send(options: { to: string; subject: string; html: string }) {
-  return getResend().emails.send({ from: FROM, ...options })
+  return getResend().emails.send({ from: FROM, reply_to: REPLY, ...options })
     .then(async (result) => {
+      // Resend reports API-level rejections in the resolved value rather than by
+      // throwing — check it, or a rejected send gets logged as a success.
+      const apiError = (result as any)?.error;
+      if (apiError) {
+        console.error(`[email/subscription] Resend rejected "${options.subject}":`, apiError);
+        await logEmailFailure({ to: options.to, from: FROM, subject: options.subject, error: apiError });
+        return result;
+      }
+
       // Log to sent_emails so the admin /email page shows full send history
       try {
         await createAdminClient().from("sent_emails").insert({
           to_email: options.to,
-          from_email: process.env.RESEND_FROM_EMAIL || "noreply@genxdigitizing.com",
+          from_email: bareAddress(FROM),
           subject: options.subject,
           body: options.html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 2000),
           resend_id: result?.data?.id || null,
@@ -34,7 +51,10 @@ function send(options: { to: string; subject: string; html: string }) {
       }
       return result;
     })
-    .catch(e => console.error(`[email/subscription] Failed to send "${options.subject}":`, e));
+    .catch(async (e) => {
+      console.error(`[email/subscription] Failed to send "${options.subject}":`, e);
+      await logEmailFailure({ to: options.to, from: FROM, subject: options.subject, error: e });
+    });
 }
 
 export function emailSubscriptionRequested(to: string, planLabel: string, price: number, designs: number) {

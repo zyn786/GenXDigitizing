@@ -25,7 +25,7 @@ function formatSize(bytes: number): string {
 
 function fileFingerprint(f: File): string { return `${f.name}::${f.size}::${f.lastModified}`; }
 
-function calcDeadline(turn:any,big:any){const h=big?12:turn==="urgent"?3:turn==="rush"?6:24;return new Date(Date.now()+h*3600000).toISOString();}
+// Deadline rule lives in lib/sla so this file, NewOrderWizard and the CRM path agree.
 
 interface Props {
   tiers: any[];
@@ -52,6 +52,8 @@ export function QuickOrder({tiers,clientId,userId,subscription,creditBalance}:Pr
   const [errors,setErrors]=useState<string[]>([]);
   const [uploadProgress,setUploadProgress]=useState(0);
   const abortRef = useRef<AbortController|null>(null);
+  // Stable per submission so a double-click or a retry reuses one order.
+  const idemKeyRef = useRef<string|null>(null);
 
   const grouped:any={};for(const t of tiers){grouped[t.category]=grouped[t.category]||[];grouped[t.category].push(t);}
   const cats=Object.keys(grouped);
@@ -117,13 +119,35 @@ export function QuickOrder({tiers,clientId,userId,subscription,creditBalance}:Pr
     const controller = new AbortController();
     abortRef.current = controller;
     try{
-      const {data:order,error:oErr}=await supabase.from("orders").insert({
-        client_id:clientId,service_tier_id:sel.id,output_format:fmt,turnaround:turn,
-        price:0,currency:"USD",width_inches:w?parseFloat(w):null,height_inches:h?parseFloat(h):null,
-        placement_notes:notes.trim()||null,design_name:designName.trim()||null,
-        sla_deadline:calcDeadline(turn,isBig),
-      }).select().single();
-      if(oErr||!order){toast.error("Failed");setBusy(false);return;}
+      // Order + credit consumption both happen server-side. The credits used to
+      // be decremented here with `.catch(()=>{})`, so a failed decrement silently
+      // produced a free order.
+      const createRes = await fetch("/api/orders/create", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          service_tier_id: sel.id,
+          turnaround: turn,
+          output_format: fmt,
+          width_inches: w || null,
+          height_inches: h || null,
+          placement_notes: notes,
+          design_name: designName,
+          quantity: qty,
+          use_credits: true,
+          file_count: files.length,
+          idempotency_key: idemKeyRef.current ??= crypto.randomUUID(),
+        }),
+      });
+
+      const created = await createRes.json().catch(()=>({}));
+      if(!createRes.ok || !created?.order){
+        toast.error(created?.error || "Could not place the order. Please try again.");
+        setBusy(false);
+        return;
+      }
+      const order = created.order;
+      idemKeyRef.current = null; // consumed
 
       if (controller.signal.aborted) return;
 
@@ -158,15 +182,22 @@ export function QuickOrder({tiers,clientId,userId,subscription,creditBalance}:Pr
       });
 
       if(!uploadResult.ok){
-        await supabase.from("orders").update({status:"cancelled"}).eq("id",order.id);
-        toast.error(uploadResult.error||"Upload failed");
-        setBusy(false);
+        // See NewOrderWizard: the order stays in `submitted` so the team is told
+        // and the SLA monitor keeps watching it, rather than being cancelled into
+        // silence.
+        await fetch(`/api/orders/${order.id}/artwork-failed`,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ reason: uploadResult.error || "upload failed" }),
+        }).catch(()=>{});
+        toast.error(`${uploadResult.error||"Upload failed"} — your order was placed and our team will contact you about the artwork.`);
+        router.push(`/client/my-orders/${order.id}`);
         return;
       }
 
-      if(usePlanCredits>0)await supabase.rpc("increment_sub_usage",{sub_id:subscription.id,amount:usePlanCredits}).catch(()=>{});
-      if(useExtraCredits>0)await supabase.rpc("decrement_credit_balance",{p_client_id:clientId,p_amount:useExtraCredits}).catch(()=>{});
-      fetch("/api/order-confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId,orderNumber:order.order_number,service:sel.label,price:0,turnaround:turn})}).catch(()=>{});
+      if(created?.credits?.warning){
+        toast.warning("Your order was placed, but credit usage needs a quick manual check by our team.");
+      }
       toast.success("Order placed!");
       router.push(`/client/my-orders/${order.id}`);
     }catch(err:any){toast.error(err?.message||"Error");}

@@ -246,7 +246,7 @@ export function DesignerUploadUI({ tasks, userId, designerId, designerName, desi
       <div className="px-4 py-3 rounded-2xl mb-5"
         style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+          <div className="relative w-9 h-9 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden"
             style={{ background: "linear-gradient(135deg, #7C3AED, #D946EF)" }}>
             {designerAvatar
               ? <NextImage fill src={designerAvatar} alt={designerName} className="rounded-full object-cover"  sizes="(max-width: 768px) 100vw, 800px" />

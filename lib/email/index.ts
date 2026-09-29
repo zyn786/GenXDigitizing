@@ -7,13 +7,17 @@
 
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/server";
+import { bareAddress, composeFrom, composeReplyTo } from "@/lib/email/address";
+import { logEmailFailure } from "@/lib/email/log";
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY ?? "placeholder");
 }
 
-const FROM    = `${process.env.RESEND_FROM_NAME ?? "genxdigitizing"} <${process.env.RESEND_FROM_EMAIL || "support@genxdigitizing.com"}>`;
-const REPLY   = process.env.RESEND_REPLY_TO || "support@genxdigitizing.com";
+// Always compose through lib/email/address — interpolating RESEND_FROM_EMAIL
+// directly produced a nested-bracket header when the env var carried a name.
+const FROM    = composeFrom();
+const REPLY   = composeReplyTo();
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.genxdigitizing.com";
 const LOGO_URL = `${APP_URL}/images/black_logo.png`;
 const TRUSTPILOT_BCC = "genxdigitizing.com+a5c28d839b@invite.trustpilot.com";
@@ -96,6 +100,7 @@ async function sendEmail(params: SendParams, retries: number = 2) {
           continue;
         }
         console.error("[email] Resend error after " + retries + " retries:", error);
+        await logEmailFailure({ to: params.to, from: FROM, subject: params.subject, error, attempts: retries + 1 });
         return { success: false, error: error };
       }
 
@@ -104,7 +109,9 @@ async function sendEmail(params: SendParams, retries: number = 2) {
       try {
         await createAdminClient().from("sent_emails").insert({
           to_email: Array.isArray(params.to) ? params.to.join(", ") : params.to,
-          from_email: process.env.RESEND_FROM_EMAIL || "support@genxdigitizing.com",
+          // Record the address that actually went on the wire, not the raw env
+          // value — the two diverged whenever RESEND_FROM_EMAIL carried a name.
+          from_email: bareAddress(FROM),
           subject: params.subject,
           body: params.text || text,
           resend_id: data?.id || null,
@@ -121,6 +128,7 @@ async function sendEmail(params: SendParams, retries: number = 2) {
         continue;
       }
       console.error("[email] Unexpected error after " + retries + " retries:", err);
+      await logEmailFailure({ to: params.to, from: FROM, subject: params.subject, error: err, attempts: retries + 1 });
       return { success: false, error: err };
     }
   }

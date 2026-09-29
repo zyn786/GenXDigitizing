@@ -18,7 +18,6 @@ import { createAdminClient } from "@/lib/supabase/server";
 export const BUCKETS = {
   outputs: "outputs",
   artwork: "artwork",
-  freeDesigns: "free-designs",
 } as const;
 
 /** Legacy S3 prefix stored in file_url rows written before the migration */
@@ -30,7 +29,6 @@ const LEGACY_S3_BUCKET = () => process.env.CHAT_ATTACHMENTS_BUCKET || "genxdigit
 /** Resolve which storage bucket a path lives in. Path prefixes win over file_type defaults. */
 export function resolveBucket(path: string, fileType?: string): string {
   if (!path) return fileType === "output" ? BUCKETS.outputs : BUCKETS.artwork;
-  if (/^free-designs\//.test(path)) return BUCKETS.freeDesigns;
   if (/^orders\/[^/]+\/output\//.test(path)) return BUCKETS.outputs;
   if (/^orders\/[^/]+\/artwork\//.test(path)) return BUCKETS.artwork;
   // chat / guest-uploads / requests live in the outputs bucket (see migration 008)

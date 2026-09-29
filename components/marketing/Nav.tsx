@@ -8,9 +8,9 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { SITE_INFO, SITE_STATS, fmtPlus } from "@/lib/site-config";
+import { SITE_INFO, SITE_CLAIMS } from "@/lib/site-config";
 import { createClient } from "@/lib/supabase/client";
-import { ChevronRight, ChevronDown, Star, Shield, Bell, LayoutDashboard, Home, Info, Briefcase, FolderOpen, DollarSign, Gift, FileText, Users, Mail, LogIn, UserPlus, Clock, ShieldCheck, RefreshCw } from "lucide-react";
+import { ChevronRight, ChevronDown, Star, Shield, Bell, LayoutDashboard, Home, Info, Briefcase, FolderOpen, DollarSign, FileText, Users, Mail, LogIn, UserPlus, Clock, ShieldCheck, RefreshCw } from "lucide-react";
 
 const NAV_ICONS: Record<string, React.ReactNode> = {
   "/home":         <Home size={16} />,
@@ -18,7 +18,6 @@ const NAV_ICONS: Record<string, React.ReactNode> = {
   "/services":     <Briefcase size={16} />,
   "/portfolio":    <FolderOpen size={16} />,
   "/pricing":      <DollarSign size={16} />,
-  "/free-designs": <Gift size={16} />,
   "/blog":         <FileText size={16} />,
   "/subscribe":    <Users size={16} />,
   "/contact":      <Mail size={16} />,
@@ -30,7 +29,6 @@ const LINKS = [
   { href: "/services",     label: "Services"       },
   { href: "/portfolio",    label: "Portfolio"      },
   { href: "/pricing",      label: "Pricing"        },
-  { href: "/free-designs", label: "Free Sample"    },
   { href: "/blog",         label: "Blog"           },
   { href: "/subscribe",    label: "B2B"            },
   { href: "/contact",      label: "Contact"        },
@@ -229,17 +227,13 @@ export function Nav({ topOffset }: { topOffset?: string }) {
                 href={l.href}
                 className={cn(
                   "relative px-2 xl:px-3 py-2.5 rounded-xl text-[12px] xl:text-[13px] font-semibold transition-all duration-200 no-underline",
-                  l.href === "/free-designs"
-                    ? isActive
-                      ? "bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white shadow-[0_2px_12px_rgba(37,99,235,0.3)]"
-                      : "text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] font-bold hover:bg-[#2563EB]/8 hover:text-transparent hover:bg-clip-text"
-                    : isActive
-                      ? "text-[var(--txt)]"
-                      : "text-[var(--txt2)] hover:text-[var(--txt)] hover:bg-[var(--elevated)]/60"
+                  isActive
+                    ? "text-[var(--txt)]"
+                    : "text-[var(--txt2)] hover:text-[var(--txt)] hover:bg-[var(--elevated)]/60"
                 )}
               >
                 {l.label}
-                {isActive && l.href !== "/free-designs" && (
+                {isActive && (
                   <motion.div
                     layoutId="navActive"
                     className="absolute -bottom-[2px] left-[15%] right-[15%] h-[3px] rounded-full bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] shadow-[0_1px_4px_rgba(37,99,235,0.3)]"
@@ -451,19 +445,14 @@ export function Nav({ topOffset }: { topOffset?: string }) {
                             onClick={() => setOpen(false)}
                             className={cn(
                               "flex items-center gap-3 py-3.5 px-3 rounded-xl text-sm font-semibold no-underline transition-all duration-150",
-                              l.href === "/free-designs"
-                                ? "text-[var(--txt)] font-bold"
-                                : isActive
-                                  ? "text-[var(--txt)] bg-[#2563EB]/15"
-                                  : "text-[var(--txt2)] hover:text-[var(--txt)] hover:bg-[var(--elevated)]/50"
+                              isActive
+                                ? "text-[var(--txt)] bg-[#2563EB]/15"
+                                : "text-[var(--txt2)] hover:text-[var(--txt)] hover:bg-[var(--elevated)]/50"
                             )}
                           >
                             <span className="text-[var(--txt3)]">{NAV_ICONS[l.href]}</span>
                             {l.label}
-                            {l.href === "/free-designs" && (
-                              <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#16A34A]/10 text-[#16A34A]">Free</span>
-                            )}
-                            {isActive && l.href !== "/free-designs" && (
+                            {isActive && (
                               <div className="ml-auto w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#2563EB] to-[#7C3AED]" />
                             )}
                           </Link>
@@ -505,22 +494,22 @@ export function Nav({ topOffset }: { topOffset?: string }) {
                       <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white/50">
                         <Star size={16} className="text-[#F59E0B] fill-[#F59E0B] flex-shrink-0" />
                         <div>
-                          <p className="text-xs font-bold text-[var(--txt)]">{SITE_STATS.avgRating}/5</p>
-                          <p className="text-[10px] text-[var(--txt3)]">{SITE_STATS.verifiedReviews}+ reviews</p>
+                          <p className="text-xs font-bold text-[var(--txt)]">{SITE_CLAIMS.price.value}</p>
+                          <p className="text-[10px] text-[var(--txt3)]">Standard designs</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white/50">
                         <Clock size={16} className="text-[#2563EB] flex-shrink-0" />
                         <div>
-                          <p className="text-xs font-bold text-[var(--txt)]">{SITE_STATS.avgDeliveryHours}h</p>
-                          <p className="text-[10px] text-[var(--txt3)]">Avg delivery</p>
+                          <p className="text-xs font-bold text-[var(--txt)]">{SITE_CLAIMS.turnaround.value}</p>
+                          <p className="text-[10px] text-[var(--txt3)]">Turnaround</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white/50">
                         <ShieldCheck size={16} className="text-[#16A34A] flex-shrink-0" />
                         <div>
-                          <p className="text-xs font-bold text-[var(--txt)]">{SITE_STATS.satisfactionRate}%</p>
-                          <p className="text-[10px] text-[var(--txt3)]">Satisfaction</p>
+                          <p className="text-xs font-bold text-[var(--txt)]">{SITE_CLAIMS.formats.value}</p>
+                          <p className="text-[10px] text-[var(--txt3)]">Machine formats</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white/50">

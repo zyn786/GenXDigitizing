@@ -1,0 +1,49 @@
+-- ============================================================
+-- Migration 049: Close the client-side order write paths
+-- ============================================================
+--
+-- ⚠️  DO NOT APPLY UNTIL THE NEW CODE IS DEPLOYED AND LIVE.  ⚠️
+--
+-- Apply this BEFORE the code ships and order placement breaks immediately: the
+-- currently deployed wizards insert orders directly from the browser, and this
+-- migration is what removes their permission to do so.
+--
+-- Confirm the deploy first. From a machine that can reach production:
+--
+--   curl -s -o /dev/null -w "%{http_code}\n" -X POST \
+--     https://www.genxdigitizing.com/api/orders/create -H 'Content-Type: application/json' -d '{}'
+--
+--   404  → old code is still live. DO NOT APPLY.
+--   401  → new route is live. Safe to apply.
+--
+-- (401 is the route refusing an unauthenticated caller and means it exists;
+-- 404 means the build has no such route at all.)
+--
+-- What this closes
+-- ----------------
+-- `orders_client_insert` (001) checked only `my_role() = 'client' AND
+-- client_id = my_client_id()` — nothing constrained `price`. The wizards
+-- computed the price in the browser and inserted it through the anon key, which
+-- ships in the page bundle, so any signed-in customer could create an order at
+-- any price, or at zero, and the row was indistinguishable from a legitimate one.
+--
+-- `orders_client_cancel` (029) permitted ONLY `status = 'cancelled'` through its
+-- WITH CHECK. It could never have allowed the spec edits OrderDetail.tsx
+-- attempts, which failed on every save. It existed to serve the silent
+-- cancel-on-upload-failure, now handled properly by
+-- /api/orders/[id]/artwork-failed.
+--
+-- After this, clients hold no write access to orders at all. All three write
+-- paths are service-role routes with their own ownership checks:
+--   POST  /api/orders/create                 order creation, server-side pricing
+--   POST  /api/orders/[id]/artwork-failed    upload failure, team notified
+--   PATCH /api/orders/[id]/edit              client spec edits, field-whitelisted
+--
+-- Reading is unaffected — orders_client_read stays exactly as it is.
+
+drop policy if exists "orders_client_insert" on public.orders;
+drop policy if exists "orders_client_cancel" on public.orders;
+
+-- Verification (expect 0 rows): confirm no client-facing write policies remain.
+--   select policyname, cmd from pg_policies
+--   where tablename = 'orders' and cmd in ('INSERT','UPDATE');
