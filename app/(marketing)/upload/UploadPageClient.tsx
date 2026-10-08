@@ -163,12 +163,12 @@ export default function UploadPageClient() {
           <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
             <h2 className="font-bold">3. Production details</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <input name="design_name" required placeholder="Design / logo name" className="field" />
-              <input name="placement" required placeholder="Placement (e.g. left chest, cap front)" className="field" />
-              <input name="width" placeholder='Width in inches (e.g. 4")' className="field" />
-              <input name="height" placeholder='Height in inches (e.g. 4")' className="field" />
-              <input name="colors" placeholder="Approx. thread colors" className="field" />
-              <select name="format" defaultValue="DST" className="field">
+              <input name="design_name" required placeholder="Design / logo name" className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--txt)] outline-none placeholder:text-[var(--txt3)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10" />
+              <input name="placement" required placeholder="Placement (e.g. left chest, cap front)" className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--txt)] outline-none placeholder:text-[var(--txt3)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10" />
+              <input name="width" placeholder='Width in inches (e.g. 4")' className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--txt)] outline-none placeholder:text-[var(--txt3)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10" />
+              <input name="height" placeholder='Height in inches (e.g. 4")' className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--txt)] outline-none placeholder:text-[var(--txt3)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10" />
+              <input name="colors" placeholder="Approx. thread colors" className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--txt)] outline-none placeholder:text-[var(--txt3)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10" />
+              <select name="format" defaultValue="DST" className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--txt)] outline-none placeholder:text-[var(--txt3)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10">
                 {FORMATS.map((format) => <option key={format}>{format}</option>)}
               </select>
             </div>
@@ -182,14 +182,14 @@ export default function UploadPageClient() {
                 </label>
               ))}
             </div>
-            <textarea name="notes" placeholder="Anything we should know? Fabric, machine, stitch count, special instructions..." rows={4} className="field mt-3 resize-none" />
+            <textarea name="notes" placeholder="Anything we should know? Fabric, machine, stitch count, special instructions..." rows={4} className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--txt)] outline-none placeholder:text-[var(--txt3)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 mt-3 resize-none" />
           </section>
 
           <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
             <h2 className="font-bold">4. Your contact details</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <input name="name" required placeholder="Your name" className="field" />
-              <input name="email" required type="email" placeholder="Email address" className="field" />
+              <input name="name" required placeholder="Your name" className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--txt)] outline-none placeholder:text-[var(--txt3)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10" />
+              <input name="email" required type="email" placeholder="Email address" className="w-full rounded-xl border border-[var(--border2)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--txt)] outline-none placeholder:text-[var(--txt3)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10" />
               <input name="company" placeholder="Company (optional)" className="field sm:col-span-2" />
             </div>
           </section>
