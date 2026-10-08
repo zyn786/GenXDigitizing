@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
-import { UploadWizard } from "./UploadWizard";
+import UploadPageClient from "./UploadPageClient";
 
 export const metadata: Metadata = {
-  title: "Upload Design — Free Quote — genxdigitizing",
+  title: "Upload Your Design — GenX Digitizing",
   description:
-    "Upload your design for a free embroidery digitizing quote. Instant pricing, 12-hour turnaround, free revisions. No account required.",
+    "Upload your artwork for a GenX Digitizing quote. No account required. We review the design before confirming price and turnaround.",
 };
 
 export default function UploadPage() {
@@ -17,7 +17,7 @@ export default function UploadPage() {
           { name: "Upload Design", url: "/upload" },
         ]}
       />
-      <UploadWizard />
+      <UploadPageClient />
     </>
   );
 }
