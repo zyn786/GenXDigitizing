@@ -4,6 +4,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { isMissingColumn } from "@/lib/db-errors";
 import { createClient } from "@/lib/supabase/client";
 import { Save, Zap, Gift, Info } from "lucide-react";
 
@@ -83,6 +84,19 @@ export function AdminPricingUI({ tiers }: { tiers: any[] }) {
   const [prices, setPrices] = useState<Record<string, number>>(
     Object.fromEntries(tiers.map((t) => [t.id, Number(t.price)]))
   );
+
+  /**
+   * Credits charged per design at each tier.
+   *
+   * Held as strings so the field can be cleared. An empty value means NULL,
+   * which is the real default: the tier defers to the plan's own credit cost
+   * (getCreditCost in lib/plans.ts). The application has read this column since
+   * it was written, but no migration created it — so every tier was silently
+   * falling back, and a per-tier price could not be set anywhere.
+   */
+  const [creditCosts, setCreditCosts] = useState<Record<string, string>>(
+    Object.fromEntries(tiers.map((t) => [t.id, t.credit_cost == null ? "" : String(t.credit_cost)]))
+  );
   const [saving, setSaving] = useState<string | null>(null);
   const [dirty, setDirty] = useState<Set<string>>(new Set());
 
@@ -101,15 +115,41 @@ export function AdminPricingUI({ tiers }: { tiers: any[] }) {
     setDirty((d) => new Set(d).add(id));
   }
 
+  function handleCreditChange(id: string, val: string) {
+    // Digits only. An empty string is a deliberate "no override".
+    setCreditCosts((c) => ({ ...c, [id]: val.replace(/[^\d]/g, "") }));
+    setDirty((d) => new Set(d).add(id));
+  }
+
+  /** Blank -> NULL (defer to the plan). A number -> that many credits. */
+  function creditCostFor(id: string): number | null {
+    const raw = (creditCosts[id] ?? "").trim();
+    if (!raw) return null;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n >= 1 ? n : null;
+  }
+
   async function saveTier(id: string) {
     setSaving(id);
     try {
       const { error } = await supabase
         .from("service_tiers")
-        .update({ price: prices[id], updated_at: new Date().toISOString() })
+        .update({
+          price: prices[id],
+          credit_cost: creditCostFor(id),
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", id);
       if (error) {
-        toast.error("Failed to save price");
+        // The CHECK constraint rejects 0 or a negative rather than storing a
+        // value that getCreditCost would silently ignore.
+        toast.error(
+          isMissingColumn(error)
+            ? "Credits need a database migration that has not been applied yet (056). The price was not saved either — run it first."
+            : error.code === "23514"
+              ? "Credits must be a whole number of 1 or more (or blank to use the plan default)"
+              : "Failed to save price"
+        );
         return;
       }
       toast.success("Price saved!");
@@ -133,10 +173,25 @@ export function AdminPricingUI({ tiers }: { tiers: any[] }) {
     setSaving("all");
     try {
       for (const id of dirtyIds) {
-        await supabase
+        const { error } = await supabase
           .from("service_tiers")
-          .update({ price: prices[id], updated_at: new Date().toISOString() })
+          .update({
+            price: prices[id],
+            credit_cost: creditCostFor(id),
+            updated_at: new Date().toISOString(),
+          })
           .eq("id", id);
+        if (error) {
+          // Report which one failed rather than claiming a clean sweep.
+          toast.error(
+            isMissingColumn(error)
+              ? "Credits need migration 056, which has not been applied. Nothing was saved."
+              : error.code === "23514"
+                ? `Credits for ${id} must be 1 or more, or blank for the plan default`
+                : `Failed to save ${id}`
+          );
+          return;
+        }
       }
       toast.success(`${dirtyIds.length} price${dirtyIds.length > 1 ? "s" : ""} saved!`);
       setDirty(new Set());
@@ -376,6 +431,32 @@ export function AdminPricingUI({ tiers }: { tiers: any[] }) {
                             onKeyDown={(e) => e.key === "Enter" && saveTier(t.id)}
                             className="w-[60px] border-none bg-transparent text-center font-syne text-[16px] font-bold outline-none sm:w-[68px] sm:text-[18px]"
                             style={{ color: mc.text }}
+                          />
+                        </div>
+
+                        {/* Credits per design at this tier. Blank is the real
+                            default and means "use the plan's own cost" — say so
+                            rather than leaving an empty box that looks unfilled. */}
+                        <div
+                          className="flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5"
+                          title="Credits charged per design at this tier. Leave blank to use the plan's default."
+                          style={{
+                            background: "var(--elevated)",
+                            borderColor: isDirty ? mc.border : "var(--border2)",
+                          }}
+                        >
+                          <span className="text-[11px] font-semibold" style={{ color: txt3 }}>
+                            ⬡
+                          </span>
+                          <input
+                            inputMode="numeric"
+                            placeholder="plan"
+                            value={creditCosts[t.id] ?? ""}
+                            onChange={(e) => handleCreditChange(t.id, e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && saveTier(t.id)}
+                            className="w-[46px] border-none bg-transparent text-center text-[14px] font-bold outline-none sm:w-[52px] placeholder:font-normal placeholder:text-[11px]"
+                            style={{ color: txt }}
+                            aria-label={`Credits per design for ${t.label}`}
                           />
                         </div>
 

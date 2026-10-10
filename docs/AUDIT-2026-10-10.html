@@ -806,12 +806,14 @@
           one customer.
         </p>
         <p>
-          <strong>Still open, and a decision for you:</strong>
-          <code>service_tiers.credit_cost</code> is read in four places and exists in no migration.
-          Reads return undefined and fall back to plan defaults, so a per-tier credit price set in
-          the database does nothing. Adding the column would make the code work as written, but it
-          sets what a design costs in credits — a pricing decision, not a bug fix, so it is left
-          alone.
+          <strong>Resolved, 2026-10-10.</strong> <code>service_tiers.credit_cost</code> was read in
+          four places and created by no migration, so every read returned undefined and fell back to
+          the plan default — a per-tier credit price could not be set anywhere. Migration 056 adds
+          the column, and Admin → Pricing now exposes it per tier beside the dollar price.
+          Blank stores NULL, which is the real default and means "use the plan's own cost"; the
+          column rejects 0 and negatives, because <code>getCreditCost</code> ignores those anyway and
+          a value that looks saved but silently does nothing is worse than a rejection. No price was
+          invented — the number is the business's to set.
         </p>
       </div>
     </article>
