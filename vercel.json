@@ -51,6 +51,10 @@
     {
       "path": "/api/cron/subscription-renewal",
       "schedule": "5 4 * * *"
+    },
+    {
+      "path": "/api/cron/follow-ups",
+      "schedule": "20 * * * *"
     }
   ],
   "env": {

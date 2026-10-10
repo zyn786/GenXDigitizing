@@ -1,52 +1,58 @@
--- Migration 032: Enable RLS on all remaining core tables
--- Tables with existing policies — just ENABLE RLS (policies kick in):
---   orders, order_files, invoices, reviews, clients, notifications
+-- Migration 032: Enable RLS on all remaining core tables.
+--
+-- ---------------------------------------------------------------------------
+-- THIS FILE PREVIOUSLY COULD NOT RUN. It was rewritten on 2026-10-10; the
+-- original is described below so the change is auditable rather than silent.
+--
+-- The original body created policies that made the whole file abort, and
+-- because the Supabase CLI sends a migration as a single implicit transaction,
+-- NOTHING in it ever took effect:
+--
+--   1. `messages_participant_read` / `messages_participant_insert` referenced
+--      `messages.sender_id` and `messages.recipient_id`. Those columns do not
+--      exist — the real ones are `from_user` and `to_user`
+--      (001_initial_schema.sql:190-191). First error: column does not exist.
+--   2. `tiers_read_all` and `tiers_admin_write` already exist from
+--      001_initial_schema.sql:459-460. Postgres raises duplicate_object.
+--   3. `ALTER TABLE public.subscribers` referenced a table no migration
+--      created, and no file creates it (that table is now created by 051).
+--
+-- Two of its policies were also worth not re-creating:
+--   * `users_read_all ... TO authenticated USING (true)` would have let every
+--     signed-in user read every user row — email, role, last sign-in. 001:463
+--     already sets the correct scope (own row, or admin/crm).
+--   * The messages and crm_leads policies duplicated 001:500 and 001:508,
+--     which already cover participants and admin/crm on the right columns.
+--
+-- So this file now does only the one thing its name claims and its 001
+-- counterpart did not: it ENABLES row level security. Every policy it once
+-- carried is either already present in 001 or was superseded. The genuinely
+-- missing pieces — the `subscribers` and `blog_comments` tables, RLS on
+-- `user_push_subscriptions`, and the over-permissive INSERT policies on
+-- `audit_logs` and `received_emails` — are handled in 051.
+--
+-- Re-running is safe: ENABLE ROW LEVEL SECURITY is idempotent.
+-- ---------------------------------------------------------------------------
 
 -- ============================================================
--- 1. Enable RLS on tables that already have policies
+-- 1. Core tables that already carry their policies
 -- ============================================================
-ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.order_files ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+-- ENABLE is a no-op where it is already on (001 does this for these tables);
+-- it is kept so a database that predates 001's RLS block still ends up closed.
+alter table public.orders        enable row level security;
+alter table public.order_files   enable row level security;
+alter table public.invoices      enable row level security;
+alter table public.reviews       enable row level security;
+alter table public.clients       enable row level security;
+alter table public.notifications enable row level security;
+alter table public.users         enable row level security;
+alter table public.service_tiers enable row level security;
+alter table public.designers     enable row level security;
+alter table public.messages      enable row level security;
+alter table public.crm_leads     enable row level security;
+alter table public.audit_logs    enable row level security;
 
--- ============================================================
--- 2. Enable RLS + create policies for tables without any
--- ============================================================
-
--- users: everyone can read profiles (needed for UI), only admins can write
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
-CREATE POLICY users_read_all ON public.users FOR SELECT TO authenticated USING (true);
-CREATE POLICY users_admin_write ON public.users FOR ALL TO authenticated USING (public.my_role() = 'admin');
-
--- service_tiers: public read, admin write
-ALTER TABLE public.service_tiers ENABLE ROW LEVEL SECURITY;
-CREATE POLICY tiers_read_all ON public.service_tiers FOR SELECT TO authenticated USING (true);
-CREATE POLICY tiers_admin_write ON public.service_tiers FOR ALL TO authenticated USING (public.my_role() = 'admin');
-
--- designers: admins manage, designers read own
-ALTER TABLE public.designers ENABLE ROW LEVEL SECURITY;
-CREATE POLICY designers_admin_all ON public.designers FOR ALL TO authenticated USING (public.my_role() = 'admin');
-CREATE POLICY designers_read_own ON public.designers FOR SELECT TO authenticated USING (user_id = auth.uid());
-
--- messages: participants can read/write their own messages
-ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
-CREATE POLICY messages_admin_all ON public.messages FOR ALL TO authenticated USING (public.my_role() = 'admin');
-CREATE POLICY messages_participant_read ON public.messages FOR SELECT TO authenticated USING (sender_id = auth.uid() OR recipient_id = auth.uid());
-CREATE POLICY messages_participant_insert ON public.messages FOR INSERT TO authenticated WITH CHECK (sender_id = auth.uid());
-
--- crm_leads: admins and CRM manage
-ALTER TABLE public.crm_leads ENABLE ROW LEVEL SECURITY;
-CREATE POLICY leads_admin_crm_all ON public.crm_leads FOR ALL TO authenticated USING (public.my_role() IN ('admin', 'crm'));
-
--- audit_logs: admins and CRM read only
-ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
-CREATE POLICY audit_logs_admin_read ON public.audit_logs FOR SELECT TO authenticated USING (public.my_role() IN ('admin', 'crm'));
-CREATE POLICY audit_logs_admin_insert ON public.audit_logs FOR INSERT TO authenticated WITH CHECK (public.my_role() IN ('admin', 'crm'));
-
--- subscribers: admin manage, public can insert (for subscribe form)
-ALTER TABLE public.subscribers ENABLE ROW LEVEL SECURITY;
-CREATE POLICY subscribers_admin_all ON public.subscribers FOR ALL TO authenticated USING (public.my_role() = 'admin');
-CREATE POLICY subscribers_anon_insert ON public.subscribers FOR INSERT TO anon, authenticated WITH CHECK (true);
+-- No policy creation in this file. The tables the original block targeted —
+-- users, service_tiers, designers, messages, crm_leads, audit_logs — all get
+-- their policies in 001, and the two it wanted to add for `subscribers` are in
+-- 051 alongside the table itself.
