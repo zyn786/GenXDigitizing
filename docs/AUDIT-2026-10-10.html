@@ -1,0 +1,1374 @@
+<title>GenX Digitizing Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* ── Design plan ────────────────────────────────────────────────
+     Subject: an engineering audit of an embroidery-digitizing
+     business — thread, stitch files, machine formats, a US-facing
+     shop run from Pakistan. Treatment: utilitarian report, read not
+     operated. Palette: cool paper neutrals biased toward the
+     brand's own blue; severity carries its own colour so it never
+     competes with the accent. Type: the project's real system —
+     Syne display, Inter body, mono for file:line evidence.
+     ──────────────────────────────────────────────────────────── */
+  :root{
+    --paper:#F7F8FA;
+    --surface:#FFFFFF;
+    --surface-2:#F0F2F6;
+    --line:#DFE3EA;
+    --line-strong:#C6CDD9;
+    --ink:#141821;
+    --ink-2:#4A5265;
+    --ink-3:#79839A;
+    --brand:#1D4ED8;
+    --brand-soft:#E8EEFF;
+    --crit:#C02626;
+    --crit-soft:#FCEBEB;
+    --warn:#9A5B00;
+    --warn-soft:#FDF3E3;
+    --ok:#156A46;
+    --ok-soft:#E6F5EE;
+    --shadow:0 1px 2px rgba(20,24,33,.06), 0 8px 24px -12px rgba(20,24,33,.18);
+    --f-display:"Syne","Trebuchet MS",system-ui,sans-serif;
+    --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#0E1116;
+      --surface:#161A22;
+      --surface-2:#1D222C;
+      --line:#2A303C;
+      --line-strong:#3A4250;
+      --ink:#E9ECF2;
+      --ink-2:#A8B1C2;
+      --ink-3:#7C8699;
+      --brand:#8FAAF7;
+      --brand-soft:#1B2540;
+      --crit:#F08A8A;
+      --crit-soft:#331B1B;
+      --warn:#E0AE5E;
+      --warn-soft:#2E2517;
+      --ok:#7FD1A9;
+      --ok-soft:#15291F;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0E1116;
+    --surface:#161A22;
+    --surface-2:#1D222C;
+    --line:#2A303C;
+    --line-strong:#3A4250;
+    --ink:#E9ECF2;
+    --ink-2:#A8B1C2;
+    --ink-3:#7C8699;
+    --brand:#8FAAF7;
+    --brand-soft:#1B2540;
+    --crit:#F08A8A;
+    --crit-soft:#331B1B;
+    --warn:#E0AE5E;
+    --warn-soft:#2E2517;
+    --ok:#7FD1A9;
+    --ok-soft:#15291F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--f-body);
+    font-size:15px;
+    line-height:1.6;
+    padding-block:0 64px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding-inline:20px}
+
+  /* ── Masthead ─────────────────────────────── */
+  .masthead{
+    border-bottom:1px solid var(--line);
+    background:var(--surface);
+    padding-block:36px 30px;
+    margin-bottom:36px;
+  }
+  .eyebrow{
+    font-family:var(--f-mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:0 0 14px;
+  }
+  .eyebrow span::after{content:"·";margin-left:10px;color:var(--line-strong)}
+  .eyebrow span:last-child::after{content:""}
+  h1{
+    font-family:var(--f-display);
+    font-weight:800;
+    font-size:clamp(28px,5vw,42px);
+    line-height:1.08;
+    letter-spacing:-.02em;
+    margin:0 0 12px;
+    text-wrap:balance;
+  }
+  .lede{font-size:17px;color:var(--ink-2);max-width:62ch;margin:0}
+
+  /* ── Headline counts ──────────────────────── */
+  .counts{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    margin:28px 0 0;
+  }
+  .count{
+    background:var(--surface);
+    padding:16px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .count b{
+    font-family:var(--f-display);
+    font-size:30px;
+    line-height:1;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+  }
+  .count span{font-size:12px;color:var(--ink-3);line-height:1.35}
+  .count.is-crit b{color:var(--crit)}
+  .count.is-ok b{color:var(--ok)}
+
+  /* ── Sections ─────────────────────────────── */
+  section{margin-top:52px;scroll-margin-top:20px}
+  h2{
+    font-family:var(--f-display);
+    font-weight:700;
+    font-size:clamp(20px,3vw,26px);
+    letter-spacing:-.01em;
+    margin:0 0 6px;
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    text-wrap:balance;
+  }
+  h2 .num{
+    font-family:var(--f-mono);
+    font-size:12px;
+    font-weight:500;
+    color:var(--brand);
+    background:var(--brand-soft);
+    border-radius:6px;
+    padding:3px 8px;
+    flex:none;
+  }
+  .sec-note{color:var(--ink-2);margin:0 0 22px;max-width:70ch}
+
+  /* ── Finding cards ────────────────────────── */
+  .finding{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-left:3px solid var(--line-strong);
+    border-radius:10px;
+    padding:16px 18px;
+    margin-bottom:10px;
+    box-shadow:var(--shadow);
+  }
+  .finding.crit{border-left-color:var(--crit)}
+  .finding.warn{border-left-color:var(--warn)}
+  .finding.ok{border-left-color:var(--ok)}
+  .f-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .f-title{
+    font-weight:600;
+    font-size:15.5px;
+    line-height:1.4;
+    margin:0;
+    flex:1;
+    min-width:min(100%,22ch);
+  }
+  .chip{
+    font-family:var(--f-mono);
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    font-weight:500;
+    border-radius:999px;
+    padding:3px 9px;
+    white-space:nowrap;
+    flex:none;
+  }
+  .chip.crit{background:var(--crit-soft);color:var(--crit)}
+  .chip.warn{background:var(--warn-soft);color:var(--warn)}
+  .chip.ok{background:var(--ok-soft);color:var(--ok)}
+  .chip.plan{background:var(--surface-2);color:var(--ink-3)}
+  .f-body{margin:9px 0 0;color:var(--ink-2);font-size:14.5px}
+  .f-body p{margin:0 0 8px}
+  .f-body p:last-child{margin-bottom:0}
+  .f-impact{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px dashed var(--line);
+    font-size:13.5px;
+    color:var(--ink-2);
+  }
+  .f-impact b{color:var(--ink);font-weight:600}
+  code{
+    font-family:var(--f-mono);
+    font-size:.855em;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 5px;
+    word-break:break-word;
+  }
+  .ref{font-family:var(--f-mono);font-size:.82em;color:var(--ink-3)}
+
+  /* ── Tables ───────────────────────────────── */
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);box-shadow:var(--shadow)}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{
+    font-family:var(--f-mono);
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    font-weight:500;
+    background:var(--surface-2);
+    white-space:nowrap;
+  }
+  tr:last-child td{border-bottom:0}
+  td strong{font-weight:600}
+
+  /* ── Build order ──────────────────────────── */
+  ol.steps{list-style:none;padding:0;margin:0;counter-reset:step}
+  ol.steps li{
+    counter-increment:step;
+    display:grid;
+    grid-template-columns:44px 1fr;
+    gap:14px;
+    padding:16px 0;
+    border-bottom:1px solid var(--line);
+  }
+  ol.steps li:last-child{border-bottom:0}
+  ol.steps li::before{
+    content:counter(step,decimal-leading-zero);
+    font-family:var(--f-mono);
+    font-size:13px;
+    color:var(--brand);
+    padding-top:2px;
+  }
+  ol.steps h3{
+    font-family:var(--f-display);
+    font-size:16px;
+    font-weight:700;
+    margin:0 0 4px;
+  }
+  ol.steps p{margin:0;color:var(--ink-2);font-size:14.5px}
+  .why{
+    display:inline-block;
+    margin-top:7px;
+    font-size:13px;
+    color:var(--ink-3);
+  }
+  .why b{color:var(--ink-2);font-weight:600}
+
+  footer{
+    margin-top:56px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+    color:var(--ink-3);
+    font-size:13px;
+  }
+  @media (max-width:520px){
+    .finding{padding:14px}
+    ol.steps li{grid-template-columns:32px 1fr;gap:10px}
+  }
+</style>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">
+      <span>genxdigitizing</span><span>Repository audit</span><span>10 October 2026</span>
+    </p>
+    <h1>Where GenX loses customers, and what to build first</h1>
+    <p class="lede">
+      Every finding below was read out of the repository at
+      <span class="ref">G:\Zuoyi stitchpro\genxdigitizing</span>. Nothing here is inferred from a
+      template or assumed from a similar business. Where the brief and the code disagree, the code
+      is reported and the disagreement is named.
+    </p>
+    <div class="counts">
+      <div class="count is-crit"><b>5</b><span>Critical findings still open</span></div>
+      <div class="count is-ok"><b>23</b><span>Findings fixed and green</span></div>
+      <div class="count"><b>4</b><span>Real roles in the database</span></div>
+      <div class="count is-ok"><b>0</b><span>Invented metrics left on the site</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ══════════════════════════════════════════ -->
+  <section id="s1">
+    <h2><span class="num">01</span> Critical problems</h2>
+    <p class="sec-note">
+      These are not improvements. Each one is a working path in production that fails, silently or
+      otherwise.
+    </p>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">An upload-wizard lead converts to an order with no artwork attached</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          The upload wizard is the main conversion path. It recorded files in one text format;
+          <span class="ref">convert-to-order</span> read a different one. The reader matched nothing,
+          its attach block was skipped entirely, and the order was created without the customer's
+          file. Staff saw “Order created!” and the designer opened an empty order.
+        </p>
+        <p>
+          The same reader used non-global matching, so even on the paths that did work only the
+          <em>first</em> file of a multi-file upload was ever attached.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Why it matters:</b> the job stalls at the exact moment the customer has already committed
+        a file and their details.
+      </p>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">Every order that uses a coupon fails</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <span class="ref">orders/create</span> wrote <code>coupon_code</code>,
+          <code>coupon_id</code> and <code>discount_amount</code> onto the order row. Those columns
+          have never existed — <span class="ref">001_initial_schema.sql:114-140</span>, and no later
+          migration adds them. PostgREST rejects the whole insert. The missing-column retry only
+          strips <code>idempotency_key</code>, so the coupon keys survive it and the retry fails too.
+        </p>
+        <p>
+          The route also never recorded the redemption, so the usage counter never incremented and
+          the admin coupon report undercounted.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Why it matters:</b> a customer arriving through a coupon — the most expensive kind to
+        acquire — sees “Could not create the order” and leaves.
+      </p>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">Nothing on a schedule ever looks at a lead</p>
+        <span class="chip crit">Open</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <code>crm_leads.follow_up_at</code> exists as a column and is written by nothing and read
+          by nothing except an AI prompt. The only scheduled work in the whole system is
+          <span class="ref">/api/cron/sla-check</span> every 30 minutes and
+          <span class="ref">/api/cron/subscription-renewal</span> daily — both of which look at
+          orders and subscriptions, never at leads. There is no <code>pg_cron</code> anywhere.
+        </p>
+        <p>
+          A lead that goes quiet is therefore never surfaced to anyone. “Follow up in three days” is
+          a human remembering, and when the team is busy, they don't.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Why it matters:</b> this is the single largest revenue leak in the repository, and the
+        brief's own rule — never lose a customer to a missed follow-up — is the one thing the system
+        cannot currently do at all.
+      </p>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">The lead timeline is free text, and the board overwrites it</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          There is no lead-events table. The entire history of a lead lives in one
+          <code>notes</code> text column, and five different writers append to it with
+          read-modify-write and no atomic append.
+        </p>
+        <p>
+          The leads board built its update from the copy loaded at page render, so any event
+          appended server-side while the board sat open was destroyed by the next drag of a stage.
+        </p>
+        <p>
+          <strong>Fixed by an append-only event log.</strong> Migration 052 adds
+          <code>lead_events</code>: one row per thing that happened, with the type, the actor, the
+          from/to stage, and a summary. Nothing updates or deletes a row — RLS allows insert and
+          select only, so append-only is enforced rather than promised. Every writer now records an
+          event: both creation paths, the email route (success <em>and</em> failure), the chat reply,
+          order conversion, and the board's own stage drags and manual adds.
+        </p>
+        <p>
+          The board renders the timeline from events, falling back to parsing the notes column for
+          leads that predate the table — no back-fill, because a line of text cannot be decomposed
+          into actor and stage without inventing them, and invented history in an audit trail is
+          worse than absent history.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Why it matters:</b> the record of who spoke to a customer, and when, is the business's
+        memory. Today it can be erased by a mouse drag.
+      </p>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">Migration 032 cannot commit, so its policies never apply</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <span class="ref">032_enable_rls_core_tables.sql:37-38</span> created policies on
+          <code>messages.sender_id</code> and <code>messages.recipient_id</code>. Those columns do
+          not exist — the real ones are <code>from_user</code> and <code>to_user</code>
+          (<span class="ref">001:190-191</span>). The file runs as one transaction, so it aborted and
+          <em>none</em> of its policies — users, leads, audit logs, subscribers — were ever created.
+          Lines 26-27 also collided with policy names from 001.
+        </p>
+        <p>
+          Rewritten to do only what its name claims. Two of its policies were worth losing: the
+          <code>users_read_all</code> one would have let every signed-in user read every user row
+          including email and role, and the rest duplicated 001 with the right columns already.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Why it mattered:</b> a fresh environment could not be built at all, and anyone auditing
+        RLS by reading the migrations would believe protections were in place that were not.
+      </p>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">Two tables the code depends on are created by no file in the repository</p>
+        <span class="chip ok">Verified live</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <code>subscribers</code> (written by <span class="ref">app/api/subscribe/route.ts:26</span>)
+          and <code>blog_comments</code> (used by two routes) had RLS policies and application code
+          but no <code>CREATE TABLE</code> anywhere. Migration 042 says so explicitly about
+          <code>blog_comments</code> and nobody acted on it.
+        </p>
+        <p>
+          Both are now created by migration 051, matching the columns the routes actually use. The
+          comment table keeps 042's posture: no anonymous read policy, so
+          <code>author_email</code> cannot leak through the public endpoint.
+        </p>
+        <p>
+          <strong>Applied and verified on 2026-10-10.</strong> Both tables now answer on the live
+          database where they previously returned <code>404 PGRST205</code>, and an anonymous write
+          to either is refused with <code>42501</code>.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">Failure logs are write-only, and bounces are recorded then ignored</p>
+        <span class="chip crit">Open</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <code>notification_failures</code> and <code>email_failures</code> are written on failure
+          and read only by <span class="ref">lib/invariants.ts</span>, which is called solely from
+          <span class="ref">/api/admin/health</span> — an endpoint on no cron, linked from no screen.
+          <code>resolved</code> is never set by any code. There is no retry anywhere.
+        </p>
+        <p>
+          Bounce and complaint webhooks are signature-verified and working — and land in
+          <code>email_bounces</code> / <code>email_complaints</code>, which nothing reads. No
+          suppression list, no flag on the lead, no alert.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Why it matters:</b> the team keeps emailing dead addresses and complaining customers, and
+        enough of that gets the sending domain suspended — which stops <em>all</em> customer email at
+        once.
+      </p>
+    </article>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <section id="s2">
+    <h2><span class="num">02</span> UX problems</h2>
+    <p class="sec-note">
+      The brief asks for Upload Design as the primary CTA and WhatsApp as secondary. On the device
+      most of your traffic uses, neither is true.
+    </p>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">The mobile sticky CTA bar never renders at any screen width</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          The bar holding WhatsApp, Register and “Upload Design” is <code>sm:hidden</code> and lives
+          inside <span class="ref">HeroSection</span>, which is rendered inside
+          <code>&lt;div className="hidden md:block"&gt;</code>. Below 640px the ancestor is hidden;
+          at 640px and above the bar hides itself. There is no width where both pass.
+        </p>
+        <p>
+          Because that bar was believed to be there, the WhatsApp floating button is separately
+          hidden on the mobile homepage — the comment says it would conflict with the bar. So on a
+          phone at <span class="ref">/</span> there is no sticky CTA, no WhatsApp button, and no chat
+          widget.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Why it matters:</b> the mobile homepage has no persistent way to start an order.
+      </p>
+    </article>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">The hero asks for an account, not a design</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          On mobile, the hero that actually renders offers “Sign Up / Login” as its primary action,
+          styled as a faint translucent button, with WhatsApp beside it. The accessible
+          reduced-motion variant of the same hero links to <span class="ref">/upload</span> instead —
+          so the fallback out-converts the default.
+        </p>
+        <p>
+          On desktop the prominent gradient button is likewise “Sign In / Register”; the only Upload
+          action is a scroll-triggered pill that fades in after the hero.
+        </p>
+        <p>
+          Across the page body, seven separate CTAs point at <span class="ref">/contact</span> and the
+          closing CTA points at <span class="ref">/register</span>.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">A guest is shown a reference number that exists nowhere</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <strong>Fixed:</strong> the reference is now generated on the server
+          (<span class="ref">lib/lead-reference.ts</span>), written into the lead's notes, returned
+          to the browser and shown on the confirmation screen. Its alphabet omits 0/O/1/I/L so it
+          survives being read down a phone, and the customer is told plainly to quote it.
+        </p>
+        <p>
+          <strong>Still open:</strong> there is no self-service status lookup, and registering still
+          does not attach a guest's submitted job to their new account — so the confirmation
+          screen's "Create Account to Track Order" button promised something the product does not
+          do. It now reads "Create an account" and sits below WhatsApp until the linking exists.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">Fields the customer fills in, confirms, and the server never receives</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <strong>Fixed for stitch count and Special Instructions.</strong> Both were collected,
+          both appeared on the confirmation screen the customer approved, and neither was in the
+          request body — the wizard simply dropped them. Stitch count now reaches
+          <code>orders.stitch_count</code>; because the customer types into a free-text box, only a
+          clean number is written to the integer column and anything else ("approx 8k") is kept as
+          text in the placement notes rather than mis-parsed. Instructions are appended to the
+          placement notes so the digitizer reads them.
+        </p>
+        <p>
+          On the guest path, garment, fabric and per-file output format were appended by the client
+          and ignored by the route: the labels survived only as raw option ids pasted into a text
+          blob, and a guest who switched file 2 to PES had that choice dropped without warning.
+          <strong>Fixed</strong> — the route reads all three, stores the labels the customer actually
+          saw, and writes each file's requested output format on its own line.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Why it matters:</b> the customer believes they told you, and the digitizer never sees it.
+      </p>
+    </article>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">Uploads have no timeout, so a stalled connection spins forever</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <strong>Fixed on all five upload paths</strong> — guest upload, the two logged-in
+          order uploaders, designer output upload, and chat attachments — each now sets a
+          three-minute deadline and reports a timeout in words. Previously a stalled connection
+          never settled the promise on any of them: the progress bar simply stopped. The
+          order paths say what to do about it, because the order already exists at that point.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">/about shows four invented team members with fabricated histories</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <span class="ref">app/(marketing)/about/AboutContent.tsx:185-214</span> renders four people
+          with initials for surnames and specific tenure claims — “8+ years in commercial embroidery
+          digitizing”, “Former screen-print designer”, “5+ years running multi-head commercial
+          embroidery machines”. No data source backs any of them. This is the same defect class as
+          the testimonials already removed, and it is live.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Why it matters:</b> fabricated credentials on a page selling expertise is deceptive
+        advertising exposure, not a copy nit.
+      </p>
+    </article>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">A “Guaranteed within 12 Hours” claim that the terms disclaim</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          The conversion page promises a guarantee; <span class="ref">terms-and-conditions:72</span>
+          says turnaround targets “are not guaranteed”. The urgent tier is also given three
+          incompatible figures across the site — 2–4 hours, 3 hours, and 6 hours.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Why it matters:</b> a guarantee the contract disclaims is the setup for a chargeback.
+      </p>
+      <div class="f-body">
+        <p>
+          <strong>Resolved, 2026-10-10.</strong> The wider problem underneath was that the site said
+          "12-hour turnaround" in about twenty places while <span class="ref">lib/sla.ts</span>
+          schedules standard at 24 hours — and the order confirmation email said "12–24h" on top of
+          that. Three numbers for one thing.
+        </p>
+        <p>
+          The published claim is now the range the tiers actually cover:
+          <code>3–24h</code>, from a single <code>TURNAROUND_RANGE_LABEL</code> constant, with a test
+          asserting its endpoints are real tiers and cannot drift from
+          <code>TURNAROUND_HOURS</code>. Per-tier copy now says 24 / 6 / 3. Large and complex work
+          keeps its "~12h", which is correct — <code>BIG_DESIGN_HOURS</code> is deliberately 12.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding ok">
+      <div class="f-head">
+        <p class="f-title">Eight invented client logos and a fabricated-scarcity banner are loaded guns</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <span class="ref">components/marketing/ClientLogoWall.tsx</span> lists eight named companies
+          under “Trusted by Embroidery Businesses Worldwide”. It is currently imported nowhere, so it
+          is not live — but the next person building a logo section will wire it up. The
+          <span class="ref">OfferBanner</span> “Order in next 2 hours” scarcity copy is likewise
+          unreachable today and has no real queue signal behind it. Both should be deleted, not left
+          parked.
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <section id="s3">
+    <h2><span class="num">03</span> Business and order-flow problems</h2>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">A quote cannot be recorded, and one bad stage value blanks the board</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          The database allows <code>quote_sent</code> and <code>negotiation</code>; the leads UI
+          offered only New, Contacted, Won and Lost. So no member of staff could record that a quote
+          had gone out — which means quote-to-order conversion cannot be measured and leads awaiting
+          a quote cannot be found.
+        </p>
+        <p>
+          Worse, the card lookup used a non-null assertion. Any row holding an unlisted stage threw
+          and took the whole leads board down for every user.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">Staff can create a $0 order from a typo</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          The conversion price was checked only for truthiness, and the string <code>"0"</code> is
+          truthy. It was then written straight to the order with no comparison to the tier price and
+          flowed into the invoice, the customer email and revenue reporting.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">A converted customer could get an account nobody can access, silently</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          Converting a lead with no existing user creates an auth account and emails a set-password
+          link. That email was fired with a bare <code>.catch</code> that logged to the console. If
+          it failed, the account existed, the customer never knew, and no one was told.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Why it matters:</b> a paying customer who cannot reach their own order is a refund
+        conversation.
+      </p>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">A failed artwork upload discarded the whole enquiry</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          On the contact form, the storage upload sat inside the handler's try/catch and throws on
+          failure. A bucket hiccup turned “customer told us what they need” into a 500 with no lead
+          row written at all.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">Partial upload failures were reported as total failure</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          Both the guest route and the logged-in wizard rejected oversized files mid-loop, after
+          earlier files had already been stored. The customer was then told their artwork was missing
+          when some of it was on the order.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">The CRM edits an active-state field that does not exist on that table</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <span class="ref">ContactsUI.tsx:64</span> updated <code>clients.is_active</code>. The
+          <code>clients</code> table has no such column — the real one is on <code>users</code>, which
+          the admin clients screen correctly uses. The write failed, and because the badge and the
+          button label read the same phantom field they were wrong too: the button always offered to
+          deactivate. It now reads and writes <code>users.is_active</code>, so CRM and Admin agree on
+          one customer.
+        </p>
+        <p>
+          <strong>Still open, and a decision for you:</strong>
+          <code>service_tiers.credit_cost</code> is read in four places and exists in no migration.
+          Reads return undefined and fall back to plan defaults, so a per-tier credit price set in
+          the database does nothing. Adding the column would make the code work as written, but it
+          sets what a design costs in credits — a pricing decision, not a bug fix, so it is left
+          alone.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">The change-log table does not exist, so staff are never told about order edits</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <code>order_edit_log</code> is created only by <span class="ref">supabase/setup/step6</span>
+          — a manual setup script, not a migration. Verified against the live database on
+          2026-10-10: the table is absent. Three code paths depend on it.
+        </p>
+        <p>
+          Customers can still change their order spec — the order update succeeds — but the log
+          insert fails, and <span class="ref">app/api/orders/[id]/edit/route.ts:134</span> only
+          notifies the team when the log row was written. So today a customer edits their design
+          brief and <strong>nobody is told</strong>. The order proceeds on the old spec.
+        </p>
+        <p>
+          The admin orders screen and the sidebar badge also query it; both degrade to zero rather
+          than crashing, which is why this stayed invisible.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Fixed and verified live.</b> Migration 051 creates the table. Confirmed against the
+        production database on 2026-10-10: the table exists, an anonymous insert is refused with
+        <code>42501</code> (row-level security), and the service-role path reaches it — so the edit
+        notification to admins will now fire instead of being suppressed by the failed log write.
+      </p>
+    </article>
+
+<article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">Any client could write change-log rows against any other customer's order</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <code>order_edit_log</code> exists only in the setup scripts, not in any migration, so a
+          database built from migrations alone does not have it — while two code paths write to it.
+          Its insert policy checked <code>changed_by = auth.uid()</code> and nothing else. A client
+          editing their own order supplies their own id <em>and</em> the order id, so they could log
+          changes against any order in the system, and staff review those rows on the admin orders
+          screen.
+        </p>
+        <p>
+          The table is now created by migration 051 and the insert policy also requires the order to
+          belong to the caller, mirroring the read policy beside it.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">The AI sales agent will invent policy, and its drafts leave no trace</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          Pricing <em>is</em> properly grounded — a tool reads live <code>service_tiers</code> and the
+          prompt forbids memory prices. Policy is not. Refund, free-sample, guarantee and deadline
+          questions have no tool behind them, while the prompt instructs the model to “state the
+          actual sample policy”. It will invent one.
+        </p>
+        <p>
+          <strong>Fixed — policy is now grounded.</strong> <span class="ref">lib/ai/policy.ts</span>
+          holds every policy the assistant may state, each entry naming where the business already
+          publishes it, with tests asserting the turnaround sentence cannot drift from
+          <span class="ref">lib/sla.ts</span> or the price floor from <span class="ref">SITE_CLAIMS</span>.
+          A <code>get_business_policy</code> tool serves it, and the prompt now says that list is the
+          only thing it may state as policy — anything outside it gets "I'll check with the team".
+        </p>
+        <p>
+          <strong>Fixed — drafts are recorded.</strong> Migration 053 adds
+          <code>ai_drafts</code>: the draft, the exact briefing it was written from, the staff member,
+          the model, token usage, and an outcome a human sets. Admin/crm only, no delete policy.
+          Human approval remains mandatory; nothing sends.
+        </p>
+        <p>
+          <strong>Fixed — the CRM notes are no longer fed in as fact.</strong> They arrive labelled
+          "internal, written by staff, may be stale or wrong", with this system's own machine-written
+          lines stripped first — a note about a failed upload is not something the customer said.
+        </p>
+        <p>
+          <strong>Correction to an earlier version of this report.</strong>
+          <code>claude-opus-5</code> (<span class="ref">lib/ai/sales-agent.ts:44</span>) is a valid
+          model id — this was reported as a likely failure and it is not. The default has been moved
+          up to <code>claude-opus-5-5</code>, the current Opus and cheaper per token, with
+          <code>SALES_AGENT_MODEL</code> still able to pin either one. The real gaps here are the two
+          above: no draft is persisted, and policy answers have no data behind them.
+        </p>
+      </div>
+      <p class="f-impact">
+        <b>Why it matters:</b> auto-send is correctly disabled, so no invented policy reaches a
+        customer yet. The grounding gap and the model id are what stand between this and a safe
+        draft mode.
+      </p>
+    </article>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <section id="s4">
+    <h2><span class="num">04</span> Security problems</h2>
+    <p class="sec-note">
+      The pattern behind nearly all of these is the same: middleware required only <em>some</em>
+      authenticated role on a path, and the route trusted identifiers from the request body. The
+      fixes below move each check into the route, where the caller's own identity is available.
+    </p>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">Any registered account could confirm any other account's email</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <span class="ref">/api/auth/auto-confirm</span> accepted an arbitrary
+          <code>userId</code> or <code>email</code> and confirmed it with the service-role key. Its
+          paginated email-search branch doubled as a user-enumeration oracle. It now confirms only
+          the caller's own address.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">The chat notify endpoint let anyone push forged notifications to anyone</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <span class="ref">/api/message-notify</span> took the recipient and the message body from
+          the request. Any logged-in account could send attacker-authored text — “Payment confirmed,
+          open /client/invoices” — to any user id, admins included, and could flood an inbox. It now
+          accepts only a message id, derives everything from that row, and requires the caller to be
+          its sender.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">The welcome-email route was an open relay for branded mail</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          Any free account could use the company's Resend reputation to send branded mail to
+          arbitrary recipients. It now sends only to the caller's own address.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">A missing webhook secret silently made the inbound-email endpoint public</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          Signature verification returned <code>true</code> when
+          <code>RESEND_WEBHOOK_SECRET</code> was unset — so anyone could POST forged
+          <code>email.received</code> payloads that run with the service-role key and notify every
+          admin. It now fails closed in production.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">Login used to advance a lead to Won and wipe its notes</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          The auth callback auto-moved any matching lead to <code>won</code> on login, and did it by
+          selecting only <code>id</code> and then writing <code>lead.notes + note</code> — so the
+          concatenation destroyed every existing note on the lead. Logging in is not a sale.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding crit">
+      <div class="f-head">
+        <p class="f-title">Push subscription keys have no RLS at all</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <span class="ref">002_push_subscriptions.sql:2-13</span> created
+          <code>user_push_subscriptions</code> with indexes and no RLS and no policies, in no later
+          migration either. Every user's <code>endpoint</code>, <code>p256dh</code> and
+          <code>auth</code> keys were readable and writable by <code>anon</code> and
+          <code>authenticated</code>. Possession of those three values is enough to send push
+          notifications to that device.
+        </p>
+        <p>
+          Migration 051 adds owner-only policies for select, insert, update and delete.
+        </p>
+        <p>
+          <strong>Correction, verified 2026-10-10 against the live database.</strong> This was
+          reported as "no RLS at all, anon can read and write every row". The table does have 17
+          rows, but an anonymous read returns <code>Content-Range: */0</code> — RLS <em>is</em>
+          enabled. Supabase auto-enables RLS on new tables in the public schema, which is the
+          platform behaviour migration 042 already refers to. So the exposure was never open. What is
+          actually missing is <em>policies</em>: with RLS on and none defined, no client key can
+          touch the table at all, and the app only works because every path uses the service-role
+          client. 051 makes that explicit rather than incidental. <strong>Applied and verified on 2026-10-10:</strong> the service role sees all 17 rows, an anonymous read sees none, and an anonymous write is refused with <code>42501</code>.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">Loose policies on audit logs, users and inbound email</p>
+        <span class="chip ok">Fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <code>audit_logs</code> insert was <code>WITH CHECK (true)</code> for any authenticated
+          user (<span class="ref">001:515</span>) — the audit trail could be written by anyone. The
+          route also took <code>user_id</code> from the request body, so an actor could be recorded
+          as somebody else.
+        </p>
+        <p>
+          The blanket policy is replaced by a scoped one, and the actor now comes from the session.
+          <span class="ref">033:49</span>'s <code>anon</code> insert on <code>received_emails</code>
+          is dropped — the only writer is the service-role webhook. The over-broad
+          <code>users_read_all</code> that 032 would have added no longer exists.
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <section id="s5">
+    <h2><span class="num">05</span> Performance problems</h2>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">The live-order widget can never render for the audience it exists for</p>
+        <span class="chip crit">Open</span>
+      </div>
+      <div class="f-body">
+        <p>
+          Its data source is genuinely real — it reads the <code>orders</code> table, invents nothing,
+          and falls back to “Someone” when a name is missing. But it bails out when
+          <code>auth.getUser()</code> returns no user, and marketing traffic is anonymous. So it
+          shows nothing to prospects, while polling every 30 seconds and pulling
+          <code>supabase-js</code> onto every marketing page, portals included.
+        </p>
+        <p>
+          Enabling it is not only a code change: it would disclose a real customer's first name to
+          strangers, and the anonymous read policy on <code>orders</code> would need checking first.
+          That is a privacy decision for you, not a default I should flip.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">Roughly 250–350 kB of client JS on the landing page, most of it avoidable</p>
+        <span class="chip plan">Tune</span>
+      </div>
+      <div class="f-body">
+        <p>
+          <code>framer-motion</code> is the dominant cost and is effectively unavoidable — it is
+          imported by the always-mounted page transition, animated sections, nav and several
+          marketing components. Everything else is trim: the dead widget above, a
+          <code>Toaster</code>, Vercel Analytics and a service-worker registration that all load on
+          marketing pages.
+        </p>
+      </div>
+    </article>
+
+    <article class="finding warn">
+      <div class="f-head">
+        <p class="f-title">Image handling is correct but untuned, and SEO plumbing had gaps</p>
+        <span class="chip ok">Partly fixed</span>
+      </div>
+      <div class="f-body">
+        <p>
+          Marketing images already use <code>next/image</code>; the config declares no AVIF/WebP
+          formats, no device sizes and no cache TTL.
+        </p>
+        <p>
+          <strong>Fixed:</strong> canonical URLs are now set on all 25 marketing pages that lacked
+          one. The three pages that declared their own <code>openGraph</code> and so silently
+          shipped with no preview image now take a shared one — Next replaces rather than merges a
+          child's <code>openGraph</code> object. The applique service page is in the sitemap, and the
+          database-unavailable fallback no longer publishes four blog slugs that had no posts behind
+          them.
+        </p>
+        <p>
+          <strong>Still open:</strong> the <code>next/image</code> config declares no AVIF/WebP
+          formats, no device sizes and no cache TTL. And the declared 1200×630 preview image is
+          <code>black_logo.png</code>, a logo file at the wrong dimensions — a purpose-built card
+          would need designing.
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <section id="s6">
+    <h2><span class="num">06</span> Automation opportunities</h2>
+    <p class="sec-note">
+      Ordered by revenue recovered per unit of work. The first one is the brief's own central rule.
+    </p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Opportunity</th>
+            <th>What exists today</th>
+            <th>What it needs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Guest acknowledgement email</strong><br><span class="ref">built</span></td>
+            <td>Done. A customer who submits without an account now gets a written confirmation
+              carrying their real reference, what happens next, and the no-payment-before-approval
+              policy. It reports a failed upload as a failed upload rather than confirming artwork
+              we do not have.</td>
+            <td>Sends only to the address that submitted the request, behind the form's rate limiter.
+              Residual risk noted: a public form can be used to mail an address that is not the
+              sender's — that is inherent to any acknowledgement email.</td>
+          </tr>
+
+          <tr>
+            <td><strong>Follow-up engine</strong><br><span class="ref">built, disarmed</span></td>
+            <td>
+              Done. <code>follow_up_at</code> is now set when a lead is created, when we email it,
+              when the customer replies, and on every stage move. One hourly cron chases what is due,
+              logging each attempt to <code>lead_follow_ups</code>.
+              <br><br>
+              <strong>Off by default.</strong> Unless <code>FOLLOW_UPS_ENABLED=true</code>, the cron
+              runs and reports exactly what it would send without sending it — the team can watch the
+              queue before arming it.
+            </td>
+            <td>
+              Refuses to chase a won or lost lead, never sends a third automated nudge (it hands the
+              lead to a person and says so), and skips any lead with no due date rather than inventing
+              one. Idempotency is a UNIQUE constraint, so a doubled cron is a no-op rather than a
+              second email.
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Lead events table</strong></td>
+            <td>One free-text <code>notes</code> column, clobbered by concurrent writers.</td>
+            <td>An append-only event row per action with actor and timestamp; the notes column then
+              becomes a view of it, not the source of truth.</td>
+          </tr>
+          <tr>
+            <td><strong>Needs-attention dashboard</strong><br><span class="ref">built</span></td>
+            <td>
+              Done. Admin home now opens with what needs attention before the totals: unanswered
+              leads, quotes awaiting reply, orders inside the SLA window, and a lapsed-customer
+              opportunity list. Every line links to the screen that acts on it, and the urgency
+              thresholds are shared with the SLA cron so nothing is chased in one place and ignored
+              in another.
+            </td>
+            <td>Still to come: failed notifications surfaced here, and follow-ups once the engine
+              exists — the count is wired and reads zero today.</td>
+          </tr>
+          <tr>
+            <td><strong>Notification retry</strong></td>
+            <td>Failures recorded in <code>notification_failures</code>; never retried, never shown.</td>
+            <td>An attempt counter and next-attempt time, plus a cron that drains the queue.</td>
+          </tr>
+          <tr>
+            <td><strong>Bounce suppression</strong></td>
+            <td>Verified webhook writes to tables nothing reads.</td>
+            <td>Flag the lead or user, block further sends, alert an admin once per address.</td>
+          </tr>
+          <tr>
+            <td><strong>AI draft audit + grounding</strong></td>
+            <td>Drafts work, cannot auto-send, leave no record, and can invent policy.</td>
+            <td>Persist every draft and its outcome; add a policy tool so refund, sample and deadline
+              answers come from data, not memory.</td>
+          </tr>
+          <tr>
+            <td><strong>Unified inbox</strong></td>
+            <td>Message, email and chat rows exist separately; a lead with no account cannot be
+              messaged at all.</td>
+            <td>A conversation key shared across channels, and a contact identity that survives a
+              customer arriving by a second channel.</td>
+          </tr>
+          <tr>
+            <td><strong>WhatsApp Cloud API</strong></td>
+            <td>Nothing. No code, no environment variables, no webhook.</td>
+            <td>Prepare only: a webhook route, credential handling server-side, and a contact
+              resolution step that reuses the identity work above.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <section id="s7">
+    <h2><span class="num">07</span> Recommended implementation order</h2>
+    <p class="sec-note">
+      The brief's phase list is sound. This is the same order, with the specific work that belongs in
+      each phase and the reason it sits there.
+    </p>
+
+    <ol class="steps">
+      <li>
+        <div>
+          <h3>Make the paths that already exist actually work</h3>
+          <p>
+            The fixes marked done in this document, plus the remaining P0s: push-subscription RLS,
+            the two missing tables, migration 032, and the <code>clients.is_active</code> mismatch.
+          </p>
+          <span class="why"><b>Why first:</b> every one of these is a live path failing today. No new
+            feature matters while ordering, artwork and conversion are unreliable.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Give the lead a real history</h3>
+          <p>
+            An append-only lead-events table with actor, type and timestamp. Migrate the existing
+            <code>notes</code> entries into it, then write events instead of appending text.
+          </p>
+          <span class="why"><b>Why second:</b> the follow-up engine, the attention dashboard and every
+            funnel metric read from this. Building them on the text column means building them
+            twice.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Follow-up engine</h3>
+          <p>
+            Due dates that are set when a lead is created or contacted, one cron that finds what is
+            due, a queue screen, and logged idempotent sends with a cancel path.
+          </p>
+          <span class="why"><b>Why third:</b> this is the brief's central rule, and the events table
+            from step 2 is what makes a follow-up auditable rather than another text append.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Needs-attention dashboard</h3>
+          <p>
+            Replace the admin home's passive totals with clickable counts: unanswered leads, quotes
+            awaiting reply, orders approaching SLA, notifications that failed to deliver.
+          </p>
+          <span class="why"><b>Why fourth:</b> cheap once step 2 exists, and it is what makes the
+            follow-up engine actually get used by a busy team.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Fix the customer-facing funnel</h3>
+          <p>
+            Restore the mobile CTA, make Upload Design the hero action on both breakpoints, persist
+            and show a real reference, add a guest status lookup, and reconcile the turnaround claims
+            with the terms. Send the fields the wizard already collects.
+          </p>
+          <span class="why"><b>Why fifth, not first:</b> more traffic into a funnel that still loses
+            artwork and coupons wastes the traffic. This work is high value and should follow the
+            reliability fixes, not precede them.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Trust cleanup</h3>
+          <p>
+            Delete the invented team bios, the client logo wall and the scarcity banner; replace the
+            absolute security claims; unify turnaround wording.
+          </p>
+          <span class="why"><b>Why here:</b> quick, and it should not wait behind engineering — but
+            it is not what unblocks revenue.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>AI safety, then channels</h3>
+          <p>
+            Persist and audit drafts, ground policy answers in data, fix the model id. Only then the
+            WhatsApp webhook and the unified conversation identity that Instagram, Facebook and email
+            will share.
+          </p>
+          <span class="why"><b>Why last:</b> all three of these are new surface. They are safe to
+            build once the record they write into — contacts, conversations, events — is trustworthy.</span>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <section id="s8">
+    <h2><span class="num">08</span> What the brief assumed, and the code says otherwise</h2>
+    <p class="sec-note">
+      Reported rather than quietly worked around, because these change what is safe to build.
+    </p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Brief assumed</th><th>Repository says</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Roles: SUPER_ADMIN, ADMIN, MANAGER, DESIGNER, CHAT_SUPPORT, MARKETING</td>
+            <td>
+              Four roles, one enum: <code>admin</code>, <code>crm</code>, <code>client</code>,
+              <code>designer</code> (<span class="ref">001:13</span>). There is no rank column and no
+              marketing role. Middleware gates admin versus crm on exactly these two values. I have
+              not invented the others.
+            </td>
+          </tr>
+          <tr>
+            <td>WhatsApp integration to prepare</td>
+            <td>
+              Nothing exists to prepare — no route, no env var, no client. It is a new build, not a
+              configuration.
+            </td>
+          </tr>
+          <tr>
+            <td>Lead stages including SPAM and CANCELLED</td>
+            <td>
+              The enum offers <code>lead</code>, <code>contacted</code>, <code>quote_sent</code>,
+              <code>negotiation</code>, <code>won</code>, <code>lost</code>. There is no spam or
+              cancelled value, and no <code>lost_reason</code> is ever written.
+            </td>
+          </tr>
+          <tr>
+            <td>Quotes as a first-class object</td>
+            <td>
+              No quotes table exists. There is a <code>quote_number</code> string on the lead and
+              nothing behind it — no line items, no status, no approval.
+            </td>
+          </tr>
+          <tr>
+            <td>Reviews and testimonials to display</td>
+            <td>
+              The <code>reviews</code> table exists and is already publicly readable for published
+              rows, so real reviews could render on service pages with a small change. It is empty,
+              and the schema has no consent column — only an admin moderation flag.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Read from <span class="ref">G:\Zuoyi stitchpro\genxdigitizing</span> at commit
+    <span class="ref">d346c37</span> plus the uncommitted working tree. Typecheck, test suite and
+    production build all pass on the current tree.
+  </footer>
+</main>

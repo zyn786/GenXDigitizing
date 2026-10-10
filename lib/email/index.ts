@@ -705,7 +705,7 @@ export async function emailWelcome(params: {
     `
     <p class="greeting">Welcome to the family, ${firstName}! 👋</p>
 
-    <p>Thanks for creating your account with <strong>GenXdigitizing</strong>. You've just joined <strong>2,500+ businesses</strong> who trust us for professional embroidery digitizing — backed by the industry's strongest guarantees.</p>
+    <p>Thanks for creating your account with <strong>GenXdigitizing</strong>. You're all set for professional embroidery digitizing — backed by the industry's strongest guarantees.</p>
 
     <div class="info-card info-card-green">
       <div style="font-size:18px;margin-bottom:8px;font-weight:700;">✅ Your Account is Ready</div>
@@ -755,23 +755,24 @@ export async function emailWelcome(params: {
       <div class="detail-row"><span class="detail-label">📁 Format Conversion</span><span class="detail-value"><span class="badge-free">FREE</span></span></div>
     </div>
 
-    <!-- Trust badges -->
+    <!-- Trust badges — policy claims only. Never put a performance metric here
+         that cannot be read from the database (see lib/site-config.ts). -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0;">
       <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:18px;font-weight:800;color:#16A34A;">4.9/5</div>
-        <div style="font-size:11px;color:#047857;font-weight:600;">Average Rating</div>
+        <div style="font-size:18px;font-weight:800;color:#16A34A;">Unlimited</div>
+        <div style="font-size:11px;color:#047857;font-weight:600;">Free Revisions</div>
       </div>
       <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:18px;font-weight:800;color:#16A34A;">2,500+</div>
-        <div style="font-size:11px;color:#047857;font-weight:600;">Happy Clients</div>
+        <div style="font-size:18px;font-weight:800;color:#16A34A;">24h</div>
+        <div style="font-size:11px;color:#047857;font-weight:600;">Standard Turnaround</div>
       </div>
       <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:18px;font-weight:800;color:#16A34A;">10k+</div>
-        <div style="font-size:11px;color:#047857;font-weight:600;">Designs Delivered</div>
+        <div style="font-size:18px;font-weight:800;color:#16A34A;">8</div>
+        <div style="font-size:11px;color:#047857;font-weight:600;">Machine Formats</div>
       </div>
       <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:18px;font-weight:800;color:#16A34A;">100%</div>
-        <div style="font-size:11px;color:#047857;font-weight:600;">Satisfaction Guarantee</div>
+        <div style="font-size:18px;font-weight:800;color:#16A34A;">Free</div>
+        <div style="font-size:11px;color:#047857;font-weight:600;">Rush &amp; Urgent Delivery</div>
       </div>
     </div>
 
@@ -907,5 +908,152 @@ export async function emailReviewRequest(params: {
     subject: `How was your genxdigitizing order? ⭐ (${params.orderNumber})`,
     html,
     bcc: TRUSTPILOT_BCC,
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  11. Request received (no account required)
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Acknowledgement for a customer who submitted a design without an account.
+ *
+ * Until now a guest got a confirmation screen and nothing else: no email, no
+ * record on their side that the request had ever been made. If the team dropped
+ * it, the customer had no proof they had been in touch — and the reference
+ * number they were shown did not exist in any database either.
+ *
+ * Every statement here is one the business already publishes: the reference is
+ * real and server-generated, the price-before-payment policy is on the site and
+ * the refund page, and the reply expectation matches the wording used on the
+ * contact form rather than inventing a firmer one.
+ *
+ * This goes only to the address that submitted the request, which is the only
+ * address the sender controls.
+ */
+export async function emailRequestReceived(params: {
+  to: string;
+  name: string;
+  reference: string;
+  /** What they asked about — "Cap Digitizing", a design name, etc. */
+  subject?: string | null;
+  /** Whether files actually arrived (a failed upload is not "we have your artwork"). */
+  artworkReceived?: boolean;
+  /** Set when this came from the upload wizard rather than the contact form. */
+  viaUpload?: boolean;
+}) {
+  const firstName = (params.name || "").trim().split(/\s+/)[0] || "there";
+  const whatsapp = "https://wa.me/18302102135";
+
+  const html = baseLayout(
+    `
+    <p class="greeting">Hi ${firstName},</p>
+    <p>Thanks — we have your request${params.subject ? ` for <strong>${params.subject}</strong>` : ""}. A digitizer will review it and reply to this email with your quote.</p>
+
+    <div class="info-card info-card-blue" style="text-align:center;">
+      <div style="font-size:12px;color:#475569;margin-bottom:6px;font-weight:600;letter-spacing:0.5px;">YOUR REFERENCE</div>
+      <div style="font-size:26px;font-weight:800;color:#1E293B;letter-spacing:2px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">${params.reference}</div>
+      <div style="font-size:12px;color:#64748B;margin-top:8px;">Quote this in any reply and we can pull your request up straight away.</div>
+    </div>
+
+    ${
+      params.artworkReceived === false
+        ? `<div class="info-card" style="border-left:4px solid #D97706;">
+             <div style="font-weight:700;margin-bottom:6px;">One thing to check</div>
+             <div>Your files did not finish uploading, so we have your details but not the artwork yet. Just reply to this email with the file attached${params.viaUpload ? "" : ", or upload it on our site,"} and we'll take it from there.</div>
+           </div>`
+        : params.artworkReceived
+          ? `<p>Your artwork came through safely.</p>`
+          : ""
+    }
+
+    <p style="margin-top:18px;"><strong>What happens next</strong></p>
+    <div class="detail-card">
+      <div class="detail-row"><span class="detail-label">1. Review</span><span class="detail-value">A digitizer looks at your design</span></div>
+      <div class="detail-row"><span class="detail-label">2. Quote</span><span class="detail-value">We reply to this email with the price</span></div>
+      <div class="detail-row"><span class="detail-label">3. You approve</span><span class="detail-value">Nothing is charged before you approve</span></div>
+    </div>
+
+    <p>You do not need an account, and no payment is taken to get a quote or a preview. Unlimited free revisions are included, and format conversion is free.</p>
+
+    <div class="cta-wrap">
+      <a href="${whatsapp}" class="cta">Message us on WhatsApp →</a>
+    </div>
+
+    <p style="margin-top:14px;color:#64748B;font-size:13px;">Most requests are answered within the hour. If you need to add anything — a Pantone reference, a deadline, a placement change — just reply to this email.</p>
+  `,
+    "We have your request"
+  );
+
+  return sendEmail({
+    to: params.to,
+    subject: `We have your request — ${params.reference}`,
+    html,
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  12. Follow-up nudge
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * A gentle nudge when a lead has gone quiet.
+ *
+ * Written to be easy to ignore. No countdown, no "last chance", no invented
+ * deadline — the brief's rule is never to spam, and the surest way to lose a
+ * customer is to make them feel chased. It asks one question and offers a way
+ * out, and every follow-up after it says less, not more.
+ *
+ * `sequence` only changes the opening line. The offer of help is the same,
+ * because there is nothing new to say the second time — inventing urgency to
+ * justify the email is exactly what this avoids.
+ */
+export async function emailFollowUp(params: {
+  to: string;
+  name: string;
+  /** 1 = first nudge, 2 = final. The engine never sends a third. */
+  sequence: number;
+  /** What they originally asked about, so the email is recognisable. */
+  subject?: string | null;
+  /** Their reference, if the enquiry had one. */
+  reference?: string | null;
+}) {
+  const firstName = (params.name || "").trim().split(/\s+/)[0] || "there";
+  const whatsapp = "https://wa.me/18302102135";
+
+  const opening =
+    params.sequence <= 1
+      ? `Just checking in${params.subject ? ` about your <strong>${params.subject}</strong> request` : ""} — I did not want to leave you without a reply.`
+      : `I have not heard back${params.subject ? ` about your <strong>${params.subject}</strong> request` : ""}, so this is the last time I will chase you.`;
+
+  const html = baseLayout(
+    `
+    <p class="greeting">Hi ${firstName},</p>
+    <p>${opening}</p>
+
+    <p>If you still need it, reply to this email${params.reference ? ` and quote <strong>${params.reference}</strong>` : ""} — or send the artwork and we'll take it from there. Nothing is charged until you approve the proof.</p>
+
+    ${
+      params.sequence <= 1
+        ? `<p>If the design is on hold, or you went another way, that is completely fine — just let me know and I'll close it off so we stop emailing you.</p>`
+        : `<p>I'll assume this one is on hold and leave it there. If it comes back to life later, reply to this email and we'll pick it straight up.</p>`
+    }
+
+    <div class="cta-wrap">
+      <a href="${whatsapp}" class="cta">Message us on WhatsApp →</a>
+    </div>
+
+    <p style="margin-top:14px;color:#64748B;font-size:13px;">Free revisions and format conversion are always included. No payment is taken for a quote or a preview.</p>
+  `,
+    params.sequence <= 1 ? "Just checking in" : "Closing the loop"
+  );
+
+  return sendEmail({
+    to: params.to,
+    subject:
+      params.sequence <= 1
+        ? `Still need ${params.subject ? params.subject.toLowerCase() : "a hand with this"}?`
+        : `Closing the loop${params.reference ? ` — ${params.reference}` : ""}`,
+    html,
   });
 }

@@ -26,14 +26,19 @@ import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod/v4";
 import { createAdminClient } from "@/lib/supabase/server";
 import { GENX_SYSTEM } from "@/lib/ai/prompts/genx-sales";
+import { POLICY_UNKNOWN_REPLY, findPolicy, renderPolicyForModel } from "@/lib/ai/policy";
 
 /**
  * Provider configuration.
  *
- * Defaults to Anthropic. To run on DeepSeek's Anthropic-compatible endpoint,
- * set in .env.local:
+ * Defaults to Anthropic on the current Opus (`claude-opus-5-5`). To pin a
+ * specific model, or to run on DeepSeek's Anthropic-compatible endpoint, set in
+ * .env.local:
  *   ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic
  *   SALES_AGENT_MODEL=deepseek-chat
+ *
+ * `SALES_AGENT_MODEL` overrides the model on either provider, so a deployment
+ * that pinned an older id keeps working unchanged.
  *
  * Note on caching: DeepSeek does honour `cache_control`, but only above its
  * minimum cacheable prefix. A short system prompt reports
@@ -41,7 +46,7 @@ import { GENX_SYSTEM } from "@/lib/ai/prompts/genx-sales";
  * GENX_SYSTEM prefix does cache (measured: 3072–3328 tokens read per turn).
  * Don't judge caching here from a small test prompt.
  */
-export const SALES_MODEL = process.env.SALES_AGENT_MODEL || "claude-opus-5";
+export const SALES_MODEL = process.env.SALES_AGENT_MODEL || "claude-opus-5-5";
 
 /** DeepSeek's thinking blocks share the output budget with the draft. */
 const MAX_TOKENS = 8192;
@@ -141,6 +146,45 @@ const getServicePrices = defineTool({
 });
 
 /**
+ * Published business policy — samples, refunds, revisions, turnaround,
+ * guarantees.
+ *
+ * The drafting prompt used to instruct the model to "state the actual sample
+ * policy" while giving it no source for one, and separately to never guess
+ * about refunds or deadlines. This is the source. Anything not in it gets
+ * "I'll check with the team", because a wrong answer about a refund is a
+ * promise the business has to honour.
+ */
+const getBusinessPolicy = defineTool({
+  name: "get_business_policy",
+  description:
+    "Look up GenX's published policy on samples, refunds, revisions, turnaround, " +
+    "guarantees, payment timing, pricing model or file formats. Call this before " +
+    "answering ANY policy question. With no topic, it returns every published " +
+    "policy. If a question is not covered here, say you will check with the team — " +
+    "never answer a policy question from memory.",
+  schema: z.object({
+    topic: z
+      .string()
+      .optional()
+      .describe("e.g. 'sample', 'refund', 'revisions', 'turnaround'. Omit for all."),
+  }),
+  run: async ({ topic }) => {
+    if (!topic) {
+      return `PUBLISHED POLICY:\n${renderPolicyForModel()}`;
+    }
+    const entry = findPolicy(topic);
+    if (!entry) {
+      return (
+        `No published policy covers "${topic}". Do not answer from memory and do not ` +
+        `improvise. Reply: "${POLICY_UNKNOWN_REPLY}"`
+      );
+    }
+    return `[${entry.topic}] ${entry.statement}\n(published at: ${entry.publishedAt})`;
+  },
+});
+
+/**
  * Order history, keyed by email so the model never handles a customer UUID.
  */
 const getCustomerOrders = defineTool({
@@ -190,7 +234,11 @@ const getCustomerOrders = defineTool({
   },
 });
 
-export const SALES_TOOLS: AgentTool[] = [getServicePrices, getCustomerOrders];
+export const SALES_TOOLS: AgentTool[] = [
+  getServicePrices,
+  getBusinessPolicy,
+  getCustomerOrders,
+];
 
 /** Tool definitions in the wire shape the Messages API expects. */
 const TOOL_DEFS = SALES_TOOLS.map((t) => ({
@@ -374,6 +422,37 @@ export async function draftReply({
  * Assemble the per-request briefing. Everything volatile lives here so the
  * cached system prefix stays byte-identical across requests.
  */
+/**
+ * Remove lines this system wrote into the notes timeline.
+ *
+ * The notes column carries both the customer's own words and our machine-written
+ * annotations — "[2026-08-14T10:31:00Z] Stage changed: New Lead → Contacted",
+ * "UPLOAD FAILED for: logo.png", "Reference: GX-7K2M9Q". Feeding those to the
+ * model as context is noise at best and misleading at worst: an internal note
+ * about a failed upload is not something the customer said, and a note about a
+ * stage change has nothing to do with their question.
+ */
+export function stripInternalAnnotations(notes: string): string {
+  return notes
+    .split(/\r?\n/)
+    .filter((line) => {
+      const t = line.trim();
+      if (!t) return true; // keep paragraph breaks
+      // Only the "[<ISO timestamp>] Event — …" shape is ours. Matching any
+      // bracketed prefix would also swallow a staff note like
+      // "[urgent] caller wants it before Friday".
+      if (/^\[\d{4}-\d{2}-\d{2}[T ][^\]]*\]\s/.test(t)) return false;
+      if (/^Reference:\s*GX-/i.test(t)) return false;
+      if (/^UPLOAD FAILED for:/i.test(t)) return false;
+      if (/^Artwork:\s*UPLOAD FAILED/i.test(t)) return false;
+      if (/^The customer believes a file was attached/i.test(t)) return false;
+      return true;
+    })
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export function buildLeadBriefing(lead: any, thread: any[] = []): string {
   const parts: string[] = ["## LEAD RECORD"];
 
@@ -394,9 +473,19 @@ export function buildLeadBriefing(lead: any, thread: any[] = []): string {
   if (lead.lost_reason) parts.push(`Lost reason: ${lead.lost_reason}`);
 
   if (lead.notes) {
-    parts.push("\n## CRM NOTES (chronological, oldest first)");
-    // Lead notes grow unbounded; the tail is what matters for a reply.
-    parts.push(lead.notes.slice(-4000));
+    const customerFacing = stripInternalAnnotations(lead.notes);
+    if (customerFacing) {
+      // Labelled as unverified on purpose. These are typed by staff under time
+      // pressure and are often out of date — a note reading "quoted $40 for the
+      // jacket back" from three months ago is not a price the assistant may
+      // repeat, and it reads as a fact unless it is marked otherwise.
+      parts.push(
+        "\n## CRM NOTES (internal, written by staff, may be stale or wrong)\n" +
+          "Use for background only. Do NOT quote anything from here to the customer " +
+          "as fact — prices, promises and dates must come from the tools.\n"
+      );
+      parts.push(customerFacing);
+    }
   }
 
   if (thread.length) {
