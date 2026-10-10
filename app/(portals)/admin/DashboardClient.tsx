@@ -16,6 +16,8 @@ import {
   Activity,
 } from "lucide-react";
 import { formatCurrency, STATUS_CLASS, STATUS_LABEL, TURNAROUND_OPTIONS } from "@/lib/utils";
+import type { AttentionReport } from "@/lib/supabase/attention";
+import { AttentionPanel } from "./AttentionPanel";
 
 interface Stats {
   orders_mtd: number;
@@ -33,6 +35,7 @@ interface Props {
   stats: Stats;
   recentOrders: any[];
   breakdown: { label: string; count: number; pct: number }[];
+  attention: AttentionReport;
 }
 
 function pctDelta(curr: number, prev: number) {
@@ -86,7 +89,7 @@ const CARD_COLORS = [
   },
 ];
 
-export function AdminDashClient({ stats, recentOrders, breakdown }: Props) {
+export function AdminDashClient({ stats, recentOrders, breakdown, attention }: Props) {
   const revDelta = pctDelta(stats.revenue_mtd, stats.revenue_prev);
   const ordersDelta = pctDelta(stats.orders_mtd, stats.orders_prev);
 
@@ -166,6 +169,10 @@ export function AdminDashClient({ stats, recentOrders, breakdown }: Props) {
           Live metrics — updates on every page load
         </p>
       </div>
+
+      {/* What needs attention, before the totals. A number that tells you the
+          month is fine does not tell you a lead has been waiting 40 minutes. */}
+      <AttentionPanel report={attention} />
 
       {/* Stat cards — 3-col everywhere */}
       <div className="mb-5 grid grid-cols-3 gap-2.5 sm:gap-3">

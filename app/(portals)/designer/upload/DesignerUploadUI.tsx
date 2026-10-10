@@ -220,6 +220,9 @@ export function DesignerUploadUI({
       const result = await new Promise<{ ok: boolean; error?: string }>((resolve) => {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "/api/upload/output");
+        // Same missing deadline as the customer uploaders: a stalled connection
+        // leaves the progress bar frozen with no way out but Cancel.
+        xhr.timeout = 180000;
         const onAbort = () => {
           xhr.abort();
           resolve({ ok: false, error: "Upload cancelled" });
@@ -243,6 +246,13 @@ export function DesignerUploadUI({
         xhr.addEventListener("error", () => {
           controller.signal.removeEventListener("abort", onAbort);
           resolve({ ok: false, error: "Network error — check your connection" });
+        });
+        xhr.addEventListener("timeout", () => {
+          controller.signal.removeEventListener("abort", onAbort);
+          resolve({
+            ok: false,
+            error: "Upload timed out — check your connection and try again",
+          });
         });
         xhr.addEventListener("abort", () => {
           controller.signal.removeEventListener("abort", onAbort);

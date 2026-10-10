@@ -274,6 +274,11 @@ export function NewOrderWizard({ tiers, clientId, userId }: any) {
           color_count: col || null,
           placement_notes: notes,
           design_name: designName,
+          // Collected on step 3 and shown on the confirm screen the customer
+          // approves — but never sent, so neither the digitizer nor the order
+          // row ever saw them.
+          stitch_count: stitchCount || null,
+          instructions: instructions || null,
           quantity: qty,
           coupon_code: appliedCoupon?.code ?? null,
           visitor_id: visitorId ?? null,
@@ -297,6 +302,11 @@ export function NewOrderWizard({ tiers, clientId, userId }: any) {
       const uploadResult = await new Promise<{ ok: boolean; error?: string }>((resolve) => {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "/api/upload/artwork");
+        // No deadline meant a stalled connection left the customer on an
+        // "Uploading… N%" bar forever — none of load/error/abort ever fires.
+        // The order already exists by this point, so the message has to say
+        // what to do rather than just "failed".
+        xhr.timeout = 180000;
         const onAbort = () => {
           xhr.abort();
           resolve({ ok: false, error: "Upload cancelled" });
@@ -320,6 +330,13 @@ export function NewOrderWizard({ tiers, clientId, userId }: any) {
         xhr.addEventListener("error", () => {
           controller.signal.removeEventListener("abort", onAbort);
           resolve({ ok: false, error: "Network error — check your connection" });
+        });
+        xhr.addEventListener("timeout", () => {
+          controller.signal.removeEventListener("abort", onAbort);
+          resolve({
+            ok: false,
+            error: "Upload timed out — the order is placed, but your artwork did not arrive",
+          });
         });
         xhr.addEventListener("abort", () => {
           controller.signal.removeEventListener("abort", onAbort);

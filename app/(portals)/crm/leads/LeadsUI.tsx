@@ -24,8 +24,12 @@ import {
   Download,
   ShoppingCart,
   Sparkles,
+  UserCircle,
 } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/utils";
+import { recordLeadEvent } from "@/lib/lead-events";
+import { summariseStageChange } from "@/lib/lead-stages";
+import { nextFollowUpAt } from "@/lib/follow-up";
 import NextImage from "next/image";
 
 const CARD_COLORS = [
@@ -78,12 +82,24 @@ const txt = "var(--txt)",
   txt3 = "var(--txt3)";
 const clr = CARD_COLORS;
 
+// Mirrors the `lead_stage` enum in the database, in funnel order
+// (001_initial_schema.sql:20). `quote_sent` and `negotiation` were missing here
+// even though the DB allows them: staff had no way to record that a quote had
+// gone out, so quote→order conversion could not be measured or followed up.
 const STAGES = [
   { id: "lead", label: "New Lead", ci: 4, icon: "📥" },
   { id: "contacted", label: "Contacted", ci: 3, icon: "📞" },
+  { id: "quote_sent", label: "Quote Sent", ci: 2, icon: "🧾" },
+  { id: "negotiation", label: "Negotiation", ci: 0, icon: "🤝" },
   { id: "won", label: "Won", ci: 1, icon: "🏆" },
   { id: "lost", label: "Lost", ci: 5, icon: "❌" },
 ];
+
+// A stage value we do not know about must never blank the page. This used to be
+// `STAGES.find(...)!` — any row with an unlisted stage threw on `clr[stage.ci]`
+// and took the whole leads board down for every user.
+const UNKNOWN_STAGE = { id: "unknown", label: "Unknown", ci: 4, icon: "❔" };
+const stageOf = (id: string) => STAGES.find((s) => s.id === id) ?? UNKNOWN_STAGE;
 
 const SOURCES = ["website", "referral", "social", "email", "cold_outreach", "other"];
 const inpStyle: React.CSSProperties = {
@@ -100,7 +116,7 @@ const inpStyle: React.CSSProperties = {
 };
 
 function LeadCard({ lead, onClick }: { lead: any; onClick: () => void }) {
-  const stage = STAGES.find((s) => s.id === lead.stage)!;
+  const stage = stageOf(lead.stage);
   const sc = clr[stage.ci];
   return (
     <div
@@ -146,6 +162,20 @@ function LeadCard({ lead, onClick }: { lead: any; onClick: () => void }) {
           <span className="text-[10px] capitalize" style={{ color: txt2 }}>
             {lead.source?.replace("_", " ")}
           </span>
+          {/* An open lead with no owner is the one that goes unanswered. Flag it
+              on the card so it is visible without opening anything. */}
+          {!lead.assigned_to && lead.stage !== "lost" && lead.stage !== "won" && (
+            <span
+              className="rounded-md border px-1.5 py-0.5 text-[9px] font-semibold"
+              style={{
+                background: clr[5].bgSoft,
+                color: clr[5].text,
+                borderColor: clr[5].border,
+              }}
+            >
+              Unassigned
+            </span>
+          )}
         </div>
         <ChevronRight size={14} style={{ color: txt3 }} />
       </div>
@@ -307,13 +337,113 @@ function AddLeadModal({
   );
 }
 
+/**
+ * Ask why a lead was lost, before the move happens.
+ *
+ * `lost_reason` has been a column on `crm_leads` since the first migration and
+ * no code has ever written it, so "why do we lose deals?" has never had an
+ * answer. The quick picks are the reasons this business actually sees — they
+ * are a convenience, not a constraint, since the field is free text.
+ */
+const LOST_REASON_PRESETS = [
+  "Price — went with a cheaper quote",
+  "Never responded",
+  "Went elsewhere",
+  "Not a fit / out of scope",
+  "Duplicate or spam",
+];
+
+function LostReasonModal({
+  leadName,
+  onCancel,
+  onConfirm,
+}: {
+  leadName?: string;
+  onCancel: () => void;
+  onConfirm: (reason: string) => void;
+}) {
+  const [reason, setReason] = useState("");
+
+  return (
+    <div
+      className="fixed inset-0 z-[400] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+      onClick={onCancel}
+    >
+      <div
+        className="w-full max-w-[420px] rounded-2xl border p-6"
+        style={{ background: "var(--bg)", borderColor: "var(--border2)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="mb-1 font-syne text-lg font-bold" style={{ color: txt }}>
+          Why was this lead lost?
+        </h3>
+        <p className="mb-4 text-[12px]" style={{ color: txt2 }}>
+          {leadName ? `${leadName} moves to Lost. ` : ""}This is recorded on the lead's timeline and
+          is the only way we can see why deals are lost.
+        </p>
+
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          {LOST_REASON_PRESETS.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setReason(p)}
+              className="cursor-pointer rounded-full border px-3 py-1 text-[11px] font-medium transition-all"
+              style={{
+                background: reason === p ? clr[4].bgSoft : "var(--elevated)",
+                color: reason === p ? clr[4].text : txt2,
+                borderColor: reason === p ? clr[4].border : "var(--border2)",
+              }}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+
+        <textarea
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          rows={3}
+          placeholder="Or type the reason…"
+          style={{ ...inpStyle, resize: "vertical" }}
+        />
+
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 cursor-pointer rounded-xl border px-4 py-2.5 text-[13px] font-semibold transition-all"
+            style={{ background: "transparent", color: txt2, borderColor: "var(--border2)" }}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            disabled={!reason.trim()}
+            onClick={() => onConfirm(reason.trim())}
+            className="flex-1 cursor-pointer rounded-xl border-none px-4 py-2.5 text-[13px] font-semibold text-white transition-all disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ background: `linear-gradient(135deg,${clr[5].bg},${clr[5].icon})` }}
+          >
+            Mark as Lost
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function LeadDetailModal({
   lead,
+  staff,
+  onAssign,
   onClose,
   onContact,
   onConvertToOrder,
 }: {
   lead: any;
+  staff: any[];
+  onAssign: (assigneeId: string) => void;
   onClose: () => void;
   onContact: () => void;
   onConvertToOrder: () => void;
@@ -327,6 +457,33 @@ function LeadDetailModal({
   const [orders, setOrders] = useState<any[]>([]);
   const [ordersLoaded, setOrdersLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [events, setEvents] = useState<any[] | null>(null);
+
+  // The timeline. `null` means "not loaded yet" — distinct from an empty array,
+  // which means this lead predates the event log and the notes-based activity
+  // list below is the only history there is.
+  useEffect(() => {
+    let cancelled = false;
+    const sb = createClient();
+    sb.from("lead_events")
+      .select("id, type, summary, actor_label, created_at")
+      .eq("lead_id", lead.id)
+      .order("created_at", { ascending: false })
+      .limit(100)
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          // Migration 052 unapplied, or RLS refused. Fall back to the notes.
+          console.error("[leads] event timeline unavailable:", error.message);
+          setEvents([]);
+          return;
+        }
+        setEvents(data ?? []);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [lead.id]);
 
   useEffect(() => {
     if (!lead.email) return;
@@ -388,11 +545,54 @@ function LeadDetailModal({
                   {formatDate(lead.created_at, { month: "long", day: "numeric", year: "numeric" })}
                 </span>
               </div>
+
+              {/* Owner. Without this nobody's job it is — the unassigned lead is
+                  the one that goes unanswered. */}
+              <div className="mt-3 flex items-center gap-2">
+                <UserCircle size={15} style={{ color: txt3, flexShrink: 0 }} />
+                <label className="text-[11px] font-semibold" style={{ color: txt3 }}>
+                  Owner
+                </label>
+                <select
+                  value={lead.assigned_to ?? ""}
+                  onChange={(e) => onAssign(e.target.value)}
+                  className="cursor-pointer rounded-lg border px-2 py-1 text-[11px] font-medium outline-none"
+                  style={{
+                    background: "var(--elevated)",
+                    color: txt,
+                    borderColor: "var(--border2)",
+                    maxWidth: 220,
+                  }}
+                >
+                  <option value="">Unassigned</option>
+                  {staff.map((s: any) => (
+                    <option key={s.id} value={s.id}>
+                      {s.full_name || s.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="p-5 pt-0 sm:p-6">
+          {lead.stage === "lost" && lead.lost_reason && (
+            <div
+              className="mb-4 rounded-xl border p-3"
+              style={{
+                background: clr[5].bgSoft,
+                borderColor: clr[5].border,
+                color: clr[5].text,
+              }}
+            >
+              <div className="mb-0.5 text-[10px] font-bold uppercase tracking-wider">
+                Lost reason
+              </div>
+              <div className="text-[12px] font-medium">{lead.lost_reason}</div>
+            </div>
+          )}
+
           <div className="mb-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <div
               className="flex items-center gap-2.5 rounded-xl p-3"
@@ -596,7 +796,65 @@ function LeadDetailModal({
             </div>
           )}
 
-          {activityLines.length > 0 && (
+          {/* Timeline. Structured events first; leads created before migration
+              052 have none, so the notes-based list below still covers them
+              rather than showing an empty history. */}
+          {events && events.length > 0 && (
+            <div className="mb-5">
+              <div className="mb-2 flex items-center gap-1.5">
+                <Calendar size={14} style={{ color: txt3 }} />
+                <span
+                  className="text-[11px] font-bold uppercase tracking-wider"
+                  style={{ color: txt3 }}
+                >
+                  Timeline
+                </span>
+              </div>
+              <div
+                className="overflow-hidden rounded-xl border"
+                style={{ background: "var(--elevated)", borderColor: "var(--border)" }}
+              >
+                {events.map((ev: any, i: number) => {
+                  const dot =
+                    ev.type === "stage_change" || ev.type === "order_created"
+                      ? clr[4].icon
+                      : ev.type === "email_failed"
+                        ? clr[5].icon
+                        : ev.type === "email_sent"
+                          ? clr[0].icon
+                          : clr[3].icon;
+                  return (
+                    <div
+                      key={ev.id}
+                      className="flex items-start gap-2.5 px-3.5 py-2.5 text-[11px]"
+                      style={{
+                        borderBottom: i < events.length - 1 ? "1px solid var(--border)" : "none",
+                      }}
+                    >
+                      <div
+                        className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                        style={{ background: dot }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span style={{ color: txt2 }}>{ev.summary}</span>
+                        {ev.actor_label && (
+                          <span style={{ color: txt3 }}> — {ev.actor_label}</span>
+                        )}
+                      </div>
+                      <span
+                        className="flex-shrink-0 whitespace-nowrap text-[10px]"
+                        style={{ color: txt3 }}
+                      >
+                        {formatDate(ev.created_at, { month: "short", day: "numeric" })}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {(!events || events.length === 0) && activityLines.length > 0 && (
             <div className="mb-5">
               <div className="mb-2 flex items-center gap-1.5">
                 <Calendar size={14} style={{ color: txt3 }} />
@@ -826,7 +1084,19 @@ function ConvertToOrderModal({ lead, onClose }: { lead: any; onClose: (order?: a
         toast.error(data.error || "Failed");
         return;
       }
-      toast.success(`Order ${data.order.order_number} created!`);
+      // The order is real regardless — but never report a clean success when
+      // the artwork did not come with it. A designer opening an order with no
+      // file is how these jobs stall.
+      if (data.artworkWarning) {
+        toast.warning(`Order ${data.order.order_number} created — ${data.artworkWarning}`, {
+          duration: 12000,
+        });
+      } else {
+        toast.success(`Order ${data.order.order_number} created!`);
+      }
+      if (data.accountWarning) {
+        toast.warning(data.accountWarning, { duration: 12000 });
+      }
       onClose(data.order);
     } catch {
       toast.error("Network error");
@@ -1155,7 +1425,15 @@ function ContactLeadModal({ lead, onClose }: { lead: any; onClose: () => void })
     });
     setSending(false);
     if (res.ok) {
-      toast.success("Email sent! Lead moved to Contacted.");
+      const data = await res.json().catch(() => ({}));
+      if (data.emailSent) {
+        toast.success("Email sent — lead moved to Contacted.");
+      } else {
+        // Never report success the customer did not receive.
+        toast.error(
+          `Email FAILED — ${data.emailError || "the mail was rejected"}. The lead was NOT moved to Contacted.`
+        );
+      }
       onClose();
       window.location.reload();
     } else {
@@ -1296,6 +1574,37 @@ export function CRMLeadsUI({
   const [convertToOrderLead, setConvertToOrderLead] = useState<any>(null);
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [stageFilter, setStageFilter] = useState<string>("all");
+  const [lostPrompt, setLostPrompt] = useState<{ id: string; fromStage: string | null } | null>(
+    null
+  );
+  const [staff, setStaff] = useState<any[]>([]);
+
+  // Who a lead can be assigned to. Readable by admin/crm (users_read, 001:463).
+  useEffect(() => {
+    let cancelled = false;
+    // The client is created here rather than taken from the render scope: it is
+    // a new object on every render, so depending on it would refetch this list
+    // continuously.
+    createClient()
+      .from("users")
+      .select("id, full_name, email")
+      .in("role", ["admin", "crm"])
+      .eq("is_active", true)
+      .order("full_name", { ascending: true })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          // The picker degrades to "Unassigned" only; assignment still works,
+          // it just cannot show names.
+          console.error("[leads] staff list unavailable:", error.message);
+          return;
+        }
+        setStaff(data ?? []);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredLeads =
     stageFilter === "all" ? leads : leads.filter((l) => l.stage === stageFilter);
@@ -1323,22 +1632,120 @@ export function CRMLeadsUI({
     );
   }
 
-  async function moveLead(id: string, stage: string) {
+  async function moveLead(id: string, stage: string, lostReason?: string) {
     const lead = leads.find((l) => l.id === id);
     const oldStage = STAGES.find((s) => s.id === lead?.stage)?.label || lead?.stage;
     const newStage = STAGES.find((s) => s.id === stage)?.label || stage;
-    const activityNote = `\n[${new Date().toISOString()}] Stage changed: ${oldStage} → ${newStage}`;
-    const newNotes = (lead?.notes || "") + activityNote;
-    const { error } = await supabase
+
+    // Losing a lead is the one transition that needs a reason. `lost_reason` has
+    // existed on the table since the first migration and no code has ever
+    // written it, so "why do we lose deals?" has never been answerable. Ask
+    // before the move rather than after: once the card is in the Lost column
+    // nobody goes back to fill it in.
+    if (stage === "lost" && !lostReason) {
+      setLostPrompt({ id, fromStage: lead?.stage ?? null });
+      return;
+    }
+
+    const activityNote =
+      `\n[${new Date().toISOString()}] Stage changed: ${oldStage} → ${newStage}` +
+      (lostReason ? ` — reason: ${lostReason}` : "");
+
+    // Re-read the notes instead of appending to the copy loaded with the page.
+    // The notes column IS the lead's whole timeline, and other writers append
+    // to it server-side while this board sits open — a client reply
+    // (message-notify), a failed email (contact-lead), a converted order. Using
+    // the render-time copy silently overwrote every one of those events on the
+    // next drag. The re-read narrows the window; it cannot close it, because
+    // Postgres offers no atomic append here — see the lead events table this
+    // needs to replace the text column entirely.
+    const { data: fresh, error: readErr } = await supabase
       .from("crm_leads")
-      .update({ stage, notes: newNotes })
-      .eq("id", id);
+      .select("notes")
+      .eq("id", id)
+      .maybeSingle();
+    if (readErr) {
+      toast.error("Could not read the lead — nothing was changed");
+      return;
+    }
+    const newNotes = (fresh?.notes ?? lead?.notes ?? "") + activityNote;
+
+    const patch: Record<string, unknown> = { stage, notes: newNotes };
+    if (stage === "lost") patch.lost_reason = lostReason?.trim() || null;
+    // Keep the follow-up clock in step with the stage. Moving to won or lost
+    // clears it — the engine refuses those stages anyway, but leaving a date on
+    // a closed lead is how a customer gets chased about a job they cancelled.
+    patch.follow_up_at = nextFollowUpAt(stage)?.toISOString() ?? null;
+
+    const { error } = await supabase.from("crm_leads").update(patch).eq("id", id);
     if (error) {
       toast.error("Failed");
       return;
     }
-    setLeads((l) => l.map((l) => (l.id === id ? { ...l, stage, notes: newNotes } : l)));
+    setLeads((l) =>
+      l.map((l) =>
+        l.id === id
+          ? { ...l, stage, notes: newNotes, ...(stage === "lost" ? { lost_reason: patch.lost_reason } : {}) }
+          : l
+      )
+    );
     toast.success(`Moved to ${newStage}`);
+
+    // Append-only event row. The notes line above stays so the fallback view and
+    // older leads keep working, but this is the record that cannot be clobbered
+    // by another writer and that can be counted.
+    try {
+      await recordLeadEvent(supabase, {
+        leadId: id,
+        type: "stage_change",
+        actorId: userId,
+        summary:
+          summariseStageChange(lead?.stage, stage) +
+          (lostReason ? ` — reason: ${lostReason}` : ""),
+        fromStage: lead?.stage ?? null,
+        toStage: stage,
+        metadata: { via: "crm board", ...(lostReason ? { lostReason } : {}) },
+      });
+    } catch (err) {
+      console.error("[leads] stage event not recorded:", err);
+    }
+  }
+
+  /**
+   * Set or clear the lead's owner.
+   *
+   * `assigned_to` has been on the table since the first migration and nothing
+   * has ever written it, so every lead has been nobody's. That is the mechanism
+   * behind "the team failed to notice" — with no owner, there is no one whose
+   * job it was.
+   */
+  async function assignLead(id: string, assigneeId: string) {
+    const next = assigneeId || null;
+    const { error } = await supabase
+      .from("crm_leads")
+      .update({ assigned_to: next, updated_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) {
+      toast.error("Could not change the owner: " + error.message);
+      return;
+    }
+
+    const name = staff.find((s: any) => s.id === next);
+    const label = name ? name.full_name || name.email : null;
+    setLeads((l) => l.map((l) => (l.id === id ? { ...l, assigned_to: next } : l)));
+    toast.success(label ? `Assigned to ${label}` : "Unassigned");
+
+    try {
+      await recordLeadEvent(supabase, {
+        leadId: id,
+        type: "assigned",
+        actorId: userId,
+        summary: label ? `Assigned to ${label}` : "Unassigned",
+        metadata: { assignedTo: next, via: "crm board" },
+      });
+    } catch (err) {
+      console.error("[leads] assignment event not recorded:", err);
+    }
   }
 
   async function addLead(data: any) {
@@ -1355,6 +1762,21 @@ export function CRMLeadsUI({
     setShowAdd(false);
     toast.success("Lead added!");
     startTx(() => router.refresh());
+
+    // A manually added lead starts its timeline the same way an automatic one
+    // does, so the board never shows a lead with no history.
+    try {
+      await recordLeadEvent(supabase, {
+        leadId: lead.id,
+        type: "created",
+        actorId: userId,
+        summary: `Lead added manually — ${lead.contact_name || lead.email || "no name"}`,
+        toStage: lead.stage ?? "lead",
+        metadata: { via: "crm board", source: lead.source ?? null },
+      });
+    } catch (err) {
+      console.error("[leads] creation event not recorded:", err);
+    }
   }
 
   return (
@@ -1594,12 +2016,26 @@ export function CRMLeadsUI({
       {selectedLead && !contactLead && !convertToOrderLead && (
         <LeadDetailModal
           lead={selectedLead}
+          staff={staff}
+          onAssign={(assigneeId) => assignLead(selectedLead.id, assigneeId)}
           onClose={() => setSelectedLead(null)}
           onContact={() => {
             setContactLead(selectedLead);
           }}
           onConvertToOrder={() => {
             setConvertToOrderLead(selectedLead);
+          }}
+        />
+      )}
+
+      {lostPrompt && (
+        <LostReasonModal
+          leadName={leads.find((l) => l.id === lostPrompt.id)?.contact_name}
+          onCancel={() => setLostPrompt(null)}
+          onConfirm={(reason) => {
+            const id = lostPrompt.id;
+            setLostPrompt(null);
+            moveLead(id, "lost", reason);
           }}
         />
       )}

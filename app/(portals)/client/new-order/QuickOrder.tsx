@@ -202,6 +202,9 @@ export function QuickOrder({ tiers, clientId, userId, subscription, creditBalanc
       const uploadResult = await new Promise<{ ok: boolean; error?: string }>((resolve) => {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "/api/upload/artwork");
+        // Same missing deadline as NewOrderWizard: without it a stalled
+        // connection never settles the promise and the progress bar just stops.
+        xhr.timeout = 180000;
         const onAbort = () => {
           xhr.abort();
           resolve({ ok: false, error: "Upload cancelled" });
@@ -225,6 +228,13 @@ export function QuickOrder({ tiers, clientId, userId, subscription, creditBalanc
         xhr.addEventListener("error", () => {
           controller.signal.removeEventListener("abort", onAbort);
           resolve({ ok: false, error: "Network error — check your connection" });
+        });
+        xhr.addEventListener("timeout", () => {
+          controller.signal.removeEventListener("abort", onAbort);
+          resolve({
+            ok: false,
+            error: "Upload timed out — the order is placed, but your artwork did not arrive",
+          });
         });
         xhr.addEventListener("abort", () => {
           controller.signal.removeEventListener("abort", onAbort);

@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import nextDynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminStats } from "@/lib/supabase/admin-queries";
+import { getAttentionReport } from "@/lib/supabase/attention";
 import { getAdminUser } from "@/lib/supabase/get-user";
 import { Topbar } from "@/components/portals/Topbar";
 import {
@@ -26,7 +27,28 @@ const AdminDashClient = nextDynamic(
 );
 
 export default async function AdminDashboard() {
-  const [user, stats] = await Promise.all([getAdminUser(), getAdminStats()]);
+  const [user, stats, attention] = await Promise.all([
+    getAdminUser(),
+    getAdminStats(),
+    // Reads only. Never let a failure here take the whole dashboard down — an
+    // admin who cannot see revenue because the attention query broke is worse
+    // off than one who sees revenue and a note that attention is unavailable.
+    getAttentionReport().catch((err) => {
+      console.error("[admin] attention report failed:", err);
+      return {
+        counts: {
+          newLeadsToday: 0,
+          unansweredLeads: 0,
+          quotesAwaitingReply: 0,
+          followUpsDue: 0,
+          ordersAtRisk: 0,
+          deliveredToday: 0,
+        },
+        alerts: [],
+        degraded: err instanceof Error ? err.message : "unavailable",
+      };
+    }),
+  ]);
 
   const supabase = createClient();
 
@@ -73,7 +95,12 @@ export default async function AdminDashboard() {
         })}
         user={user}
       />
-      <AdminDashClient stats={stats} recentOrders={recentOrders ?? []} breakdown={breakdown} />
+      <AdminDashClient
+        stats={stats}
+        recentOrders={recentOrders ?? []}
+        breakdown={breakdown}
+        attention={attention}
+      />
     </>
   );
 }
