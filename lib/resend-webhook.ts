@@ -80,10 +80,21 @@ export function verifyResendWebhook(
   var secret = opts.secret !== undefined ? opts.secret : process.env.RESEND_WEBHOOK_SECRET || "";
   var now = opts.now !== undefined ? opts.now : Math.floor(Date.now() / 1000);
 
-  // No secret configured (local dev) — allow, but say so loudly.
+  // No secret configured — fail CLOSED in production. This used to return true
+  // everywhere, so a missing RESEND_WEBHOOK_SECRET silently turned the inbound
+  // email webhooks into open endpoints: anyone could POST forged
+  // "email.received" payloads, which run with the service-role key and push
+  // "New email from …" notifications to every admin. Local dev keeps the
+  // bypass because there is no tunnel secret to verify against.
   if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      console.error(
+        "[resend-webhook] RESEND_WEBHOOK_SECRET not set — rejecting webhook (fail closed). Set it in the deployment environment."
+      );
+      return false;
+    }
     console.warn(
-      "[resend-webhook] RESEND_WEBHOOK_SECRET not set — skipping signature verification"
+      "[resend-webhook] RESEND_WEBHOOK_SECRET not set — skipping signature verification (non-production only)"
     );
     return true;
   }

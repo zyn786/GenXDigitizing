@@ -99,26 +99,11 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Auto-progress CRM lead: login → won
-  if (user.email) {
-    const { data: lead } = await supabase
-      .from("crm_leads")
-      .select("id")
-      .eq("email", user.email)
-      .in("stage", ["lead", "contacted"])
-      .maybeSingle();
-
-    if (lead) {
-      const activityNote = `\n[${new Date().toISOString()}] Client logged in — auto moved to Won`;
-      await supabase
-        .from("crm_leads")
-        .update({
-          stage: "won",
-          notes: (lead.notes || "") + activityNote,
-        })
-        .eq("id", lead.id);
-    }
-  }
+  // NOTE: this route used to auto-advance a matching CRM lead to `won` on
+  // login. Removed: logging in is not a sale, and the write also wiped the
+  // lead's notes (it selected only `id`, then wrote `lead.notes + note`, so
+  // the concatenation destroyed every existing note). Stage changes belong to
+  // a human action or a paid order — never to a page view.
 
   const role = profile?.role ?? user.user_metadata?.role ?? "client";
 

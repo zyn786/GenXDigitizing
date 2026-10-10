@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { emailWelcome } from "@/lib/email/index";
 
 export async function POST(request: NextRequest) {
@@ -17,6 +18,22 @@ export async function POST(request: NextRequest) {
 
     if (!email || !name) {
       return NextResponse.json({ error: "Missing email or name" }, { status: 400 });
+    }
+
+    // Only ever send to the caller's own address. Middleware requires *some*
+    // authenticated role on this path, so previously any free account could use
+    // the company's Resend reputation to send branded "welcome" mail to
+    // arbitrary recipients — spam and deliverability damage with no trace.
+    var supabase = createClient();
+    var {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user?.email || String(email).trim().toLowerCase() !== user.email.toLowerCase()) {
+      return NextResponse.json(
+        { error: "You can only send this to your own email address" },
+        { status: 403 }
+      );
     }
 
     var result = await emailWelcome({

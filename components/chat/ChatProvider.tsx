@@ -223,7 +223,17 @@ export function ChatProvider({
           resolve(null);
         });
 
+        // Without a deadline a stalled connection never fired load or error, so
+        // the promise never settled and the upload spinner ran until the tab
+        // was closed.
+        xhr.addEventListener("timeout", () => {
+          setUploadProgress(0);
+          toast.error("Upload timed out — check your connection and try again");
+          resolve(null);
+        });
+
         xhr.open("POST", "/api/chat/upload");
+        xhr.timeout = 180000;
         xhr.send(fd);
       });
     },
@@ -425,33 +435,18 @@ export function ChatProvider({
         })
       );
 
-      // Notify recipient
-      fetch("/api/message-notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ to_user: conv.recipientId, body }),
-      }).catch(() => {});
-
-      // Sync CRM lead: client reply → contacted
-      if (currentUserRole === "client") {
-        fetch("/api/crm/sync-lead", {
+      // Notify the recipient. The server derives the recipient, the snippet and
+      // the action link from this message row — it no longer trusts the request
+      // body — and it also advances a client's lead out of `lead` on their
+      // first reply. This replaced a second, duplicate call to /api/chat/notify
+      // (every staff reply produced two notifications) and a
+      // /api/crm/sync-lead call that middleware rejects for clients, so the
+      // lead never progressed.
+      if (inserted?.id) {
+        fetch("/api/message-notify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: currentUserId }),
-        }).catch(() => {});
-      }
-
-      // Notify recipient: admin/CRM reply → persistent notification for client
-      if ((currentUserRole === "admin" || currentUserRole === "crm") && conv.recipientId) {
-        fetch("/api/chat/notify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            toUserId: conv.recipientId,
-            fromName: "Support Team",
-            body: body.slice(0, 80),
-            orderId: orderId,
-          }),
+          body: JSON.stringify({ message_id: inserted.id }),
         }).catch(() => {});
       }
 
