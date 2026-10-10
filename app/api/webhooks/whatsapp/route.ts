@@ -25,8 +25,8 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { normalisePhone } from "@/lib/channels";
 import { handleInboundMessage } from "@/lib/channels/inbound";
+import { extractWhatsAppMessages } from "@/lib/channels/whatsapp";
 import { verifyMetaSignature, readRawBody } from "@/lib/channels/meta-signature";
 
 /** GET — Meta's one-time verification handshake. */
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const messages = extractMessages(payload);
+    const messages = extractWhatsAppMessages(payload);
 
     if (!messages.length) {
       // Status callbacks (sent/delivered/read) arrive on the same endpoint.
@@ -116,60 +116,4 @@ export async function POST(req: NextRequest) {
     console.error("[whatsapp] delivery failed:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
-}
-
-/**
- * Reduce Meta's envelope to our shape.
- *
- * The nesting is entry[].changes[].value.{messages,contacts}[] and every level
- * is optional in practice — a status callback carries `statuses` instead of
- * `messages`, and a partially-populated payload should yield fewer messages,
- * not a crash.
- */
-export function extractMessages(payload: any) {
-  const out: any[] = [];
-
-  for (const entry of payload?.entry ?? []) {
-    for (const change of entry?.changes ?? []) {
-      const value = change?.value;
-      if (!value) continue;
-
-      const contacts = value.contacts ?? [];
-      for (const m of value.messages ?? []) {
-        const phone = normalisePhone(m.from);
-        // No usable number means we cannot say who this is. Skip rather than
-        // invent an identity — a wrong one merges two customers silently.
-        if (!phone) {
-          console.warn("[whatsapp] skipping a message with an unusable sender number");
-          continue;
-        }
-
-        const contact = contacts.find((c: any) => c.wa_id === m.from) ?? contacts[0];
-        const body =
-          m.text?.body ??
-          m.button?.text ??
-          m.interactive?.list_reply?.title ??
-          m.interactive?.button_reply?.title ??
-          // Media with no caption still carries meaning: the customer sent
-          // something. Say so rather than storing an empty message.
-          (m.image ? "[image]" : m.document ? "[document]" : m.audio ? "[audio]" : "");
-
-        out.push({
-          channel: "whatsapp",
-          externalId: phone,
-          displayName: contact?.profile?.name ?? null,
-          // WhatsApp does not give an email address.
-          email: null,
-          body: body || "[unsupported message type]",
-          providerMessageId: m.id ?? null,
-          attachments: m.image || m.document ? { type: m.type, raw: m[m.type] } : null,
-          receivedAt: m.timestamp
-            ? new Date(Number(m.timestamp) * 1000).toISOString()
-            : new Date().toISOString(),
-        });
-      }
-    }
-  }
-
-  return out;
 }

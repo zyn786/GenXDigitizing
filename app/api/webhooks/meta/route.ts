@@ -22,6 +22,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { handleInboundMessage } from "@/lib/channels/inbound";
+import { extractMetaMessages } from "@/lib/channels/meta";
 import { readRawBody, verifyMetaSignature } from "@/lib/channels/meta-signature";
 
 /** GET — Meta's verification handshake, shared with the WhatsApp route's token. */
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const messages = extractMessagingEvents(payload);
+    const messages = extractMetaMessages(payload);
 
     if (!messages.length) {
       // Read receipts, deliveries and reactions arrive on the same endpoint.
@@ -91,62 +92,4 @@ export async function POST(req: NextRequest) {
     console.error("[meta] delivery failed:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
-}
-
-/**
- * Reduce a Graph webhook to our shape.
- *
- * Two things are deliberately skipped rather than guessed at:
- *
- *   - `message.is_echo` events. Those are messages WE sent, delivered back to
- *     us for confirmation. Recording one as inbound would show the customer's
- *     own thread a reply from them that they never wrote.
- *   - Anything without a numeric sender id. A missing id means we cannot say
- *     who this is, and inventing one merges two customers.
- */
-export function extractMessagingEvents(payload: any) {
-  const out: any[] = [];
-  const channel = payload?.object === "instagram" ? "instagram" : "facebook";
-
-  for (const entry of payload?.entry ?? []) {
-    for (const event of entry?.messaging ?? []) {
-      // Our own outgoing message, echoed back. Never inbound.
-      if (event?.message?.is_echo) continue;
-
-      const senderId = event?.sender?.id;
-      if (!/^\d{5,}$/.test(String(senderId ?? ""))) {
-        console.warn(`[meta] skipping a ${channel} event with an unusable sender id`);
-        continue;
-      }
-
-      const body =
-        event?.message?.text ??
-        (event?.message?.attachments?.length
-          ? `[${event.message.attachments[0]?.type ?? "attachment"}]`
-          : "") ??
-        "";
-
-      // A postback is a button tap — a deliberate action, so it counts as a
-      // message even though the customer typed nothing.
-      const postback = event?.postback?.title ?? event?.postback?.payload ?? null;
-
-      const text = body || postback;
-      if (!text) continue; // read receipts, reactions, deliveries
-
-      out.push({
-        channel,
-        externalId: String(senderId),
-        displayName: null,
-        email: null,
-        body: String(text),
-        providerMessageId: event?.message?.mid ?? null,
-        attachments: event?.message?.attachments ? { raw: event.message.attachments } : null,
-        receivedAt: event?.timestamp
-          ? new Date(Number(event.timestamp)).toISOString()
-          : new Date().toISOString(),
-      });
-    }
-  }
-
-  return out;
 }
