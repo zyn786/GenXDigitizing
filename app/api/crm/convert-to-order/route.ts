@@ -256,6 +256,12 @@ export async function POST(req: NextRequest) {
       .from("crm_leads")
       .update({
         stage: "won",
+        // Clear the follow-up clock. Left in place it is inert — the engine
+        // refuses to chase a won lead — but a stale date on a closed lead fires
+        // the moment anyone moves it back to an open stage. Found on a real
+        // lead: converted at 08:11, still carrying the 12:11 date set when it
+        // was created.
+        follow_up_at: null,
         notes: (lead.notes || "") + wonNote,
       })
       .eq("id", lead_id);
