@@ -103,7 +103,9 @@ export function ContactForm() {
       setReference(typeof data.reference === "string" ? data.reference : null);
       setDone(true);
       toast.success(
-        file ? "Request sent with artwork — we reply within 1 hour" : "Request sent — we reply within 1 hour"
+        file
+          ? "Request sent with artwork — we reply within 1 hour"
+          : "Request sent — we reply within 1 hour"
       );
     } catch {
       toast.error("Network error — try again or email support");
@@ -122,8 +124,8 @@ export function ContactForm() {
         </h3>
 
         <p className="mb-4 text-xs text-[var(--txt2)] sm:text-sm">
-          We'll reply to <span className="font-semibold text-[var(--txt)]">{form.email}</span> within
-          1 hour.
+          We'll reply to <span className="font-semibold text-[var(--txt)]">{form.email}</span>{" "}
+          within 1 hour.
         </p>
 
         {reference ? (
@@ -185,13 +187,7 @@ export function ContactForm() {
           style={{ top: -9999, left: -9999 }}
           aria-hidden="true"
         >
-          <input
-            ref={honeypotRef}
-            type="text"
-            name="website"
-            tabIndex={-1}
-            autoComplete="off"
-          />
+          <input ref={honeypotRef} type="text" name="website" tabIndex={-1} autoComplete="off" />
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

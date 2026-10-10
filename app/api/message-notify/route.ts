@@ -107,7 +107,11 @@ export async function POST(req: NextRequest) {
           if (stageErr) {
             // Unchecked before, so a failed move was invisible and the lead
             // stayed in `lead` — exactly the "nobody noticed" case.
-            console.error("[message-notify] lead stage NOT advanced for", lead.id, stageErr.message);
+            console.error(
+              "[message-notify] lead stage NOT advanced for",
+              lead.id,
+              stageErr.message
+            );
           }
         }
 
@@ -117,9 +121,7 @@ export async function POST(req: NextRequest) {
           leadId: lead.id,
           type: "chat_reply",
           actorLabel: callerRow.email,
-          summary: snippet
-            ? `Customer replied in chat: "${snippet}"`
-            : "Customer replied in chat",
+          summary: snippet ? `Customer replied in chat: "${snippet}"` : "Customer replied in chat",
           metadata: { messageId: message.id },
         });
 

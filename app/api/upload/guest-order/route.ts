@@ -106,7 +106,9 @@ export async function POST(req: NextRequest) {
     // them. A guest who switches file 2 to PES used to have that choice dropped.
     const perFileFormats = uploadedFiles
       .map((f, i) =>
-        f.format ? `  ${String(i + 1).padStart(2, " ")}. ${f.name} → requested output: ${f.format}` : null
+        f.format
+          ? `  ${String(i + 1).padStart(2, " ")}. ${f.name} → requested output: ${f.format}`
+          : null
       )
       .filter(Boolean);
 
@@ -128,11 +130,14 @@ export async function POST(req: NextRequest) {
       notes && `Notes: ${notes}`,
       couponCode && `Coupon: ${couponCode} (${discountAmount ? `-$${discountAmount}` : "applied"})`,
       visitorId && `Visitor: ${visitorId}`,
-      failedFiles.length > 0 && `UPLOAD FAILED for: ${failedFiles.join(", ")} — ask the customer to resend`,
+      failedFiles.length > 0 &&
+        `UPLOAD FAILED for: ${failedFiles.join(", ")} — ask the customer to resend`,
       "",
       "Uploaded Files:",
       ...artworkLines,
-      ...(perFileFormats.length ? ["", "Requested output formats (per file):", ...perFileFormats] : []),
+      ...(perFileFormats.length
+        ? ["", "Requested output formats (per file):", ...perFileFormats]
+        : []),
     ]
       .filter(Boolean)
       .join("\n");

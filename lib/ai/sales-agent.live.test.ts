@@ -112,19 +112,14 @@ describe.skipIf(!enabled)("live draft", () => {
     ).toEqual([]);
 
     const priceFigures = result.draft.match(/\$\s?\d+(?:\.\d+)?/g) ?? [];
-    const allowedPrices = new Set(
-      (tiers ?? []).map((t: any) => `$${Number(t.price).toFixed(2)}`)
-    );
+    const allowedPrices = new Set((tiers ?? []).map((t: any) => `$${Number(t.price).toFixed(2)}`));
     const unexplainedPrices = priceFigures.filter(
       (p) => !allowedPrices.has(`$${Number(p.replace(/[$\s]/g, "")).toFixed(2)}`)
     );
     if (unexplainedPrices.length) {
       console.warn(`[live] WARNING prices not in service_tiers: ${unexplainedPrices.join(", ")}`);
     }
-    expect(
-      unexplainedPrices,
-      "the draft quoted a price that is not in service_tiers"
-    ).toEqual([]);
+    expect(unexplainedPrices, "the draft quoted a price that is not in service_tiers").toEqual([]);
 
     // The reference must never appear in a customer-facing draft.
     expect(result.draft).not.toContain("GX-");

@@ -26,10 +26,7 @@ describe("formatLeadArtworkLines", () => {
 
   it("omits the size parenthetical when size is unknown or zero", () => {
     const lines = formatLeadArtworkLines([{ name: "a.png", key: "requests/a.png" }]);
-    expect(lines).toEqual([
-      "Artwork: a.png",
-      "Download: /api/chat/upload?key=requests%2Fa.png",
-    ]);
+    expect(lines).toEqual(["Artwork: a.png", "Download: /api/chat/upload?key=requests%2Fa.png"]);
   });
 
   it("round-trips through the parser", () => {

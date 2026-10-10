@@ -124,10 +124,7 @@ export async function getAttentionReport(now = Date.now()): Promise<AttentionRep
     inactiveRes,
   ] = await Promise.all([
     // Created today and still untouched.
-    db
-      .from("crm_leads")
-      .select("id", { count: "exact", head: true })
-      .gte("created_at", sinceToday),
+    db.from("crm_leads").select("id", { count: "exact", head: true }).gte("created_at", sinceToday),
 
     // Open, in the first stage, and old enough that a human should have replied.
     db

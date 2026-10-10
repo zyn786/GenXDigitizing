@@ -37,10 +37,7 @@ export async function POST(req: NextRequest) {
     // into the invoice, the customer email and the revenue reports.
     const priceNumber = Number(price);
     if (!Number.isFinite(priceNumber) || priceNumber <= 0) {
-      return NextResponse.json(
-        { error: "Price must be a number greater than 0" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Price must be a number greater than 0" }, { status: 400 });
     }
 
     const admin = createAdminClient();

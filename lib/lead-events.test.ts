@@ -23,9 +23,7 @@ describe("lead stages", () => {
   });
 
   it("writes a stage change the way the board and the API both read it", () => {
-    expect(summariseStageChange("lead", "contacted")).toBe(
-      "Stage changed: New Lead → Contacted"
-    );
+    expect(summariseStageChange("lead", "contacted")).toBe("Stage changed: New Lead → Contacted");
     expect(summariseStageChange(null, "quote_sent")).toBe("Moved to Quote Sent");
     expect(summariseStageChange("won", "won")).toBe("Stage unchanged (Won)");
   });
@@ -61,9 +59,9 @@ describe("buildLeadEventRow", () => {
     );
     // A type outside the vocabulary would be rejected by the CHECK constraint
     // anyway; failing here says which call site is wrong.
-    expect(() =>
-      buildLeadEventRow({ leadId: "l", type: "poked" as never, summary: "x" })
-    ).toThrow(/unknown lead event type/);
+    expect(() => buildLeadEventRow({ leadId: "l", type: "poked" as never, summary: "x" })).toThrow(
+      /unknown lead event type/
+    );
   });
 
   it("agrees with the database vocabulary", () => {

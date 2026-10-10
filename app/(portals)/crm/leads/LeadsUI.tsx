@@ -837,9 +837,7 @@ function LeadDetailModal({
                       />
                       <div className="min-w-0 flex-1">
                         <span style={{ color: txt2 }}>{ev.summary}</span>
-                        {ev.actor_label && (
-                          <span style={{ color: txt3 }}> — {ev.actor_label}</span>
-                        )}
+                        {ev.actor_label && <span style={{ color: txt3 }}> — {ev.actor_label}</span>}
                       </div>
                       <span
                         className="flex-shrink-0 whitespace-nowrap text-[10px]"
@@ -1685,7 +1683,12 @@ export function CRMLeadsUI({
     setLeads((l) =>
       l.map((l) =>
         l.id === id
-          ? { ...l, stage, notes: newNotes, ...(stage === "lost" ? { lost_reason: patch.lost_reason } : {}) }
+          ? {
+              ...l,
+              stage,
+              notes: newNotes,
+              ...(stage === "lost" ? { lost_reason: patch.lost_reason } : {}),
+            }
           : l
       )
     );
@@ -1700,8 +1703,7 @@ export function CRMLeadsUI({
         type: "stage_change",
         actorId: userId,
         summary:
-          summariseStageChange(lead?.stage, stage) +
-          (lostReason ? ` — reason: ${lostReason}` : ""),
+          summariseStageChange(lead?.stage, stage) + (lostReason ? ` — reason: ${lostReason}` : ""),
         fromStage: lead?.stage ?? null,
         toStage: stage,
         metadata: { via: "crm board", ...(lostReason ? { lostReason } : {}) },

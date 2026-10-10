@@ -132,7 +132,8 @@ export async function POST(req: NextRequest) {
     });
     if (draftLogErr) {
       console.error(
-        "[ai-draft] draft NOT recorded —", draftLogErr.message,
+        "[ai-draft] draft NOT recorded —",
+        draftLogErr.message,
         "(is migration 053 applied?)"
       );
     }

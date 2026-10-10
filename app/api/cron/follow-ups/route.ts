@@ -93,10 +93,7 @@ export async function GET(req: NextRequest) {
         // Stop chasing, tell a person. This is a deliberate end state, not a
         // failure — the lead is now somebody's job.
         handedOver.push(lead.id);
-        await db
-          .from("crm_leads")
-          .update({ follow_up_at: null })
-          .eq("id", lead.id);
+        await db.from("crm_leads").update({ follow_up_at: null }).eq("id", lead.id);
         await recordLeadEvent(db, {
           leadId: lead.id,
           type: "note",

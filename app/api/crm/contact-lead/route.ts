@@ -82,13 +82,7 @@ export async function POST(req: NextRequest) {
       .then((r) => r.data.user)
       .catch(() => null);
     const staffRow = staff
-      ? (
-          await admin
-            .from("users")
-            .select("full_name, email")
-            .eq("id", staff.id)
-            .maybeSingle()
-        ).data
+      ? (await admin.from("users").select("full_name, email").eq("id", staff.id).maybeSingle()).data
       : null;
 
     // Get current notes and stage

@@ -73,7 +73,10 @@ function keyFromDownloadUrl(url: string): string | null {
   if (at === -1) return null;
   // The URL always ends the line, but a trailing space or markdown punctuation
   // would otherwise land inside the key.
-  const encoded = url.slice(at + 4).trim().replace(/[)\].,;]+$/, "");
+  const encoded = url
+    .slice(at + 4)
+    .trim()
+    .replace(/[)\].,;]+$/, "");
   if (!encoded) return null;
   try {
     const decoded = decodeURIComponent(encoded);

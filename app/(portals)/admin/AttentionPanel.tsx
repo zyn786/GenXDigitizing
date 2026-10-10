@@ -17,9 +17,24 @@ import type { AttentionAlert, AttentionReport } from "@/lib/supabase/attention";
  */
 
 const LEVEL = {
-  critical: { text: "#B91C1C", soft: "rgba(220,38,38,0.08)", border: "rgba(220,38,38,0.28)", dot: "#DC2626" },
-  warning: { text: "#B45309", soft: "rgba(217,119,6,0.08)", border: "rgba(217,119,6,0.28)", dot: "#D97706" },
-  opportunity: { text: "#1D4ED8", soft: "rgba(37,99,235,0.08)", border: "rgba(37,99,235,0.25)", dot: "#2563EB" },
+  critical: {
+    text: "#B91C1C",
+    soft: "rgba(220,38,38,0.08)",
+    border: "rgba(220,38,38,0.28)",
+    dot: "#DC2626",
+  },
+  warning: {
+    text: "#B45309",
+    soft: "rgba(217,119,6,0.08)",
+    border: "rgba(217,119,6,0.28)",
+    dot: "#D97706",
+  },
+  opportunity: {
+    text: "#1D4ED8",
+    soft: "rgba(37,99,235,0.08)",
+    border: "rgba(37,99,235,0.25)",
+    dot: "#2563EB",
+  },
 } as const;
 
 function CountTile({

@@ -6,7 +6,7 @@ describe("stripInternalAnnotations", () => {
     const notes = [
       "Service: Cap Digitizing",
       "[2026-08-14T10:31:00.000Z] Stage changed: New Lead → Contacted",
-      "[2026-08-14T11:02:00.000Z] Email sent to a@b.com - \"Your quote\"",
+      '[2026-08-14T11:02:00.000Z] Email sent to a@b.com - "Your quote"',
       "",
       "Need this on a left chest, 12 shirts.",
     ].join("\n");

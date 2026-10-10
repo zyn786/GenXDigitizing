@@ -234,11 +234,7 @@ const getCustomerOrders = defineTool({
   },
 });
 
-export const SALES_TOOLS: AgentTool[] = [
-  getServicePrices,
-  getBusinessPolicy,
-  getCustomerOrders,
-];
+export const SALES_TOOLS: AgentTool[] = [getServicePrices, getBusinessPolicy, getCustomerOrders];
 
 /** Tool definitions in the wire shape the Messages API expects. */
 const TOOL_DEFS = SALES_TOOLS.map((t) => ({

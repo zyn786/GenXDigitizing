@@ -212,7 +212,6 @@ const COMPARISON_ROWS = [
   },
 ];
 
-
 const PROCESS_STEPS = [
   {
     n: "01",

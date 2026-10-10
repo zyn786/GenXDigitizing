@@ -103,7 +103,10 @@ export function renderPolicyForModel(): string {
 
 /** Compare topics ignoring case, spaces, hyphens and underscores. */
 function normaliseTopic(s: string): string {
-  return s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
+  return s
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
 }
 
 /**

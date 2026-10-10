@@ -454,7 +454,7 @@ export function AdminPricingUI({ tiers }: { tiers: any[] }) {
                             value={creditCosts[t.id] ?? ""}
                             onChange={(e) => handleCreditChange(t.id, e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && saveTier(t.id)}
-                            className="w-[46px] border-none bg-transparent text-center text-[14px] font-bold outline-none sm:w-[52px] placeholder:font-normal placeholder:text-[11px]"
+                            className="w-[46px] border-none bg-transparent text-center text-[14px] font-bold outline-none placeholder:text-[11px] placeholder:font-normal sm:w-[52px]"
                             style={{ color: txt }}
                             aria-label={`Credits per design for ${t.label}`}
                           />
