@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/refund-policy" },
   title: "Refund Policy — genxdigitizing",
   description: "Our refund and satisfaction guarantee policy for embroidery digitizing services.",
 };

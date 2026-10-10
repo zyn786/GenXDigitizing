@@ -79,6 +79,7 @@ const DATA: ServicePageData = {
 };
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/custom-patches" },
   title: `${DATA.title} — genxdigitizing`,
   description: DATA.description,
   keywords: DATA.keywords,

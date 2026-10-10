@@ -48,7 +48,7 @@ const DATA: ServicePageData = {
     {
       icon: "⚡",
       title: "Fast Turnaround",
-      desc: "Standard 12-hour delivery. Rush in 6 hours. All speed options included at no extra charge.",
+      desc: "Standard 24-hour delivery. Rush in 6 hours. All speed options included at no extra charge.",
     },
     {
       icon: "🔄",
@@ -76,6 +76,7 @@ const DATA: ServicePageData = {
 };
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/3d-puff-digitizing" },
   title: `${DATA.title} — genxdigitizing`,
   description: DATA.description,
   keywords: DATA.keywords,

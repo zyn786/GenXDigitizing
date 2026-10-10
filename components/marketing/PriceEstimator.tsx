@@ -309,10 +309,12 @@ export function PriceEstimator({ tiers }: PriceEstimatorProps) {
     const estimatedStitches = estimateStitches(area, complexity);
     const serviceData = SERVICE_OPTIONS.find((s) => s.value === service)!;
 
-    let turnaround = "12–24h";
-    if (complexity === "complex") turnaround = "18–24h";
-    else if (area > 80) turnaround = "18–24h";
-    else turnaround = "6–12h";
+    // The previous answer for a simple design was "6–12h", which no tier
+    // delivers: standard is 24 hours, rush 6, urgent 3. Large and complex work
+    // is the 12-hour case (BIG_DESIGN_HOURS, and the admin pricing screen
+    // already describes Jumbo / Full Back / Complex Vector as ~12 hours).
+    const isLargeOrComplex = complexity === "complex" || area > 80;
+    const turnaround = isLargeOrComplex ? "~12h" : "3–24h";
 
     return {
       area,

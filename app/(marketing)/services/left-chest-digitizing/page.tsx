@@ -23,7 +23,7 @@ const DATA: ServicePageData = {
   ],
   startingPrice: 7,
   formats: "DST, PES, EMB & more",
-  turnaround: "6–12h delivery",
+  turnaround: "3–24h delivery",
   benefits: [
     {
       icon: "📏",
@@ -43,12 +43,12 @@ const DATA: ServicePageData = {
     {
       icon: "⚡",
       title: "Fastest Turnaround",
-      desc: "Most left chest logos digitized in 6–12 hours. Simple designs in as little as 3 hours. Rush always included free.",
+      desc: "Most left chest logos digitized within 24 hours. Rush in 6 hours, urgent in 3 — always included free.",
     },
     {
       icon: "🔄",
       title: "Free Revisions",
-      desc: "Unlimited adjustments until the file runs perfectly on your machine. 98% of left chest logos approved on first pass.",
+      desc: "Unlimited adjustments until the file runs perfectly on your machine.",
     },
   ],
   faqs: [
@@ -75,6 +75,7 @@ const DATA: ServicePageData = {
 };
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/left-chest-digitizing" },
   title: `${DATA.title} — genxdigitizing`,
   description: DATA.description,
   keywords: DATA.keywords,

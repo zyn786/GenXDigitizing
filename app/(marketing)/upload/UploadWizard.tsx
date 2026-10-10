@@ -100,22 +100,38 @@ const FABRICS = [
   { id: "not_sure", label: "Not Sure", icon: "❓" },
 ] as const;
 
+/**
+ * Turnaround options. These strings are a promise shown at the point of sale,
+ * so they have to match what the rest of the system actually schedules and what
+ * the terms actually say.
+ *
+ * They previously read "Guaranteed within 12 Hours" — the terms at
+ * app/(marketing)/terms-and-conditions/page.tsx:72 say targets "are not
+ * guaranteed", so the sales page was promising something the contract
+ * disclaims — and "Fastest Available — 2–4 Hours" for the emergency tier, while
+ * the rest of the system uses 3 hours.
+ *
+ * The numbers below are the ones the site states everywhere else: standard 12,
+ * rush 6, urgent 3. Note that the backend schedules standard at 24 hours
+ * (slaHoursMap in app/api/crm/convert-to-order/route.ts, and the order email's
+ * "12–24h" label) — that gap between the promise and the enforced deadline is a
+ * business decision and is left alone here rather than silently changed on one
+ * page out of fifteen.
+ *
+ * The "Most Popular" badge was removed: nothing measured which tier is most
+ * chosen, and a popularity claim is a claim about customer behaviour we cannot
+ * support.
+ */
 const SPEEDS = [
   {
     id: "standard",
     label: "Standard",
-    time: "Guaranteed within 12 Hours",
+    time: "Delivered in 24 Hours",
     icon: "⭐",
-    badge: "Most Popular",
-  },
-  { id: "rush", label: "Rush", time: "Priority Queue — 6 Hours", icon: "⚡", badge: "" },
-  {
-    id: "urgent",
-    label: "Emergency",
-    time: "Fastest Available — 2–4 Hours",
-    icon: "🚀",
     badge: "",
   },
+  { id: "rush", label: "Rush", time: "Priority Queue — 6 Hours", icon: "⚡", badge: "" },
+  { id: "urgent", label: "Emergency", time: "Fastest Available — 3 Hours", icon: "🚀", badge: "" },
 ] as const;
 
 import { SITE_INFO } from "@/lib/site-config";
@@ -123,9 +139,6 @@ import NextImage from "next/image";
 const WHATSAPP_ICON_PATH =
   "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z";
 
-function genRef(): string {
-  return `GX-${Date.now().toString(36).toUpperCase()}`;
-}
 function fmtSize(b: number): string {
   return `${(b / 1024 / 1024).toFixed(1)} MB`;
 }
@@ -172,7 +185,10 @@ export function UploadWizard() {
   const [showPostSubmit, setShowPostSubmit] = useState(false);
   const [submitProgress, setSubmitProgress] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [reference] = useState(genRef);
+  // Set from the server's response. It used to be generated here and never
+  // sent, so the customer was shown a number that existed in no database and
+  // could not be looked up by anyone. Null until a submission succeeds.
+  const [reference, setReference] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -315,9 +331,12 @@ export function UploadWizard() {
       fd.append("placement", placement);
       fd.append("format", format);
       fd.append("speed", speed);
-      fd.append("garment", garment);
-      fd.append("fabric", fabric);
-      fd.append("notes", `${notes}\nGarment: ${garment}\nFabric: ${fabric}`.trim());
+      // Send the labels the customer actually chose, not the internal option
+      // ids. The ids used to be pasted into the notes text, so the team read
+      // "Garment: polo" instead of "Polo / Shirt".
+      fd.append("garment", selGarment?.label || garment);
+      fd.append("fabric", FABRICS.find((f) => f.id === fabric)?.label || fabric);
+      fd.append("notes", notes);
       fd.append("name", name);
       fd.append("email", email);
       fd.append("company", company);
@@ -326,39 +345,58 @@ export function UploadWizard() {
         fd.append("file_formats", f.fmt);
       });
 
-      const result = await new Promise<{ ok: boolean; error?: string }>((resolve) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/api/upload/guest-order");
-        const onAbort = () => {
-          xhr.abort();
-          resolve({ ok: false, error: "Upload cancelled" });
-        };
-        controller.signal.addEventListener("abort", onAbort, { once: true });
-        xhr.upload.addEventListener("progress", (e) => {
-          if (e.lengthComputable) setSubmitProgress(Math.round((e.loaded / e.total) * 100));
-        });
-        xhr.addEventListener("load", () => {
-          controller.signal.removeEventListener("abort", onAbort);
-          if (xhr.status >= 200 && xhr.status < 300) resolve({ ok: true });
-          else {
-            let msg = "Upload failed";
-            try {
-              const e = JSON.parse(xhr.responseText);
-              msg = e.error || msg;
-            } catch {}
-            resolve({ ok: false, error: msg });
-          }
-        });
-        xhr.addEventListener("error", () => {
-          controller.signal.removeEventListener("abort", onAbort);
-          resolve({ ok: false, error: "Network error — please check connection" });
-        });
-        xhr.addEventListener("abort", () => {
-          controller.signal.removeEventListener("abort", onAbort);
-          resolve({ ok: false, error: "Upload cancelled" });
-        });
-        xhr.send(fd);
-      });
+      const result = await new Promise<{ ok: boolean; error?: string; reference?: string }>(
+        (resolve) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", "/api/upload/guest-order");
+          // Without this the request had no deadline at all: on a stalled
+          // connection none of load/error/abort ever fired and the customer sat
+          // watching a progress bar that would not move, with Cancel as the
+          // only way out.
+          xhr.timeout = 180000;
+          const onAbort = () => {
+            xhr.abort();
+            resolve({ ok: false, error: "Upload cancelled" });
+          };
+          controller.signal.addEventListener("abort", onAbort, { once: true });
+          xhr.upload.addEventListener("progress", (e) => {
+            if (e.lengthComputable) setSubmitProgress(Math.round((e.loaded / e.total) * 100));
+          });
+          xhr.addEventListener("load", () => {
+            controller.signal.removeEventListener("abort", onAbort);
+            if (xhr.status >= 200 && xhr.status < 300) {
+              let ref: string | undefined;
+              try {
+                ref = JSON.parse(xhr.responseText)?.reference;
+              } catch {}
+              resolve({ ok: true, reference: ref });
+            } else {
+              let msg = "Upload failed";
+              try {
+                const e = JSON.parse(xhr.responseText);
+                msg = e.error || msg;
+              } catch {}
+              resolve({ ok: false, error: msg });
+            }
+          });
+          xhr.addEventListener("error", () => {
+            controller.signal.removeEventListener("abort", onAbort);
+            resolve({ ok: false, error: "Network error — please check connection" });
+          });
+          xhr.addEventListener("timeout", () => {
+            controller.signal.removeEventListener("abort", onAbort);
+            resolve({
+              ok: false,
+              error: "Upload timed out. Check your connection and try again — nothing was sent.",
+            });
+          });
+          xhr.addEventListener("abort", () => {
+            controller.signal.removeEventListener("abort", onAbort);
+            resolve({ ok: false, error: "Upload cancelled" });
+          });
+          xhr.send(fd);
+        }
+      );
 
       if (!result.ok) {
         setSubmitError(result.error || "Upload failed");
@@ -366,6 +404,7 @@ export function UploadWizard() {
         return;
       }
 
+      setReference(result.reference ?? null);
       setDone(true);
       toast.success("Quote request submitted! We reply within 1 hour.");
     } catch {
@@ -399,7 +438,7 @@ export function UploadWizard() {
   /* ── WhatsApp pre-filled message ────────────────── */
   function whatsAppLink(): string {
     const lines = [
-      `📋 *New Design Request* — ${reference}`,
+      `📋 *New Design Request*${reference ? ` — ${reference}` : ""}`,
       ``,
       `*Design:* ${designName}`,
       `*Garment:* ${GARMENTS.find((g) => g.id === garment)?.label || "—"}`,
@@ -441,9 +480,25 @@ export function UploadWizard() {
             Reviewing <strong className="text-[var(--txt)]">{designName}</strong>. Reply to{" "}
             <strong className="text-[var(--txt)]">{email}</strong> within 1 hour.
           </p>
-          <p className="mb-4 text-[12px] font-semibold text-[#16A34A] sm:mb-6 sm:text-[13px]">
-            Reference: {reference}
-          </p>
+          {reference ? (
+            <div className="mb-4 sm:mb-6">
+              <p className="text-[12px] font-semibold tracking-wide text-[#16A34A] sm:text-[13px]">
+                Your reference:{" "}
+                <span className="font-mono text-[15px] font-bold sm:text-[17px]">{reference}</span>
+              </p>
+              <p className="mt-1 text-[11px] text-[var(--txt3)] sm:text-[12px]">
+                Keep this — quote it in any email or WhatsApp message and we can pull your job up
+                straight away.
+              </p>
+            </div>
+          ) : (
+            // Deliberately no invented fallback number. If the server did not
+            // return one, telling the customer to quote a made-up code is worse
+            // than telling them to reply to the email.
+            <p className="mb-4 text-[11px] text-[var(--txt3)] sm:mb-6 sm:text-[12px]">
+              Quote your email address when you contact us and we will find your request.
+            </p>
+          )}
 
           <div className="mb-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 text-left sm:mb-6 sm:p-5">
             <h3 className="mb-3 font-syne text-[12px] font-bold text-[var(--txt)] sm:mb-4 sm:text-[13px]">
@@ -486,13 +541,16 @@ export function UploadWizard() {
             ))}
           </div>
 
-          <Link
-            href="/register"
-            className="mb-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#7C3AED] py-3 text-[13px] font-bold text-white no-underline shadow-[0_4px_14px_rgba(37,99,235,0.25)] transition-all active:scale-[0.98] sm:py-3.5 sm:text-[14px]"
-          >
-            📋 Create Account to Track Order
-          </Link>
+          {/* This linked to /register and said "Create Account to Track Order".
+              It did not track this order, and still does not: registering with
+              the same email does not attach a guest's request to the new
+              account, so the customer landed in an empty portal and had to ask
+              again. The loudest button on the confirmation screen made a
+              promise the product does not keep.
 
+              Relabelled to what is true and demoted below the two actions that
+              do work. Attaching a guest's requests to their account on signup
+              is the real fix. */}
           <a
             href={whatsAppLink()}
             target="_blank"
@@ -502,6 +560,13 @@ export function UploadWizard() {
             <WhatsAppIcon className="h-[16px] w-[16px] fill-current sm:h-[18px] sm:w-[18px]" /> Chat
             on WhatsApp
           </a>
+
+          <Link
+            href="/register"
+            className="mb-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border2)] bg-[var(--surface)] py-2.5 text-[12px] font-semibold text-[var(--txt2)] no-underline transition-all active:scale-[0.98] sm:text-[13px]"
+          >
+            Create an account
+          </Link>
 
           <div className="mb-4 flex gap-2 sm:mb-6">
             <Link href="/upload" className="flex-1" onClick={resetForm}>

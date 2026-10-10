@@ -66,6 +66,7 @@ const DATA: ServicePageData = {
 };
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/jacket-back-digitizing" },
   title: `${DATA.title} — genxdigitizing`,
   description: DATA.description,
   keywords: DATA.keywords,

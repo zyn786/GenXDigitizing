@@ -35,9 +35,14 @@ import { Button } from "@/components/ui/Button";
 import { GradientOrb } from "@/components/shared/GradientOrb";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { SectionHeading } from "@/components/shared/SectionHeading";
-import { TrustStatsSection } from "@/components/shared/TrustStatsSection";
+import {
+  TrustStatsSection,
+  MIN_LIVE_COUNT,
+  type LiveStats,
+} from "@/components/shared/TrustStatsSection";
 import { SewOutGuarantee } from "@/components/marketing/SewOutGuarantee";
 import { MobileHeroScroll } from "@/components/marketing/MobileHeroScroll";
+import { MobileCtaBar } from "@/components/marketing/MobileCtaBar";
 
 import dynamic from "next/dynamic";
 
@@ -88,14 +93,14 @@ const WHY_CHOOSE_US = [
   {
     icon: Zap,
     title: "3–24 Hour Turnaround",
-    desc: "Standard delivery in 12 hours. Rush in 6. Urgent in 3. All speed tiers included at no extra charge — unlike competitors who charge $10+ for rush.",
-    stat: "3–12h avg",
+    desc: "Standard delivery in 24 hours. Rush in 6. Urgent in 3. All speed tiers included at no extra charge — unlike competitors who charge $10+ for rush.",
+    stat: "3–24h",
     color: "#F97316",
   },
   {
     icon: RefreshCw,
     title: "Unlimited Free Revisions",
-    desc: "Not satisfied? We keep going. No caps. No extra fees. 98% of files approved on first pass — but we'll revise until it runs perfectly on your machine.",
+    desc: "Not satisfied? We keep going. No caps. No extra fees. We'll revise until it runs perfectly on your machine.",
     stat: "Unlimited",
     color: "#16A34A",
   },
@@ -207,34 +212,6 @@ const COMPARISON_ROWS = [
   },
 ];
 
-const CASE_STUDIES = [
-  {
-    client: "ProStitch Apparel",
-    industry: "Promotional Products — USA",
-    problem:
-      "Previous digitizer produced files with inconsistent density. Cap designs had thread breaks on curved sections, and small text registered poorly on left-chest logos.",
-    solution:
-      "genxdigitizing manually digitized 200+ cap designs with structural underlay, adjusted stitch angles for curved surfaces, and provided sew-out photos with every proof.",
-    results: [
-      { metric: "98%", label: "First-run approval" },
-      { metric: "40%", label: "Fewer thread breaks" },
-      { metric: "12h", label: "Avg. turnaround" },
-    ],
-  },
-  {
-    client: "Victory Sportswear",
-    industry: "Team Uniforms — Nigeria",
-    problem:
-      "Complex jacket-back designs with gradients and small sponsor logos were coming back unusable. Auto-digitized files had excessive trims and wasted thread.",
-    solution:
-      "Re-digitized 150+ jacket-back designs with optimized path planning. Reduced jump stitches by 60%. Color-matched every thread to Pantone references.",
-    results: [
-      { metric: "60%", label: "Fewer jump stitches" },
-      { metric: "100%", label: "Color accuracy" },
-      { metric: "8h", label: "Avg. turnaround" },
-    ],
-  },
-];
 
 const PROCESS_STEPS = [
   {
@@ -282,7 +259,7 @@ const HEADLINES = {
   altB: {
     line1: "Your Design,",
     gradient: "Production-Ready by Tomorrow",
-    sub: "Professional digitizing for every application: caps, jackets, polos, 3D puff. 12-hour turnaround. All formats included. No minimums.",
+    sub: "Professional digitizing for every application: caps, jackets, polos, 3D puff. 3–24h turnaround. All formats included. No minimums.",
   },
 };
 
@@ -503,7 +480,7 @@ function SewoutGifShowcase({
 
 const ROTATING_WORDS = ["Just Quality.", "No Auto-Trace.", "Pure Craft."];
 
-function HeroSection() {
+function HeroSection({ stats }: { stats?: LiveStats }) {
   const headline = HEADLINES.primary;
   const [wordIndex, setWordIndex] = useState(0);
   const [portalReady, setPortalReady] = useState(false);
@@ -565,72 +542,6 @@ function HeroSection() {
           poster="https://res.cloudinary.com/djoixgojj/video/upload/q_auto:low,so_0,w_1200/v1781040748/hero-bg-desktop_ogydtd.jpg"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/50 to-black/75 sm:from-black/55 sm:via-black/50 sm:to-black/70" />
-      </div>
-
-      {/* Mobile bottom bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#0F3460] shadow-[0_1px_8px_rgba(37,99,235,0.2)] sm:hidden">
-        {/* Buttons */}
-        <div
-          className="flex items-center gap-2 px-3 pt-3"
-          style={{ paddingBottom: "env(safe-area-inset-bottom, 12px)" }}
-        >
-          <div className="relative flex-shrink-0">
-            {/* Popup label — bounces, hides on scroll */}
-            <div className="absolute -top-12 left-1/2 z-50 -translate-x-4">
-              <div
-                className="relative whitespace-nowrap rounded-xl bg-[#25D366] px-3 py-1.5 text-[11px] font-bold text-white shadow-lg"
-                style={{ animation: "bounceUp 2s ease-in-out infinite" }}
-              >
-                GET QUOTE in 5 min
-                <div className="absolute -bottom-1.5 left-3 h-3 w-3 rotate-45 bg-[#25D366]" />
-              </div>
-            </div>
-            <a
-              href={`https://wa.me/${SITE_INFO.whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-[#25D366] text-white shadow-md transition-all active:scale-95"
-              aria-label="WhatsApp"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" />
-              </svg>
-            </a>
-          </div>
-
-          <Link href="/register" className="flex-1">
-            <Button
-              variant="grad"
-              size="md"
-              className="!h-11 w-full !rounded-2xl !py-0 !text-[13px] !font-bold !shadow-md !ring-1 !ring-inset !ring-white"
-            >
-              Register
-            </Button>
-          </Link>
-
-          <Link href="/upload" className="flex-[2]">
-            <Button
-              variant="grad"
-              size="md"
-              className="!h-11 w-full !rounded-2xl !py-0 !text-[13px] !font-bold !shadow-md !ring-1 !ring-inset !ring-white"
-              rightIcon={<Upload size={14} />}
-            >
-              Upload Design
-            </Button>
-          </Link>
-        </div>
-        {/* Trust line */}
-        <div
-          className="flex items-center justify-center gap-1 pb-1 pt-1"
-          style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
-        >
-          <svg viewBox="0 0 24 24" className="h-2.5 w-2.5 fill-white/90">
-            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
-          </svg>
-          <span className="text-[9px] font-medium text-white/90">100% Secure</span>
-          <span className="text-[9px] text-white/50">·</span>
-          <span className="text-[9px] font-medium text-white/90">SSL Encrypted</span>
-        </div>
       </div>
 
       {/* Service cards slider */}
@@ -719,20 +630,25 @@ function HeroSection() {
           {headline.sub}
         </p>
 
-        {/* Primary CTAs — side by side on all screens */}
+        {/* Primary CTAs — Upload Design leads, as the business intends.
+            This slot used to be "Sign In / Register": the loudest button on the
+            page asked a first-time visitor to create an account before they had
+            seen a price, and the only Upload action was a pill that faded in
+            after the hero. Someone who is ready to buy should not have to sign
+            up to ask. Register stays in the header for people who want it. */}
         <div className="mb-3 flex flex-row justify-center gap-2 sm:mb-4 sm:gap-4">
-          <Link href="/register" className="flex-1 sm:flex-none">
+          <Link href="/upload" className="flex-1 sm:flex-none">
             <Button
               variant="grad"
               size="xl"
               className="w-full !rounded-2xl !px-5 !py-3.5 !text-sm !font-bold !shadow-[0_8px_32px_rgba(37,99,235,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:!shadow-[0_12px_40px_rgba(37,99,235,0.55)] sm:w-auto sm:!px-10 sm:!py-4 sm:!text-lg"
-              rightIcon={<ArrowRight size={15} className="sm:size-[20px]" />}
+              rightIcon={<Upload size={15} className="sm:size-[20px]" />}
             >
-              Sign In / Register
+              Upload Design — Free
             </Button>
           </Link>
           <a
-            href="https://wa.me/18302102135"
+            href={`https://wa.me/${SITE_INFO.whatsapp}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 no-underline sm:flex-none"
@@ -740,7 +656,7 @@ function HeroSection() {
             <Button
               variant="grad"
               size="xl"
-              className="w-full !rounded-2xl !border !border-[#25D366]/30 !bg-[#25D366] !px-5 !py-3.5 !text-sm !font-semibold !shadow-[0_4px_16px_rgba(37,211,102,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:!bg-[#22C55E] sm:w-auto sm:!px-10 sm:!py-4 sm:!text-lg"
+              className="w-full !rounded-2xl !border !border-white/25 !bg-white/10 !px-5 !py-3.5 !text-sm !font-semibold !text-white !shadow-none backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:!bg-white/20 sm:w-auto sm:!px-10 sm:!py-4 sm:!text-lg"
               rightIcon={
                 <svg
                   viewBox="0 0 24 24"
@@ -764,12 +680,21 @@ function HeroSection() {
         <div className="mt-5 hidden w-full grid-cols-2 gap-3 sm:mt-6 sm:grid sm:gap-4 md:grid-cols-6">
           {[
             // Was a 4.9/5 rating, 5,000+ orders and 100+ countries — all
-            // invented. These are capabilities and published policies.
+            // invented. These are capabilities and published policies, plus a
+            // real delivered count when the database actually has one.
+            ...(stats?.deliveredOrders && stats.deliveredOrders >= MIN_LIVE_COUNT
+              ? [
+                  {
+                    value: stats.deliveredOrders.toLocaleString(),
+                    sub: "Designs delivered",
+                    icon: FileCheck,
+                  },
+                ]
+              : [{ value: "100%", sub: "Hand-digitized", icon: Shield }]),
             { value: SITE_CLAIMS.price.value, sub: "Standard designs", icon: Star },
             { value: SITE_CLAIMS.turnaround.value, sub: "Turnaround", icon: Clock },
             { value: SITE_CLAIMS.revisions.value, sub: "Unlimited revisions", icon: RefreshCw },
             { value: SITE_CLAIMS.formats.value, sub: "Machine formats", icon: Globe },
-            { value: "100%", sub: "Hand-digitized", icon: Shield },
             { value: "3–24h", sub: "Delivery options", icon: FileCheck },
           ].map((stat) => {
             const Icon = stat.icon;
@@ -1212,101 +1137,6 @@ function HowItWorksSection() {
 
 function _DeletedCaseStudiesSection() {
   return null;
-}
-function __unused_case_studies() {
-  return (
-    <section
-      className="bg-[#FAFAF9] py-12 sm:py-16 md:py-20"
-      aria-labelledby="case-studies-heading"
-    >
-      <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-12">
-        <AnimatedSection>
-          <div className="mb-10 text-center sm:mb-12">
-            <SectionBadge color="#7C3AED">Case Studies</SectionBadge>
-            <h2
-              id="case-studies-heading"
-              className="mb-3 mt-3 font-syne text-3xl font-bold leading-[1.15] text-[var(--txt)] md:text-5xl"
-            >
-              Real Results for{" "}
-              <span className="bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
-                Real Businesses
-              </span>
-            </h2>
-            <p className="mx-auto max-w-xl text-sm text-[var(--txt2)] sm:text-base">
-              Not hypotheticals. These are actual production outcomes from clients who switched to
-              genxdigitizing.
-            </p>
-          </div>
-
-          <div className="space-y-8 sm:space-y-10">
-            {CASE_STUDIES.map((cs, idx) => (
-              <div key={cs.client} className="grid items-stretch gap-5 sm:gap-6 md:grid-cols-3">
-                {/* Problem card */}
-                <div className="relative rounded-2xl border border-red-200 bg-white p-6 shadow-sm sm:p-7">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-lg">
-                    ⚠️
-                  </div>
-                  <span className="absolute right-5 top-5 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-500">
-                    The Problem
-                  </span>
-                  <h3 className="mb-2 font-syne text-lg font-bold text-[var(--txt)]">
-                    {cs.client}
-                  </h3>
-                  <p className="mb-3 text-[11px] text-[var(--txt3)]">{cs.industry}</p>
-                  <p className="text-sm leading-relaxed text-[var(--txt2)]">{cs.problem}</p>
-                </div>
-
-                {/* Solution card */}
-                <div className="relative rounded-2xl border border-blue-200 bg-white p-6 shadow-sm sm:p-7">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-lg">
-                    🔧
-                  </div>
-                  <span className="absolute right-5 top-5 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-500">
-                    The Solution
-                  </span>
-                  <h3 className="mb-2 font-syne text-lg font-bold text-[var(--txt)]">
-                    genxdigitizing Approach
-                  </h3>
-                  <p className="text-sm leading-relaxed text-[var(--txt2)]">{cs.solution}</p>
-                </div>
-
-                {/* Results card */}
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0F3460] via-[#1D4ED8] to-[#2563EB] p-6 text-white shadow-lg sm:p-7">
-                  <div className="bg-white/12pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full" />
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-white/15">
-                    <Trophy size={20} className="text-white" />
-                  </div>
-                  <span className="absolute right-5 top-5 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/70">
-                    The Results
-                  </span>
-                  <h3 className="mb-5 font-syne text-lg font-bold">Measured Impact</h3>
-                  <div className="space-y-5">
-                    {cs.results.map((r) => (
-                      <div key={r.label} className="flex items-baseline gap-2">
-                        <div className="font-syne text-3xl font-bold leading-none sm:text-4xl">
-                          {r.metric}
-                        </div>
-                        <div className="text-xs text-white/60">{r.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 text-center">
-            <p className="mb-3 text-sm text-[var(--txt2)]">Want to be our next case study?</p>
-            <Link href="/contact">
-              <Button variant="grad" size="sm" rightIcon={<ArrowRight size={14} />}>
-                Start Your Project
-              </Button>
-            </Link>
-          </div>
-        </AnimatedSection>
-      </div>
-    </section>
-  );
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1777,6 +1607,7 @@ interface Props {
     activeOrders: number;
     deliveredOrders: number;
     reviewCount: number;
+    avgRating?: number | null;
   };
   faqs: { q: string; a: string }[];
 }
@@ -2028,7 +1859,7 @@ function BeforeAfterShowcaseSection() {
   );
 }
 
-export function LandingClient({ services, process, faqs }: Props) {
+export function LandingClient({ services, process, faqs, liveStats }: Props) {
   const tiers: Record<string, { size: string; price: string }[]> = {};
   for (const svc of services) {
     const cat = svc.title.toLowerCase().includes("vector")
@@ -2046,11 +1877,17 @@ export function LandingClient({ services, process, faqs }: Props) {
         <MobileHeroScroll />
       </div>
       <div className="hidden md:block">
-        <HeroSection />
+        <HeroSection stats={liveStats} />
       </div>
 
-      {/* 4. STATISTICS / OPERATIONS LIVE */}
-      <TrustStatsSection />
+      {/* Phone-width sticky action bar. Mounted here, at the top level, and not
+          inside HeroSection: HeroSection renders only above `md`, and the bar is
+          `sm:hidden`, so while it lived in there it rendered at no width at all
+          and the phone homepage had no persistent way to start an order. */}
+      <MobileCtaBar />
+
+      {/* 4. STATISTICS / OPERATIONS LIVE — real counts from the database */}
+      <TrustStatsSection stats={liveStats} />
 
       {/* PORTFOLIO PREVIEW */}
       <PortfolioPreview />

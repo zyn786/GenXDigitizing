@@ -5,6 +5,7 @@ import { ContactForm } from "./ContactForm";
 import { FreeSampleBanner } from "@/components/marketing/FreeSampleBanner";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/contact" },
   title: "Contact — Get a Free Quote — genxdigitizing",
   description:
     "Get in touch with genxdigitizing. Questions about embroidery digitizing, pricing, or your order — we reply fast.",

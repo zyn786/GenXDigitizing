@@ -1,6 +1,24 @@
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { SITE_CLAIMS } from "@/lib/site-config";
 
+export interface LiveStats {
+  totalOrders: number;
+  activeOrders: number;
+  deliveredOrders: number;
+  reviewCount: number;
+  avgRating?: number | null;
+}
+
+/**
+ * Live counts are only shown once they are worth showing.
+ *
+ * Below this, the row falls back to published policy claims — which are true
+ * statements about price, turnaround and revisions, never invented numbers.
+ * Hiding a weak real number is not a false claim; inventing a strong one is.
+ * Raise or lower this to taste — it is the only knob.
+ */
+export const MIN_LIVE_COUNT = 10;
+
 function TrustStat({
   value,
   suffix,
@@ -21,7 +39,45 @@ function TrustStat({
   );
 }
 
-export function TrustStatsSection() {
+export function TrustStatsSection({ stats }: { stats?: LiveStats }) {
+  // Real numbers first. Every value below is read from the database at request
+  // time (getLiveStats in app/(marketing)/home/page.tsx, revalidated every 5
+  // minutes) and is only rendered when it is above zero — so this row can never
+  // advertise "0 designs delivered", and it falls back to the published policy
+  // claims when there is nothing real to report yet.
+  //
+  // Do not add a number here that is not read from the database. Hardcoded
+  // performance metrics (5,000+ orders, 4.9/5, 98% first-pass) were removed
+  // from this component for exactly that reason — see lib/site-config.ts.
+  const live: { value: number | string; suffix?: string; label: string }[] = [];
+
+  if (stats?.deliveredOrders && stats.deliveredOrders >= MIN_LIVE_COUNT) {
+    live.push({ value: stats.deliveredOrders, label: "Designs Delivered" });
+  }
+  if (stats?.avgRating && stats.reviewCount >= MIN_LIVE_COUNT) {
+    live.push({
+      value: stats.avgRating,
+      suffix: "/5",
+      label: `From ${stats.reviewCount.toLocaleString()} Verified Reviews`,
+    });
+  }
+  if (stats?.activeOrders && stats.activeOrders >= MIN_LIVE_COUNT) {
+    live.push({ value: stats.activeOrders, label: "Orders In Production" });
+  }
+  if (stats?.totalOrders && stats.totalOrders >= MIN_LIVE_COUNT) {
+    live.push({ value: stats.totalOrders, label: "Orders Placed" });
+  }
+
+  const policy = [
+    { value: SITE_CLAIMS.price.value, label: "Standard Designs" },
+    { value: "12", suffix: "h", label: "Standard Turnaround" },
+    { value: SITE_CLAIMS.revisions.value, label: "Unlimited Revisions" },
+    { value: SITE_CLAIMS.formats.value, label: "Machine Formats" },
+  ];
+
+  const row = [...live, ...policy].slice(0, 4);
+  const hasLive = live.length > 0;
+
   return (
     <AnimatedSection className="pb-0 pt-6 md:pt-20">
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 md:px-12">
@@ -32,8 +88,14 @@ export function TrustStatsSection() {
           <div className="relative z-10">
             <div className="mb-10 text-center sm:mb-12">
               <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-white">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#16A34A]" />
-                Operations Live
+                <span
+                  className={
+                    hasLive
+                      ? "h-1.5 w-1.5 animate-pulse rounded-full bg-[#16A34A]"
+                      : "h-1.5 w-1.5 rounded-full bg-white/50"
+                  }
+                />
+                {hasLive ? "Operations Live" : "Published Policy"}
               </span>
               <h2 className="mb-3 font-syne text-2xl font-bold text-white md:text-4xl">
                 Built on Trust & Speed
@@ -43,16 +105,16 @@ export function TrustStatsSection() {
               </p>
             </div>
 
-            {/* Big numbers row */}
+            {/* Big numbers row — live counts first, published policy fills the rest */}
             <div className="mx-auto mb-10 grid max-w-3xl grid-cols-2 gap-6 sm:mb-12 sm:gap-8 md:grid-cols-4">
-              {/* Was 5,000+ orders / 500+ clients / 4h / 99% satisfaction, all
-                  invented. These are provable instead: price from
-                  service_tiers, turnaround and revisions from published policy,
-                  format count from the output_fmt enum. */}
-              <TrustStat value={SITE_CLAIMS.price.value} label="Standard Designs" />
-              <TrustStat value="12" suffix="h" label="Standard Turnaround" />
-              <TrustStat value={SITE_CLAIMS.revisions.value} label="Unlimited Revisions" />
-              <TrustStat value={SITE_CLAIMS.formats.value} label="Machine Formats" />
+              {row.map((stat) => (
+                <TrustStat
+                  key={stat.label}
+                  value={stat.value}
+                  suffix={stat.suffix}
+                  label={stat.label}
+                />
+              ))}
             </div>
 
             {/* Operational details — compact grid */}

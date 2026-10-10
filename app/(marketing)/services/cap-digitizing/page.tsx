@@ -48,12 +48,12 @@ const DATA: ServicePageData = {
     {
       icon: "⚡",
       title: "Fast Turnaround",
-      desc: "Standard 12-hour delivery. Rush in 6 hours. Urgent in 3 hours. All speed options included free.",
+      desc: "Standard 24-hour delivery. Rush in 6 hours. Urgent in 3 hours. All speed options included free.",
     },
     {
       icon: "🔄",
       title: "Free Revisions Forever",
-      desc: "Unlimited revisions until the file runs clean on your machine. 98% of cap designs approved on first pass.",
+      desc: "Unlimited revisions until the file runs clean on your machine.",
     },
   ],
   faqs: [
@@ -76,6 +76,7 @@ const DATA: ServicePageData = {
 };
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/cap-digitizing" },
   title: `${DATA.title} — genxdigitizing`,
   description: DATA.description,
   keywords: DATA.keywords,

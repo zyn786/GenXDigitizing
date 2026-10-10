@@ -43,7 +43,7 @@ const DATA: ServicePageData = {
     {
       icon: "⚡",
       title: "Fast Turnaround",
-      desc: "Standard 12-hour delivery. Rush in 6 hours. Urgent in 3 hours. All speed tiers included free.",
+      desc: "Standard 24-hour delivery. Rush in 6 hours. Urgent in 3 hours. All speed tiers included free.",
     },
     {
       icon: "🎨",
@@ -53,7 +53,7 @@ const DATA: ServicePageData = {
     {
       icon: "🔄",
       title: "Free Revisions",
-      desc: "Unlimited free revisions until the file runs clean on your beanies. 98% first-pass approval rate.",
+      desc: "Unlimited free revisions until the file runs clean on your beanies.",
     },
   ],
   faqs: [
@@ -79,6 +79,7 @@ const DATA: ServicePageData = {
 };
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/beanies-digitizing" },
   title: `${DATA.title} — genxdigitizing`,
   description: DATA.description,
   keywords: DATA.keywords,

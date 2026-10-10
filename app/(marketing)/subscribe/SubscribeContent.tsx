@@ -68,7 +68,7 @@ const FAQS = [
 ];
 
 /* ── Component ──────────────────────────────────── */
-export function SubscribeContent() {
+export function SubscribeContent({ activeSubscribers = 0 }: { activeSubscribers?: number }) {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
@@ -430,7 +430,9 @@ export function SubscribeContent() {
             Ready to save on digitizing?
           </p>
           <p className="mb-5 text-[13px] text-[var(--txt2)] sm:text-sm">
-            Join hundreds of embroidery shops already saving with monthly plans.
+            {activeSubscribers >= 10
+              ? `${activeSubscribers.toLocaleString()} shops are on a monthly plan right now.`
+              : "Monthly plans that cut the per-design price on repeat work."}
           </p>
           <a href="#plans">
             <Button variant="grad" size="lg" rightIcon={<ArrowRight size={16} />}>

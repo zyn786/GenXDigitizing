@@ -33,6 +33,22 @@ export const TURNAROUND_HOURS = {
 /** A big design gets this much time regardless of the turnaround speed. */
 export const BIG_DESIGN_HOURS = 12;
 
+/**
+ * Order statuses where WE still owe the customer work, so the original deadline
+ * still applies. `review` is admin QA — work we owe. Excluded: `approved`
+ * (waiting on the customer), `revision` (awaiting triage, and its deadline is
+ * reset when a revision is assigned), and the terminal states.
+ *
+ * shared because the SLA cron and the admin attention panel must agree on what
+ * "at risk" means — two definitions of the same window is how an order gets
+ * chased in one place and ignored in another.
+ */
+export const SLA_ACTIVE_STATUSES = ["submitted", "assigned", "in_progress", "review"] as const;
+
+/** At-risk thresholds, in milliseconds before the deadline. */
+export const SLA_WARNING_MS = 2 * 60 * 60 * 1000;
+export const SLA_URGENT_MS = 30 * 60 * 1000;
+
 export type Turnaround = keyof typeof TURNAROUND_HOURS;
 
 /** Hours allowed for this order. */

@@ -8,12 +8,14 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 
+// Only the tiers that an actual coupon can honour (BULK20 at 5+, BULK30 at 10+
+// — see supabase/migrations/013_coupon_system.sql). Do not add a row here that
+// no coupon backs: this table renders directly above the wizard's submit
+// button, so anything shown is a price promise to the customer.
 const TIERS = [
   { count: 1, price: 7.0, save: null },
-  { count: 3, price: 5.95, save: "15%" },
   { count: 5, price: 5.6, save: "20%" },
   { count: 10, price: 4.9, save: "30%" },
-  { count: 20, price: 3.5, save: "50%" },
 ];
 
 interface TieredPricingTableProps {
@@ -36,7 +38,7 @@ export function TieredPricingTable({ fileCount }: TieredPricingTableProps) {
           <span className="text-sm">📊</span>
           <div>
             <p className="text-[12px] font-semibold text-[var(--txt)] sm:text-[13px]">
-              Volume pricing — save up to 50%
+              Volume pricing — save up to 30%
             </p>
             {fileCount > 1 && currentTier.save && (
               <p className="text-[11px] font-medium text-[#16A34A]">

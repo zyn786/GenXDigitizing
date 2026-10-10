@@ -5,29 +5,55 @@ import { FAQSchema, BreadcrumbSchema, VideoObjectSchema } from "@/components/sha
 import { LandingClient } from "./LandingClient";
 
 async function getLiveStats() {
-  const admin = createAdminClient();
-  const { count: totalOrders } = await admin
-    .from("orders")
-    .select("*", { count: "exact", head: true });
-  const { count: activeOrders } = await admin
-    .from("orders")
-    .select("*", { count: "exact", head: true })
-    .not("status", "in", "(delivered,cancelled,refunded)");
-  const { count: deliveredOrders } = await admin
-    .from("orders")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "delivered");
-  const { count: reviewCount } = await admin
-    .from("reviews")
-    .select("*", { count: "exact", head: true })
-    .eq("is_published", true);
-  return {
-    totalOrders: totalOrders || 0,
-    activeOrders: activeOrders || 0,
-    deliveredOrders: deliveredOrders || 0,
-    reviewCount: reviewCount || 0,
-  };
+  // Fail soft. This runs during `next build` (and in CI, where the Supabase env
+  // is a placeholder), so a throw here fails the whole build. Any error
+  // degrades to "no live numbers" and the page falls back to published policy
+  // claims — see TrustStatsSection.
+  try {
+    const admin = createAdminClient();
+    const [
+      { count: totalOrders },
+      { count: activeOrders },
+      { count: deliveredOrders },
+      { count: reviewCount },
+      { data: reviewStars },
+    ] = await Promise.all([
+      admin.from("orders").select("*", { count: "exact", head: true }),
+      admin
+        .from("orders")
+        .select("*", { count: "exact", head: true })
+        .not("status", "in", "(delivered,cancelled,refunded)"),
+      admin.from("orders").select("*", { count: "exact", head: true }).eq("status", "delivered"),
+      admin.from("reviews").select("*", { count: "exact", head: true }).eq("is_published", true),
+      admin.from("reviews").select("stars").eq("is_published", true),
+    ]);
+
+    const rated = (reviewStars ?? []).filter((r: any) => typeof r.stars === "number");
+    const avgRating = rated.length
+      ? Math.round((rated.reduce((s: number, r: any) => s + r.stars, 0) / rated.length) * 10) / 10
+      : null;
+
+    return {
+      totalOrders: totalOrders || 0,
+      activeOrders: activeOrders || 0,
+      deliveredOrders: deliveredOrders || 0,
+      reviewCount: reviewCount || 0,
+      avgRating,
+    };
+  } catch (e) {
+    console.error("[home] live stats unavailable — falling back to policy claims:", e);
+    return {
+      totalOrders: 0,
+      activeOrders: 0,
+      deliveredOrders: 0,
+      reviewCount: 0,
+      avgRating: null,
+    };
+  }
 }
+
+// Live numbers must not be frozen at build time — refresh them every 5 minutes.
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Professional Embroidery Digitizing Services — genxdigitizing",
@@ -48,7 +74,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "genxdigitizing — Production-Ready Embroidery Files",
     description:
-      "Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. Every major machine format.",
+      "Professional embroidery digitizing from $7. Free revisions. 3–24h delivery. Every major machine format.",
     type: "website",
   },
   alternates: {
@@ -131,7 +157,7 @@ const FAQS = [
   },
   {
     q: "How long does digitizing take?",
-    a: "Standard: 12 hours. Rush: 6 hours. Urgent: 3 hours. Large designs (25k+ stitches) may take the full 12 hours. All timing options are free.",
+    a: "Standard: 24 hours. Rush: 6 hours. Urgent: 3 hours. All timing options are free.",
   },
   {
     q: "Are revisions really free?",

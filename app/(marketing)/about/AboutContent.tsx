@@ -46,7 +46,7 @@ const STATS = [
     color: "#2563EB",
   },
   {
-    value: "12h",
+    value: "3–24h",
     label: "Standard Turnaround",
     icon: Clock,
     color: "#F97316",
@@ -147,8 +147,8 @@ const REASONS = [
   {
     icon: Clock,
     title: "3–24h Turnaround",
-    desc: "Standard delivery within 12 hours. Rush in 6 hours. Urgent orders in 3 hours — always included, never extra.",
-    stat: "3–12h avg",
+    desc: "Standard delivery within 24 hours. Rush in 6 hours. Urgent orders in 3 hours — always included, never extra.",
+    stat: "3–24h",
   },
   {
     icon: Pencil,
@@ -182,33 +182,50 @@ const REASONS = [
   },
 ];
 
+/**
+ * The work, described by the role that does it.
+ *
+ * This block previously rendered four named people — "Alex K.", "Maria R.",
+ * "James P.", "Sarah L." — with specific employment histories attached
+ * ("8+ years in commercial embroidery digitizing", "Former screen-print
+ * designer", "5+ years running multi-head commercial embroidery machines").
+ * None of it was true, and none of it could be checked by anyone. Fabricated
+ * credentials on a page selling expertise are a deceptive-advertising problem,
+ * not a copy problem — and they are the same defect class as the invented
+ * testimonials already removed from the service pages.
+ *
+ * What replaces them is what can actually be described: how a file moves
+ * through the shop, and what each step is responsible for. No names, no tenure,
+ * no headcount. If real staff photos and roles are supplied later, they belong
+ * here — with the people's consent.
+ */
 const TEAM = [
   {
-    initials: "AK",
-    name: "Alex K.",
-    role: "Lead Digitizer",
-    bio: "8+ years in commercial embroidery digitizing. Specializes in 3D puff, cap digitizing, and complex jacket backs.",
+    initials: "01",
+    name: "Digitizing",
+    role: "Your file is drawn by hand",
+    bio: "Every design is manually digitized — stitch by stitch, with the underlay and pathing the garment needs. Nothing is auto-traced and sent.",
     color: "#2563EB",
   },
   {
-    initials: "MR",
-    name: "Maria R.",
-    role: "Senior Vector Artist",
-    bio: "Former screen-print designer turned vector specialist. Handles complex logo rebuilds and color separations.",
+    initials: "02",
+    name: "Vector Artwork",
+    role: "Logos rebuilt cleanly",
+    bio: "Low-resolution logos are redrawn as true vector art, so colour separations and edges hold up at any size you print or embroider.",
     color: "#F97316",
   },
   {
-    initials: "JP",
-    name: "James P.",
-    role: "Quality Control Lead",
-    bio: "Reviews every file before delivery. 5+ years running multi-head commercial embroidery machines in production shops.",
+    initials: "03",
+    name: "Quality Review",
+    role: "Checked before it reaches you",
+    bio: "Files are reviewed against the spec you gave us — size, placement, colour count, format — before anything is sent for approval.",
     color: "#16A34A",
   },
   {
-    initials: "SL",
-    name: "Sarah L.",
-    role: "Client Success Manager",
-    bio: "First point of contact for new clients. Ensures clear communication, accurate specs, and on-time delivery.",
+    initials: "04",
+    name: "Client Support",
+    role: "Someone answers",
+    bio: "Questions about a quote, a revision or an order go to a person who can see your file and your history with us.",
     color: "#7C3AED",
   },
 ];
@@ -368,7 +385,7 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {[
                   { n: "$7", sub: "Standard Designs" },
-                  { n: "12h", sub: "Standard Turnaround" },
+                  { n: "24h", sub: "Standard Turnaround" },
                   { n: "Free", sub: "Unlimited Revisions" },
                   { n: "8", sub: "Machine Formats" },
                 ].map((stat) => (
@@ -527,13 +544,12 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
         <div className="mx-auto max-w-[1400px] px-5 sm:px-6 md:px-12">
           <AnimatedSection>
             <div className="mb-8 text-center sm:mb-10">
-              <SectionBadge color="#F97316">Our Team</SectionBadge>
+              <SectionBadge color="#F97316">How We Work</SectionBadge>
               <h2 className="mb-3 font-syne text-2xl font-bold sm:text-3xl md:text-4xl">
-                The People Behind Your Files
+                What Happens to Your File
               </h2>
               <p className="mx-auto max-w-2xl text-sm text-[var(--txt2)] sm:text-base">
-                Real digitzers. Real artists. Real quality specialists. No outsourcing black boxes —
-                every team member is trained, vetted, and dedicated to embroidery quality.
+                Four steps, in this order, every time. You see the result before you pay for it.
               </p>
             </div>
 
@@ -568,11 +584,8 @@ export function AboutContent({ tiers }: { tiers: ServiceTier[] }) {
               ))}
             </div>
 
-            {/* Team note */}
             <p className="mx-auto mt-6 max-w-xl text-center text-xs text-[var(--txt3)] sm:text-sm">
-              This is our core leadership team. Behind them: a network of vetted digitzers and
-              artists who share genxdigitizing quality standards. Every file passes through senior
-              review before delivery.
+              Questions at any of these steps reach a person, not a ticket queue.
             </p>
           </AnimatedSection>
         </div>

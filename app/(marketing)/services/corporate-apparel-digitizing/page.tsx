@@ -48,7 +48,7 @@ const DATA: ServicePageData = {
     {
       icon: "⚡",
       title: "Program Turnaround",
-      desc: "Full corporate programs delivered in 24 hours. Individual designs in 6–12 hours. Rush options always available.",
+      desc: "Full corporate programs delivered in 24 hours. Individual designs in 3–24 hours. Rush options always available.",
     },
     {
       icon: "🔄",
@@ -71,7 +71,7 @@ const DATA: ServicePageData = {
     },
     {
       q: "What's the typical turnaround for corporate programs?",
-      a: "Full corporate programs delivered in 24 hours. Individual employee items in 12 hours. Rush delivery available for onboarding needs.",
+      a: "Full corporate programs delivered in 24 hours. Individual employee items in 3–24 hours. Rush delivery available for onboarding needs.",
     },
   ],
   portfolioSlug: "digitizing",
@@ -79,6 +79,7 @@ const DATA: ServicePageData = {
 };
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/corporate-apparel-digitizing" },
   title: `${DATA.title} — genxdigitizing`,
   description: DATA.description,
   keywords: DATA.keywords,

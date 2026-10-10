@@ -43,7 +43,7 @@ const DATA: ServicePageData = {
     {
       icon: "⚡",
       title: "Fast Delivery",
-      desc: "Most logo designs digitized in under 12 hours. Rush delivery available in 6 hours at no extra cost.",
+      desc: "Most logo designs digitized within 24 hours. Rush delivery in 6 hours at no extra cost.",
     },
   ],
   faqs: [
@@ -65,6 +65,7 @@ const DATA: ServicePageData = {
 };
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/logo-digitizing" },
   title: `${DATA.title} — genxdigitizing`,
   description: DATA.description,
   keywords: DATA.keywords,

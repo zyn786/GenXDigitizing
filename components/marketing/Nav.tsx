@@ -671,7 +671,9 @@ export function Nav({ topOffset }: { topOffset?: string }) {
                     <div className="mt-2.5 flex items-center justify-center gap-3 border-t border-[var(--border)] pt-2.5">
                       <div className="flex items-center gap-1">
                         <Shield size={12} className="text-[#16A34A]" />
-                        <span className="text-[10px] font-medium text-[#16A34A]">100% Secure</span>
+                        <span className="text-[10px] font-medium text-[#16A34A]">
+                          Private upload
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Shield size={12} className="text-[#16A34A]" />

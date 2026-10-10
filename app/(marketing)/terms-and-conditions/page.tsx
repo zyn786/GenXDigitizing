@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/terms-and-conditions" },
   title: "Terms & Conditions — genxdigitizing",
   description: "Terms of service for using genxdigitizing embroidery digitizing services.",
 };

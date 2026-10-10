@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/privacy-policy" },
   title: "Privacy Policy — genxdigitizing",
   description: "How genxdigitizing collects, uses, and protects your personal information.",
 };

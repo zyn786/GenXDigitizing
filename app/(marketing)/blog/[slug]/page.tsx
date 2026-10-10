@@ -5,6 +5,7 @@ import { fetchBlogPosts, type BlogPost } from "@/lib/blog-data";
 import { BreadcrumbSchema, FAQSchema } from "@/components/shared/StructuredData";
 import BlogContent from "@/components/blog/BlogContent";
 import BlogComments from "@/components/blog/BlogComments";
+import { SITE_OG_IMAGE } from "@/lib/site-config";
 
 interface Props {
   params: { slug: string };
@@ -28,6 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: post.keywords,
     alternates: { canonical: `/blog/${post.slug}` },
     openGraph: {
+    images: [SITE_OG_IMAGE],
       title: post.title,
       description: post.description,
       type: "article",

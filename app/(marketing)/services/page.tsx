@@ -5,9 +5,10 @@ import { ServiceSchema, BreadcrumbSchema } from "@/components/shared/StructuredD
 import { ServicesContent } from "./ServicesContent";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services" },
   title: "Services — Embroidery Digitizing, Vector Art & Custom Patches",
   description:
-    "Production-ready embroidery digitizing for caps, jackets, and more. Vector art conversion and custom patch design. Proof-first workflow, free revisions, 12hr turnaround.",
+    "Production-ready embroidery digitizing for caps, jackets, and more. Vector art conversion and custom patch design. Proof-first workflow, free revisions, 3–24h turnaround.",
 };
 
 export default async function ServicesPage() {

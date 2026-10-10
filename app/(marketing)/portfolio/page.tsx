@@ -3,8 +3,10 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { PortfolioClient } from "./PortfolioClient";
+import { SITE_OG_IMAGE } from "@/lib/site-config";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/portfolio" },
   title: "Portfolio — genxdigitizing Embroidery Work Samples",
   description:
     "Real stitch quality and clean vector artwork. Browse embroidery digitizing, vector art, and custom patch samples from our production workflow.",
@@ -19,6 +21,7 @@ export const metadata: Metadata = {
     "custom patch samples",
   ],
   openGraph: {
+    images: [SITE_OG_IMAGE],
     title: "Our Work — genxdigitizing Portfolio",
     description:
       "See the quality of our embroidery digitizing, vector art, and custom patches — real production files.",

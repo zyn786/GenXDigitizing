@@ -3,6 +3,7 @@ import { ServicePageTemplate } from "@/components/marketing/ServicePageTemplate"
 import type { ServicePageData } from "@/components/marketing/ServicePageTemplate";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/applique-digitizing" },
   title: "Appliqué Digitizing Services — From $8 — genxdigitizing",
   description:
     "Professional appliqué digitizing services. Clean placement lines, tack-down stitches, and cover stitches for flawless appliqué embroidery.",

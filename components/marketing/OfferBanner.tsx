@@ -7,7 +7,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Sparkles, Zap } from "lucide-react";
-import { isOfferDismissed, dismissOffer, isTimeInRange } from "@/lib/visitor";
+import { isOfferDismissed, dismissOffer } from "@/lib/visitor";
 import type { CouponOffer } from "@/types/coupon";
 
 interface OfferBannerProps {
@@ -50,20 +50,12 @@ export function OfferBanner({
       return;
     }
 
-    // Time urgency: show between 8AM-2PM
-    if (isTimeInRange(8, 14) && !isOfferDismissed("time_urgent", 2 * 60 * 60 * 1000)) {
-      setCurrentOffer({
-        id: "time_urgent",
-        title: "Order in next 2 hours",
-        description: "Get in today's queue for fastest delivery",
-        discountLabel: "FAST",
-        type: "time_urgent",
-        isAutoApplied: true,
-      });
-      setDismissed(false);
-      return;
-    }
-
+    // A "time_urgent" offer used to sit here: between 8AM and 2PM it told the
+    // visitor "Order in next 2 hours — get in today's queue for fastest
+    // delivery". Nothing measured a queue, and ignoring the countdown cost
+    // nothing, so the deadline was invented pressure. Real urgency belongs to
+    // a real signal (an actual cutoff for the next production slot); until that
+    // exists, the banner stays quiet.
     setDismissed(true);
   }, [autoOffers, isFirstVisitor, appliedCoupon, fileCount]);
 

@@ -23,13 +23,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       u(`/blog/${p.slug}`, { freq: "monthly", pri: 0.8 })
     );
   } catch {
-    // Fallback to hardcoded entries if DB unavailable
-    blogEntries = [
-      u("/blog/what-is-embroidery-digitizing", { freq: "monthly", pri: 0.8 }),
-      u("/blog/manual-vs-auto-digitizing", { freq: "monthly", pri: 0.8 }),
-      u("/blog/embroidery-file-formats-explained", { freq: "monthly", pri: 0.8 }),
-      u("/blog/how-to-convert-jpg-to-vector", { freq: "monthly", pri: 0.8 }),
-    ];
+    // Emit nothing rather than a hardcoded list. Those four slugs pointed at
+    // posts that do not exist — lib/blog-data.ts sets STATIC_POSTS = [] and the
+    // database is the only source — so a build with the database unavailable
+    // published four 404s into the sitemap.
+    blogEntries = [];
   }
 
   return [
@@ -51,6 +49,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // ── Service pages ───────────────────────────────────
     u("/services/3d-puff-digitizing", { freq: "monthly", pri: 0.8 }),
+    u("/services/applique-digitizing", { freq: "monthly", pri: 0.8 }),
     u("/services/bags-digitizing", { freq: "monthly", pri: 0.8 }),
     u("/services/beanies-digitizing", { freq: "monthly", pri: 0.8 }),
     u("/services/cap-digitizing", { freq: "monthly", pri: 0.85 }),

@@ -32,12 +32,12 @@ const DATA: ServicePageData = {
     {
       icon: "⚡",
       title: "3–24 Hour Turnaround",
-      desc: "Standard delivery in 12 hours. Rush in 6. Urgent in 3. All speed tiers free — unlike competitors who charge extra.",
+      desc: "Standard delivery in 24 hours. Rush in 6. Urgent in 3. All speed tiers free — unlike competitors who charge extra.",
     },
     {
       icon: "🔄",
       title: "Unlimited Free Revisions",
-      desc: "Not satisfied? We keep going until your file runs clean. No caps. No extra charges. 98% first-pass approval rate.",
+      desc: "Not satisfied? We keep going until your file runs clean. No caps. No extra charges.",
     },
     {
       icon: "🎯",
@@ -82,6 +82,7 @@ const DATA: ServicePageData = {
 };
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/services/embroidery-digitizing" },
   title: `${DATA.title} — genxdigitizing`,
   description: DATA.description,
   keywords: DATA.keywords,
