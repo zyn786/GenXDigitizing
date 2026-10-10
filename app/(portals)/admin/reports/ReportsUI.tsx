@@ -14,6 +14,7 @@ import {
   Legend,
 } from "recharts";
 import { formatCurrency, getInitials } from "@/lib/utils";
+import { formatDuration, formatRate, type FunnelReport } from "@/lib/analytics";
 import { TrendingUp, DollarSign, Users, ShoppingCart } from "lucide-react";
 
 const CARD_COLORS = [
@@ -76,6 +77,8 @@ interface Props {
   totalRevenue: number;
   totalOrders: number;
   avgValue: number;
+  /** Null when migration 052 has not been applied — the panel says so rather than showing zeros. */
+  funnel: FunnelReport | null;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -114,6 +117,7 @@ export function AdminReportsUI({
   totalRevenue,
   totalOrders,
   avgValue,
+  funnel,
 }: Props) {
   const maxRevenue = Math.max(...monthly.map((m) => m.revenue), 1);
 
@@ -135,6 +139,58 @@ export function AdminReportsUI({
         <p className="mt-1 text-[12px] sm:text-xs" style={{ color: txt3 }}>
           {new Date().getFullYear()} performance overview
         </p>
+      </div>
+
+      {/* Sales funnel — the lead-flow question, above the revenue charts
+          because a lead that goes cold never becomes revenue. */}
+      <div
+        className="mb-5 rounded-2xl border p-4 sm:p-5"
+        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+      >
+        <h3 className="mb-1 font-syne text-[15px] font-bold" style={{ color: txt }}>
+          Sales funnel
+        </h3>
+        {funnel ? (
+          <>
+            <p className="mb-4 text-[11px]" style={{ color: txt3 }}>
+              From the lead timeline. Medians, not averages — one lead answered after three weeks
+              would drag a mean far off what a typical lead experiences.
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {[
+                ["First reply", formatDuration(funnel.timeToFirstContact)],
+                ["Quote → won", formatDuration(funnel.quoteToWon)],
+                ["Leads won", formatRate(funnel.leadToWon)],
+              ].map(([label, value]) => (
+                <div
+                  key={label}
+                  className="rounded-xl p-3"
+                  style={{ background: "var(--elevated)" }}
+                >
+                  <div
+                    className="mb-1 text-[10px] font-semibold uppercase tracking-wider"
+                    style={{ color: txt3 }}
+                  >
+                    {label}
+                  </div>
+                  <div className="text-[15px] font-bold" style={{ color: txt }}>
+                    {value}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-[11px]" style={{ color: txt3 }}>
+              {funnel.totals.leads} lead{funnel.totals.leads === 1 ? "" : "s"} ·{" "}
+              {funnel.totals.contacted} answered · {funnel.totals.quotesSent} quoted ·{" "}
+              {funnel.totals.won} won · {funnel.totals.lost} lost
+            </p>
+          </>
+        ) : (
+          <p className="text-[12px]" style={{ color: txt3 }}>
+            No funnel data yet. This panel reads the lead timeline, which fills in as leads are
+            created and moved.
+          </p>
+        )}
       </div>
 
       {/* KPI row — 2-col mobile, 4-col desktop */}

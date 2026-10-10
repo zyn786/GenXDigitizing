@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminUser } from "@/lib/supabase/get-user";
 import { Topbar } from "@/components/portals/Topbar";
 import { AdminReportsUI } from "./ReportsUI";
+import { buildFunnelReport } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -86,12 +87,31 @@ export default async function AdminReportsPage() {
   const totalOrders = orders?.length ?? 0;
   const avgValue = totalOrders ? totalRevenue / totalOrders : 0;
 
+  // Sales funnel, from the lead event log. Computed rather than estimated —
+  // this is the question the event log exists to answer, and until it existed
+  // "how long does a lead wait?" was not answerable at all. Degrades to an
+  // empty report if migration 052 has not been applied.
+  let funnel = null;
+  try {
+    const { data: events, error: eventsErr } = await supabase
+      .from("lead_events")
+      .select("lead_id, type, from_stage, to_stage, created_at")
+      .order("created_at", { ascending: false })
+      .limit(5000);
+
+    if (eventsErr) throw new Error(eventsErr.message);
+    funnel = buildFunnelReport(events ?? []);
+  } catch (err) {
+    console.error("[reports] funnel unavailable — is migration 052 applied?", err);
+  }
+
   return (
     <>
       <Topbar title="Reports & Analytics" subtitle={`Year ${year}`} user={user} />
       <AdminReportsUI
         monthly={monthly}
         breakdown={breakdown}
+        funnel={funnel}
         designers={designers ?? []}
         topClients={topClients ?? []}
         totalRevenue={totalRevenue}
