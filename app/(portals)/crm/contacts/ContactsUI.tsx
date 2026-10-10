@@ -58,16 +58,27 @@ function ContactDetail({ contact, onClose }: { contact: any; onClose: () => void
     startTx(() => router.refresh());
   }
 
+  // Active state lives on `users`, not `clients`. This wrote
+  // `clients.is_active`, a column that has never existed — so the toggle failed
+  // outright, and because the reads below used the same phantom field the badge
+  // never appeared and the button always said "Deactivate". Admin → Clients
+  // already updates `users`, so the two screens disagreed about one customer.
+  const isActive = user?.is_active ?? true;
+
   async function toggleActive() {
-    const { error } = await supabase
-      .from("clients")
-      .update({ is_active: !contact.is_active })
-      .eq("id", contact.id);
-    if (error) {
-      toast.error("Failed");
+    if (!user?.id) {
+      toast.error("This contact has no linked account");
       return;
     }
-    toast.success(contact.is_active ? "Client deactivated" : "Client activated");
+    const { error } = await supabase
+      .from("users")
+      .update({ is_active: !isActive })
+      .eq("id", user.id);
+    if (error) {
+      toast.error("Failed: " + error.message);
+      return;
+    }
+    toast.success(isActive ? "Client deactivated" : "Client activated");
     startTx(() => router.refresh());
   }
 
@@ -152,7 +163,7 @@ function ContactDetail({ contact, onClose }: { contact: any; onClose: () => void
               <div style={{ fontSize: 13, color: "var(--txt2)" }}>{contact.company_name}</div>
               <div style={{ marginTop: 5 }}>
                 <TierBadge tier={contact.tier} />
-                {!contact.is_active && (
+                {!isActive && (
                   <span
                     style={{
                       marginLeft: 6,
@@ -314,21 +325,21 @@ function ContactDetail({ contact, onClose }: { contact: any; onClose: () => void
                 fontSize: 12,
                 fontWeight: 500,
                 cursor: "pointer",
-                background: contact.is_active ? "rgba(244,63,94,0.1)" : "rgba(52,211,153,0.1)",
-                border: contact.is_active
+                background: isActive ? "rgba(244,63,94,0.1)" : "rgba(52,211,153,0.1)",
+                border: isActive
                   ? "1px solid rgba(244,63,94,0.25)"
                   : "1px solid rgba(52,211,153,0.25)",
-                color: contact.is_active ? "#FB7185" : "#34D399",
+                color: isActive ? "#FB7185" : "#34D399",
               }}
             >
-              {contact.is_active ? "Deactivate" : "Activate"}
+              {isActive ? "Deactivate" : "Activate"}
             </button>
           </div>
 
           {/* Meta */}
           <div style={{ fontSize: 11, color: "var(--txt3)", lineHeight: 1.8 }}>
             <div>Joined: {formatDate(contact.joined_at)}</div>
-            {user?.last_sign_in_at && <div>Last seen: {formatDate(user.last_sign_in_at)}</div>}
+            {user?.last_sign_in && <div>Last seen: {formatDate(user.last_sign_in)}</div>}
             {contact.credit_balance > 0 && (
               <div>Credit balance: {formatCurrency(contact.credit_balance)}</div>
             )}
@@ -541,8 +552,8 @@ export function CRMContactsUI({ contacts }: { contacts: any[] }) {
                   </td>
                   <td style={{ padding: "10px 14px", fontSize: 12, color: "var(--txt2)" }}>—</td>
                   <td style={{ padding: "10px 14px", fontSize: 11, color: "var(--txt3)" }}>
-                    {c.users?.last_sign_in_at
-                      ? formatDate(c.users.last_sign_in_at, { month: "short", day: "numeric" })
+                    {c.users?.last_sign_in
+                      ? formatDate(c.users.last_sign_in, { month: "short", day: "numeric" })
                       : "—"}
                   </td>
                   <td style={{ padding: "10px 14px" }}>

@@ -22,7 +22,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { computeDeadline } from "@/lib/sla";
-import { validateCoupon } from "@/lib/coupons";
+import { recordRedemption, validateCoupon } from "@/lib/coupons";
 import { getCreditCost } from "@/lib/plans";
 import { notifyUsers } from "@/lib/notify-server";
 import { emailOrderSubmitted } from "@/lib/email";
@@ -78,7 +78,21 @@ export async function POST(req: NextRequest) {
       use_credits,
       idempotency_key,
       file_count,
+      // Both are collected by the wizard and shown on the confirmation screen
+      // the customer approves, and neither was in the request body — so the
+      // digitizer never saw them.
+      stitch_count,
+      instructions,
     } = body;
+
+    // `orders.stitch_count` is an int (001_initial_schema.sql:130) and the
+    // customer types into a free-text box ("12,000", "approx 8k"), so only a
+    // clean number goes in the column. Anything else is kept as text in the
+    // placement notes rather than dropped or mis-parsed.
+    const stitchDigits = String(stitch_count ?? "").replace(/[^\d]/g, "");
+    const stitchCountInt = stitchDigits ? parseInt(stitchDigits, 10) : null;
+    const stitchCountUnparsed =
+      stitch_count && !stitchCountInt ? String(stitch_count).trim() : null;
 
     if (!service_tier_id || !design_name?.trim()) {
       return NextResponse.json({ error: "Service and design name are required" }, { status: 400 });
@@ -205,15 +219,28 @@ export async function POST(req: NextRequest) {
       width_inches: width_inches ? Number(width_inches) : null,
       height_inches: height_inches ? Number(height_inches) : null,
       color_count: color_count ? parseInt(color_count) : null,
-      placement_notes: placement_notes?.trim() || null,
+      placement_notes:
+        [
+          placement_notes?.trim(),
+          instructions?.trim() && `Instructions: ${String(instructions).trim()}`,
+          stitchCountUnparsed && `Stitch count (as given): ${stitchCountUnparsed}`,
+        ]
+          .filter(Boolean)
+          .join("\n") || null,
+      stitch_count: stitchCountInt,
       design_name: design_name.trim(),
       // Server clock, not the customer's device.
       sla_deadline: computeDeadline(turn, !!tier.is_big_design),
       status: "submitted",
       idempotency_key: idempotency_key || null,
-      ...(coupon
-        ? { coupon_code: coupon.code, coupon_id: coupon.id, discount_amount: discount }
-        : {}),
+      // No coupon columns here. `orders` has never had coupon_code / coupon_id /
+      // discount_amount (001_initial_schema.sql:114-140, and no migration adds
+      // them) — they exist only on coupon_redemptions. Writing them made
+      // PostgREST reject the entire insert, and the missing-column retry below
+      // only strips idempotency_key, so EVERY order that used a coupon failed
+      // outright with "Could not create the order". The discount itself is
+      // already carried in `price`; the coupon link is recorded in
+      // coupon_redemptions below.
     };
 
     let { data: order, error: insertErr } = await db
@@ -292,6 +319,30 @@ export async function POST(req: NextRequest) {
 
     const orderNumber = order.order_number || order.id;
     const clientUser = (client as any).users;
+
+    // ── Record the coupon redemption ────────────────────────
+    // This route validated and priced the coupon but never recorded it, so the
+    // usage counter never incremented and the admin coupon report undercounted.
+    // Failure is reported, never swallowed — but it must not fail an order the
+    // customer has already paid for.
+    if (coupon) {
+      try {
+        await recordRedemption(
+          coupon.id,
+          String(visitor_id ?? ""),
+          clientUser?.email ?? null,
+          orderNumber,
+          discount
+        );
+      } catch (err) {
+        console.error(
+          "[orders/create] coupon redemption NOT recorded —",
+          coupon.code,
+          orderNumber,
+          err
+        );
+      }
+    }
 
     // ── Notify, server-side and awaited ─────────────────────
     // This used to be a separate client fetch that a closed tab could skip.

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { checkRateLimit, cleanupRateLimit } from "@/lib/rate-limit";
-import { draftReply, buildLeadBriefing } from "@/lib/ai/sales-agent";
+import { draftReply, buildLeadBriefing, SALES_MODEL } from "@/lib/ai/sales-agent";
 
 // Drafts are slow (a tool-using model call). Vercel's default 10s would kill it.
 export const maxDuration = 60;
@@ -112,6 +112,30 @@ export async function POST(req: NextRequest) {
         `in=${result.usage.inputTokens} out=${result.usage.outputTokens} ` +
         `cache_read=${result.usage.cacheReadTokens} cache_write=${result.usage.cacheCreationTokens}`
     );
+
+    // Record what was proposed, to whom, by whom, and on what input. A failed
+    // write here must not lose the draft the person is waiting for — but it is
+    // reported, because an audit trail with silent holes is not an audit trail.
+    const { error: draftLogErr } = await admin.from("ai_drafts").insert({
+      lead_id: lead.id ?? null,
+      lead_email: lead.email ?? null,
+      created_by: user.id,
+      draft: result.draft,
+      instruction: instruction ?? null,
+      escalated: !!result.escalated,
+      briefing,
+      model: SALES_MODEL,
+      input_tokens: result.usage.inputTokens,
+      output_tokens: result.usage.outputTokens,
+      cache_read_tokens: result.usage.cacheReadTokens,
+      cache_creation_tokens: result.usage.cacheCreationTokens,
+    });
+    if (draftLogErr) {
+      console.error(
+        "[ai-draft] draft NOT recorded —", draftLogErr.message,
+        "(is migration 053 applied?)"
+      );
+    }
 
     return NextResponse.json(result);
   } catch (err: any) {

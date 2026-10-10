@@ -35,6 +35,8 @@ export function ContactForm() {
   const [file, setFile] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
+  const [reference, setReference] = useState<string | null>(null);
+  const honeypotRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const upd =
@@ -79,6 +81,11 @@ export function ContactForm() {
       fd.append("company", form.company);
       fd.append("service", form.service);
       fd.append("message", form.message);
+      // The honeypot has to travel with the request or the server's check can
+      // never fire. This field is rendered in the form but was never appended —
+      // the route's `if (formData.get("website"))` was dead code, so the form
+      // had no bot protection beyond the rate limiter.
+      fd.append("website", honeypotRef.current?.value ?? "");
       if (file) fd.append("artwork", file);
 
       const res = await fetch("/api/contact", {
@@ -93,8 +100,11 @@ export function ContactForm() {
         return;
       }
 
+      setReference(typeof data.reference === "string" ? data.reference : null);
       setDone(true);
-      toast.success("Request sent with artwork — we reply within 1 hour");
+      toast.success(
+        file ? "Request sent with artwork — we reply within 1 hour" : "Request sent — we reply within 1 hour"
+      );
     } catch {
       toast.error("Network error — try again or email support");
     } finally {
@@ -111,16 +121,31 @@ export function ContactForm() {
           Request Sent
         </h3>
 
-        <p className="mb-4 text-xs text-[var(--txt2)] sm:mb-6 sm:text-sm">
-          We'll review your artwork and reply to{" "}
-          <span className="font-semibold text-[var(--txt)]">{form.email}</span> within 1 hour.
+        <p className="mb-4 text-xs text-[var(--txt2)] sm:text-sm">
+          We'll reply to <span className="font-semibold text-[var(--txt)]">{form.email}</span> within
+          1 hour.
         </p>
+
+        {reference ? (
+          <div className="mb-4 sm:mb-6">
+            <p className="text-[12px] font-semibold text-[#16A34A] sm:text-[13px]">
+              Your reference:{" "}
+              <span className="font-mono text-[15px] font-bold sm:text-[17px]">{reference}</span>
+            </p>
+            <p className="mt-1 text-[11px] text-[var(--txt3)] sm:text-[12px]">
+              Quote this in any follow-up and we can find your request immediately.
+            </p>
+          </div>
+        ) : (
+          <div className="mb-4 sm:mb-6" />
+        )}
 
         <Button
           variant="grad"
           onClick={() => {
             setDone(false);
             setFile(null);
+            setReference(null);
           }}
         >
           Send Another Request →
@@ -137,7 +162,7 @@ export function ContactForm() {
         <h3 className="font-syne text-lg font-bold sm:text-xl">Send Your Request</h3>
 
         <p className="mt-1 text-xs text-[var(--txt3)] sm:text-sm">
-          Fill all details and upload your artwork — we reply within 1 hour
+          Tell us what you need — artwork optional, we reply within 1 hour
         </p>
 
         <div className="mt-2 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2">
@@ -160,7 +185,13 @@ export function ContactForm() {
           style={{ top: -9999, left: -9999 }}
           aria-hidden="true"
         >
-          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+          <input
+            ref={honeypotRef}
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+          />
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -234,7 +265,7 @@ export function ContactForm() {
               className="flex w-full cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-[var(--border2)] bg-[var(--bg)] p-4 text-[var(--txt3)] transition-all hover:border-[#2563EB] hover:bg-[#2563EB]/5 hover:text-[#2563EB]"
             >
               <Upload size={20} />
-              <span className="text-xs font-medium">Click to upload artwork</span>
+              <span className="text-xs font-medium">Click to upload artwork (optional)</span>
               <span className="text-[10px]">PNG, JPG, WEBP, PDF, AI, PSD — max 20MB</span>
             </button>
           )}
@@ -257,11 +288,11 @@ export function ContactForm() {
             loading={sending}
           >
             <span className="sm:hidden">Send Request — Reply in 1 Hour</span>
-            <span className="hidden sm:inline">Send Request with Artwork — Reply in 1 Hour</span>
+            <span className="hidden sm:inline">Send Request — Reply in 1 Hour</span>
           </Button>
 
           <p className="mt-2 text-center text-[10px] text-[var(--txt3)] sm:mt-3 sm:text-[11px]">
-            All fields required • Your artwork is securely uploaded
+            Artwork optional • Securely uploaded
           </p>
         </div>
       </form>

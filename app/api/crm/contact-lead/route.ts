@@ -1,8 +1,10 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { notifyUsers } from "@/lib/notify-server";
 import { isMissingColumn } from "@/lib/db-errors";
+import { buildStageChangeEvent, recordLeadEvent } from "@/lib/lead-events";
+import { nextFollowUpAt } from "@/lib/follow-up";
 
 const FROM = "genxdigitizing <support@genxdigitizing.com>";
 const REPLY = "support@genxdigitizing.com";
@@ -19,6 +21,7 @@ export async function POST(req: NextRequest) {
 
     // Send email via Resend
     let emailSent = false;
+    let emailError: string | null = null;
     try {
       const { Resend } = await import("resend");
       const resend = new Resend(process.env.RESEND_API_KEY ?? "");
@@ -60,22 +63,60 @@ export async function POST(req: NextRequest) {
 </div></div></body></html>`,
       });
       emailSent = !error;
-      if (error) console.error("[contact-lead] Resend error:", error);
+      if (error) {
+        emailError = error.message ?? String(error);
+        console.error("[contact-lead] Resend error:", error);
+      }
     } catch (e) {
+      emailError = e instanceof Error ? e.message : String(e);
       console.error("[contact-lead] Email send failed:", e);
     }
 
     // Update lead stage + append activity
     const admin = createAdminClient();
 
-    // Get current notes
+    // Who is doing this. Recorded on the event so "who replied to this lead,
+    // and when" has an answer — the notes column never carried an actor.
+    const staff = await createClient()
+      .auth.getUser()
+      .then((r) => r.data.user)
+      .catch(() => null);
+    const staffRow = staff
+      ? (
+          await admin
+            .from("users")
+            .select("full_name, email")
+            .eq("id", staff.id)
+            .maybeSingle()
+        ).data
+      : null;
+
+    // Get current notes and stage
     const { data: currentLead } = await admin
       .from("crm_leads")
-      .select("notes")
+      .select("notes, stage")
       .eq("id", leadId)
       .single();
-    const activityNote = `\n[${new Date().toISOString()}] Email sent to ${to} - "${subject}"`;
+    // Only claim the email went out if it actually did. Previously this note
+    // and the stage change were written unconditionally, so a rejected send
+    // still moved the lead to `contacted` and dropped it out of the follow-up
+    // queue while the customer received nothing.
+    const activityNote = emailSent
+      ? `\n[${new Date().toISOString()}] Email sent to ${to} - "${subject}"`
+      : `\n[${new Date().toISOString()}] Email FAILED to ${to} - "${subject}" (${emailError ?? "unknown error"}) — lead left in its current stage`;
+
     const newNotes = (currentLead?.notes || "") + activityNote;
+
+    const leadPatch: Record<string, unknown> = {
+      notes: newNotes,
+      updated_at: new Date().toISOString(),
+    };
+    if (emailSent) {
+      leadPatch.stage = "contacted";
+      // Restart the follow-up clock from this contact. Leaving the old date in
+      // place would have the engine chase hours after we just emailed them.
+      leadPatch.follow_up_at = nextFollowUpAt("contacted")?.toISOString() ?? null;
+    }
 
     // NOTE: this update used to write a `last_contact_at` column that no
     // migration ever created. PostgREST rejects the whole statement for an
@@ -84,11 +125,7 @@ export async function POST(req: NextRequest) {
     // check the error.
     const { error: leadUpdateError } = await admin
       .from("crm_leads")
-      .update({
-        stage: "contacted",
-        notes: newNotes,
-        updated_at: new Date().toISOString(),
-      })
+      .update(leadPatch)
       .eq("id", leadId);
     if (leadUpdateError) {
       console.error(
@@ -96,6 +133,33 @@ export async function POST(req: NextRequest) {
           ? "[contact-lead] lead update failed — unapplied migration? " + leadUpdateError.message
           : "[contact-lead] lead update failed: " + leadUpdateError.message
       );
+    } else {
+      // Record the outcome on the timeline — including the failure, which is the
+      // entry that matters when a customer says nobody ever replied.
+      await recordLeadEvent(admin, {
+        leadId,
+        type: emailSent ? "email_sent" : "email_failed",
+        actorId: staff?.id ?? null,
+        actorLabel: staffRow?.full_name || staffRow?.email || "Staff",
+        summary: emailSent
+          ? `Email sent to ${to} — "${subject}"`
+          : `Email FAILED to ${to} — "${subject}" (${emailError ?? "unknown error"})`,
+        metadata: { to, subject, emailSent, emailError },
+      });
+
+      if (emailSent && currentLead?.stage !== "contacted") {
+        await recordLeadEvent(
+          admin,
+          buildStageChangeEvent({
+            leadId,
+            fromStage: currentLead?.stage ?? null,
+            toStage: "contacted",
+            actorId: staff?.id ?? null,
+            actorLabel: staffRow?.full_name || staffRow?.email || "Staff",
+            metadata: { reason: "email sent" },
+          })
+        );
+      }
     }
 
     // If lead's email has a registered user account, send a chat message from support
@@ -135,7 +199,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, emailSent });
+    return NextResponse.json({
+      success: true,
+      emailSent,
+      emailError,
+      leadStage: emailSent ? "contacted" : "unchanged",
+    });
   } catch (error: any) {
     console.error("[contact-lead]", error);
     return NextResponse.json({ error: error.message || "Failed" }, { status: 500 });
