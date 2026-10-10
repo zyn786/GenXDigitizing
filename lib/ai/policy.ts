@@ -67,7 +67,9 @@ export const BUSINESS_POLICIES: PolicyEntry[] = [
   {
     topic: "turnaround",
     statement:
-      `Standard turnaround is ${TURNAROUND_HOURS.standard} hours, rush is ${TURNAROUND_HOURS.rush} hours, and urgent is ${TURNAROUND_HOURS.urgent} hours. Large designs (bigger than a standard hoop) are quoted at ${BIG_DESIGN_HOURS} hours. These are the windows the system schedules against.`,
+      `Exactly one of these applies to any given order — quote the one that matches and never combine them into a range: ` +
+      `Standard is ${TURNAROUND_HOURS.standard} hours. Rush is ${TURNAROUND_HOURS.rush} hours. Urgent is ${TURNAROUND_HOURS.urgent} hours. ` +
+      `A large or complex design (jumbo, full back, complex vector) is quoted at ${BIG_DESIGN_HOURS} hours regardless of the speed chosen, because that rule replaces the others.`,
     publishedAt: "lib/sla.ts; /terms-and-conditions",
   },
   {
@@ -78,9 +80,14 @@ export const BUSINESS_POLICIES: PolicyEntry[] = [
   },
   {
     topic: "pricing_model",
+    // Deliberately carries NO figure. Putting "$7" here would give the model a
+    // second, hardcoded price source alongside the live lookup — and if the
+    // prices in service_tiers ever changed, this sentence would keep quoting
+    // the old one. Every number a customer sees must come from
+    // get_service_prices, which reads the database.
     statement:
-      `${SITE_CLAIMS.price.value} is the standard per-design price, with volume discounts at 5+ and 10+ designs. Exact pricing for a specific design must come from the live price lookup.`,
-    publishedAt: "lib/site-config.ts; lib/supabase (service_tiers)",
+      "There is a standard per-design price, with volume discounts at 5+ and 10+ designs. The figure for any specific design must come from get_service_prices, which reads the live pricing configuration — never state a price that did not come from there.",
+    publishedAt: "/pricing; lib/supabase (service_tiers) is the source of truth",
   },
   {
     topic: "file_formats",

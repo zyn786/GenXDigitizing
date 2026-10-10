@@ -899,6 +899,21 @@
           lines stripped first — a note about a failed upload is not something the customer said.
         </p>
         <p>
+          <strong>Verified live, 2026-10-10.</strong> The assistant runs against DeepSeek's
+          Anthropic-compatible endpoint (<code>ANTHROPIC_BASE_URL</code> +
+          <code>SALES_AGENT_MODEL=deepseek-chat</code> in the deployed environment), so the model
+          default in the code is inert here — the environment variable overrides it. An end-to-end
+          draft was run and it calls both tools before answering.
+        </p>
+        <p>
+          That run also caught the last stale turnaround in the system:
+          <code>service_tiers.est_hours</code> still said <code>12–24h</code>, and since
+          <code>get_service_prices</code> returns that field, it is what the assistant quoted to a
+          customer. It had not invented anything — the stored data was simply wrong. All nine active
+          tiers are now correct (3–24h, or ~12h for big designs), and the corrected draft quotes
+          $7.00 and 3–24 hours, both traceable to the database.
+        </p>
+        <p>
           <strong>Correction to an earlier version of this report.</strong>
           <code>claude-opus-5</code> (<span class="ref">lib/ai/sales-agent.ts:44</span>) is a valid
           model id — this was reported as a likely failure and it is not. The default has been moved

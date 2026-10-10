@@ -29,9 +29,22 @@ describe("business policy source", () => {
     expect(t!.statement).toContain(`${BIG_DESIGN_HOURS} hours`);
   });
 
-  it("never lets the price floor drift from SITE_CLAIMS", () => {
+  it("carries no price figure at all, so the live lookup stays the only source", () => {
+    // Putting a figure here would give the model a second, hardcoded price
+    // source; if service_tiers changed, this sentence would keep quoting the
+    // old one. A live draft test caught the model doing exactly that.
     const p = findPolicy("pricing_model");
-    expect(p!.statement).toContain(SITE_CLAIMS.price.value);
+    expect(p!.statement).not.toMatch(/\$\s?\d/);
+    expect(p!.statement).toContain("get_service_prices");
+  });
+
+  it("states turnaround as alternatives, never as a combined range", () => {
+    // A live draft returned "about 12–24 hours" — a number that exists nowhere
+    // in the data — because the statement listed four figures without saying
+    // they were alternatives. It now says so explicitly.
+    const t = findPolicy("turnaround")!;
+    expect(t.statement).toMatch(/never combine them into a range/i);
+    expect(t.statement).not.toMatch(/\d+\s*[–-]\s*\d+\s*hours/i);
   });
 
   it("says out loud that turnaround is not a guarantee", () => {
