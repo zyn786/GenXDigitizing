@@ -1,4 +1,17 @@
-import { SITE_INFO } from "@/lib/site-config";
+import { SITE_INFO, SITE_CLAIMS, TURNAROUND_RANGE_LABEL } from "@/lib/site-config";
+
+/**
+ * The description used across structured data.
+ *
+ * Built from the claim constants rather than typed out, because this exact
+ * sentence lived here twice and kept saying "12-hour turnaround" for a day
+ * after the site had moved to the published range. JSON-LD is the copy Google
+ * reads, so it drifting from the page is the version that matters.
+ */
+const SITE_DESCRIPTION =
+  `Production-ready embroidery digitizing, vector art, and custom patches. ` +
+  `From ${SITE_CLAIMS.price.value}, ${TURNAROUND_RANGE_LABEL} turnaround, unlimited free revisions, ` +
+  `every major machine format.`;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.genxdigitizing.com";
 
@@ -31,8 +44,7 @@ export function OrganizationSchema() {
     // structured-data violation that risks a manual action. Only add
     // aggregateRating when the `reviews` table actually has published rows.
     priceRange: "$5-$30",
-    description:
-      "Production-ready embroidery digitizing, vector art, and custom patches. From $7, 12-hour turnaround, unlimited free revisions, every major machine format.",
+    description: SITE_DESCRIPTION,
     ...(SITE_INFO.social
       ? {
           sameAs: Object.values(SITE_INFO.social),
@@ -140,8 +152,7 @@ export function WebSiteSchema() {
     // structured-data violation that risks a manual action. Only add
     // aggregateRating when the `reviews` table actually has published rows.
     priceRange: "$5-$30",
-    description:
-      "Production-ready embroidery digitizing, vector art, and custom patches. From $7, 12-hour turnaround, unlimited free revisions, every major machine format.",
+    description: SITE_DESCRIPTION,
     potentialAction: {
       "@type": "SearchAction",
       target: {

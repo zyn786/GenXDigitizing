@@ -5,6 +5,7 @@ import Script from "next/script";
 import { LiveOrderProvider } from "@/components/social-proof/LiveOrderProvider";
 import { OrganizationSchema, WebSiteSchema } from "@/components/shared/StructuredData";
 import { Analytics } from "@vercel/analytics/next";
+import { SITE_CLAIMS, TURNAROUND_RANGE_LABEL } from "@/lib/site-config";
 import "./globals.css";
 
 const syne = Syne({
@@ -23,8 +24,13 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "genxdigitizing — Premium Embroidery Digitizing from $7",
+  // Built from the claim constants. This sentence and its openGraph twin both
+  // said "12hr turnaround" for a day after the site moved to the published
+  // range — they are the global description, so they appear in search results
+  // and on every share card, which is where a stale claim travels furthest.
   description:
-    "Production-ready embroidery digitizing, vector art conversion, and custom patches from $7. Clean proofs, 12hr turnaround, free unlimited revisions.",
+    `Production-ready embroidery digitizing, vector art conversion, and custom patches from ` +
+    `${SITE_CLAIMS.price.value}. Clean proofs, ${TURNAROUND_RANGE_LABEL} turnaround, free unlimited revisions.`,
   keywords: [
     "embroidery digitizing",
     "DST files",
@@ -44,7 +50,8 @@ export const metadata: Metadata = {
     siteName: "genxdigitizing",
     title: "genxdigitizing — Production-Ready Embroidery Files",
     description:
-      "Professional embroidery digitizing from $7. Free revisions. 12-hour delivery. Every major machine format.",
+      `Professional embroidery digitizing from ${SITE_CLAIMS.price.value}. Free revisions. ` +
+      `${TURNAROUND_RANGE_LABEL} delivery. Every major machine format.`,
     images: [
       {
         url: "/images/black_logo.png",
