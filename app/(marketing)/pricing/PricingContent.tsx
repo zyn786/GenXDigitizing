@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { SERVICE_CATEGORIES } from "@/lib/utils";
 import { SITE_CLAIMS, SITE_CLAIM_LIST } from "@/lib/site-config";
-import { PriceEstimator } from "@/components/marketing/PriceEstimator";
 import type { ServiceCategory } from "@/types";
 
 interface ServiceTier {
@@ -298,28 +297,6 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
             </AnimatedSection>
           );
         })}
-
-        {/* PRICE ESTIMATOR — after pricing, before social proof */}
-        <div className="pt-4 sm:pt-6">
-          <AnimatedSection>
-            <div className="mb-8 text-center sm:mb-10">
-              <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#F97316]/20 bg-[#F97316]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#F97316]">
-                <span className="text-sm">🧮</span> Quick Estimator
-              </span>
-              <h2 className="mb-2 font-syne text-2xl font-bold sm:text-4xl">
-                Calculate Your
-                <span className="block bg-gradient-to-r from-[#2563EB] via-[#7C3AED] to-[#F97316] bg-clip-text text-transparent">
-                  Estimated Price
-                </span>
-              </h2>
-              <p className="mx-auto max-w-lg text-sm text-[var(--txt2)] sm:text-base">
-                Adjust the sliders below to get an instant estimate. Exact pricing confirmed after
-                artwork review.
-              </p>
-            </div>
-            <PriceEstimator tiers={tiers} />
-          </AnimatedSection>
-        </div>
 
         {/* Was "What Our Clients Say" with three invented quotes — David K.,
             Sarah M. and James T., none of whom exist. Replaced with what we can
