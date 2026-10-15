@@ -10,6 +10,7 @@ import { formatLeadArtworkLines } from "@/lib/lead-artwork";
 import { formatLeadReferenceLine, generateLeadReference } from "@/lib/lead-reference";
 import { recordLeadEvent } from "@/lib/lead-events";
 import { emailRequestReceived } from "@/lib/email";
+import { notifyOwnerOnWhatsApp } from "@/lib/whatsapp/send";
 import { nextFollowUpAt } from "@/lib/follow-up";
 
 export async function POST(req: NextRequest) {
@@ -237,6 +238,11 @@ export async function POST(req: NextRequest) {
     if (!ack.success) {
       console.error("[guest-order] acknowledgement email failed for", reference, ack.error);
     }
+
+    // WhatsApp ping to the owner. Best-effort — the request is already saved.
+    notifyOwnerOnWhatsApp(
+      `🔔 New design request ${reference}\n${name} · ${email}\n${designName} · ${placement} · ${files.length} file(s)`
+    ).catch((e: unknown) => console.error("[guest-order] whatsapp ping failed:", e));
 
     return NextResponse.json({ success: true, reference });
   } catch (err: any) {

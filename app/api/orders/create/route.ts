@@ -26,6 +26,7 @@ import { recordRedemption, validateCoupon } from "@/lib/coupons";
 import { getCreditCost } from "@/lib/plans";
 import { notifyUsers } from "@/lib/notify-server";
 import { emailOrderSubmitted } from "@/lib/email";
+import { notifyOwnerOnWhatsApp } from "@/lib/whatsapp/send";
 import { isMissingColumn } from "@/lib/db-errors";
 
 const MAX_QUANTITY = 50;
@@ -387,6 +388,12 @@ export async function POST(req: NextRequest) {
         estimatedDelivery: estimated,
       }).catch((e: unknown) => console.error("[orders/create] confirmation email failed:", e));
     }
+
+    // WhatsApp ping to the owner. Best-effort — an order must never fail because
+    // the WhatsApp send did, so the result is logged and ignored.
+    notifyOwnerOnWhatsApp(
+      `🔔 New order ${orderNumber}\n${tier.label}${qty > 1 ? ` ×${qty}` : ""} · $${price.toFixed(0)} · ${TURNAROUND_LABEL[turn] ?? turn}\nClient: ${clientUser?.full_name ?? "Client"}`
+    ).catch((e: unknown) => console.error("[orders/create] whatsapp ping failed:", e));
 
     return NextResponse.json({
       order,
