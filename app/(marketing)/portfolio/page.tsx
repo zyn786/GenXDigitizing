@@ -9,10 +9,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/portfolio" },
   title: "Portfolio — genxdigitizing Embroidery Work Samples",
   description:
-    "Real stitch quality and clean vector artwork. Browse embroidery digitizing, vector art, and custom patch samples from our production workflow.",
+    "Real stitch quality and clean vector artwork. Browse embroidery digitizing, vector art, and custom patch samples — plus real sew-out photos from production runs.",
   keywords: [
     "embroidery digitizing portfolio",
     "embroidery digitizing examples",
+    "embroidery sew-out samples",
+    "real sewout photos",
     "cap digitizing samples",
     "left chest logo digitizing",
     "puff embroidery samples",

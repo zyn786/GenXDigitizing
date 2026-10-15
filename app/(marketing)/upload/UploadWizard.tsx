@@ -2,7 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { readUploadPrefill } from "@/lib/portfolio-to-order";
 // Note: removed AnimatePresence — it was causing input focus loss on re-render
 import { toast } from "sonner";
 import {
@@ -195,6 +197,85 @@ export function UploadWizard() {
   const isB2B =
     company.trim() !== "" || (email && !/@(gmail|yahoo|hotmail|outlook)\./i.test(email));
   const selGarment = GARMENTS.find((g) => g.id === garment);
+
+  /* ── Pre-fill from the URL ("Make something like this") ──
+     Portfolio samples link here with settings attached. Every value is
+     checked against this component's own option lists, so a hand-edited or
+     hostile URL can only ever select an option that really exists — anything
+     unrecognised is dropped and the field keeps its default. */
+  const searchParams = useSearchParams();
+  const prefillApplied = useRef(false);
+  const [prefilled, setPrefilled] = useState(false);
+
+  useEffect(() => {
+    if (prefillApplied.current) return;
+    prefillApplied.current = true;
+
+    const p = readUploadPrefill(searchParams.toString());
+    if (Object.keys(p).length === 0) return;
+
+    let touched = false;
+    const isNum = (v?: string) => !!v && /^\d{1,3}(\.\d{1,2})?$/.test(v.trim());
+
+    // A placement on its own is enough to infer the garment, so a partial
+    // link still lands somewhere sensible.
+    let nextGarment = GARMENTS.some((g) => g.id === p.garment) ? p.garment! : "";
+    let nextPlacement = "";
+    if (p.placement) {
+      const owner = GARMENTS.find((g) =>
+        (g.placements as readonly string[]).includes(p.placement!)
+      );
+      if (owner) {
+        // Keep an explicitly named garment only if it genuinely offers this
+        // placement; otherwise the placement wins and the garment follows.
+        const explicit = GARMENTS.find((g) => g.id === nextGarment);
+        const explicitFits =
+          !!explicit && (explicit.placements as readonly string[]).includes(p.placement);
+        if (!explicitFits) nextGarment = owner.id;
+        nextPlacement = p.placement;
+      }
+    }
+    if (nextGarment) {
+      setGarment(nextGarment);
+      touched = true;
+    }
+    if (nextPlacement) {
+      setPlacement(nextPlacement);
+      touched = true;
+    }
+    if (FABRICS.some((f) => f.id === p.fabric)) {
+      setFabric(p.fabric!);
+      touched = true;
+    }
+    if ((FORMATS as readonly string[]).includes(p.format ?? "")) {
+      setFormat(p.format!);
+      touched = true;
+    }
+    if (SPEEDS.some((s) => s.id === p.speed)) {
+      setSpeed(p.speed!);
+      touched = true;
+    }
+    if (isNum(p.width)) {
+      setWidth(p.width!.trim());
+      touched = true;
+    }
+    if (isNum(p.height)) {
+      setHeight(p.height!.trim());
+      touched = true;
+    }
+    if (isNum(p.colors)) {
+      setColors(p.colors!.trim());
+      touched = true;
+    }
+    if (p.notes?.trim()) {
+      setNotes(p.notes.trim());
+      touched = true;
+    }
+
+    if (touched) setPrefilled(true);
+    // Runs once — the ref guard also absorbs StrictMode's double-invoke.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Hide footer & nudge BackToTop
   useEffect(() => {
@@ -1363,6 +1444,40 @@ export function UploadWizard() {
               No credit card — just upload and we'll prove our quality
             </p>
           </div>
+
+          {/* ═══ PRE-FILLED FROM A PORTFOLIO SAMPLE ══════════ */}
+          {prefilled && (
+            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-[#2563EB]/20 bg-[#2563EB]/[0.06] px-3.5 py-3">
+              <Sparkles size={15} className="mt-0.5 flex-shrink-0 text-[#2563EB]" />
+              <div className="min-w-0">
+                <p className="text-[12px] font-semibold text-[var(--txt)] sm:text-[13px]">
+                  We've pre-filled the settings from the sample you picked
+                </p>
+                <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--txt2)] sm:text-[12px]">
+                  Check them on steps 2–4 and change anything that isn't right — you can also{" "}
+                  <button
+                    type="button"
+                    className="underline underline-offset-2"
+                    onClick={() => {
+                      setGarment("");
+                      setPlacement("");
+                      setFabric("");
+                      setFormat("DST");
+                      setSpeed("standard");
+                      setWidth("");
+                      setHeight("");
+                      setColors("");
+                      setNotes("");
+                      setPrefilled(false);
+                    }}
+                  >
+                    clear them
+                  </button>{" "}
+                  and start fresh.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* ═══ STEP INDICATOR ════════════════ */}
           {StepIndicator()}

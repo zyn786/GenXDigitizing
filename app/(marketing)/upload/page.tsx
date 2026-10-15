@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { BreadcrumbSchema } from "@/components/shared/StructuredData";
 import { UploadWizard } from "./UploadWizard";
@@ -18,7 +19,12 @@ export default function UploadPage() {
           { name: "Upload Design", url: "/upload" },
         ]}
       />
-      <UploadWizard />
+      {/* The wizard reads ?garment=…&placement=… (set by "Make something like
+          this" on a portfolio sample), so it calls useSearchParams and needs a
+          Suspense boundary or the route opts out of static rendering. */}
+      <Suspense fallback={<div className="py-16" />}>
+        <UploadWizard />
+      </Suspense>
     </>
   );
 }

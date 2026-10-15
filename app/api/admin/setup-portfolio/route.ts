@@ -61,6 +61,13 @@ export async function POST() {
           },
           { name: "Vector Art", slug: "vector", emoji: "✏️", color: "#E76F2E", sort_order: 2 },
           { name: "Patch Design", slug: "patches", emoji: "🏷️", color: "#10B981", sort_order: 3 },
+          {
+            name: "Sew-out Samples",
+            slug: "sewouts",
+            emoji: "🪡",
+            color: "#7C3AED",
+            sort_order: 4,
+          },
         ]);
         if (seedErr) {
           return NextResponse.json(
@@ -68,7 +75,7 @@ export async function POST() {
             { status: 500 }
           );
         }
-        results.push("Seeded 3 categories");
+        results.push("Seeded 4 categories");
       }
 
       return NextResponse.json({

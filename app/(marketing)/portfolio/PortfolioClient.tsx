@@ -14,20 +14,25 @@ import {
   Globe,
   Shield,
   Zap,
-  Eye,
   Download,
   FileCheck,
   SlidersHorizontal,
   ImageOff,
+  BadgeCheck,
   ArrowUpRight,
 } from "lucide-react";
 import { GradientOrb } from "@/components/shared/GradientOrb";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { Button } from "@/components/ui/Button";
 import { PortfolioModal } from "@/components/portfolio/PortfolioModal";
-import { fetchPortfolio, DEFAULT_CATEGORIES, SUB_CATEGORIES } from "@/components/portfolio/data";
+import {
+  fetchPortfolio,
+  DEFAULT_CATEGORIES,
+  SUB_CATEGORIES,
+  PORTFOLIO_SLUGS,
+} from "@/components/portfolio/data";
 import { SITE_CLAIMS } from "@/lib/site-config";
-import type { PortfolioItem, PortfolioCategory } from "@/components/portfolio/data";
+import type { PortfolioItem, PortfolioCategory, PortfolioImage } from "@/components/portfolio/data";
 import Image from "next/image";
 
 /* ─────────────────────────────────────────────────────────────
@@ -86,7 +91,7 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className="relative flex w-full cursor-pointer flex-col items-center gap-0.5 rounded-xl border px-2 py-2 text-[11px] font-semibold transition-all duration-200 sm:w-auto sm:flex-row sm:gap-1.5 sm:px-4 sm:py-2.5 sm:text-sm"
+      className="relative flex shrink-0 cursor-pointer flex-row items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-2 text-[12px] font-semibold transition-all duration-200 sm:gap-1.5 sm:px-4 sm:py-2.5 sm:text-sm"
       style={{
         background: isActive ? `linear-gradient(135deg, ${color}, ${color}DD)` : "var(--surface)",
         color: isActive ? "#fff" : "var(--txt2)",
@@ -94,11 +99,11 @@ function FilterChip({
         boxShadow: isActive ? `0 0 24px ${color}30` : "none",
       }}
     >
-      <span className="text-base leading-none sm:text-sm">{emoji}</span>
-      <span className="text-[10px] leading-tight sm:text-sm">{label}</span>
+      <span className="text-sm leading-none">{emoji}</span>
+      <span className="leading-tight">{label}</span>
       {count > 0 && (
         <span
-          className="absolute -right-1 -top-1 inline-flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold sm:static sm:h-[18px] sm:min-w-[18px] sm:text-[10px]"
+          className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold"
           style={{
             background: isActive ? `${color}30` : "var(--border)",
             color: isActive ? "#fff" : "var(--txt3)",
@@ -163,21 +168,6 @@ function GalleryCard({
                 transform: isHovered ? "scale(1.06)" : "scale(1)",
               }}
             />
-            {/* Hover: View indicator */}
-            <div
-              className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[8px] transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100"
-              style={{
-                background: `linear-gradient(180deg, transparent 40%, ${accent}30 100%)`,
-              }}
-            >
-              <span
-                className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white"
-                style={{ background: `${accent}90`, backdropFilter: "blur(8px)" }}
-              >
-                <Eye size={15} />
-                View
-              </span>
-            </div>
           </>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -188,6 +178,13 @@ function GalleryCard({
         {item.images.length > 1 && (
           <span className="absolute right-2.5 top-2.5 z-10 rounded-full bg-black/40 px-2 py-0.5 text-[10px] font-semibold text-white/90">
             +{item.images.length - 1}
+          </span>
+        )}
+
+        {item.images.some((i: any) => i.isSewout) && (
+          <span className="absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-full bg-[#16A34A]/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white backdrop-blur-sm">
+            <BadgeCheck size={10} />
+            Sew-out
           </span>
         )}
       </div>
@@ -358,15 +355,150 @@ function ClientResultCard({ item }: { item: PortfolioItem }) {
   );
 }
 
+/* ── Real Sewouts Section ────────────────────────────────── */
+function SewoutTile({
+  img,
+  item,
+  index,
+  onClick,
+}: {
+  img: PortfolioImage;
+  item: PortfolioItem;
+  index: number;
+  onClick: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const accent = item.accent || item.category?.color || "#16A34A";
+
+  return (
+    <motion.button
+      type="button"
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ delay: Math.min(index, 8) * 0.04, duration: 0.35 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={onClick}
+      aria-label={`View sew-out for ${item.title}`}
+      className="group relative block cursor-pointer overflow-hidden rounded-xl text-left"
+      style={{
+        border: `1px solid ${hovered ? accent + "55" : "var(--border2)"}`,
+        boxShadow: hovered ? `0 14px 40px ${accent}20` : "0 2px 8px rgba(0,0,0,0.05)",
+        transition: "border-color 250ms, box-shadow 250ms",
+      }}
+    >
+      <div className="relative aspect-square overflow-hidden sm:aspect-[4/5]">
+        <Image
+          src={img.thumbnailUrl || img.url}
+          alt={img.alt || `${item.title} sew-out sample`}
+          fill
+          loading="lazy"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-cover transition-transform duration-500"
+          style={{ transform: hovered ? "scale(1.07)" : "scale(1)" }}
+        />
+        {/* Sew-out proof badge */}
+        <span className="absolute left-2 top-2 z-10 inline-flex items-center gap-1 rounded-full bg-[#16A34A]/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white backdrop-blur-sm sm:text-[10px]">
+          <BadgeCheck size={10} />
+          Sew-out
+        </span>
+        {/* Hover veil */}
+        <div
+          className="absolute inset-0 flex items-end p-2.5 transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100"
+          style={{ background: "linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.72) 100%)" }}
+        >
+          <div className="w-full">
+            <p className="line-clamp-1 text-[11px] font-semibold text-white sm:text-xs">
+              {item.title}
+            </p>
+            <p className="mt-0.5 flex items-center gap-1 text-[9px] text-white/70 sm:text-[10px]">
+              {item.category?.name}
+              {item.stitches ? ` · ${(item.stitches / 1000).toFixed(1)}k stitches` : ""}
+              <ArrowUpRight size={10} />
+            </p>
+          </div>
+        </div>
+      </div>
+    </motion.button>
+  );
+}
+
+function SewoutSection({
+  entries,
+  onSelect,
+}: {
+  entries: { img: PortfolioImage; item: PortfolioItem }[];
+  onSelect: (item: PortfolioItem) => void;
+}) {
+  if (entries.length === 0) return null;
+
+  return (
+    <section className="relative overflow-hidden py-10 sm:py-14">
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 md:px-12">
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--elevated)] p-5 sm:rounded-3xl sm:p-8 md:p-10">
+          <GradientOrb color="#16A34A" size={280} className="-left-16 -top-24 opacity-10" />
+          <GradientOrb color="#2563EB" size={200} className="opacity-8 -bottom-20 right-[5%]" />
+
+          <div className="relative z-10">
+            {/* Header */}
+            <div className="mb-6 flex flex-col items-center text-center sm:mb-8">
+              <SectionBadge color="#16A34A">
+                <BadgeCheck size={13} />
+                Real Sewouts
+              </SectionBadge>
+              <h2 className="mb-2 mt-4 font-syne text-[clamp(24px,4vw,38px)] font-bold leading-tight">
+                Stitched, Not Simulated
+              </h2>
+              <p className="max-w-2xl text-sm leading-relaxed text-[var(--txt2)] sm:text-base">
+                These are actual sew-out photos from production runs — the exact files we delivered,
+                stitched on real fabric. No mockups, no renders.
+              </p>
+            </div>
+
+            {/* Grid */}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
+              {entries.map(({ img, item }, idx) => (
+                <SewoutTile
+                  key={img.id || `${item.id}-${img.url}`}
+                  img={img}
+                  item={item}
+                  index={idx}
+                  onClick={() => onSelect(item)}
+                />
+              ))}
+            </div>
+
+            {/* Proof strip */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-[var(--txt3)] sm:mt-8 sm:text-xs">
+              <span className="inline-flex items-center gap-1.5">
+                <BadgeCheck size={13} className="text-[#16A34A]" />
+                {entries.length} sew-out{entries.length !== 1 ? "s" : ""} photographed
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Check size={13} className="text-[#16A34A]" />
+                Production-tested files
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Check size={13} className="text-[#16A34A]" />
+                Stitch quality verified before delivery
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ═════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ═════════════════════════════════════════════════════════════ */
 export function PortfolioClient() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category");
-  const validSlugs = ["digitizing", "vector", "patches"];
   const [activeCat, setActiveCat] = useState(
-    validSlugs.includes(categoryParam || "") ? categoryParam! : "all"
+    (PORTFOLIO_SLUGS as readonly string[]).includes(categoryParam || "") ? categoryParam! : "all"
   );
   const [activeSub, setActiveSub] = useState<string | null>(null);
   const [items, setItems] = useState<PortfolioItem[]>([]);
@@ -379,7 +511,9 @@ export function PortfolioClient() {
     fetchPortfolio()
       .then((data) => {
         setItems(data.items);
-        const dbValidCats = data.categories.filter((c: any) => validSlugs.includes(c.slug));
+        const dbValidCats = data.categories.filter((c: any) =>
+          (PORTFOLIO_SLUGS as readonly string[]).includes(c.slug)
+        );
         if (dbValidCats.length) setCategories(dbValidCats);
 
         // Auto-open item from ?item= query param
@@ -391,7 +525,7 @@ export function PortfolioClient() {
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [searchParams, validSlugs]);
+  }, [searchParams]);
 
   const mainCategories = [
     { slug: "all", name: "All Work", emoji: "✦", color: "#2563EB" },
@@ -400,11 +534,29 @@ export function PortfolioClient() {
 
   const subs = activeCat !== "all" ? SUB_CATEGORIES[activeCat] || [] : [];
 
+  /**
+   * Only the sub-filters that would actually return something. The full list
+   * is a fixed vocabulary per category, so a category with nothing tagged yet
+   * rendered seven chips reading "0" — noise that looks broken. When none of
+   * them match, the row is dropped entirely rather than shown with just "All".
+   */
+  const subsWithItems = subs
+    .map((sub) => ({
+      sub,
+      count: items.filter((i) => i.category?.slug === activeCat && i.tags?.includes(sub)).length,
+    }))
+    .filter((entry) => entry.count > 0);
+
   const filtered = items.filter((i) => {
     if (activeCat !== "all" && i.category?.slug !== activeCat) return false;
     if (activeSub && !i.tags?.includes(activeSub)) return false;
     return true;
   });
+
+  // Every sew-out photo across the currently filtered projects
+  const sewoutEntries = filtered.flatMap((item) =>
+    (item.images || []).filter((img) => img.isSewout).map((img) => ({ img, item }))
+  );
 
   return (
     <div className="overflow-x-hidden bg-[var(--bg)] text-[var(--txt)]">
@@ -468,33 +620,47 @@ export function PortfolioClient() {
           ════════════════════════════════════════════════════════ */}
       <section className="pb-6 sm:pb-8">
         <div className="mx-auto max-w-[1400px] px-4 sm:px-6 md:px-12">
-          {/* Main categories */}
-          <div className="mb-3 grid grid-cols-4 justify-center gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
-            {mainCategories.map((cat) => {
-              const count =
-                cat.slug === "all"
-                  ? items.length
-                  : items.filter((i) => i.category?.slug === cat.slug).length;
-              return (
-                <FilterChip
-                  key={cat.slug}
-                  label={cat.name}
-                  emoji={cat.emoji}
-                  count={count}
-                  isActive={activeCat === cat.slug}
-                  color={cat.color}
-                  onClick={() => {
-                    setActiveCat(cat.slug);
-                    setActiveSub(null);
-                  }}
-                />
-              );
-            })}
+          {/* Main categories.
+              On phones this is a horizontal scroll row rather than a grid: with
+              five categories a 4-column grid stranded the fifth alone on its
+              own row, and a longer name like "Sew-out Samples" wrapped inside a
+              quarter-width cell. A scrolling row fits any number of categories
+              and matches the sub-filter row directly beneath it. It bleeds to
+              the screen edges so the scroll is discoverable. */}
+          <div className="relative mb-3">
+            <div
+              className="pointer-events-none absolute bottom-1 right-0 top-0 z-10 w-8 sm:hidden"
+              style={{
+                background: "linear-gradient(to left, var(--bg) 30%, transparent 100%)",
+              }}
+            />
+            <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:justify-center sm:px-0 sm:pb-0">
+              {mainCategories.map((cat) => {
+                const count =
+                  cat.slug === "all"
+                    ? items.length
+                    : items.filter((i) => i.category?.slug === cat.slug).length;
+                return (
+                  <FilterChip
+                    key={cat.slug}
+                    label={cat.name}
+                    emoji={cat.emoji}
+                    count={count}
+                    isActive={activeCat === cat.slug}
+                    color={cat.color}
+                    onClick={() => {
+                      setActiveCat(cat.slug);
+                      setActiveSub(null);
+                    }}
+                  />
+                );
+              })}
+            </div>
           </div>
 
-          {/* Sub-category chips — scrollable on mobile, hide zero-count */}
+          {/* Sub-category chips — scrollable on mobile, zero-count hidden */}
           <AnimatePresence>
-            {subs.length > 0 && (
+            {subsWithItems.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
@@ -525,11 +691,8 @@ export function PortfolioClient() {
                     >
                       All
                     </button>
-                    {subs.map((sub) => {
+                    {subsWithItems.map(({ sub, count: subCount }) => {
                       const isSel = activeSub === sub;
-                      const subCount = items.filter(
-                        (i) => i.category?.slug === activeCat && i.tags?.includes(sub)
-                      ).length;
                       return (
                         <button
                           key={sub}
@@ -626,6 +789,13 @@ export function PortfolioClient() {
           )}
         </div>
       </section>
+
+      {/* ════════════════════════════════════════════════════════
+          REAL SEWOUTS — Stitched proof band
+          ════════════════════════════════════════════════════════ */}
+      {!loading && !error && activeCat !== "sewouts" && (
+        <SewoutSection entries={sewoutEntries} onSelect={setSelectedItem} />
+      )}
 
       {/* ════════════════════════════════════════════════════════
           MID-PAGE CTA — Quick conversion prompt

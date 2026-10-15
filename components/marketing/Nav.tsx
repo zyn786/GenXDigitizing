@@ -68,6 +68,7 @@ const PORTFOLIO_SUB = [
   { label: "🧵 Digitizing", href: "/portfolio?category=digitizing" },
   { label: "✏️ Vector Art", href: "/portfolio?category=vector" },
   { label: "🏷️ Patches", href: "/portfolio?category=patches" },
+  { label: "🪡 Sew-outs", href: "/portfolio?category=sewouts" },
 ];
 
 const PORTAL_HOME: Record<string, string> = {

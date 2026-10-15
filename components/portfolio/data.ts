@@ -8,6 +8,9 @@ export interface PortfolioImage {
   height?: number;
   sortOrder: number;
   isBefore: boolean;
+  /** Real stitched sew-out sample (production proof) */
+  isSewout?: boolean;
+  isThumbnail?: boolean;
 }
 
 export interface PortfolioCategory {
@@ -83,7 +86,18 @@ export const DEFAULT_CATEGORIES: PortfolioCategory[] = [
     color: "#16A34A",
     sortOrder: 3,
   },
+  {
+    id: "sewouts",
+    name: "Sew-out Samples",
+    slug: "sewouts",
+    emoji: "🪡",
+    color: "#7C3AED",
+    sortOrder: 4,
+  },
 ];
+
+/** Category slugs the public portfolio surfaces — order drives the filter chips */
+export const PORTFOLIO_SLUGS = ["digitizing", "vector", "patches", "sewouts"] as const;
 
 // Sub-categories (tags for admin to assign per project)
 export const SUB_CATEGORIES: Record<string, string[]> = {
@@ -99,6 +113,7 @@ export const SUB_CATEGORIES: Record<string, string[]> = {
   ],
   vector: ["Logo", "Mascot", "Illustration", "Typography", "Print-Ready"],
   patches: ["Merit Badge", "Tactical", "PVC-Style", "Name Patch", "Club Patch", "Event Patch"],
+  sewouts: ["Cap", "Left Chest", "Jacket Back", "Puff 3D", "Applique", "Towel", "Full Back"],
 };
 
 // Default placeholder colors by category
@@ -106,6 +121,7 @@ export const CATEGORY_ACCENTS: Record<string, string> = {
   digitizing: "#2563EB",
   vector: "#F97316",
   patches: "#16A34A",
+  sewouts: "#7C3AED",
   cap: "#2563EB",
   jacket: "#F97316",
 };

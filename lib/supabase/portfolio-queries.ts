@@ -17,6 +17,7 @@ function normalizeImages(images: any[]) {
       height: img.height,
       sortOrder: img.sort_order,
       isBefore: img.is_before,
+      isSewout: img.is_sewout ?? false,
       isThumbnail: img.sort_order === -1,
     }));
 }
@@ -148,6 +149,7 @@ export async function createPortfolio(data: any, images?: any[]) {
       height: img.height || null,
       sort_order: img.isThumbnail ? -1 : idx,
       is_before: img.isBefore || false,
+      is_sewout: img.isSewout || false,
     }));
 
     const { data: insertedImages } = await supabase
@@ -185,6 +187,7 @@ export async function updatePortfolio(id: string, data: any, images?: any[]) {
         height: img.height || null,
         sort_order: img.isThumbnail ? -1 : idx,
         is_before: img.isBefore || false,
+        is_sewout: img.isSewout || false,
       }));
 
       await supabase.from("portfolio_images").insert(imageRows);

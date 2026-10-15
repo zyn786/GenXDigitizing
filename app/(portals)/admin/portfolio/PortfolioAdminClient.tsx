@@ -90,6 +90,7 @@ interface PortfolioImage {
   height?: number;
   sortOrder: number;
   isBefore: boolean;
+  isSewout?: boolean;
   isThumbnail?: boolean;
 }
 
@@ -238,6 +239,7 @@ export function PortfolioAdminClient() {
           height: img.height,
           sortOrder: isThumbnail ? -1 : baseIdx + idx,
           isBefore: false,
+          isSewout: false,
           isThumbnail,
         }));
         setForm((f) => ({
@@ -314,7 +316,22 @@ export function PortfolioAdminClient() {
   const toggleImageBefore = (idx: number) => {
     setForm((f) => ({
       ...f,
-      images: f.images.map((img, i) => (i === idx ? { ...img, isBefore: !img.isBefore } : img)),
+      images: f.images.map((img, i) => {
+        if (i !== idx) return img;
+        const isBefore = !img.isBefore;
+        return { ...img, isBefore, isSewout: isBefore ? false : img.isSewout };
+      }),
+    }));
+  };
+  const toggleImageSewout = (idx: number) => {
+    setForm((f) => ({
+      ...f,
+      images: f.images.map((img, i) => {
+        if (i !== idx) return img;
+        const isSewout = !img.isSewout;
+        // A sew-out is the stitched proof — it can't also be the "before" mock
+        return { ...img, isSewout, isBefore: isSewout ? false : img.isBefore };
+      }),
     }));
   };
 
@@ -929,7 +946,8 @@ export function PortfolioAdminClient() {
                     Gallery Images ({form.images.filter((i) => !i.isThumbnail).length})
                     <span className="font-normal" style={{ color: txt3 }}>
                       {" "}
-                      — shown in lightbox, 4:3 ratio recommended
+                      — shown in lightbox, 4:3 ratio recommended. Hover a photo: <strong>B</strong>{" "}
+                      marks before, <strong>S</strong> marks a real sew-out.
                     </span>
                   </label>
                   <div
@@ -985,6 +1003,21 @@ export function PortfolioAdminClient() {
                                 B
                               </button>
                               <button
+                                onClick={() =>
+                                  toggleImageSewout(form.images.findIndex((i) => i === img))
+                                }
+                                title={img.isSewout ? "Unmark as sew-out" : "Mark as sew-out"}
+                                className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold"
+                                style={{
+                                  background: img.isSewout
+                                    ? "rgba(255,255,255,0.9)"
+                                    : "rgba(255,255,255,0.3)",
+                                  color: img.isSewout ? "#000" : "#fff",
+                                }}
+                              >
+                                S
+                              </button>
+                              <button
                                 onClick={() => {
                                   setForm((f) => ({
                                     ...f,
@@ -999,13 +1032,19 @@ export function PortfolioAdminClient() {
                             <span
                               className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-semibold"
                               style={{
-                                background: img.isBefore
-                                  ? "rgba(220,38,38,0.85)"
-                                  : "rgba(0,0,0,0.55)",
+                                background: img.isSewout
+                                  ? "rgba(22,163,74,0.9)"
+                                  : img.isBefore
+                                    ? "rgba(220,38,38,0.85)"
+                                    : "rgba(0,0,0,0.55)",
                                 color: "#fff",
                               }}
                             >
-                              {img.isBefore ? "Before" : `Image ${idx + 1}`}
+                              {img.isSewout
+                                ? "Sew-out"
+                                : img.isBefore
+                                  ? "Before"
+                                  : `Image ${idx + 1}`}
                             </span>
                           </div>
                         ))}
