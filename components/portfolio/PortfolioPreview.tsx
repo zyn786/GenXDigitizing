@@ -6,14 +6,17 @@ import { Loader2, ArrowRight } from "lucide-react";
 import { PortfolioCard } from "./PortfolioCard";
 import { PortfolioModal } from "./PortfolioModal";
 import { PortfolioFilters } from "./PortfolioFilters";
-import { fetchPortfolio, DEFAULT_CATEGORIES } from "./data";
+import { fetchPortfolio, DEFAULT_CATEGORIES, PORTFOLIO_SLUGS } from "./data";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 
 import { Button } from "@/components/ui/Button";
 import type { PortfolioItem, PortfolioCategory } from "./data";
 
+/** Cards fetched per category for the landing preview. */
+const PREVIEW_PER_CATEGORY = 8;
+
 export function PortfolioPreview() {
-  const [activeCategory, setActiveCategory] = useState("digitizing");
+  const [activeCategory, setActiveCategory] = useState("all");
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [categories, setCategories] = useState<PortfolioCategory[]>(DEFAULT_CATEGORIES);
@@ -24,18 +27,29 @@ export function PortfolioPreview() {
     async function load() {
       try {
         const data = await fetchPortfolio();
-        // 10 per category for landing preview
+
+        /**
+         * Driven entirely by the categories the database actually returns,
+         * rather than a hardcoded ["digitizing", "vector", "patches"]. Adding
+         * a category in the admin used to leave it invisible here until someone
+         * remembered to edit this file.
+         *
+         * A category with nothing in it is dropped: a chip that leads to an
+         * empty grid reads as a broken page, not as an invitation.
+         */
+        const offered = data.categories.filter((c: any) =>
+          (PORTFOLIO_SLUGS as readonly string[]).includes(c.slug)
+        );
         const pick = (slug: string) =>
-          data.items.filter((i: any) => i.category?.slug === slug).slice(0, 10);
-        const selected = [...pick("digitizing"), ...pick("vector"), ...pick("patches")];
-        setItems(selected);
-        const validSlugs = ["digitizing", "vector", "patches"];
-        const dbCategories = data.categories.filter((c: any) => validSlugs.includes(c.slug));
-        if (dbCategories.length > 0) {
-          const merged = dbCategories.map((c: any) => ({
-            ...c,
-            count: pick(c.slug).length,
-          }));
+          data.items.filter((i: any) => i.category?.slug === slug).slice(0, PREVIEW_PER_CATEGORY);
+
+        const populated = offered
+          .map((cat: any) => ({ cat, taken: pick(cat.slug) }))
+          .filter((entry: any) => entry.taken.length > 0);
+
+        setItems(populated.flatMap((entry: any) => entry.taken));
+
+        if (populated.length > 0) {
           setCategories([
             {
               id: "all",
@@ -44,9 +58,9 @@ export function PortfolioPreview() {
               emoji: "✦",
               color: "#2563EB",
               sortOrder: 0,
-              count: selected.length,
+              count: populated.reduce((n: number, e: any) => n + e.taken.length, 0),
             },
-            ...merged,
+            ...populated.map(({ cat, taken }: any) => ({ ...cat, count: taken.length })),
           ]);
         }
       } catch {
@@ -62,6 +76,9 @@ export function PortfolioPreview() {
     activeCategory === "all"
       ? items
       : items.filter((item) => item.category?.slug === activeCategory);
+
+  /** Bounds the tripled marquee render; see the note at the marquee. */
+  const marqueeItems = filtered.length > 12 ? filtered.slice(0, 12) : filtered;
 
   const counts: Record<string, number> = {};
   for (const cat of categories) {
@@ -95,14 +112,16 @@ export function PortfolioPreview() {
             for quality and precision.
           </p>
 
-          {/* Filters — 3 categories only, single row */}
-          {!loading && !error && (
+          {/* Filters — every category that has work, plus "All Work".
+              The "all" entry is passed through so the selected chip matches
+              what the grid is actually showing. */}
+          {!loading && !error && categories.length > 1 && (
             <div className="mb-6 sm:mb-8">
               <PortfolioFilters
                 active={activeCategory}
                 onChange={setActiveCategory}
                 counts={counts}
-                categories={categories.filter((c) => c.slug !== "all")}
+                categories={categories}
               />
             </div>
           )}
@@ -171,17 +190,20 @@ export function PortfolioPreview() {
                     className="opacity-6 pointer-events-none absolute right-1/4 top-1/2 h-[200px] w-[400px] -translate-y-1/2 rounded-full blur-[120px]"
                     style={{ background: `radial-gradient(circle, #7C3AED 0%, transparent 70%)` }}
                   />
-                  {/* Marquee */}
+                  {/* Marquee. The list is tripled for a seamless loop, so it
+                      is capped first — with "All Work" selected this is the sum
+                      of every category, and an uncapped 32 would mount ~96
+                      cards. A no-op at today's portfolio size. */}
                   <div className="animate-marquee-slow flex w-max gap-5 px-8">
                     {filtered.length > 0
-                      ? [...filtered, ...filtered, ...filtered].map((item, idx) => (
+                      ? [...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, idx) => (
                           <div
                             key={`${item.id}-${idx}`}
                             className="w-[280px] shrink-0 transition-transform duration-300 hover:scale-[1.02] lg:w-[320px]"
                           >
                             <PortfolioCard
                               item={item}
-                              index={idx % filtered.length}
+                              index={idx % marqueeItems.length}
                               onClick={() => setSelectedItem(item)}
                               onCategoryClick={setActiveCategory}
                             />
