@@ -94,7 +94,12 @@ const WHY_CHOOSE_US = [
   {
     icon: Zap,
     title: "3–24 Hour Turnaround",
-    desc: "Standard delivery in 24 hours. Rush in 6. Urgent in 3. All speed tiers included at no extra charge — unlike competitors who charge $10+ for rush.",
+    // The trailing clause used to read "unlike competitors who charge $10+ for
+    // rush" — an unsubstantiated comparative price claim about unnamed
+    // competitors, with no source anywhere in the repo. The first half stands on
+    // its own: service_tiers carries no rush or urgent rows, so speed is not
+    // surcharged.
+    desc: "Standard delivery in 24 hours. Rush in 6. Urgent in 3. All speed tiers included at no extra charge.",
     stat: "3–24h",
     color: "#F97316",
   },
@@ -108,7 +113,11 @@ const WHY_CHOOSE_US = [
   {
     icon: Shield,
     title: "Pay When Satisfied",
-    desc: "Review your proof first. Approve the quality. Then pay. If we can't get it right after reasonable revisions, full refund — no questions asked.",
+    // Was "full refund — no questions asked", which is not what the refund
+    // policy delivers: it grades quality refunds at 20-40% (minor) and 40-60%
+    // (moderate), reserving a full refund for output that is unusable. The
+    // promise now matches the published policy.
+    desc: "Review the file, request revisions, and only sign off when it runs right. If a delivered file can't be used at all, the refund policy covers it.",
     stat: "Risk-free",
     color: "#7C3AED",
   },
@@ -122,7 +131,11 @@ const WHY_CHOOSE_US = [
   {
     icon: Heart,
     title: "Machine-Tested Quality",
-    desc: "Every file is reviewed by an ex-production-floor QC specialist before delivery. Stitch angles checked. Density verified. Pull compensation dialed in.",
+    // Dropped "reviewed by an ex-production-floor QC specialist" — an
+    // unverifiable staffing credential of the same kind AboutContent removed
+    // from the About page. The check itself is real; who performs it is not
+    // something the repo can support.
+    desc: "Every file is checked before delivery. Stitch angles verified. Density checked. Pull compensation dialed in.",
     stat: "100% checked",
     color: "#DC2626",
   },

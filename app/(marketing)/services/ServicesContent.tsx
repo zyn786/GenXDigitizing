@@ -75,8 +75,11 @@ const SERVICES = [
       "Vibrant thread color matching",
       "Iron-on, sew-on & Velcro backing",
       "High-density fine detail work",
-      "Bulk discounts from 20%",
-      "Bulk order discounts available",
+      // Two bulk-discount bullets removed: the live coupons table has one
+      // first-order code and no bulk coupon, so there was no discount behind
+      // either line. Replaced with capabilities that are actually offered.
+      "Single samples to full bulk runs",
+      "Merrow & satin stitch borders",
       "Digital preview before production",
       "Free revisions & fast turnaround",
     ],

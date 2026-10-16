@@ -108,10 +108,13 @@ const SERVICE_META = {
   sewout: {
     emoji: "🏷️",
     title: "Patch Design",
-    desc: "Structured patch planning for embroidered, woven, PVC, leather, and specialty patch production. Bulk discounts from 20%.",
-    // "500+ patches" was invented and "Bulk 50% Off" overstated the coupons
-    // table, which carries BULK20 (5+ designs) and BULK30 (10+ designs).
-    tags: ["Embroidered", "Chenille", "PVC / Woven", "Leather", "Bulk Discounts"],
+    desc: "Structured patch planning for embroidered, woven, PVC, leather, and specialty patch production.",
+    // Earlier revisions invented "500+ patches" and "Bulk 50% Off", then
+    // softened to "Bulk discounts from 20%" on the belief that migration 013
+    // had seeded BULK20 (5+ designs) and BULK30 (10+ designs). It had not: the
+    // live coupons table holds exactly one row — GENX10, 10%, first order only,
+    // is_bulk_discount false. No bulk discount exists to advertise.
+    tags: ["Embroidered", "Chenille", "PVC / Woven", "Leather", "Merrow Borders"],
     color: "#16A34A",
     grad: "linear-gradient(135deg, #16A34A, #15803D)",
   },

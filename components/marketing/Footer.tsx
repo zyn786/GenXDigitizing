@@ -155,10 +155,11 @@ export function Footer() {
             {copyrightStart === currentYear ? currentYear : `${copyrightStart}–${currentYear}`}{" "}
             genxdigitizing. All rights reserved.
           </p>
-          <p className="flex items-center justify-center gap-1.5 text-[11px] text-[var(--txt3)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#16A34A] shadow-[0_0_6px_#16A34A]" />
-            All systems operational
-          </p>
+          {/* Was a hardcoded green dot reading "All systems operational" on
+              every page, wired to no monitor, probe or health endpoint — a
+              status claim that could never be wrong and therefore said
+              nothing. Removed rather than faked; if a real status page is
+              wanted, link to one that reads actual health. */}
         </div>
       </div>
     </footer>

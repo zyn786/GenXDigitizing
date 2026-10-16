@@ -58,7 +58,11 @@ export function FreeSampleBanner({ variant = "default", className = "" }: FreeSa
             {/* Badge */}
             <span className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/15 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white">
               <Gift size={13} />
-              Limited Time Offer
+              {/* Was "Limited Time Offer". The free sample is a permanent,
+                  codified policy (lib/ai/policy.ts — "offered once per
+                  customer") with no end date anywhere in the repo, so the
+                  scarcity was invented. */}
+              No Credit Card Required
             </span>
 
             <h2 className="mb-3 font-syne text-2xl font-bold leading-[1.15] text-white sm:text-3xl md:text-4xl">

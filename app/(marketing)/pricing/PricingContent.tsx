@@ -454,9 +454,6 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
                 <span className="text-xs">♾️</span> Free unlimited revisions
               </span>
               <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--txt2)] sm:text-xs">
-                <span className="text-xs">⚡</span> Late delivery = free upgrade
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--txt2)] sm:text-xs">
                 <span className="text-xs">💳</span> Pay only when satisfied
               </span>
               <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--txt2)] sm:text-xs">

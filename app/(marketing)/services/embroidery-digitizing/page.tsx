@@ -42,7 +42,7 @@ const DATA: ServicePageData = {
     {
       icon: "🎯",
       title: "Machine-Tested Quality",
-      desc: "Every file reviewed by ex-production-floor QC specialist. Stitch angles checked. Density verified. Pull compensation dialed in.",
+      desc: "Every file is checked before delivery. Stitch angles verified. Density checked. Pull compensation dialed in.",
     },
     {
       icon: "📁",
@@ -52,7 +52,7 @@ const DATA: ServicePageData = {
     {
       icon: "💳",
       title: "Pay When Satisfied",
-      desc: "Review your proof first. Approve the quality. Then pay. Zero risk — if we can't get it right, full refund.",
+      desc: "Review the file, request revisions, and only sign off when it runs right. If a delivered file can't be used at all, the refund policy covers it.",
     },
   ],
   faqs: [

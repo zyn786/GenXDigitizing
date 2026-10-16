@@ -9,9 +9,15 @@ import {
 const DATA: ServicePageData = {
   title: "Custom Patch Design Service",
   shortName: "Patches",
-  subtitle: "Bulk Discounts | Free Shipping | From $5 Per Design",
+  // Subtitle and description used to promise "Bulk Discounts" and "Free
+  // Shipping". Neither exists: the live coupons table carries a single
+  // first-order code (GENX10, 10%, is_bulk_discount false) and no bulk coupon
+  // at all, and this service ships nothing — the terms scope it to "digitized
+  // patches with merrow borders" and delivery is by file. Claims replaced with
+  // what the service actually does.
+  subtitle: "Embroidered, Woven, PVC & More | From $5 Per Design",
   description:
-    "Professional custom patch digitizing for embroidered, PVC, woven, chenille, and leather patches. Merrow borders, iron-on backing, and bulk order discounts.",
+    "Professional custom patch digitizing for embroidered, PVC, woven, chenille, and leather patches. Merrow borders, iron-on backing, and production-ready files.",
   emoji: "🏷️",
   color: "#16A34A",
   keywords: [
@@ -23,7 +29,7 @@ const DATA: ServicePageData = {
   ],
   startingPrice: 5,
   formats: "DST, PES, EMB & more",
-  turnaround: "12–24h delivery",
+  turnaround: "3–24h delivery",
   benefits: [
     {
       icon: "🎨",
@@ -37,13 +43,13 @@ const DATA: ServicePageData = {
     },
     {
       icon: "💰",
-      title: "Bulk Discounts",
-      desc: "Volume pricing for teams, events, brands, and promotional campaigns — discounts from 20%.",
+      title: "Large Runs Welcome",
+      desc: "Single samples to full production runs. Volume work is quoted per project — send us the quantity and we'll price it against the design.",
     },
     {
       icon: "📦",
-      title: "Free Shipping",
-      desc: "Free shipping on patch orders to USA, Canada, and Australia. International shipping available at competitive rates.",
+      title: "Merrow Border Ready",
+      desc: "Files prepared for merrow-edge and satin-border patch production, with the border path, underlay and density set for the material you're using.",
     },
     {
       icon: "🖼️",
@@ -67,11 +73,14 @@ const DATA: ServicePageData = {
     },
     {
       q: "What's the minimum order for custom patches?",
-      a: "We handle orders of any size, from single samples to 10,000+ bulk runs. Bulk discounts start at 50 patches, with maximum savings at 500+.",
+      a: "We handle orders of any size, from single samples to full bulk runs. Volume pricing is quoted per project rather than published as a rate card, so tell us the quantity and design and we'll price it.",
     },
     {
-      q: "How long does patch production take?",
-      a: "Digitizing takes 12–24 hours. Physical patch production typically takes 5–10 business days depending on quantity and complexity. Rush options available.",
+      q: "How long does patch digitizing take?",
+      // Was "How long does patch production take?" answered with "physical
+      // patch production typically takes 5-10 business days" — we do not
+      // manufacture patches, so that described a process that does not exist.
+      a: "Standard delivery is 3–24 hours depending on the tier you choose, with rush and urgent options at no extra charge.",
     },
   ],
   portfolioSlug: "patches",
