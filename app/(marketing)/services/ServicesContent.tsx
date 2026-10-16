@@ -331,6 +331,12 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
           const isReversed = i % 2 === 1;
           const IconComp = svc.icon;
           const portfolioForService = portfoliosByCategory[svc.slug] || [];
+          // The first project in a category is not necessarily one that has a
+          // photo. Checking only [0] meant a single image-less project hid the
+          // artwork for the whole service and fell through to "Sample coming
+          // soon" — which was live on /services. Take the first item that
+          // actually has an image.
+          const featuredSample = portfolioForService.find((p) => p.images?.[0]?.url);
 
           return (
             <AnimatedSection key={svc.slug} className="!py-0">
@@ -420,9 +426,9 @@ export function ServicesContent({ tiers }: { tiers: ServiceTier[] }) {
                   {/* Artwork/Image side */}
                   <div className={`hidden sm:block ${isReversed ? "lg:order-1" : "lg:order-2"}`}>
                     <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--elevated)]">
-                      {portfolioForService[0]?.images?.[0] ? (
+                      {featuredSample ? (
                         <Image
-                          src={portfolioForService[0].images[0].url}
+                          src={featuredSample.images[0].url}
                           alt={svc.title}
                           fill
                           className="object-cover"

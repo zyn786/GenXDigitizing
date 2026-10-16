@@ -126,7 +126,7 @@ const PROCESS = [
   {
     step: "02",
     title: "Manual Digitizing",
-    desc: "Our digitzers hand-place every stitch path, adjust density for your fabric, and optimize for clean sew-outs.",
+    desc: "Our digitizers hand-place every stitch path, adjust density for your fabric, and optimize for clean sew-outs.",
     icon: Pencil,
   },
   {
@@ -153,7 +153,7 @@ const REASONS = [
   {
     icon: Pencil,
     title: "100% Manual Digitizing",
-    desc: "No auto-tracing software. Every stitch path is hand-placed by experienced digitzers who understand fabric behavior and machine mechanics.",
+    desc: "No auto-tracing software. Every stitch path is hand-placed by experienced digitizers who understand fabric behavior and machine mechanics.",
     stat: "Manual only",
   },
   {

@@ -174,13 +174,20 @@ textarea,
     }
   }
 
-  /* Reduced motion */
+  /* Reduced motion.
+     `animation-iteration-count: 1` is NOT optional. The marquees above are
+     `animation: marquee 40s linear infinite`; shortening only the duration
+     leaves the iteration count infinite, so the animation restarts roughly
+     100,000 times a second — maximum CPU churn for exactly the users who
+     asked for less motion. The count must be clamped at the same time. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 

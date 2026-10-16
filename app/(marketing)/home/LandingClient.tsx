@@ -31,6 +31,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { SITE_INFO, SITE_CLAIMS, SITE_CLAIM_LIST } from "@/lib/site-config";
+import { BIG_DESIGN_HOURS } from "@/lib/sla";
 import { Button } from "@/components/ui/Button";
 import { GradientOrb } from "@/components/shared/GradientOrb";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
@@ -86,7 +87,7 @@ const WHY_CHOOSE_US = [
   {
     icon: PenTool,
     title: "100% Manual Digitizing",
-    desc: "Every stitch path is hand-placed by experienced digitzers. No auto-trace shortcuts. Files optimized for your specific fabric and machine.",
+    desc: "Every stitch path is hand-placed by experienced digitizers. No auto-trace shortcuts. Files optimized for your specific fabric and machine.",
     stat: "Manual only",
     color: "#2563EB",
   },
@@ -694,7 +695,15 @@ function HeroSection({ stats }: { stats?: LiveStats }) {
             { value: SITE_CLAIMS.turnaround.value, sub: "Turnaround", icon: Clock },
             { value: SITE_CLAIMS.revisions.value, sub: "Unlimited revisions", icon: RefreshCw },
             { value: SITE_CLAIMS.formats.value, sub: "Machine formats", icon: Globe },
-            { value: "3–24h", sub: "Delivery options", icon: FileCheck },
+            // Was a second hardcoded "3–24h" — the same figure as the Turnaround
+            // card two slots earlier, so the strip stated one thing twice and
+            // bypassed the SITE_CLAIMS constants. Large designs are genuinely
+            // quoted at BIG_DESIGN_HOURS, which is a different, real number.
+            {
+              value: `${BIG_DESIGN_HOURS}h`,
+              sub: "Large designs",
+              icon: FileCheck,
+            },
           ].map((stat) => {
             const Icon = stat.icon;
             return (

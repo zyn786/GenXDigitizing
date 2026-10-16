@@ -1,5 +1,6 @@
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { SITE_CLAIMS } from "@/lib/site-config";
+import { TURNAROUND_HOURS } from "@/lib/sla";
 
 export interface LiveStats {
   totalOrders: number;
@@ -68,9 +69,22 @@ export function TrustStatsSection({ stats }: { stats?: LiveStats }) {
     live.push({ value: stats.totalOrders, label: "Orders Placed" });
   }
 
+  /**
+   * Turnaround comes from `TURNAROUND_HOURS`, never a literal. This row
+   * previously hardcoded "12h", which contradicted the 24 hours the system
+   * actually schedules (lib/sla.ts), the "3–24h" the rest of the site states,
+   * and the terms — and it was the copy shown on the homepage, because the
+   * live row is suppressed below MIN_LIVE_COUNT. It also slipped past
+   * lib/turnaround-claim.test.ts, whose regexes look for the two characters
+   * "12h" adjacent in source; as separate JSX props they never are.
+   */
   const policy = [
     { value: SITE_CLAIMS.price.value, label: "Standard Designs" },
-    { value: "12", suffix: "h", label: "Standard Turnaround" },
+    {
+      value: String(TURNAROUND_HOURS.standard),
+      suffix: "h",
+      label: "Standard Turnaround",
+    },
     { value: SITE_CLAIMS.revisions.value, label: "Unlimited Revisions" },
     { value: SITE_CLAIMS.formats.value, label: "Machine Formats" },
   ];

@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/server";
 import { FAQSchema, BreadcrumbSchema, VideoObjectSchema } from "@/components/shared/StructuredData";
+import { SITE_OG_IMAGE } from "@/lib/site-config";
 import { LandingClient } from "./LandingClient";
 
 async function getLiveStats() {
@@ -72,6 +73,11 @@ export const metadata: Metadata = {
     "3D puff digitizing",
   ],
   openGraph: {
+    // Declaring `openGraph` replaces the layout's object wholesale rather than
+    // merging, so `images` must be repeated here or the most-shared URL on the
+    // site ships a blank preview card. lib/site-config.ts documents this exact
+    // trap; the homepage was the one page still hitting it.
+    images: [SITE_OG_IMAGE],
     title: "genxdigitizing — Production-Ready Embroidery Files",
     description:
       "Professional embroidery digitizing from $7. Free revisions. 3–24h delivery. Every major machine format.",
