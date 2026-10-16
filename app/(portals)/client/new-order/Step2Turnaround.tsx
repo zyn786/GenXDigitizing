@@ -7,7 +7,7 @@ const txt = "var(--txt)",
 const GREEN = { bgSoft: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.25)", text: "#047857" };
 const PURPLE = { bg: "#8B5CF6", icon: "#7C3AED" };
 const TURNS = [
-  { id: "standard", label: "Standard", time: "12–24h", icon: "🕐", desc: "Default for all orders" },
+  { id: "standard", label: "Standard", time: "24h", icon: "🕐", desc: "Default for all orders" },
   { id: "rush", label: "Rush", time: "6h", icon: "⚡", desc: "Most designs eligible" },
   { id: "urgent", label: "Urgent", time: "3h", icon: "🔥", desc: "Standard & vector only" },
 ];

@@ -23,7 +23,7 @@ const DATA: ServicePageData = {
   ],
   startingPrice: 8,
   formats: "AI, SVG, EPS, PDF, CDR",
-  turnaround: "12–24h delivery",
+  turnaround: "3–24h delivery",
   benefits: [
     {
       icon: "✍️",
@@ -53,7 +53,7 @@ const DATA: ServicePageData = {
     {
       icon: "⚡",
       title: "Fast Turnaround",
-      desc: "Simple logos in 4–6 hours. Complex illustrations in 12–24 hours. Rush delivery available at no extra charge.",
+      desc: "Simple logos in 6 hours rush or 24 hours standard. Complex illustrations on the same tiers. Speed options at no extra charge.",
     },
   ],
   faqs: [

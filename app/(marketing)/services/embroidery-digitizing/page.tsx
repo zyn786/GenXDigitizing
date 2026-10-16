@@ -62,7 +62,7 @@ const DATA: ServicePageData = {
     },
     {
       q: "How long does digitizing take?",
-      a: "Standard turnaround is 12–24 hours. Rush delivery (6 hours) and urgent delivery (3 hours) are available at no extra cost.",
+      a: "Standard turnaround is 24 hours. Rush delivery (6 hours) and urgent delivery (3 hours) are available at no extra cost.",
     },
     {
       q: "What file formats do you deliver?",

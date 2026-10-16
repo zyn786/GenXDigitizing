@@ -53,7 +53,7 @@ const DATA: ServicePageData = {
     {
       icon: "⚡",
       title: "Fast Bulk Delivery",
-      desc: "Multiple files delivered in 12–24 hours. Rush available for pre-season and tournament deadlines.",
+      desc: "Multiple files delivered in 24 hours standard, or 6-hour rush for pre-season and tournament deadlines.",
     },
   ],
   faqs: [

@@ -360,8 +360,11 @@ export async function POST(req: NextRequest) {
     }
 
     // 10. Send order confirmation email to client
+    // "24h", not the retired "12–24h" range. slaHoursMap directly below
+    // schedules standard at 24, so the email was quoting a window the
+    // scheduler does not use.
     const turnaroundLabels: Record<string, string> = {
-      standard: "12–24h",
+      standard: "24h",
       rush: "6h",
       urgent: "3h",
     };
@@ -376,7 +379,7 @@ export async function POST(req: NextRequest) {
       orderNumber,
       serviceName: design_name.trim(),
       price: priceNumber,
-      turnaround: turnaroundLabels[turnaround || "standard"] || "12–24h",
+      turnaround: turnaroundLabels[turnaround || "standard"] || "24h",
       estimatedDelivery: estDelivery,
     }).catch((err) => console.error("[convert-to-order] Email failed:", err));
 

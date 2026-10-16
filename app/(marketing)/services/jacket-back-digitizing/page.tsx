@@ -23,7 +23,7 @@ const DATA: ServicePageData = {
   ],
   startingPrice: 18,
   formats: "DST, PES, EMB & more",
-  turnaround: "12–24h delivery",
+  turnaround: "3–24h delivery",
   benefits: [
     {
       icon: "📐",
@@ -43,7 +43,7 @@ const DATA: ServicePageData = {
     {
       icon: "⚡",
       title: "Fast Turnaround",
-      desc: "Standard 12–24 hour delivery for most jacket back designs. Rush options available at no extra charge.",
+      desc: "Standard 24 hour delivery for most jacket back designs. Rush options available at no extra charge.",
     },
   ],
   faqs: [

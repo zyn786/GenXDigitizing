@@ -25,7 +25,7 @@ const GREEN = {
 };
 const PURPLE = { bg: "#8B5CF6", bgSoft: "rgba(139,92,246,0.08)", icon: "#7C3AED", text: "#6D28D9" };
 const TURNS = [
-  { id: "standard", label: "Standard", time: "12–24h", icon: "🕐" },
+  { id: "standard", label: "Standard", time: "24h", icon: "🕐" },
   { id: "rush", label: "Rush", time: "6h", icon: "⚡" },
   { id: "urgent", label: "Urgent", time: "3h", icon: "🔥" },
 ];

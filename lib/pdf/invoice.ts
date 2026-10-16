@@ -47,7 +47,7 @@ const ORANGE = "#E76F2E";
 const WHITE = "#FFFFFF";
 
 const TURNAROUND_LABEL: Record<string, string> = {
-  standard: "Standard (12-24h)",
+  standard: "Standard (24h)",
   rush: "Rush (6h)",
   urgent: "Urgent (3h)",
 };

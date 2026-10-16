@@ -14,7 +14,7 @@ const txt = "var(--txt)",
 const GREEN = { icon: "#059669", text: "#047857", bgSoft: "rgba(16,185,129,0.08)" };
 const PURPLE = { icon: "#7C3AED", text: "#6D28D9", bgSoft: "rgba(139,92,246,0.08)" };
 const TURNS = [
-  { id: "standard", label: "Standard", time: "12–24h", icon: "🕐" },
+  { id: "standard", label: "Standard", time: "24h", icon: "🕐" },
   { id: "rush", label: "Rush", time: "6h", icon: "⚡" },
   { id: "urgent", label: "Urgent", time: "3h", icon: "🔥" },
 ];
@@ -678,7 +678,7 @@ export function QuickOrder({ tiers, clientId, userId, subscription, creditBalanc
         <div className="mt-1.5 space-y-0.5 text-center">
           {sel && (
             <p className="text-[10px]" style={{ color: txt3 }}>
-              ⏱ Delivery: <strong style={{ color: txt }}>{selTurn?.time || "12–24h"}</strong> · Pay
+              ⏱ Delivery: <strong style={{ color: txt }}>{selTurn?.time || "24h"}</strong> · Pay
               only when satisfied
             </p>
           )}

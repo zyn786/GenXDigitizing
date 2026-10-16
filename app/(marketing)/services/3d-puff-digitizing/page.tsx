@@ -23,7 +23,7 @@ const DATA: ServicePageData = {
   ],
   startingPrice: 7,
   formats: "DST, PES, EMB & more",
-  turnaround: "12–24h delivery",
+  turnaround: "3–24h delivery",
   benefits: [
     {
       icon: "📐",

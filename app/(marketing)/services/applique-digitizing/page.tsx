@@ -29,7 +29,7 @@ const DATA: ServicePageData = {
   keywords: ["appliqué", "tack-down", "cover stitch", "placement line", "fabric appliqué"],
   startingPrice: 8,
   formats: "DST, PES, EMB, JEF, XXX, VIP",
-  turnaround: "12–24h (rush available)",
+  turnaround: "3–24h delivery",
   portfolioSlug: "digitizing",
   portfolioTag: "Applique",
   benefits: [
@@ -79,7 +79,7 @@ const DATA: ServicePageData = {
     },
     {
       q: "What's the turnaround time?",
-      a: "Standard delivery in 12–24 hours. Rush (6h) and urgent (3h) options available at no extra charge.",
+      a: "Standard delivery in 24 hours. Rush (6h) and urgent (3h) options available at no extra charge.",
     },
     {
       q: "Do I need to specify fabric type?",

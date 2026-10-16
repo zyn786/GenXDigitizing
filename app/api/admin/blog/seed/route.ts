@@ -39,7 +39,7 @@ const SEED_POSTS = [
         },
         {
           heading: "How Much Does Embroidery Digitizing Cost in 2026?",
-          body: "Pricing varies based on design size, complexity, and stitch count. Here's the standard pricing structure:\n\n| Size | Price | Typical Use | Turnaround |\n|------|-------|-------------|------------|\n| Standard (4″–8″) | $7 | Left chest logos, cap logos | 12–24h |\n| Large (8″–12″) | $18 | Jacket backs, large designs | 12–24h |\n| Jumbo (12″+) | $25 | Full backs, complex designs | ~12h |\n\nAll prices include free unlimited revisions, free format conversion, and free rush delivery. Pay only when satisfied with the proof. No hidden fees. No minimum orders.",
+          body: "Pricing varies based on design size, complexity, and stitch count. Here's the standard pricing structure:\n\n| Size | Price | Typical Use | Turnaround |\n|------|-------|-------------|------------|\n| Standard (4″–8″) | $7 | Left chest logos, cap logos | 24h |\n| Large (8″–12″) | $18 | Jacket backs, large designs | 24h |\n| Jumbo (12″+) | $25 | Full backs, complex designs | ~12h |\n\nAll prices include free unlimited revisions, free format conversion, and free rush delivery. Pay only when satisfied with the proof. No hidden fees. No minimum orders.",
         },
         {
           heading: "Why Businesses Choose Professional Digitizing Services",
@@ -53,7 +53,7 @@ const SEED_POSTS = [
         },
         {
           q: "How long does professional digitizing take?",
-          a: "Standard turnaround is 12–24 hours. Rush delivery (6 hours) and urgent delivery (3 hours) are available at no extra cost for most designs. Very complex or oversized designs may take the full 24 hours.",
+          a: "Standard turnaround is 24 hours. Rush delivery (6 hours) and urgent delivery (3 hours) are available at no extra cost for most designs.",
         },
         {
           q: "What file formats should I request from a digitizer?",
@@ -278,7 +278,7 @@ const SEED_POSTS = [
         },
         {
           heading: "Option 1: Professional Vector Conversion Service (Recommended)",
-          body: "The fastest, most reliable path to clean vector artwork is professional conversion. Services like genxdigitizing employ experienced vector artists who manually redraw your artwork using professional software (Adobe Illustrator, CorelDRAW).\n\n**How professional conversion works:**\n1. You upload a JPG, PNG, PDF, or even a photo of a hand sketch\n2. A vector artist traces the artwork manually, creating clean paths and shapes\n3. Colors are separated, gradients are rebuilt, and text is matched to fonts\n4. You receive AI, SVG, EPS, and PDF files — ready for digitizing, printing, or any production use\n\n**Cost:** Professional vector conversion starts at $8 for basic logos (up to 2 colors) and $15–$30 for complex multi-color illustrations.\n\n**Turnaround:** 12–24 hours standard. Rush delivery available at no extra charge.\n\nProfessional conversion is the right choice when: quality matters, the design is complex, colors need accurate matching, or you don't have the time or software to do it yourself.",
+          body: "The fastest, most reliable path to clean vector artwork is professional conversion. Services like genxdigitizing employ experienced vector artists who manually redraw your artwork using professional software (Adobe Illustrator, CorelDRAW).\n\n**How professional conversion works:**\n1. You upload a JPG, PNG, PDF, or even a photo of a hand sketch\n2. A vector artist traces the artwork manually, creating clean paths and shapes\n3. Colors are separated, gradients are rebuilt, and text is matched to fonts\n4. You receive AI, SVG, EPS, and PDF files — ready for digitizing, printing, or any production use\n\n**Cost:** Professional vector conversion starts at $8 for basic logos (up to 2 colors) and $15–$30 for complex multi-color illustrations.\n\n**Turnaround:** 24 hours standard. Rush delivery available at no extra charge.\n\nProfessional conversion is the right choice when: quality matters, the design is complex, colors need accurate matching, or you don't have the time or software to do it yourself.",
         },
         {
           heading: "Option 2: DIY Vector Conversion with Software",
@@ -304,7 +304,7 @@ const SEED_POSTS = [
         },
         {
           q: "How long does professional vector conversion take?",
-          a: "Standard turnaround is 12–24 hours. Simple logos (1–2 colors) can be completed in 4–6 hours. Complex multi-color illustrations may take 24–48 hours depending on detail level.",
+          a: "Standard turnaround is 24 hours. Rush delivery is 6 hours and urgent is 3 hours.",
         },
         {
           q: "What's the difference between raster and vector in simple terms?",

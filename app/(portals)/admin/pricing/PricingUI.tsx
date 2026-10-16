@@ -71,7 +71,7 @@ const FREE_FEATURES = [
 ];
 
 const TURNAROUND = [
-  { icon: "🕐", label: "Standard", time: "12–24 hours", note: "Default for all orders", ci: 0 },
+  { icon: "🕐", label: "Standard", time: "24 hours", note: "Default for all orders", ci: 0 },
   { icon: "⚡", label: "Rush", time: "6 hours", note: "Most designs eligible", ci: 2 },
   { icon: "🔥", label: "Urgent", time: "3 hours", note: "Standard & vector only", ci: 4 },
 ];

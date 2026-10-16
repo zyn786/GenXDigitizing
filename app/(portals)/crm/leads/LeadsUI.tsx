@@ -1234,7 +1234,7 @@ function ConvertToOrderModal({ lead, onClose }: { lead: any; onClose: (order?: a
                     borderColor: "var(--border2)",
                   }}
                 >
-                  <option value="standard">🕐 Standard (12-24h)</option>
+                  <option value="standard">🕐 Standard (24h)</option>
                   <option value="rush">⚡ Rush (6h)</option>
                   <option value="urgent">🔥 Urgent (3h)</option>
                 </select>

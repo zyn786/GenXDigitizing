@@ -23,6 +23,18 @@ import { TURNAROUND_HOURS } from "./sla";
 const ROOTS = ["app", "components", "lib"];
 const SKIP = [/\.test\./, /node_modules/, /\.next/];
 
+/**
+ * Every shape the retired claim ships in.
+ *
+ * The range form is the one the original guard missed. It matched "12-hour"
+ * and "12hr" — but the wording that actually survived was "12–24h", with an
+ * en dash between the numbers, on four service pages and in the terms and
+ * conditions. Those drifted for as long as the guard existed and were only
+ * found by fetching production and reading it, which is the thing this file
+ * exists to avoid.
+ */
+const RETIRED_TURNAROUND = /\b12\s*[–—-]\s*24\s*(?:h|hour)|\b12[-\s]?hour\b|\b12hr\b/i;
+
 function sourceFiles(dir: string): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(dir)) {
@@ -51,7 +63,7 @@ describe("published turnaround claim", () => {
       for (const file of sourceFiles(root)) {
         const src = stripComments(readFileSync(file, "utf8"));
         // The retired wording, in the shapes it actually shipped in.
-        if (/\b12[-\s]?hour\b/i.test(src) || /\b12hr\b/i.test(src)) {
+        if (RETIRED_TURNAROUND.test(src)) {
           offenders.push(file);
         }
       }
@@ -71,18 +83,30 @@ describe("published turnaround claim", () => {
       "Jumbo / Full Back and Complex Vector: ~12 hours",
     ];
     for (const s of legitimate) {
-      expect(/\b12[-\s]?hour\b/i.test(s), s).toBe(false);
-      expect(/\b12hr\b/i.test(s), s).toBe(false);
+      expect(RETIRED_TURNAROUND.test(s), s).toBe(false);
+    }
+  });
+
+  it("catches every shape the retired claim shipped in", () => {
+    // Named so that removing one of these is a deliberate act rather than an
+    // accident of editing the regex.
+    const retired = [
+      "12-hour turnaround",
+      "12hr turnaround",
+      "12–24h delivery", // en dash — the form that survived the original guard
+      "12-24h delivery", // hyphen
+      "Standard 12–24h, Rush 6h", // as written in the terms
+      "delivered in 12–24 hours",
+    ];
+    for (const s of retired) {
+      expect(RETIRED_TURNAROUND.test(s), s).toBe(true);
     }
   });
 
   it("is honest about what it does not catch", () => {
-    // The guard matches "12-hour" and "12hr", which is what actually shipped.
-    // A bare "12 hours" is deliberately allowed through because the big-design
-    // copy uses it — so a plain "12 hours turnaround" would slip past. Naming
-    // the gap beats implying coverage the check does not have.
-    expect(/\b12[-\s]?hour\b/i.test("12-hour turnaround")).toBe(true);
-    expect(/\b12hr\b/i.test("12hr turnaround")).toBe(true);
-    expect(/\b12[-\s]?hour\b/i.test("12 hours turnaround")).toBe(false);
+    // A bare "12 hours" is still allowed through, because the big-design copy
+    // uses that phrasing legitimately — so a plain "12 hours turnaround" would
+    // slip past. Naming the gap beats implying coverage the check does not have.
+    expect(RETIRED_TURNAROUND.test("12 hours turnaround")).toBe(false);
   });
 });

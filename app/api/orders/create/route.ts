@@ -33,7 +33,7 @@ const MAX_QUANTITY = 50;
 const TURNAROUNDS = new Set(["standard", "rush", "urgent"]);
 
 const TURNAROUND_LABEL: Record<string, string> = {
-  standard: "Standard (12–24h)",
+  standard: "Standard (24h)",
   rush: "Rush (6h) ⚡ FREE",
   urgent: "Urgent (3h) 🔥 FREE",
 };
@@ -377,7 +377,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (clientUser?.email) {
-      const estimated = turn === "urgent" ? "3 hours" : turn === "rush" ? "6 hours" : "12–24 hours";
+      const estimated = turn === "urgent" ? "3 hours" : turn === "rush" ? "6 hours" : "24 hours";
       await emailOrderSubmitted({
         to: clientUser.email,
         clientName: clientUser.full_name ?? "there",

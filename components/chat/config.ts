@@ -35,7 +35,7 @@ export const QUICK_REPLIES: QuickReply[] = [
     id: "qr-5",
     label: "Turnaround Time",
     content:
-      "Standard turnaround is 12–24 hours. Rush (6h) and Urgent (3h) options are available at no extra charge.",
+      "Standard turnaround is 24 hours. Rush (6h) and Urgent (3h) options are available at no extra charge.",
     category: "general",
   },
   {

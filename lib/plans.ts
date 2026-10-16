@@ -26,7 +26,7 @@ export const PLAN_CONFIG: Record<string, PlanConfig> = {
       "10 Basic Left Chest Designs",
       "Free Minor Edits",
       "PES, DST, EMB & All Formats",
-      "12-24 Hour Delivery",
+      "24 Hour Delivery",
       "Email Support",
     ],
     savings: "20%",

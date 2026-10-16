@@ -69,7 +69,7 @@ export default function TermsPage() {
                 to begin work and agree to pay the quoted amount upon delivery.
               </p>
               <p>
-                Turnaround times (Standard 12–24h, Rush 6h, Urgent 3h) are estimates based on
+                Turnaround times (Standard 24h, Rush 6h, Urgent 3h) are estimates based on
                 current workload. While we consistently meet these targets, they are not guaranteed
                 in cases of force majeure, technical issues, or unusually complex designs.
               </p>
