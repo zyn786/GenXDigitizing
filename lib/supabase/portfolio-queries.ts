@@ -53,6 +53,9 @@ function normalizeItem(item: any) {
     visible: item.visible,
     sortOrder: item.sort_order,
     tags: item.tags || [],
+    // Migration 066. Defaulted rather than passed through, so this keeps
+    // working against a database that has not had it applied yet.
+    keywords: item.keywords || [],
     images: item.portfolio_images ? normalizeImages(item.portfolio_images) : [],
     createdAt: item.created_at,
     updatedAt: item.updated_at,
@@ -60,8 +63,24 @@ function normalizeItem(item: any) {
 }
 
 // ── Public: Get visible portfolios ──────────────────────────
-export async function getPublicPortfolio(categorySlug?: string, featuredOnly = false) {
-  const supabase = createClient();
+/**
+ * Visible projects, for the public site.
+ *
+ * The optional third argument exists so a caller that is not handling a user
+ * request — `generateMetadata`, a build-time fetch — can pass the service-role
+ * client instead of the cookie-bound one. `createClient()` calls `cookies()`,
+ * which forces a route to be dynamically rendered and throws outright during
+ * static generation, so metadata that needs projects cannot use the default.
+ *
+ * Defaulting to `createClient()` keeps the two existing callers exactly as they
+ * were.
+ */
+export async function getPublicPortfolio(
+  categorySlug?: string,
+  featuredOnly = false,
+  client?: ReturnType<typeof createClient>
+) {
+  const supabase = client ?? createClient();
 
   let query = supabase
     .from("portfolios")

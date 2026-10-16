@@ -49,7 +49,21 @@ export function extractMetaMessages(payload: any): InboundMessage[] {
         displayName: null,
         email: null,
         body: String(text),
-        providerMessageId: event?.message?.mid ?? null,
+        // A postback (button tap) carries no `message.mid`, and the dedupe in
+        // lib/channels/inbound.ts is skipped entirely when this is null while
+        // the unique index is `where external_id is not null`. So a retried
+        // postback delivery inserted a second row and bumped `unread_count`
+        // twice — the inbox showed the customer tapping the same button twice.
+        //
+        // A stable id is derivable for postbacks: Meta's timestamp plus the
+        // sender identifies the tap, and a genuine second tap arrives with a
+        // different timestamp. Synthesised rather than left null so the
+        // existing dedupe and unique index do their job.
+        providerMessageId:
+          event?.message?.mid ??
+          (event?.postback && event?.timestamp != null
+            ? `postback:${senderId}:${event.timestamp}:${event.postback.payload ?? event.postback.title ?? ""}`
+            : null),
         attachments: event?.message?.attachments ? { raw: event.message.attachments } : null,
         receivedAt: event?.timestamp
           ? new Date(Number(event.timestamp)).toISOString()

@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { handleInboundMessage } from "@/lib/channels/inbound";
+import { alertWebhookFailure, handleInboundMessage } from "@/lib/channels/inbound";
 import { extractMetaMessages } from "@/lib/channels/meta";
 import { readRawBody, verifyMetaSignature } from "@/lib/channels/meta-signature";
 
@@ -83,6 +83,14 @@ export async function POST(req: NextRequest) {
       const result = await handleInboundMessage(db, msg);
       if (!result.ok) {
         console.error("[meta] failed to record a message:", result.error);
+        // Same reasoning as the WhatsApp route: without this the message is
+        // lost with nothing but a console line, and the customer is never
+        // answered by anyone who knows they wrote.
+        await alertWebhookFailure(db, {
+          channel: msg.channel,
+          reason: result.error,
+          eventKey: `meta:${msg.providerMessageId ?? msg.externalId}`,
+        });
         return NextResponse.json({ error: "Could not record the message" }, { status: 500 });
       }
     }

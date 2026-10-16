@@ -25,10 +25,11 @@
 import type { Channel, InboundMessage } from "@/lib/channels";
 import { conversationKey } from "@/lib/channels";
 import { recordLeadEvent } from "@/lib/lead-events";
-import { notifyUsers } from "@/lib/notify-server";
 import { nextFollowUpAt } from "@/lib/follow-up";
+import { defaultSend, enqueueAndDeliver } from "@/lib/outbox";
 
-type AnyClient = { from: (table: string) => any };
+/** `rpc` is needed by the outbox, which this now hands alerts to. */
+type AnyClient = { from: (table: string) => any; rpc: (fn: string, args?: any) => any };
 
 export interface InboundResult {
   ok: boolean;
@@ -265,24 +266,66 @@ export async function handleInboundMessage(
     });
 
     // ── 8. Tell the people who work leads ────────────────────
+    // Through the outbox rather than straight at notifyUsers: an alert that
+    // says a customer is waiting is worth retrying, and this one now also
+    // reaches the owner's WhatsApp instead of only the dashboard.
+    //
+    // The event key is the provider's message id, so a webhook Meta retries
+    // notifies once — the same idempotency the message row already relies on.
+    // Delivered inline first (a five-minute delay defeats the purpose of a
+    // "someone is waiting" alert), with the row on disk if that attempt fails.
     const { data: staff } = await db
       .from("users")
       .select("id")
       .in("role", ["admin", "crm"])
       .eq("is_active", true);
 
-    if (staff?.length) {
-      await notifyUsers(
-        staff.map((u: any) => u.id),
+    const staffIds: string[] = (staff ?? []).map((u: any) => u.id);
+    const eventKey = `${msg.channel}:${msg.providerMessageId ?? `${msg.externalId}:${receivedAt}`}`;
+    const title = `New ${msg.channel} message`;
+    const preview = `${msg.displayName || msg.externalId}: ${String(msg.body).slice(0, 100)}`;
+
+    const outboxDeps = { send: (row: any) => defaultSend(db, row) };
+
+    for (const userId of staffIds) {
+      await enqueueAndDeliver(
+        db,
         {
-          type: "message",
-          title: `New ${msg.channel} message`,
-          body: `${msg.displayName || msg.externalId}: ${String(msg.body).slice(0, 100)}`,
-          // The unified inbox, not /crm/messages. That page is the legacy
-          // user-to-user chat and does not contain channel messages, so the
-          // notification used to link somewhere the message was not.
-          action_url: "/crm/inbox",
-        }
+          // Per-recipient, so one staff member's delivery cannot suppress
+          // another's — the unique key is (event_key, channel), and the
+          // recipient has to be part of it.
+          eventKey: `${eventKey}:in_app:${userId}`,
+          eventType: "new_conversation",
+          channel: "in_app",
+          recipient: userId,
+          payload: {
+            title,
+            body: preview,
+            actionUrl: "/crm/inbox",
+            notifType: "message",
+          },
+        },
+        outboxDeps
+      );
+    }
+
+    // The owner's phone, when one is configured. Free-form text, so WhatsApp
+    // only accepts it inside the 24-hour customer service window — outside it
+    // Meta returns 131047 and the outbox marks the row dead with that reason
+    // rather than retrying something that cannot succeed. A permanent fix is
+    // an approved message template; none exists yet.
+    const ownerNumber = process.env.WHATSAPP_ADMIN_NUMBER;
+    if (ownerNumber) {
+      await enqueueAndDeliver(
+        db,
+        {
+          eventKey: `${eventKey}:whatsapp`,
+          eventType: "new_conversation",
+          channel: "whatsapp",
+          recipient: ownerNumber,
+          payload: { text: `${title}\n${preview}` },
+        },
+        outboxDeps
       );
     }
 
@@ -293,6 +336,54 @@ export async function handleInboundMessage(
     const message = err instanceof Error ? err.message : String(err);
     console.error("[channels] inbound failed:", message);
     return { ok: false, outcome: "error", error: message };
+  }
+}
+
+/**
+ * Tell someone a customer message could not be stored.
+ *
+ * Without this the only trace is a console line and a 500. Meta retries for a
+ * while and then gives up, and the message is gone — from the inbox, from the
+ * lead timeline, and from anyone's awareness. A customer who wrote to the
+ * business and got no reply, with nothing anywhere saying so, is the exact
+ * failure this whole pipeline exists to prevent.
+ *
+ * Best-effort: this runs on a path that is already failing, so it must not be
+ * able to throw. `enqueueAndDeliver` never does, and its row survives even if
+ * the delivery attempt does not.
+ */
+export async function alertWebhookFailure(
+  db: AnyClient,
+  input: { channel: string; reason?: string | null; eventKey: string }
+): Promise<void> {
+  const { data: staff } = await db
+    .from("users")
+    .select("id")
+    .in("role", ["admin", "crm"])
+    .eq("is_active", true);
+
+  const deps = { send: (row: any) => defaultSend(db, row) };
+  const body = `A ${input.channel} message could not be saved. It will not appear in the inbox. ${
+    input.reason ? `Reason: ${input.reason}` : ""
+  }`.trim();
+
+  for (const user of staff ?? []) {
+    await enqueueAndDeliver(
+      db,
+      {
+        eventKey: `${input.eventKey}:failed:in_app:${(user as any).id}`,
+        eventType: "webhook_processing_failed",
+        channel: "in_app",
+        recipient: (user as any).id,
+        payload: {
+          title: `${input.channel} message not saved`,
+          body,
+          actionUrl: "/crm/inbox",
+          notifType: "system",
+        },
+      },
+      deps
+    );
   }
 }
 

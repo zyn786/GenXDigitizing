@@ -55,6 +55,10 @@
     {
       "path": "/api/cron/follow-ups",
       "schedule": "20 * * * *"
+    },
+    {
+      "path": "/api/cron/outbox",
+      "schedule": "*/5 * * * *"
     }
   ],
   "env": {

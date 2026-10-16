@@ -62,7 +62,12 @@ export const BUSINESS_POLICIES: PolicyEntry[] = [
     topic: "payment_timing",
     statement:
       "You pay only after you have seen and approved the preview. No payment is required to get a quote or a proof.",
-    publishedAt: "Home page and service pages; /refund-policy",
+    // `/refund-policy` used to be cited here and does not state when payment is
+    // due — it covers cancellation, quality tiers and non-refundable cases. The
+    // sales agent answers payment questions only from this file and escalates
+    // otherwise, so a bad citation made it quote a page that does not support
+    // the claim. These are the pages that actually say it.
+    publishedAt: "Home page FAQ; /pricing; /about; /terms-and-conditions sections 3 and 5",
   },
   {
     topic: "turnaround",

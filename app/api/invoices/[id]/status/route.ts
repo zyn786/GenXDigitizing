@@ -64,16 +64,21 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       const client = invoice.clients as any;
       const clientUser = client?.users;
 
-      // Update order status — only if not in a terminal/post-delivery state
-      if (
-        order?.status &&
-        !["submitted", "delivered", "cancelled", "refunded"].includes(order.status)
-      ) {
-        await supabase
-          .from("orders")
-          .update({ status: "submitted", updated_at: new Date().toISOString() })
-          .eq("id", invoice.order_id);
-      }
+      // Payment does NOT move the order.
+      //
+      // This used to reset the order to `submitted` whenever payment landed on
+      // anything that was not already submitted/delivered/cancelled/refunded —
+      // so paying an order sitting at `assigned`, `in_progress`, `review` or
+      // `approved` silently discarded its assignment, its in-progress
+      // timestamp and its QA sign-off, and put it back in the assignment
+      // queue. The transition table in app/api/orders/[id]/status/route.ts has
+      // no edge into `submitted` from any of those states, so this write also
+      // bypassed the state machine entirely.
+      //
+      // It is also unnecessary: what payment unlocks is the customer's
+      // download, and that is gated on `invoices.status = 'paid'` by the RLS
+      // policy in 006_payment_gating_rls.sql and by the portal UI. Nothing
+      // reads the order status to decide it.
 
       // Update client LTV
       if (invoice.client_id) {
@@ -105,20 +110,28 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       // Notify client with web push
       if (clientUser?.id) {
         const { notifyUser } = await import("@/lib/notify-helpers");
+        // What payment unlocks is the DOWNLOAD, not the start of work — the
+        // invoice is created when the order reaches QA review, by which point
+        // the digitizing is already finished. The old wording ("Work will begin
+        // shortly") told customers the opposite of what actually happens, and
+        // linked to a page with no files on it.
         notifyUser(clientUser.id, {
           type: "payment",
           title: "Payment confirmed",
-          body: `Your payment for ${order?.order_number || invoice.invoice_number || "Invoice #" + invoice.id.slice(0, 8)} has been received. Work will begin shortly.`,
-          action_url: "/client/invoices",
+          body: `Your payment for ${order?.order_number || invoice.invoice_number || "Invoice #" + invoice.id.slice(0, 8)} has been received. Your digitized files are ready to download.`,
+          action_url: "/client/my-orders",
         }).catch(console.error);
       }
 
       // Notify admins with web push
       const { notifyRole } = await import("@/lib/notify-helpers");
+      // "Ready for assignment" was wrong for the same reason: assignment is the
+      // `submitted → assigned` transition, reachable long before an invoice
+      // exists. What this actually means is that the client can now download.
       notifyRole("admin", {
         type: "payment",
         title: `Payment received — ${order?.order_number || invoice.invoice_number || "Invoice #" + invoice.id.slice(0, 8)}`,
-        body: `$${Number(invoice.amount).toFixed(0)} — order ready for assignment.`,
+        body: `$${Number(invoice.amount).toFixed(0)} — the client can now download the output files.`,
         action_url: `/admin/orders`,
       }).catch(console.error);
 

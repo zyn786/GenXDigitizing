@@ -41,9 +41,11 @@ export default function RefundPolicyPage() {
                 1. Full Refunds — Before Work Begins
               </h2>
               <p>
-                You may cancel your order and receive a <strong>100% refund</strong> at any time
-                before we begin digitizing your file. Once work has started, our digitizers have
-                invested time and labor into your project.
+                You may cancel your order at any time before we begin digitizing your file and
+                receive a <strong>100% refund of any amount paid toward it</strong>. In the standard
+                flow no payment is taken until after you have seen and approved your proof, so
+                cancelling this early usually costs nothing. Once work has started, our digitizers
+                have invested time and labor into your project.
               </p>
               <p>
                 To cancel before work begins: contact{" "}

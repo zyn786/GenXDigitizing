@@ -23,6 +23,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (body.featured !== undefined) updateData.featured = body.featured;
     if (body.visible !== undefined) updateData.visible = body.visible;
     if (body.tags !== undefined) updateData.tags = body.tags;
+    // Never read here either — see the note in ../route.ts.
+    if (body.keywords !== undefined) {
+      updateData.keywords = Array.isArray(body.keywords) ? body.keywords : [];
+    }
     if (body.sortOrder !== undefined) updateData.sort_order = body.sortOrder;
 
     const item = await updatePortfolio(id, updateData, body.images);

@@ -116,6 +116,19 @@ interface Portfolio {
   images: PortfolioImage[];
 }
 
+/**
+ * "a, b ,, c" → ["a","b","c"].
+ *
+ * One parser for the field, the chip preview and the save payload, so the three
+ * cannot disagree about what the typed text means.
+ */
+function parseKeywords(text: string): string[] {
+  return text
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
+}
+
 const DEFAULT_FORM = {
   title: "",
   slug: "",
@@ -168,6 +181,8 @@ export function PortfolioAdminClient() {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(DEFAULT_FORM);
+  /** Raw keyword text while typing; parsed into `form.keywords` on save. */
+  const [keywordsText, setKeywordsText] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -282,6 +297,7 @@ export function PortfolioAdminClient() {
   const openNew = () => {
     setEditingId(null);
     setForm(DEFAULT_FORM);
+    setKeywordsText(""); // a stale value here would attach the last project's keywords to a new one
     setShowModal(true);
   };
   const openEdit = (p: Portfolio) => {
@@ -304,6 +320,7 @@ export function PortfolioAdminClient() {
       keywords: p.keywords || [],
       images: p.images.map((img) => ({ ...img })),
     });
+    setKeywordsText((p.keywords || []).join(", "));
     setShowModal(true);
   };
 
@@ -343,10 +360,16 @@ export function PortfolioAdminClient() {
     setSaving(true);
     const method = editingId ? "PATCH" : "POST";
     const url = editingId ? `/api/admin/portfolio/${editingId}` : "/api/admin/portfolio";
+    // Parse the keyword text once, here. Sent explicitly rather than relying on
+    // `form.keywords`, which is only kept in step while the modal is open.
+    const payload = {
+      ...form,
+      keywords: parseKeywords(keywordsText),
+    };
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     });
     if (res.ok) {
       toast.success(editingId ? "Updated" : "Created");
@@ -812,18 +835,17 @@ export function PortfolioAdminClient() {
                     — comma-separated, for SEO
                   </span>
                 </label>
+                {/* Backed by raw text, not by the parsed array.
+                    It used to render `form.keywords.join(", ")` and rebuild the
+                    array on every keystroke with `.filter(Boolean)`. A comma
+                    produces a trailing empty entry, the filter deleted it, and
+                    the input re-rendered without the comma you had just typed —
+                    so the second keyword could never be started. Parsing now
+                    happens once, on save. */}
                 <input
                   type="text"
-                  value={form.keywords.join(", ")}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      keywords: e.target.value
-                        .split(",")
-                        .map((k) => k.trim())
-                        .filter(Boolean),
-                    }))
-                  }
+                  value={keywordsText}
+                  onChange={(e) => setKeywordsText(e.target.value)}
                   placeholder="embroidery digitizing, custom patches, vector art..."
                   className="input text-xs"
                   style={{
@@ -836,9 +858,9 @@ export function PortfolioAdminClient() {
                     outline: "none",
                   }}
                 />
-                {form.keywords.length > 0 && (
+                {parseKeywords(keywordsText).length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {form.keywords.map((kw) => (
+                    {parseKeywords(keywordsText).map((kw) => (
                       <span
                         key={kw}
                         className="rounded-full px-2 py-0.5 text-[10px] font-medium"
@@ -946,7 +968,9 @@ export function PortfolioAdminClient() {
                     Gallery Images ({form.images.filter((i) => !i.isThumbnail).length})
                     <span className="font-normal" style={{ color: txt3 }}>
                       {" "}
-                      — shown in lightbox, 4:3 ratio recommended. Hover a photo: <strong>B</strong>{" "}
+                      — shown in lightbox, 4:3 ratio recommended. Hover a photo: <strong>
+                        B
+                      </strong>{" "}
                       marks before, <strong>S</strong> marks a real sew-out.
                     </span>
                   </label>

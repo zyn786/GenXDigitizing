@@ -46,6 +46,17 @@ export async function GET(req: NextRequest) {
 
   const enabled = process.env.FOLLOW_UPS_ENABLED === "true";
 
+  /**
+   * How many emails one run may send. Defaults low on purpose — see the note
+   * where it is used. Malformed or absent values fall back rather than
+   * disabling the engine.
+   */
+  const maxPerRun = (() => {
+    const raw = Number(process.env.FOLLOW_UPS_MAX_PER_RUN);
+    return Number.isFinite(raw) && raw > 0 ? Math.min(Math.floor(raw), 200) : 25;
+  })();
+  let cappedAt: number | null = null;
+
   try {
     const db = createAdminClient();
     const now = Date.now();
@@ -84,6 +95,24 @@ export async function GET(req: NextRequest) {
 
       if (decision.action === "wait") continue;
 
+      // ── The dry run comes first, and writes nothing ──────────
+      // It used to sit further down, AFTER the hand_to_human branch — and that
+      // branch clears `follow_up_at` and records a lead event. So "disabled"
+      // was not a no-op: with the flag unset the engine still mutated leads,
+      // taking them out of the chase queue and leaving a timeline entry saying
+      // the system had stopped chasing them. Reporting what would happen is
+      // the entire purpose of the dry run; doing half of it is the worst of
+      // both.
+      if (!enabled) {
+        if (decision.action === "skip") skipped.push(`${lead.id}:${decision.reason}`);
+        else if (decision.action === "hand_to_human") handedOver.push(lead.id);
+        else
+          sent.push(
+            `${followUpKey(lead.id, (count ?? 0) + 1)} (dry run — FOLLOW_UPS_ENABLED is not "true")`
+          );
+        continue;
+      }
+
       if (decision.action === "skip") {
         skipped.push(`${lead.id}:${decision.reason}`);
         continue;
@@ -103,14 +132,23 @@ export async function GET(req: NextRequest) {
         continue;
       }
 
+      // ── Bounded per run ──────────────────────────────────────
+      // This engine had never been armed, and `decideFollowUp` has no age cap:
+      // a lead whose follow-up date passed months ago still returns "send". The
+      // candidate query takes up to 200, so the first armed run could have
+      // emailed the entire backlog at once — to people who enquired long enough
+      // ago to have forgotten us.
+      //
+      // A cap turns that into a trickle the team can watch and stop, and the
+      // backlog still clears over the following hours. Raising
+      // FOLLOW_UPS_MAX_PER_RUN is a deliberate act, not an accident.
+      if (sent.length >= maxPerRun) {
+        cappedAt = maxPerRun;
+        break;
+      }
+
       const sequence = (count ?? 0) + 1;
       const key = followUpKey(lead.id, sequence);
-
-      if (!enabled) {
-        // Dry run: report the queue, write nothing.
-        sent.push(`${key} (dry run — FOLLOW_UPS_ENABLED is not "true")`);
-        continue;
-      }
 
       if (!lead.email) {
         skipped.push(`${lead.id}:no email address`);
@@ -181,7 +219,11 @@ export async function GET(req: NextRequest) {
       sent.push(key);
     }
 
-    if (handedOver.length) {
+    // Only when the engine actually ran. In dry-run the hand-offs above were
+    // reported, not performed, so there is nothing to tell admins about — and
+    // a nightly "leads need a person" alert for a system that is switched off
+    // is exactly the noise that teaches people to ignore alerts.
+    if (enabled && handedOver.length) {
       await notifyRole("admin", {
         type: "system",
         title: `${handedOver.length} lead(s) need a person`,
@@ -197,6 +239,10 @@ export async function GET(req: NextRequest) {
       handedOver: handedOver.length,
       skipped: skipped.length,
       failed: failed.length,
+      maxPerRun,
+      // Present only when the cap actually stopped the run, so a truncated
+      // queue is visible rather than looking like a complete pass.
+      cappedAt,
       timestamp: new Date(now).toISOString(),
     });
   } catch (err) {

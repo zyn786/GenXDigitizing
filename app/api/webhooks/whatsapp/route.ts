@@ -25,7 +25,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { handleInboundMessage } from "@/lib/channels/inbound";
+import { alertWebhookFailure, handleInboundMessage } from "@/lib/channels/inbound";
 import { extractWhatsAppMessages } from "@/lib/channels/whatsapp";
 import { verifyMetaSignature, readRawBody } from "@/lib/channels/meta-signature";
 
@@ -103,6 +103,13 @@ export async function POST(req: NextRequest) {
       // A storage failure must be retried by Meta rather than dropped.
       if (!result.ok) {
         console.error("[whatsapp] failed to record a message:", result.error);
+        await alertWebhookFailure(db, {
+          channel: msg.channel,
+          reason: result.error,
+          // The provider's id, so Meta's retries of the same delivery raise one
+          // alert rather than one per attempt.
+          eventKey: `whatsapp:${msg.providerMessageId ?? msg.externalId}`,
+        });
         return NextResponse.json({ error: "Could not record the message" }, { status: 500 });
       }
     }

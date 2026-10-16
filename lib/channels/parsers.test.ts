@@ -150,6 +150,42 @@ describe("extractMetaMessages", () => {
     expect(m.body).toBe("Get a quote");
   });
 
+  /**
+   * A postback has no `message.mid`, and the dedupe in lib/channels/inbound.ts
+   * is skipped when the provider id is null while the unique index is
+   * `where external_id is not null`. So a retried delivery used to store the
+   * tap twice and bump `unread_count` twice.
+   */
+  it("gives a postback a stable id so a retried delivery is deduped", () => {
+    const payload = igMessage();
+    delete payload.entry[0].messaging[0].message;
+    payload.entry[0].messaging[0].postback = { title: "Get a quote", payload: "QUOTE" };
+
+    const [first] = extractMetaMessages(payload);
+    const [again] = extractMetaMessages(payload);
+
+    expect(first.providerMessageId).toBeTruthy();
+    // Same delivery twice must produce the same id, or the unique index cannot
+    // catch the duplicate.
+    expect(again.providerMessageId).toBe(first.providerMessageId);
+  });
+
+  it("gives two different taps different ids, so a real second tap still counts", () => {
+    const build = (timestamp: number) => {
+      const payload = igMessage();
+      delete payload.entry[0].messaging[0].message;
+      payload.entry[0].messaging[0].postback = { title: "Get a quote", payload: "QUOTE" };
+      payload.entry[0].messaging[0].timestamp = timestamp;
+      return extractMetaMessages(payload)[0].providerMessageId;
+    };
+
+    expect(build(1760000000000)).not.toBe(build(1760000001000));
+  });
+
+  it("still uses Meta's own id for a real message", () => {
+    expect(extractMetaMessages(igMessage())[0].providerMessageId).toBe("mid.ABC");
+  });
+
   it("ignores read receipts and reactions", () => {
     const payload = igMessage();
     delete payload.entry[0].messaging[0].message;

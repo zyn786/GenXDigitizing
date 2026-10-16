@@ -35,6 +35,9 @@ export async function POST(req: NextRequest) {
         featured: body.featured || false,
         visible: body.visible ?? true,
         tags: body.tags || [],
+        // Was never read here, which is one of the three reasons the admin's
+        // keyword field silently discarded whatever was typed into it.
+        keywords: Array.isArray(body.keywords) ? body.keywords : [],
         sort_order: body.sortOrder || 0,
       },
       body.images
