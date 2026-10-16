@@ -29,7 +29,9 @@ export const PLAN_CONFIG: Record<string, PlanConfig> = {
       "24 Hour Delivery",
       "Email Support",
     ],
-    savings: "20%",
+    // $59 against 10 × $7 = $70 is 15.7%, so 16% — it read "20%", which
+    // overstated the discount by a quarter.
+    savings: "16%",
     creditCostBigDesign: 3,
   },
   business: {

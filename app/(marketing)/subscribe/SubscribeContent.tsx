@@ -369,7 +369,11 @@ export function SubscribeContent({ activeSubscribers = 0 }: { activeSubscribers?
             Contact Sales <ArrowRight size={15} />
           </a>
           <span className="mt-2 block text-[11px] text-[var(--txt3)]">
-            For plans up to 75 designs/month,{" "}
+            {/* 80, not 75: Pro Max is the largest self-serve plan and
+                PLAN_CONFIG has it at 80 designs. The number is derived so the
+                ceiling cannot drift away from the plan that defines it. */}
+            For plans up to {Math.max(...Object.values(PLAN_CONFIG).map((p) => p.designs))}{" "}
+            designs/month,{" "}
             <Link
               href={
                 isLoggedIn

@@ -8,7 +8,25 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { SERVICE_CATEGORIES } from "@/lib/utils";
 import { SITE_CLAIMS, SITE_CLAIM_LIST } from "@/lib/site-config";
+import { PLAN_CONFIG } from "@/lib/plans";
 import type { ServiceCategory } from "@/types";
+
+/**
+ * The Starter comparison, derived rather than written down.
+ *
+ * This page used to state "$55/mo for 10 = save $15" beside a "21% off" badge
+ * while lib/plans.ts — the file that calls itself the single source of truth,
+ * and the one /subscribe actually renders — has Starter at $59. Two pages
+ * quoted different prices for the same plan, and the badge overstated the
+ * discount on top of that. Deriving all three numbers from PLAN_CONFIG means
+ * a price change can only move them together.
+ */
+const STARTER = PLAN_CONFIG.starter;
+/** $7, the standard design price SITE_CLAIMS.price publishes. */
+const STANDARD_DESIGN_PRICE = Number(SITE_CLAIMS.price.value.replace(/[^0-9.]/g, ""));
+const STARTER_LIST_TOTAL = STARTER.designs * STANDARD_DESIGN_PRICE;
+const STARTER_SAVING = STARTER_LIST_TOTAL - STARTER.price;
+const STARTER_PERCENT_OFF = Math.round((STARTER_SAVING / STARTER_LIST_TOTAL) * 100);
 
 interface ServiceTier {
   id: string;
@@ -424,15 +442,17 @@ export function PricingContent({ tiers }: { tiers: ServiceTier[] }) {
               </p>
               <div className="mb-2 flex items-center justify-center gap-2 text-[12px] sm:text-sm">
                 <span style={{ color: "var(--txt3)", textDecoration: "line-through" }}>
-                  $7/design × 10 = $70
+                  ${STANDARD_DESIGN_PRICE}/design × {STARTER.designs} = ${STARTER_LIST_TOTAL}
                 </span>
                 <span style={{ color: "var(--txt3)" }}>→</span>
-                <span style={{ color: "#16A34A", fontWeight: 700 }}>$55/mo for 10 = save $15</span>
+                <span style={{ color: "#16A34A", fontWeight: 700 }}>
+                  ${STARTER.price}/mo for {STARTER.designs} = save ${STARTER_SAVING}
+                </span>
                 <span
                   className="rounded px-1.5 py-0.5 text-[10px] font-bold"
                   style={{ background: "rgba(22,163,74,0.1)", color: "#16A34A" }}
                 >
-                  21% off
+                  {STARTER_PERCENT_OFF}% off
                 </span>
               </div>
               <p className="mb-2 text-[11px] sm:text-xs" style={{ color: "var(--txt2)" }}>
