@@ -37,6 +37,11 @@ export const NAV_SECTIONS: Record<UserRole, NavSection[]> = {
       title: "Overview",
       items: [
         { label: "Dashboard", href: "/admin", iconName: "LayoutDashboard" },
+        // Opens a /crm route on purpose: /admin/* is admin-only, while /crm/*
+        // admits crm and admin, which is who migration 057 lets read these
+        // tables. Same destination from both sidebars so there is one inbox,
+        // not two.
+        { label: "Inbox", href: "/crm/inbox", iconName: "Inbox", badgeKey: "inbox" },
         { label: "Reports", href: "/admin/reports", iconName: "BarChart3" },
       ],
     },
@@ -89,6 +94,7 @@ export const NAV_SECTIONS: Record<UserRole, NavSection[]> = {
       title: "Workspace",
       items: [
         { label: "Pipeline", href: "/crm/leads", iconName: "TrendingUp" },
+        { label: "Inbox", href: "/crm/inbox", iconName: "Inbox", badgeKey: "inbox" },
         { label: "Contacts", href: "/crm/contacts", iconName: "Users" },
         { label: "Messages", href: "/crm/messages", iconName: "MessageSquare" },
       ],

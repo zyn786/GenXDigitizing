@@ -25,16 +25,27 @@
 
 import { summariseStageChange } from "./lead-stages";
 
-/** The event vocabulary. Mirrored by a CHECK constraint in migration 052. */
+/**
+ * The event vocabulary. Mirrored by a CHECK constraint built in migration 052
+ * and extended in 064; `lead-events.test.ts` reads those migrations and fails
+ * if the two lists drift apart.
+ */
 export const LEAD_EVENT_TYPES = [
   "created",
   "stage_change",
   "assigned",
   "email_sent",
   "email_failed",
+  /** A message FROM the customer. Written by the inbound pipeline. */
   "chat_reply",
   "order_created",
   "note",
+  /**
+   * A message the business sent back. Written when a reply actually leaves the
+   * inbox — not when one is typed. Kept separate from `chat_reply` because a
+   * timeline that cannot say who spoke is not much of a timeline.
+   */
+  "reply_sent",
 ] as const;
 
 export type LeadEventType = (typeof LEAD_EVENT_TYPES)[number];

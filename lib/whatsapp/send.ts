@@ -26,6 +26,16 @@ export interface WhatsAppSendResult {
   ok: boolean;
   messageId?: string;
   error?: string;
+  /**
+   * Meta's own error code, when it gave one.
+   *
+   * Carried out of here so callers can turn 131047 (outside the 24-hour
+   * window) or 190 (bad token) into something a person can act on, instead of
+   * relaying a provider string. Absent for network faults, which have no code.
+   */
+  code?: number;
+  /** HTTP status, for the same reason. */
+  status?: number;
 }
 
 export async function sendWhatsAppText(to: string, text: string): Promise<WhatsAppSendResult> {
@@ -61,8 +71,9 @@ export async function sendWhatsAppText(to: string, text: string): Promise<WhatsA
 
     if (!res.ok) {
       const err = json?.error?.message ?? `HTTP ${res.status}`;
-      console.error("[whatsapp/send] failed:", err);
-      return { ok: false, error: err };
+      const code = typeof json?.error?.code === "number" ? json.error.code : undefined;
+      console.error("[whatsapp/send] failed:", code ? `${err} (code ${code})` : err);
+      return { ok: false, error: err, code, status: res.status };
     }
 
     return { ok: true, messageId: json?.messages?.[0]?.id };

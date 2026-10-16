@@ -96,6 +96,7 @@ export async function PortalLayout({ children, requiredRole }: PortalLayoutProps
       { count: pendingReviews },
       { count: unreadNotifications },
       { count: unreviewedEdits },
+      { count: unreadThreads },
     ] = await Promise.all([
       supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "submitted"),
       supabase
@@ -116,15 +117,35 @@ export async function PortalLayout({ children, requiredRole }: PortalLayoutProps
         .from("order_edit_log")
         .select("*", { count: "exact", head: true })
         .eq("reviewed_by_admin", false),
+      // Threads with unread channel messages — the unified inbox. Counts
+      // threads rather than messages so a four-line message is one badge, not
+      // four. RLS on `conversations` admits admin and crm only, so this
+      // returns 0 rather than erroring for anyone else.
+      supabase
+        .from("conversations")
+        .select("*", { count: "exact", head: true })
+        .gt("unread_count", 0),
     ]);
     badgeCounts = {
       orders: (pendingOrders ?? 0) + (unreviewedEdits ?? 0),
       messages: unreadMessages ?? 0,
       reviews: pendingReviews ?? 0,
       notifications: unreadNotifications ?? 0,
+      inbox: unreadThreads ?? 0,
       leads: 0,
     };
   }
+  // crm had no server-side counts at all — the sidebar rendered bare for the
+  // one role whose job is answering customers. The inbox is the count that
+  // matters here; the rest arrive client-side from BadgeProvider.
+  if (profile.role === "crm") {
+    const { count: unreadThreads } = await supabase
+      .from("conversations")
+      .select("*", { count: "exact", head: true })
+      .gt("unread_count", 0);
+    badgeCounts = { inbox: unreadThreads ?? 0 };
+  }
+
   if (profile.role === "client" && clientId) {
     const { data: sub } = await supabase
       .from("client_subscriptions")

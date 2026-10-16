@@ -10,6 +10,14 @@ interface BadgeState {
   invoices: number;
   messages: number;
   notifications: number;
+  /**
+   * Conversations with unread channel messages — the unified inbox.
+   *
+   * RLS decides who actually sees a number here: migration 057 grants
+   * `conversations` to admin and crm only, so every other role's query returns
+   * zero rows rather than an error, and the badge simply stays absent.
+   */
+  inbox: number;
   total: number;
 }
 
@@ -39,6 +47,7 @@ export function BadgeProvider({
     invoices: 0,
     messages: 0,
     notifications: 0,
+    inbox: 0,
     total: 0,
   });
   const subscribedRef = useRef(false);
@@ -51,28 +60,44 @@ export function BadgeProvider({
 
   const fetchCounts = useCallback(async () => {
     if (!userId) return;
-    const [{ count: pendingOrders }, { count: unreadMsgs }, { count: pendingInvoices }] =
-      await Promise.all([
-        supabase.current
-          .from("orders")
-          .select("*", { count: "exact", head: true })
-          .eq("status", "submitted"),
-        supabase.current
-          .from("messages")
-          .select("*", { count: "exact", head: true })
-          .eq("is_read", false)
-          .neq("from_user", userId),
-        supabase.current
-          .from("invoices")
-          .select("*", { count: "exact", head: true })
-          .eq("status", "pending"),
-      ]);
+    const [
+      { count: pendingOrders },
+      { count: unreadMsgs },
+      { count: pendingInvoices },
+      { count: unreadThreads },
+    ] = await Promise.all([
+      supabase.current
+        .from("orders")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "submitted"),
+      supabase.current
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .eq("is_read", false)
+        .neq("from_user", userId),
+      supabase.current
+        .from("invoices")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending"),
+      // Counts threads, not messages: a customer sending four lines is one
+      // thing to answer, and a badge of "4" would overstate the work.
+      supabase.current
+        .from("conversations")
+        .select("*", { count: "exact", head: true })
+        .gt("unread_count", 0),
+    ]);
     setBadges((p) => ({
       orders: pendingOrders ?? 0,
       invoices: pendingInvoices ?? 0,
       messages: unreadMsgs ?? 0,
       notifications: p.notifications,
-      total: (pendingOrders ?? 0) + (pendingInvoices ?? 0) + (unreadMsgs ?? 0) + p.notifications,
+      inbox: unreadThreads ?? 0,
+      total:
+        (pendingOrders ?? 0) +
+        (pendingInvoices ?? 0) +
+        (unreadMsgs ?? 0) +
+        (unreadThreads ?? 0) +
+        p.notifications,
     }));
   }, [userId]);
 
@@ -96,10 +121,23 @@ export function BadgeProvider({
         refetch
       )
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "invoices" }, refetch)
+      // Needs migration 062 — `conversations` is not in the supabase_realtime
+      // publication, so until that runs these two handlers never fire and the
+      // inbox badge relies on the focus refresh below plus the inbox's own 30s
+      // poll. Harmless if unpublished; just do not read "subscribed" as "live".
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "conversations" },
+        refetch
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "conversations" },
+        refetch
+      )
       .subscribe((status: string) => {
-        console.log("[BadgeProvider] Realtime status:", status);
         if (status === "CLOSED" || status === "CHANNEL_ERROR") {
-          console.warn("[BadgeProvider] Realtime disconnected");
+          console.warn("[BadgeProvider] Realtime disconnected:", status);
           subscribedRef.current = false;
         }
       });
@@ -110,6 +148,28 @@ export function BadgeProvider({
         channelRef.current = null;
         subscribedRef.current = false;
       }
+    };
+  }, [userId, fetchCounts]);
+
+  /**
+   * Refresh when the tab becomes visible again.
+   *
+   * Staff leave this open in a background tab. Without this the counts freeze
+   * at whenever the page loaded, and the inbox badge — the whole point of the
+   * badge — shows a stale number until a manual reload. Doubles as the
+   * freshness path for `conversations`, which is not on the realtime
+   * publication yet.
+   */
+  useEffect(() => {
+    if (!userId) return;
+    const onVisible = () => {
+      if (document.visibilityState === "visible") fetchCounts();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
     };
   }, [userId, fetchCounts]);
 

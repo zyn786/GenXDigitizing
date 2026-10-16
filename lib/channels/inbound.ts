@@ -278,7 +278,10 @@ export async function handleInboundMessage(
           type: "message",
           title: `New ${msg.channel} message`,
           body: `${msg.displayName || msg.externalId}: ${String(msg.body).slice(0, 100)}`,
-          action_url: "/crm/messages",
+          // The unified inbox, not /crm/messages. That page is the legacy
+          // user-to-user chat and does not contain channel messages, so the
+          // notification used to link somewhere the message was not.
+          action_url: "/crm/inbox",
         }
       );
     }

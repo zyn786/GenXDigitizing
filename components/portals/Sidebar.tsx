@@ -36,6 +36,7 @@ export function Sidebar({ user, badgeCounts = {}, subscriptionStatus }: SidebarP
       invoices: b.invoices || badgeCounts.invoices || 0,
       messages: b.messages || badgeCounts.messages || 0,
       notifications: b.notifications || badgeCounts.notifications || 0,
+      inbox: b.inbox || badgeCounts.inbox || 0,
     };
   } catch {}
 

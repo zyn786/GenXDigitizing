@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import { readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
 import {
+  LEAD_EVENT_TYPES,
   buildLeadEventRow,
   buildStageChangeEvent,
   isLeadEventType,
@@ -149,5 +152,89 @@ describe("recordLeadEvent", () => {
     expect(res.ok).toBe(false);
     expect(insert).not.toHaveBeenCalled();
     expect(err).toHaveBeenCalled();
+  });
+});
+
+/**
+ * The vocabulary exists in two places — this module and a CHECK constraint in
+ * the migrations — and both comments claim they are mirrored. Nothing enforced
+ * it, so they drifted: 'reply_sent' was added to the database in 064, and the
+ * code would have rejected it before it ever got there (`buildLeadEventRow`
+ * throws on an unknown type, and `recordLeadEvent` turns that into a
+ * silently-swallowed failure that only a console line reports).
+ *
+ * The spot-checks above could not catch that. This reads the migrations.
+ */
+function vocabularyFromMigrations(): string[] {
+  const dir = path.resolve(process.cwd(), "supabase/migrations");
+  const files = readdirSync(dir).filter((f) => f.endsWith(".sql"));
+
+  const found = new Set<string>();
+  for (const file of files) {
+    const sql = readFileSync(path.join(dir, file), "utf8");
+    // Only lead_events' constraint — other tables constrain `status`, `channel`
+    // and `direction` the same way and would otherwise be swept in.
+    if (!sql.includes("lead_events")) continue;
+
+    const block = /check\s*\(\s*type\s+in\s*\(([\s\S]*?)\)\s*\)/gi;
+    let match: RegExpExecArray | null;
+    while ((match = block.exec(sql))) {
+      for (const quoted of match[1].match(/'[a-z_]+'/g) ?? []) {
+        found.add(quoted.replace(/'/g, ""));
+      }
+    }
+  }
+  return [...found].sort();
+}
+
+describe("the vocabulary and the migrations", () => {
+  it("match in both directions", () => {
+    const inCode = [...LEAD_EVENT_TYPES].sort();
+    const inDatabase = vocabularyFromMigrations();
+
+    // Not a vacuous pass: a broken regex would leave this empty and the
+    // comparison below would fail on the first element — but say it explicitly
+    // so a parse failure is never mistaken for agreement.
+    expect(inDatabase.length).toBeGreaterThan(0);
+
+    // Missing from the database = a code path that throws at runtime.
+    expect(inDatabase.filter((t) => !inCode.includes(t as never))).toEqual([]);
+    // Missing from the code = a value the DB allows that nothing can write.
+    expect(inCode.filter((t) => !inDatabase.includes(t))).toEqual([]);
+    expect(inCode).toEqual(inDatabase);
+  });
+
+  it("keeps who-spoke apart: chat_reply is inbound, reply_sent is outbound", () => {
+    expect(LEAD_EVENT_TYPES).toContain("chat_reply");
+    expect(LEAD_EVENT_TYPES).toContain("reply_sent");
+  });
+});
+
+describe("buildLeadEventRow for an outbound reply", () => {
+  it("builds a reply_sent row attributed to the staff member", () => {
+    expect(
+      buildLeadEventRow({
+        leadId: "lead-1",
+        type: "reply_sent",
+        actorId: "u1",
+        actorLabel: "  Ayesha  ",
+        summary: 'whatsapp reply: "Yes, we can do that."',
+        metadata: { channel: "whatsapp", conversationId: "c1" },
+      })
+    ).toEqual({
+      lead_id: "lead-1",
+      type: "reply_sent",
+      actor_id: "u1",
+      actor_label: "Ayesha",
+      summary: 'whatsapp reply: "Yes, we can do that."',
+      from_stage: null,
+      to_stage: null,
+      metadata: { channel: "whatsapp", conversationId: "c1" },
+    });
+  });
+
+  it("is a real type now, and a lookalike still is not", () => {
+    expect(isLeadEventType("reply_sent")).toBe(true);
+    expect(isLeadEventType("message_sent")).toBe(false);
   });
 });
