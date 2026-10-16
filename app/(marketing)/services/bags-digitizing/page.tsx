@@ -85,6 +85,7 @@ export default function Page() {
   return (
     <>
       <ServiceSchema
+        price={DATA.startingPrice}
         name={DATA.title}
         description={DATA.description}
         url="/services/bags-digitizing"

@@ -73,14 +73,27 @@ export function FAQSchema({ faqs }: { faqs: { q: string; a: string }[] }) {
 }
 
 /** Service schema — include on /services and individual service pages */
+/**
+ * `price` must be the same value the page renders (`data.startingPrice` in
+ * ServicePageTemplate) — it is the ONLY thing this offer should ever quote.
+ *
+ * It was hardcoded to 7.00 with the description "Starting from $7" while four
+ * pages advertised something else: custom-patches $5, vector-art-conversion $8,
+ * applique $8, jacket-back $18. Google reads the structured data, not the page,
+ * so those four pages were publishing a price they do not charge. Passing the
+ * rendered value through makes the two incapable of disagreeing.
+ */
 export function ServiceSchema({
   name,
   description,
   url,
+  price = 7,
 }: {
   name: string;
   description: string;
   url?: string;
+  /** Starting price in USD, matching the figure shown on the page. */
+  price?: number;
 }) {
   const data = {
     "@context": "https://schema.org",
@@ -99,9 +112,9 @@ export function ServiceSchema({
     ...(url && { url: `${BASE_URL}${url}` }),
     offers: {
       "@type": "Offer",
-      price: "7.00",
+      price: price.toFixed(2),
       priceCurrency: "USD",
-      description: "Starting from $7",
+      description: `Starting from $${price}`,
     },
   };
   return (

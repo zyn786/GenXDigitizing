@@ -21,6 +21,9 @@ export default async function ServicesPage() {
 
   return (
     <>
+      {/* No `price` here on purpose. This is the index across every service
+          rather than one offering, so it correctly falls back to the standard
+          design price of $7 — which is what SITE_CLAIMS.price states. */}
       <ServiceSchema
         name="Embroidery Digitizing Services"
         description="Production-ready embroidery digitizing, vector art conversion, and custom patch design. Manual digitizing, free revisions, all machine formats supported."

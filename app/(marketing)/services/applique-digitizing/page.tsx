@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ServicePageTemplate } from "@/components/marketing/ServicePageTemplate";
 import type { ServicePageData } from "@/components/marketing/ServicePageTemplate";
+import { ServiceSchema, BreadcrumbSchema } from "@/components/shared/StructuredData";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/services/applique-digitizing" },
@@ -92,5 +93,25 @@ const DATA: ServicePageData = {
 };
 
 export default function AppliqueDigitizingPage() {
-  return <ServicePageTemplate data={DATA} />;
+  return (
+    <>
+      {/* This page was the only one of the fifteen rendering no structured
+          data — no Service and no BreadcrumbList — so it was absent from the
+          service markup every sibling emits. */}
+      <ServiceSchema
+        price={DATA.startingPrice}
+        name={DATA.title}
+        description={DATA.description}
+        url="/services/applique-digitizing"
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", url: "/" },
+          { name: "Services", url: "/services" },
+          { name: "Appliqué Digitizing", url: "/services/applique-digitizing" },
+        ]}
+      />
+      <ServicePageTemplate data={DATA} />
+    </>
+  );
 }
