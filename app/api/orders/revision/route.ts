@@ -169,21 +169,20 @@ export async function POST(req: NextRequest) {
       }).catch(console.error);
     }
 
-    // 12. Audit log
-    await admin
-      .from("audit_logs")
-      .insert({
-        action: "revision_requested",
-        entity: "orders",
-        entity_id: orderId,
-        user_id: user.id,
-        new_data: {
-          orderNumber,
-          revisionNotes: revisionNotes.slice(0, 500),
-          previousStatus: orderData.status,
-        },
-      })
-      .catch(console.error);
+    // 12. Audit log — a Supabase query builder is thenable but has no .catch(),
+    // so the old `.catch(console.error)` threw a TypeError here every time.
+    const { error: auditError } = await admin.from("audit_logs").insert({
+      action: "revision_requested",
+      entity: "orders",
+      entity_id: orderId,
+      user_id: user.id,
+      new_data: {
+        orderNumber,
+        revisionNotes: revisionNotes.slice(0, 500),
+        previousStatus: orderData.status,
+      },
+    });
+    if (auditError) console.error("[revision] Audit log error:", auditError.message);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

@@ -58,11 +58,14 @@ export function PdfPreviewFrame({
   title,
   className,
   style,
+  toolbar = true,
 }: {
   url: string;
   title: string;
   className?: string;
   style?: React.CSSProperties;
+  /** Viewer controls (zoom, page nav) — off for compact thumbnails. */
+  toolbar?: boolean;
 }) {
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -99,9 +102,12 @@ export function PdfPreviewFrame({
   }, [url]);
 
   if (blobUrl) {
+    const fragment = toolbar
+      ? "#view=FitH&navpanes=0"
+      : "#toolbar=0&navpanes=0&scrollbar=0&view=FitH";
     return (
       <iframe
-        src={blobUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH"}
+        src={blobUrl + fragment}
         title={title}
         className={className}
         style={{ border: "none", display: "block", ...style }}

@@ -14,6 +14,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import NextImage from "next/image";
+import { uploadOutputFiles } from "@/lib/upload-output-client";
 
 const OUTPUT_FORMATS = [
   "DST",
@@ -208,64 +209,17 @@ export function DesignerUploadUI({
     const controller = new AbortController();
     abortRef.current = controller;
     try {
-      const fd = new FormData();
-      fd.append("orderId", selOrder);
-      fd.append("notes", notes);
-      for (let i = 0; i < entries.length; i++) {
-        fd.append("files", entries[i].file);
-        fd.append("formats", entries[i].format);
-      }
-
-      // XHR for progress + abort
-      const result = await new Promise<{ ok: boolean; error?: string }>((resolve) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/api/upload/output");
-        // Same missing deadline as the customer uploaders: a stalled connection
-        // leaves the progress bar frozen with no way out but Cancel.
-        xhr.timeout = 180000;
-        const onAbort = () => {
-          xhr.abort();
-          resolve({ ok: false, error: "Upload cancelled" });
-        };
-        controller.signal.addEventListener("abort", onAbort, { once: true });
-        xhr.upload.addEventListener("progress", (e) => {
-          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
-        });
-        xhr.addEventListener("load", () => {
-          controller.signal.removeEventListener("abort", onAbort);
-          if (xhr.status >= 200 && xhr.status < 300) resolve({ ok: true });
-          else {
-            let msg = "Upload failed";
-            try {
-              const e = JSON.parse(xhr.responseText);
-              msg = e.error || msg;
-            } catch {}
-            resolve({ ok: false, error: msg });
-          }
-        });
-        xhr.addEventListener("error", () => {
-          controller.signal.removeEventListener("abort", onAbort);
-          resolve({ ok: false, error: "Network error — check your connection" });
-        });
-        xhr.addEventListener("timeout", () => {
-          controller.signal.removeEventListener("abort", onAbort);
-          resolve({
-            ok: false,
-            error: "Upload timed out — check your connection and try again",
-          });
-        });
-        xhr.addEventListener("abort", () => {
-          controller.signal.removeEventListener("abort", onAbort);
-          resolve({ ok: false, error: "Upload cancelled" });
-        });
-        xhr.send(fd);
-      });
-
-      if (!result.ok) {
-        setUploadError(result.error || "Upload failed");
-        toast.error(result.error || "Upload failed");
-        return;
-      }
+      await uploadOutputFiles(
+        selOrder,
+        entries.map((e) => ({ file: e.file, format: e.format })),
+        {
+          signal: controller.signal,
+          onProgress: (done, total) => {
+            // One request per file; the bar advances as each file lands.
+            setUploadProgress(Math.round((done / total) * 100));
+          },
+        }
+      );
 
       toast.success(`${entries.length} file(s) uploaded — submitted for QA review`);
       startTx(() => {
@@ -274,6 +228,13 @@ export function DesignerUploadUI({
       });
       // Notifications handled server-side by /api/upload/output
       setDone(true);
+    } catch (err: any) {
+      const message =
+        err?.name === "AbortError" || /cancel/i.test(err?.message || "")
+          ? "Upload cancelled"
+          : err?.message || "Upload failed";
+      setUploadError(message);
+      toast.error(message);
     } finally {
       setUploading(false);
       setUploadProgress(0);

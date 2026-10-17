@@ -375,16 +375,16 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     // When admin approves designer work (internal, NOT visible to client)
     if (newStatus === "approved") {
       if (designerUser) {
-        await supabase
-          .from("notifications")
-          .insert({
-            user_id: designerUser.id,
-            type: "order_update",
-            title: `Design approved — ${order.order_number}`,
-            body: "Your work has been approved by admin. Pending client release.",
-            action_url: `/designer/tasks`,
-          })
-          .catch(console.error);
+        // Query builders are thenable but have no .catch() — awaiting the
+        // insert and logging its error is the only safe form.
+        const { error: notifyError } = await supabase.from("notifications").insert({
+          user_id: designerUser.id,
+          type: "order_update",
+          title: `Design approved — ${order.order_number}`,
+          body: "Your work has been approved by admin. Pending client release.",
+          action_url: `/designer/tasks`,
+        });
+        if (notifyError) console.error("[status] Approve notification failed:", notifyError.message);
       }
       // Notify admins that order is ready for client release
       const { data: admins } = await supabase
@@ -413,16 +413,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
           ? `Revision notes: ${admin_notes}`
           : "Changes requested. Check task details.";
 
-        await supabase
-          .from("notifications")
-          .insert({
-            user_id: designerUser.id,
-            type: "order_update",
-            title: `Revision requested — ${order.order_number}`,
-            body: revisionBody,
-            action_url: `/designer/tasks`,
-          })
-          .catch(console.error);
+        const { error: notifyError } = await supabase.from("notifications").insert({
+          user_id: designerUser.id,
+          type: "order_update",
+          title: `Revision requested — ${order.order_number}`,
+          body: revisionBody,
+          action_url: `/designer/tasks`,
+        });
+        if (notifyError)
+          console.error("[status] Revision notification failed:", notifyError.message);
 
         emailRevisionRequested({
           to: designerUser.email,

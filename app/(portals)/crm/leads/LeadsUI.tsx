@@ -30,7 +30,7 @@ import { formatDate, getInitials } from "@/lib/utils";
 import { recordLeadEvent } from "@/lib/lead-events";
 import { summariseStageChange } from "@/lib/lead-stages";
 import { nextFollowUpAt } from "@/lib/follow-up";
-import NextImage from "next/image";
+import { saveFile } from "@/components/file-preview";
 
 const CARD_COLORS = [
   {
@@ -457,6 +457,7 @@ function LeadDetailModal({
   const [orders, setOrders] = useState<any[]>([]);
   const [ordersLoaded, setOrdersLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [artworkOpen, setArtworkOpen] = useState(false);
   const [events, setEvents] = useState<any[] | null>(null);
 
   // The timeline. `null` means "not loaded yet" — distinct from an empty array,
@@ -729,40 +730,37 @@ function LeadDetailModal({
                   Artwork Preview
                 </span>
               </div>
-              <a
-                href={artworkUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block overflow-hidden rounded-xl border"
-                style={{ borderColor: "var(--border)" }}
+              <button
+                type="button"
+                onClick={() => setArtworkOpen(true)}
+                className="block w-full cursor-zoom-in overflow-hidden rounded-xl border"
+                style={{ borderColor: "var(--border)", padding: 0, background: "transparent" }}
+                title="Open artwork preview"
               >
-                <NextImage
+                <img
                   src={artworkUrl}
                   alt={artworkInfo?.name || "Artwork"}
-                  width={600}
-                  height={400}
                   className="h-auto max-h-[300px] w-full object-contain"
                   style={{ background: "var(--elevated)" }}
                   onError={() => setImgError(true)}
                 />
-              </a>
+              </button>
               <div className="mt-2 flex items-center gap-2">
-                <a
-                  href={artworkUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-[12px] font-semibold no-underline transition-all hover:opacity-80"
+                <button
+                  type="button"
+                  onClick={() => setArtworkOpen(true)}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 text-[12px] font-semibold no-underline transition-all hover:opacity-80"
                   style={{
                     background: clr[4].bgSoft,
                     borderColor: clr[4].border,
                     color: clr[4].text,
                   }}
                 >
-                  <Image size={16} /> View Full ↗
-                </a>
-                <a
-                  href={artworkUrl}
-                  download
+                  <Image size={16} /> Preview
+                </button>
+                <button
+                  type="button"
+                  onClick={() => saveFile(artworkUrl!, artworkInfo?.name || "artwork")}
                   className="inline-flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 text-[12px] font-semibold no-underline transition-all hover:opacity-80"
                   style={{
                     background: clr[0].bgSoft,
@@ -771,7 +769,7 @@ function LeadDetailModal({
                   }}
                 >
                   <Download size={16} /> Download
-                </a>
+                </button>
               </div>
             </div>
           )}
@@ -989,6 +987,40 @@ function LeadDetailModal({
           </div>
         </div>
       </div>
+
+      {artworkOpen && artworkUrl && (
+        <div
+          className="fixed inset-0 z-[400] flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.85)" }}
+          onClick={() => setArtworkOpen(false)}
+        >
+          <div className="absolute left-4 top-4 z-10">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                saveFile(artworkUrl, artworkInfo?.name || "artwork");
+              }}
+              className="flex h-10 items-center gap-1.5 rounded-full px-4 text-xs font-semibold text-white"
+              style={{ background: "rgba(255,255,255,0.16)", border: "none", cursor: "pointer" }}
+            >
+              <Download size={13} /> Download
+            </button>
+          </div>
+          <button
+            onClick={() => setArtworkOpen(false)}
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full text-xl text-white"
+            style={{ background: "rgba(255,255,255,0.1)", border: "none", cursor: "pointer" }}
+          >
+            ×
+          </button>
+          <img
+            src={artworkUrl}
+            alt={artworkInfo?.name || "Artwork"}
+            className="max-h-[90vh] max-w-full rounded-xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -1036,19 +1068,67 @@ function parseLeadMessage(notes: string): string {
     .trim();
 }
 
+/**
+ * Pull the order-relevant fields out of a lead's request notes, so the
+ * convert-to-order form arrives filled in instead of asking staff to retype
+ * what the client already told us.
+ */
+function parseLeadRequest(notes: string) {
+  const text = String(notes || "");
+  const take = (re: RegExp) => {
+    const m = text.match(re);
+    return m?.[1]?.trim().replace(/[“”"]/g, "") || "";
+  };
+  const size = take(/Size:\s*([\d.]+\s*[^\s×x]*\s*[×x]\s*[\d.]+)/i);
+  const dims = size.match(/([\d.]+)\D+[×x]\s*([\d.]+)/);
+  return {
+    design: take(/Design:\s*(.+)/i),
+    placement: take(/Placement:\s*(.+)/i),
+    garment: take(/Garment:\s*(.+)/i),
+    fabric: take(/Fabric:\s*(.+)/i),
+    format: take(/Format:\s*([A-Za-z0-9]+)/i).toUpperCase(),
+    colors: take(/Colors:\s*(\d+)/i),
+    speed: take(/Speed:\s*(\w+)/i).toLowerCase(),
+    width: dims?.[1] || "",
+    height: dims?.[2] || "",
+  };
+}
+
+function SummaryItem({ label, value }: { label: string; value?: string }) {
+  if (!value) return null;
+  return (
+    <div className="min-w-0">
+      <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: txt3 }}>
+        {label}
+      </div>
+      <div className="truncate text-[12px] font-medium" style={{ color: txt }} title={value}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
 function ConvertToOrderModal({ lead, onClose }: { lead: any; onClose: (order?: any) => void }) {
   const parsedService = parseLeadService(lead.notes);
+  const req = parseLeadRequest(lead.notes);
+  const artworkUrl = getArtworkUrl(lead.notes);
+  const artworkInfo = parseLeadArtworkInfo(lead.notes);
   const [tiers, setTiers] = useState<any[]>([]);
   const [tiersLoaded, setTiersLoaded] = useState(false);
   const [form, setForm] = useState({
     service_tier_id: "",
-    design_name: lead.company ? `${lead.company} Logo` : "",
+    design_name:
+      req.design || (lead.company ? `${lead.company} Logo` : lead.contact_name || ""),
     price: lead.deal_value || "",
-    turnaround: "standard",
-    output_format: "DST",
-    width_inches: "4",
-    height_inches: "4",
-    color_count: "",
+    turnaround: req.speed.includes("urgent")
+      ? "urgent"
+      : req.speed.includes("rush")
+        ? "rush"
+        : "standard",
+    output_format: req.format || "DST",
+    width_inches: req.width || "4",
+    height_inches: req.height || "4",
+    color_count: req.colors || "",
   });
   const [busy, setBusy] = useState(false);
 
@@ -1110,7 +1190,7 @@ function ConvertToOrderModal({ lead, onClose }: { lead: any; onClose: (order?: a
       onClick={() => onClose()}
     >
       <div
-        className="max-h-[90vh] w-full max-w-[480px] overflow-y-auto rounded-2xl border p-6"
+        className="max-h-[90vh] w-full max-w-[580px] overflow-y-auto rounded-2xl border p-6"
         style={{ background: "var(--bg)", borderColor: "var(--border2)" }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -1144,6 +1224,62 @@ function ConvertToOrderModal({ lead, onClose }: { lead: any; onClose: (order?: a
           )}
         </div>
 
+        {(req.placement ||
+          req.garment ||
+          req.fabric ||
+          req.width ||
+          req.height ||
+          req.colors ||
+          req.format) && (
+          <div
+            className="mb-3 grid grid-cols-3 gap-x-3 gap-y-2 rounded-xl border p-3"
+            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          >
+            <SummaryItem label="Placement" value={req.placement} />
+            <SummaryItem label="Garment" value={req.garment} />
+            <SummaryItem label="Fabric" value={req.fabric} />
+            <SummaryItem
+              label="Size"
+              value={
+                req.width && req.height ? `${req.width}" × ${req.height}"` : undefined
+              }
+            />
+            <SummaryItem label="Colors" value={req.colors} />
+            <SummaryItem label="Format" value={req.format} />
+          </div>
+        )}
+
+        {artworkUrl && (
+          <div
+            className="mb-3 flex items-center gap-3 rounded-xl border p-2.5"
+            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          >
+            <img
+              src={artworkUrl}
+              alt={artworkInfo?.name || "Artwork"}
+              className="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
+              style={{ background: "var(--elevated)" }}
+            />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[12px] font-semibold" style={{ color: txt }}>
+                {artworkInfo?.name || "Artwork"}
+              </p>
+              <p className="text-[10px]" style={{ color: txt3 }}>
+                Attached to the order automatically
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => saveFile(artworkUrl, artworkInfo?.name || "artwork")}
+              title="Download artwork"
+              className="flex-shrink-0 cursor-pointer rounded-lg border p-2"
+              style={{ background: "var(--elevated)", borderColor: "var(--border2)", color: txt2 }}
+            >
+              <Download size={13} />
+            </button>
+          </div>
+        )}
+
         {!tiersLoaded ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 size={20} className="animate-spin" style={{ color: txt3 }} />
@@ -1159,7 +1295,17 @@ function ConvertToOrderModal({ lead, onClose }: { lead: any; onClose: (order?: a
               </label>
               <select
                 value={form.service_tier_id}
-                onChange={upd("service_tier_id")}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  const tier = tiers.find((t: any) => t.id === id);
+                  setForm((f) => ({
+                    ...f,
+                    service_tier_id: id,
+                    // Follow the tier price unless the lead already carries a
+                    // negotiated deal value.
+                    price: f.price || (tier ? String(tier.price) : ""),
+                  }));
+                }}
                 className="w-full rounded-xl border px-3 py-2.5 text-[13px] outline-none"
                 style={{ background: "var(--surface)", color: txt, borderColor: "var(--border2)" }}
               >

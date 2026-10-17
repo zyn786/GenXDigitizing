@@ -42,9 +42,15 @@ export async function POST(req: NextRequest) {
     const orderId = formData.get("orderId") as string;
     const files = formData.getAll("files") as File[];
     const formats = formData.getAll("formats") as string[];
+    // Clients upload one file per request to stay under the platform's request
+    // size cap, send notify=0 for those, then call once more with finalize=1
+    // so the status change and admin notification happen exactly once.
+    const finalizeOnly = formData.get("finalize") === "1";
+    const shouldNotify = formData.get("notify") !== "0";
 
     if (!orderId) return NextResponse.json({ error: "orderId required" }, { status: 400 });
-    if (!files.length) return NextResponse.json({ error: "No files provided" }, { status: 400 });
+    if (!finalizeOnly && !files.length)
+      return NextResponse.json({ error: "No files provided" }, { status: 400 });
 
     // All DB operations use admin client to bypass RLS
     const db = createAdminClient();
@@ -72,7 +78,7 @@ export async function POST(req: NextRequest) {
     const results = [];
     const now = Date.now();
 
-    for (let i = 0; i < files.length; i++) {
+    for (let i = 0; i < (finalizeOnly ? 0 : files.length); i++) {
       const file = files[i];
       if (file.size > 100 * 1024 * 1024) {
         return NextResponse.json(
@@ -143,7 +149,7 @@ export async function POST(req: NextRequest) {
       .eq("id", orderId)
       .single();
 
-    if (orderData) {
+    if (orderData && shouldNotify) {
       if (["in_progress", "revision", "assigned"].includes(orderData.status)) {
         await db.from("orders").update({ status: "review" }).eq("id", orderId);
       }

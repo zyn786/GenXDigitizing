@@ -22,7 +22,8 @@ import {
   X,
 } from "lucide-react";
 import { formatDate, formatCurrency, hoursUntilDeadline, TURNAROUND_OPTIONS } from "@/lib/utils";
-import Image from "next/image";
+import { PdfPreviewFrame, previewKind, saveFile } from "@/components/file-preview";
+import { uploadOutputFiles } from "@/lib/upload-output-client";
 
 const PC = {
   urgent: {
@@ -152,7 +153,13 @@ export function DesignerTasksClient({
   const [filter, setFilter] = useState<string>("all");
   const [showCompleted, setShowCompleted] = useState(false);
   const [completedModal, setCompletedModal] = useState<any>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewFile, setPreviewFile] = useState<{
+    url: string;
+    name: string;
+    kind: "image" | "pdf";
+  } | null>(null);
+  const openPreview = (url: string, name: string, kind: "image" | "pdf") =>
+    setPreviewFile({ url, name, kind });
   const [uploadModal, setUploadModal] = useState<any>(null); // { orderId, orderNumber }
   const [uploadFiles, setUploadFiles] = useState<{ id: string; file: File; format: string }[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -189,17 +196,10 @@ export function DesignerTasksClient({
     if (!uploadFiles.length || !uploadModal) return;
     setUploading(true);
     try {
-      const fd = new FormData();
-      fd.append("orderId", uploadModal.orderId);
-      uploadFiles.forEach((f) => {
-        fd.append("files", f.file);
-        fd.append("formats", f.format);
-      });
-      const res = await fetch("/api/upload/output", { method: "POST", body: fd });
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}));
-        throw new Error(e.error || "Upload failed");
-      }
+      await uploadOutputFiles(
+        uploadModal.orderId,
+        uploadFiles.map((f) => ({ file: f.file, format: f.format }))
+      );
       toast.success(`${uploadFiles.length} file(s) submitted for QA`);
       setUploadModal(null);
       setUploadFiles([]);
@@ -212,23 +212,7 @@ export function DesignerTasksClient({
   }
 
   async function downloadFile(url: string, name: string) {
-    try {
-      const res = await fetch(url);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = name;
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
-      }, 200);
-    } catch {
-      window.open(url, "_blank");
-    }
+    await saveFile(url, name);
   }
 
   function toggle(id: string) {
@@ -307,12 +291,10 @@ export function DesignerTasksClient({
             style={{ background: "linear-gradient(135deg, #7C3AED, #D946EF)" }}
           >
             {designerAvatar ? (
-              <Image
-                fill
+              <img
                 src={designerAvatar}
                 alt={designerName}
-                className="rounded-full object-cover"
-                sizes="(max-width: 768px) 100vw, 800px"
+                className="h-full w-full rounded-full object-cover"
               />
             ) : (
               designerName?.charAt(0)?.toUpperCase() || "D"
@@ -650,25 +632,39 @@ export function DesignerTasksClient({
                               }}
                             >
                               <div className="flex min-w-0 items-center gap-3">
-                                <div
-                                  className="relative h-10 w-10 flex-shrink-0 cursor-pointer overflow-hidden rounded-lg"
-                                  style={{ background: "var(--elevated2)" }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setPreviewImage(f.signed_url || f.file_url);
-                                  }}
-                                >
-                                  <Image
-                                    fill
-                                    src={f.signed_url || f.file_url}
-                                    alt={f.file_name}
-                                    className="object-cover"
-                                    onError={(e: any) => {
-                                      e.target.style.display = "none";
+                                {previewKind(f.file_name) === "image" ? (
+                                  <button
+                                    type="button"
+                                    className="relative h-10 w-10 flex-shrink-0 cursor-pointer overflow-hidden rounded-lg"
+                                    style={{
+                                      background: "var(--elevated2)",
+                                      padding: 0,
+                                      border: "none",
                                     }}
-                                    sizes="(max-width: 768px) 100vw, 800px"
-                                  />
-                                </div>
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openPreview(
+                                        f.signed_url || f.file_url,
+                                        f.file_name,
+                                        "image"
+                                      );
+                                    }}
+                                  >
+                                    <img
+                                      src={f.signed_url || f.file_url}
+                                      alt={f.file_name}
+                                      className="h-full w-full object-cover"
+                                      loading="lazy"
+                                      onError={(e: any) => {
+                                        e.target.style.display = "none";
+                                      }}
+                                    />
+                                  </button>
+                                ) : (
+                                  <span className="flex-shrink-0" style={{ color: txt2 }}>
+                                    <FileText size={14} />
+                                  </span>
+                                )}
                                 <div className="min-w-0">
                                   <p
                                     className="truncate text-[12px] font-medium"
@@ -681,20 +677,43 @@ export function DesignerTasksClient({
                                   </p>
                                 </div>
                               </div>
-                              <button
-                                onClick={() =>
-                                  downloadFile(f.signed_url || f.file_url, f.file_name)
-                                }
-                                className="flex flex-shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium"
-                                style={{
-                                  background: "var(--surface)",
-                                  border: "1px solid var(--border2)",
-                                  color: txt2,
-                                  cursor: "pointer",
-                                }}
-                              >
-                                <Download size={12} /> Download
-                              </button>
+                              <div className="flex flex-shrink-0 items-center gap-1.5">
+                                {previewKind(f.file_name) && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openPreview(
+                                        f.signed_url || f.file_url,
+                                        f.file_name,
+                                        previewKind(f.file_name) as "image" | "pdf"
+                                      );
+                                    }}
+                                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium"
+                                    style={{
+                                      background: "var(--surface)",
+                                      border: "1px solid var(--border2)",
+                                      color: txt2,
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    Preview
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() =>
+                                    downloadFile(f.signed_url || f.file_url, f.file_name)
+                                  }
+                                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium"
+                                  style={{
+                                    background: "var(--surface)",
+                                    border: "1px solid var(--border2)",
+                                    color: txt2,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <Download size={12} /> Download
+                                </button>
+                              </div>
                             </div>
                           ))
                         )}
@@ -1192,22 +1211,38 @@ export function DesignerTasksClient({
                               }}
                             >
                               <div className="flex min-w-0 items-center gap-3">
-                                <div
-                                  className="relative h-10 w-10 flex-shrink-0 cursor-pointer overflow-hidden rounded-lg"
-                                  style={{ background: "var(--elevated2)" }}
-                                  onClick={() => setPreviewImage(f.signed_url || f.file_url)}
-                                >
-                                  <Image
-                                    fill
-                                    src={f.signed_url || f.file_url}
-                                    alt={f.file_name}
-                                    className="object-cover"
-                                    onError={(e: any) => {
-                                      e.target.style.display = "none";
+                                {previewKind(f.file_name) === "image" ? (
+                                  <button
+                                    type="button"
+                                    className="relative h-10 w-10 flex-shrink-0 cursor-pointer overflow-hidden rounded-lg"
+                                    style={{
+                                      background: "var(--elevated2)",
+                                      padding: 0,
+                                      border: "none",
                                     }}
-                                    sizes="(max-width: 768px) 100vw, 800px"
-                                  />
-                                </div>
+                                    onClick={() =>
+                                      openPreview(
+                                        f.signed_url || f.file_url,
+                                        f.file_name,
+                                        "image"
+                                      )
+                                    }
+                                  >
+                                    <img
+                                      src={f.signed_url || f.file_url}
+                                      alt={f.file_name}
+                                      className="h-full w-full object-cover"
+                                      loading="lazy"
+                                      onError={(e: any) => {
+                                        e.target.style.display = "none";
+                                      }}
+                                    />
+                                  </button>
+                                ) : (
+                                  <span className="flex-shrink-0" style={{ color: txt2 }}>
+                                    <FileText size={14} />
+                                  </span>
+                                )}
                                 <p
                                   className="truncate text-[12px] font-medium"
                                   style={{ color: txt }}
@@ -1215,20 +1250,42 @@ export function DesignerTasksClient({
                                   {f.file_name}
                                 </p>
                               </div>
-                              <button
-                                onClick={() =>
-                                  downloadFile(f.signed_url || f.file_url, f.file_name)
-                                }
-                                className="flex flex-shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium"
-                                style={{
-                                  background: "var(--surface)",
-                                  border: "1px solid var(--border2)",
-                                  color: txt2,
-                                  cursor: "pointer",
-                                }}
-                              >
-                                <Download size={12} /> Download
-                              </button>
+                              <div className="flex flex-shrink-0 items-center gap-1.5">
+                                {previewKind(f.file_name) && (
+                                  <button
+                                    onClick={() =>
+                                      openPreview(
+                                        f.signed_url || f.file_url,
+                                        f.file_name,
+                                        previewKind(f.file_name) as "image" | "pdf"
+                                      )
+                                    }
+                                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium"
+                                    style={{
+                                      background: "var(--surface)",
+                                      border: "1px solid var(--border2)",
+                                      color: txt2,
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    Preview
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() =>
+                                    downloadFile(f.signed_url || f.file_url, f.file_name)
+                                  }
+                                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium"
+                                  style={{
+                                    background: "var(--surface)",
+                                    border: "1px solid var(--border2)",
+                                    color: txt2,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <Download size={12} /> Download
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -1341,28 +1398,49 @@ export function DesignerTasksClient({
         </div>
       )}
 
-      {/* ── Image preview overlay ── */}
-      {previewImage && (
+      {/* ── Preview overlay — stays on the page ── */}
+      {previewFile && (
         <div
           className="fixed inset-0 z-[80] flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.85)" }}
-          onClick={() => setPreviewImage(null)}
+          onClick={() => setPreviewFile(null)}
         >
+          <div className="absolute left-4 top-4 z-10 flex gap-2">
+            <button
+              onClick={() => saveFile(previewFile.url, previewFile.name)}
+              className="flex h-10 items-center gap-1.5 rounded-full px-4 text-xs font-semibold text-white"
+              style={{ background: "rgba(255,255,255,0.16)", border: "none", cursor: "pointer" }}
+            >
+              <Download size={13} /> Download
+            </button>
+          </div>
           <button
-            onClick={() => setPreviewImage(null)}
+            onClick={() => setPreviewFile(null)}
             className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full text-xl text-white"
             style={{ background: "rgba(255,255,255,0.1)", border: "none", cursor: "pointer" }}
           >
             ×
           </button>
-          <Image
-            src={previewImage}
-            alt="Preview"
-            width={1200}
-            height={900}
-            className="max-h-[90vh] max-w-full rounded-xl object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {previewFile.kind === "pdf" ? (
+            <div
+              className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-xl"
+              style={{ background: "#fff" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <PdfPreviewFrame
+                url={previewFile.url}
+                title={previewFile.name}
+                style={{ width: "100%", height: "85vh" }}
+              />
+            </div>
+          ) : (
+            <img
+              src={previewFile.url}
+              alt={previewFile.name}
+              className="max-h-[90vh] max-w-full rounded-xl object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
         </div>
       )}
 

@@ -423,17 +423,23 @@ function PdfFrame({
   src,
   filename,
   height,
+  toolbar,
 }: {
   src: string;
   filename: string;
   height: number | string;
+  /** Full viewer controls in the enlarged preview; none in the card. */
+  toolbar?: boolean;
 }) {
   var pdf = usePdfBlobUrl(src);
 
   if (pdf.blobUrl) {
+    const fragment = toolbar
+      ? "#view=FitH&navpanes=0"
+      : "#toolbar=0&navpanes=0&scrollbar=0&view=FitH";
     return (
       <iframe
-        src={pdf.blobUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH"}
+        src={pdf.blobUrl + fragment}
         title={filename}
         style={{ display: "block", width: "100%", height: height, border: "none" }}
       />
@@ -472,7 +478,7 @@ function PdfThumb({
   href: string;
   filename: string;
   size?: number;
-  onOpen: () => void;
+  onOpen?: () => void;
 }) {
   return (
     <div
@@ -487,26 +493,28 @@ function PdfThumb({
     >
       <div style={{ position: "relative", height: 246, background: "#0b1220" }}>
         <PdfFrame src={withParam(href, "inline=1")} filename={filename} height="100%" />
-        <button
-          type="button"
-          onClick={onOpen}
-          style={{
-            position: "absolute",
-            top: 6,
-            right: 6,
-            padding: "3px 7px",
-            borderRadius: 6,
-            border: "none",
-            background: "rgba(15,23,42,0.75)",
-            color: "#fff",
-            fontSize: 10,
-            fontWeight: 700,
-            cursor: "zoom-in",
-            fontFamily: "Inter, sans-serif",
-          }}
-        >
-          Preview
-        </button>
+        {onOpen ? (
+          <button
+            type="button"
+            onClick={onOpen}
+            style={{
+              position: "absolute",
+              top: 6,
+              right: 6,
+              padding: "3px 7px",
+              borderRadius: 6,
+              border: "none",
+              background: "rgba(15,23,42,0.75)",
+              color: "#fff",
+              fontSize: 10,
+              fontWeight: 700,
+              cursor: "zoom-in",
+              fontFamily: "Inter, sans-serif",
+            }}
+          >
+            Preview
+          </button>
+        ) : null}
       </div>
       <span
         style={{
@@ -690,6 +698,7 @@ function PreviewModal({
               src={withParam(item.href, "inline=1")}
               filename={item.filename}
               height="78vh"
+              toolbar
             />
           )}
         </div>
@@ -730,6 +739,21 @@ function PendingAttachChip({ a, onRemove }: { a: any; onRemove: () => void }) {
           filename={a.filename}
           size={a.size}
           href={"/api/admin/email/attachment?path=" + encodeURIComponent(a.path)}
+        />
+        <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: cTxt3 }}>
+          Ready to send {removeBtn}
+        </span>
+      </div>
+    );
+  }
+
+  if (a.status === "ready" && a.path && isPdfAttachment(a)) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "flex-start" }}>
+        <PdfThumb
+          href={"/api/admin/email/attachment?path=" + encodeURIComponent(a.path)}
+          filename={a.filename}
+          size={a.size}
         />
         <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: cTxt3 }}>
           Ready to send {removeBtn}

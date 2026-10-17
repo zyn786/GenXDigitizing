@@ -341,6 +341,25 @@ export function AdminOrderDetail({
     setPreviewFile({ url, name, kind });
   const [fileDeleting, setFileDeleting] = useState<string | null>(null);
   const [reuploading, setReuploading] = useState(false);
+  const [downloadingAll, setDownloadingAll] = useState(false);
+
+  /**
+   * Save every output file. Browsers only allow multiple downloads from a
+   * single gesture if they are spaced out — one fetch at a time, with a short
+   * gap so Chrome does not drop the later files.
+   */
+  async function downloadAllOutputs(files: any[]) {
+    if (!files.length || downloadingAll) return;
+    setDownloadingAll(true);
+    try {
+      for (const f of files) {
+        await saveFile(f.signed_url || f.file_url, f.file_name);
+        await new Promise((r) => setTimeout(r, 350));
+      }
+    } finally {
+      setDownloadingAll(false);
+    }
+  }
 
   async function handleDeleteFile(fileId: string) {
     if (!confirm("Delete this file? This cannot be undone.")) return;
@@ -980,6 +999,23 @@ export function AdminOrderDetail({
                   disabled={reuploading}
                 />
               </label>
+              {outputFiles.length > 1 && (
+                <button
+                  onClick={() => downloadAllOutputs(outputFiles)}
+                  disabled={downloadingAll}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-2.5 text-[11px] font-semibold transition-all active:scale-95"
+                  style={{
+                    background: CARD_COLORS[4].bgSoft,
+                    borderColor: CARD_COLORS[4].border,
+                    color: CARD_COLORS[4].text,
+                    cursor: downloadingAll ? "wait" : "pointer",
+                    opacity: downloadingAll ? 0.7 : 1,
+                  }}
+                >
+                  <Download size={12} />{" "}
+                  {downloadingAll ? "Downloading…" : `Download All (${outputFiles.length})`}
+                </button>
+              )}
               {outputFiles.length > 0 && (
                 <button
                   onClick={async () => {

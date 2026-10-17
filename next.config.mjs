@@ -61,6 +61,10 @@ const nextConfig = {
         source: "/client/my-orders/:path*",
         headers: [{ key: "Content-Security-Policy", value: PANEL_CSP }],
       },
+      {
+        source: "/designer/:path*",
+        headers: [{ key: "Content-Security-Policy", value: PANEL_CSP }],
+      },
     ];
   },
 
