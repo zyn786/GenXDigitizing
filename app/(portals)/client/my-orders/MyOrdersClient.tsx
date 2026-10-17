@@ -13,6 +13,7 @@ import {
   STATUS_LABEL,
   TURNAROUND_OPTIONS,
 } from "@/lib/utils";
+import { saveFile } from "@/components/file-preview";
 
 const CARD_COLORS = [
   {
@@ -440,24 +441,18 @@ export function MyOrdersClient({ orders, userId }: any) {
                 <div className="mt-3 flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
                   {outputFiles.length > 0 ? (
                     outputFiles.map((f: any) => (
-                      <a
+                      <button
                         key={f.id}
-                        href={f.signed_url || f.file_url}
-                        download={f.file_name}
-                        target="_blank"
-                        rel="noreferrer"
+                        onClick={() => saveFile(f.signed_url || f.file_url, f.file_name)}
+                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-2 text-[11px] font-medium transition-all active:scale-95"
+                        style={{
+                          background: "var(--elevated)",
+                          color: txt2,
+                          borderColor: "var(--border2)",
+                        }}
                       >
-                        <button
-                          className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-2 text-[11px] font-medium transition-all active:scale-95"
-                          style={{
-                            background: "var(--elevated)",
-                            color: txt2,
-                            borderColor: "var(--border2)",
-                          }}
-                        >
-                          <Download size={12} /> {f.format ?? f.file_name}
-                        </button>
-                      </a>
+                        <Download size={12} /> {f.format ?? f.file_name}
+                      </button>
                     ))
                   ) : (
                     <span className="self-center text-xs" style={{ color: txt3 }}>

@@ -119,7 +119,10 @@ export async function POST(request: NextRequest) {
     // Resolve storage paths into Resend attachment payloads.
     var supabase = createAdminClient();
     var resendAttachments = [];
-    var attachmentNames = [];
+    // Full metadata (path included) — the Sent view re-parses this to build
+    // thumbnails and download links. Storing bare names here is what made
+    // image previews disappear as soon as the list was refetched.
+    var attachmentMeta = [];
 
     for (var a = 0; a < attachments.length; a++) {
       var att = attachments[a];
@@ -148,9 +151,18 @@ export async function POST(request: NextRequest) {
       resendAttachments.push({
         filename: filename,
         content: Buffer.from(await dl.data.arrayBuffer()),
-        content_type: att.content_type || undefined,
+        // Resend's SDK field is camelCase. The old `content_type` key was
+        // silently ignored, so the MIME type fell back to whatever Resend
+        // guessed from the filename (uppercase ".JPG" often lost, leaving
+        // recipients with a generic file icon instead of a preview).
+        contentType: att.content_type || undefined,
       });
-      attachmentNames.push(filename);
+      attachmentMeta.push({
+        filename: filename,
+        path: path,
+        content_type: att.content_type || undefined,
+        size: att.size || dl.data.size,
+      });
     }
 
     // Our own RFC Message-ID. Storing it is what lets a reply find its way
@@ -196,7 +208,9 @@ export async function POST(request: NextRequest) {
         body: message,
         sent_by: user.id,
         resend_id: result.data?.id || null,
-        attachments_meta: attachmentNames.length ? attachmentNames.join(", ") : null,
+        attachments_meta: attachmentMeta.length
+          ? JSON.stringify(attachmentMeta)
+          : null,
         message_id: ourMessageId,
         in_reply_to: inReplyTo,
         references: references,

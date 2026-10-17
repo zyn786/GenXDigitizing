@@ -1,0 +1,19 @@
+# Build output and dependencies — Vercel builds from source
+node_modules
+.next
+out
+build
+dist
+
+# Local env files (project variables live in Vercel)
+.env
+.env.*
+!.env.example
+
+# Local artifacts / logs
+.git
+.vercel
+.supabase
+*.log
+tsconfig.tsbuildinfo
+test-01-login.png

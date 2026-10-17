@@ -1,3 +1,12 @@
+/**
+ * Portal pages that render PDF previews need `blob:` under both frame-src and
+ * object-src: blob documents inherit the embedding page's CSP, and Chromium
+ * treats the built-in PDF viewer as plugin content. Public pages keep the
+ * stricter policy from the catch-all rule.
+ */
+const PANEL_CSP =
+  "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; media-src 'self' https:; connect-src 'self' https: wss:; frame-src 'self' blob:; object-src 'self' blob:; base-uri 'self'; form-action 'self';";
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -41,6 +50,16 @@ const nextConfig = {
               "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; media-src 'self' https:; connect-src 'self' https: wss:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';",
           },
         ],
+      },
+      {
+        // Email panel and order pages render PDF previews through blob URLs.
+        // (Next.js: when two rules set the same header, the last one wins.)
+        source: "/admin/:path*",
+        headers: [{ key: "Content-Security-Policy", value: PANEL_CSP }],
+      },
+      {
+        source: "/client/my-orders/:path*",
+        headers: [{ key: "Content-Security-Policy", value: PANEL_CSP }],
       },
     ];
   },

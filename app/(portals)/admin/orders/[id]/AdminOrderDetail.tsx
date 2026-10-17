@@ -19,7 +19,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import Image from "next/image";
+import { PdfPreviewFrame, previewKind, saveFile } from "@/components/file-preview";
 import {
   formatDate,
   formatDateTime,
@@ -196,43 +196,37 @@ function FileCard({
   onDelete,
 }: {
   file: any;
-  onPreview?: (url: string) => void;
+  onPreview?: (url: string, filename: string, kind: "image" | "pdf") => void;
   onDelete?: (id: string) => void;
 }) {
   const isArtwork = file.file_type === "artwork";
   const url = file.signed_url || file.file_url;
-  function download() {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = file.file_name;
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => document.body.removeChild(a), 100);
-  }
+  // Only artwork is previewable; outputs are DST/EMB/PES and download-only.
+  const kind = isArtwork ? previewKind(file.file_name) : null;
   return (
     <div
       className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-xl p-3"
       style={{ background: "var(--elevated)", border: "1px solid var(--border)" }}
     >
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        {isArtwork ? (
-          <div
+        {kind === "image" ? (
+          <button
+            type="button"
+            title={"Preview " + file.file_name}
             className="relative h-10 w-10 flex-shrink-0 cursor-pointer overflow-hidden rounded-lg"
-            style={{ background: "var(--elevated2)" }}
-            onClick={() => onPreview?.(url)}
+            style={{ background: "var(--elevated2)", padding: 0, border: "none" }}
+            onClick={() => onPreview?.(url, file.file_name, "image")}
           >
-            <Image
-              fill
+            <img
               src={url}
               alt={file.file_name}
-              className="object-cover"
+              className="h-full w-full object-cover"
+              loading="lazy"
               onError={(e: any) => {
                 e.target.style.display = "none";
               }}
-              sizes="(max-width: 768px) 100vw, 800px"
             />
-          </div>
+          </button>
         ) : (
           <span className="flex-shrink-0" style={{ color: "var(--txt2)" }}>
             <FileText size={14} />
@@ -256,7 +250,7 @@ function FileCard({
       </div>
       <div className="flex flex-shrink-0 gap-1.5">
         <button
-          onClick={download}
+          onClick={() => saveFile(url, file.file_name)}
           className="inline-flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-[11px] font-semibold transition-all active:scale-95"
           style={{
             background: CARD_COLORS[4].bgSoft,
@@ -266,17 +260,19 @@ function FileCard({
         >
           <Download size={10} /> Download
         </button>
-        <button
-          onClick={() => onPreview?.(url)}
-          className="inline-flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-[11px] font-medium transition-all active:scale-95"
-          style={{
-            background: "var(--elevated)",
-            borderColor: "var(--border2)",
-            color: "var(--txt2)",
-          }}
-        >
-          <ExternalLink size={10} /> Preview
-        </button>
+        {kind && (
+          <button
+            onClick={() => onPreview?.(url, file.file_name, kind)}
+            className="inline-flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-[11px] font-medium transition-all active:scale-95"
+            style={{
+              background: "var(--elevated)",
+              borderColor: "var(--border2)",
+              color: "var(--txt2)",
+            }}
+          >
+            <ExternalLink size={10} /> Preview
+          </button>
+        )}
         {onDelete && (
           <button
             onClick={() => onDelete(file.id)}
@@ -336,7 +332,13 @@ export function AdminOrderDetail({
   const [qaRevisionOpen, setQaRevisionOpen] = useState(false);
   const [qaRevisionNotes, setQaRevisionNotes] = useState("");
   const [qaSaving, setQaSaving] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewFile, setPreviewFile] = useState<{
+    url: string;
+    name: string;
+    kind: "image" | "pdf";
+  } | null>(null);
+  const openPreview = (url: string, name: string, kind: "image" | "pdf") =>
+    setPreviewFile({ url, name, kind });
   const [fileDeleting, setFileDeleting] = useState<string | null>(null);
   const [reuploading, setReuploading] = useState(false);
 
@@ -925,7 +927,7 @@ export function AdminOrderDetail({
                 <FileCard
                   key={f.id}
                   file={f}
-                  onPreview={setPreviewImage}
+                  onPreview={openPreview}
                   onDelete={handleDeleteFile}
                 />
               ))
@@ -945,7 +947,7 @@ export function AdminOrderDetail({
                 <FileCard
                   key={f.id}
                   file={f}
-                  onPreview={setPreviewImage}
+                  onPreview={openPreview}
                   onDelete={handleDeleteFile}
                 />
               ))
@@ -1476,28 +1478,49 @@ export function AdminOrderDetail({
         </div>
       </div>
 
-      {/* Preview overlay */}
-      {previewImage && (
+      {/* Preview overlay — stays on the page, never opens a new tab */}
+      {previewFile && (
         <div
           className="fixed inset-0 z-[80] flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.85)" }}
-          onClick={() => setPreviewImage(null)}
+          onClick={() => setPreviewFile(null)}
         >
+          <div className="absolute left-4 top-4 z-10 flex gap-2">
+            <button
+              onClick={() => saveFile(previewFile.url, previewFile.name)}
+              className="flex h-10 items-center gap-1.5 rounded-full px-4 text-xs font-semibold text-white"
+              style={{ background: "rgba(255,255,255,0.16)", border: "none", cursor: "pointer" }}
+            >
+              <Download size={13} /> Download
+            </button>
+          </div>
           <button
-            onClick={() => setPreviewImage(null)}
+            onClick={() => setPreviewFile(null)}
             className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full text-xl text-white"
             style={{ background: "rgba(255,255,255,0.1)", border: "none", cursor: "pointer" }}
           >
             ×
           </button>
-          <Image
-            src={previewImage}
-            alt="Preview"
-            width={1200}
-            height={900}
-            className="max-h-[90vh] max-w-full rounded-xl object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {previewFile.kind === "pdf" ? (
+            <div
+              className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-xl"
+              style={{ background: "#fff" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <PdfPreviewFrame
+                url={previewFile.url}
+                title={previewFile.name}
+                style={{ width: "100%", height: "85vh" }}
+              />
+            </div>
+          ) : (
+            <img
+              src={previewFile.url}
+              alt={previewFile.name}
+              className="max-h-[90vh] max-w-full rounded-xl object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
         </div>
       )}
     </div>

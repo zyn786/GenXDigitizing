@@ -33,6 +33,7 @@ import {
   Download,
   ChevronDown,
   ChevronUp,
+  FileText,
 } from "lucide-react";
 
 /* ── tokens ─────────────────────────────────────────── */
@@ -244,50 +245,88 @@ function isImageAttachment(f: any): boolean {
   return /\.(png|jpe?g|gif|webp|bmp|avif|heic|heif)$/.test(name);
 }
 
+/** PDFs get an inline first-page preview — see PdfThumb. */
+function isPdfAttachment(f: any): boolean {
+  if (f && typeof f.content_type === "string" && f.content_type === "application/pdf") {
+    return true;
+  }
+  return /\.pdf$/.test(String((f && f.filename) || "").toLowerCase());
+}
+
+/** Add a query param without caring whether the URL already has one. */
+function withParam(url: string, param: string): string {
+  return url + (url.indexOf("?") === -1 ? "?" : "&") + param;
+}
+
 /**
- * Thumbnail for an image attachment. `src` serves the bytes same-origin, so the
- * session cookie authorises it; the anchor adds inline=1 so the full-size view
- * opens in a tab instead of downloading.
+ * Image attachment card. Clicking the thumbnail opens the in-page preview;
+ * the caption's download button always saves the original file.
  */
 function AttachThumb({
   src,
   href,
   filename,
   size,
+  onOpen,
 }: {
   src: string;
   href: string;
   filename: string;
   size?: number;
+  onOpen?: () => void;
 }) {
+  var previewArea = (
+    <img
+      src={src}
+      alt={filename}
+      loading="lazy"
+      style={{
+        display: "block",
+        width: "100%",
+        height: 132,
+        objectFit: "cover",
+        background: "#0b1220",
+      }}
+    />
+  );
+
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      title={"Open " + filename}
+    <div
       style={{
         display: "block",
         width: 190,
-        textDecoration: "none",
         border: "1px solid " + cBord2,
         borderRadius: 10,
         overflow: "hidden",
         background: "var(--surface)",
       }}
     >
-      <img
-        src={src}
-        alt={filename}
-        loading="lazy"
-        style={{
-          display: "block",
-          width: "100%",
-          height: 132,
-          objectFit: "cover",
-          background: "#0b1220",
-        }}
-      />
+      {onOpen ? (
+        <button
+          type="button"
+          onClick={onOpen}
+          title={"Preview " + filename}
+          style={{
+            display: "block",
+            width: "100%",
+            padding: 0,
+            border: "none",
+            background: "none",
+            cursor: "zoom-in",
+          }}
+        >
+          {previewArea}
+        </button>
+      ) : (
+        <a
+          href={withParam(href, "inline=1")}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={"Open " + filename}
+        >
+          {previewArea}
+        </a>
+      )}
       <span
         style={{
           display: "flex",
@@ -300,7 +339,10 @@ function AttachThumb({
         }}
       >
         <Paperclip size={11} style={{ flexShrink: 0 }} />
-        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <span
+          title={filename}
+          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+        >
           {filename}
         </span>
         {size ? (
@@ -308,8 +350,351 @@ function AttachThumb({
             {fmtSize(size)}
           </span>
         ) : null}
+        <a
+          href={withParam(href, "download=1")}
+          title={"Download " + filename}
+          style={{
+            display: "inline-flex",
+            color: cTxt2,
+            flexShrink: 0,
+            marginLeft: size ? 2 : "auto",
+          }}
+        >
+          <Download size={12} />
+        </a>
       </span>
-    </a>
+    </div>
+  );
+}
+
+/**
+ * Fetch a PDF same-origin and hand the bytes back as a blob URL. Blob
+ * documents carry no response headers, so they sidestep both the site's
+ * `object-src` CSP and the API's `X-Frame-Options` — the browser's own PDF
+ * viewer can then render them. Revoked on unmount.
+ */
+function usePdfBlobUrl(src: string) {
+  var [blobUrl, setBlobUrl] = useState<string | null>(null);
+  var [failed, setFailed] = useState(false);
+
+  useEffect(
+    function () {
+      // Mobile browsers usually have no inline PDF viewer; skip the fetch and
+      // show the "tap to open" state rather than a blank frame.
+      if (typeof navigator !== "undefined" && (navigator as any).pdfViewerEnabled === false) {
+        setFailed(true);
+        return;
+      }
+
+      var cancelled = false;
+      var created: string | null = null;
+
+      fetch(src, { credentials: "same-origin" })
+        .then(function (r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.blob();
+        })
+        .then(function (blob) {
+          if (cancelled) return;
+          // Some uploads stored application/octet-stream; the viewer needs
+          // the real type before it will render.
+          var typed =
+            blob.type === "application/pdf" ? blob : new Blob([blob], { type: "application/pdf" });
+          created = URL.createObjectURL(typed);
+          setBlobUrl(created);
+        })
+        .catch(function () {
+          if (!cancelled) setFailed(true);
+        });
+
+      return function () {
+        cancelled = true;
+        if (created) URL.revokeObjectURL(created);
+      };
+    },
+    [src]
+  );
+
+  return { blobUrl: blobUrl, failed: failed };
+}
+
+/** Shared rendered frame for the card thumbnail and the full-size preview. */
+function PdfFrame({
+  src,
+  filename,
+  height,
+}: {
+  src: string;
+  filename: string;
+  height: number | string;
+}) {
+  var pdf = usePdfBlobUrl(src);
+
+  if (pdf.blobUrl) {
+    return (
+      <iframe
+        src={pdf.blobUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH"}
+        title={filename}
+        style={{ display: "block", width: "100%", height: height, border: "none" }}
+      />
+    );
+  }
+
+  return (
+    <span
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+        height: height,
+        padding: "0 10px",
+        textAlign: "center",
+        color: cTxt3,
+        fontSize: 11,
+        fontWeight: 600,
+      }}
+    >
+      <FileText size={22} />
+      {pdf.failed ? "Preview not available" : "Loading preview…"}
+    </span>
+  );
+}
+
+/** PDF attachment card: first page inline, click to enlarge, download button. */
+function PdfThumb({
+  href,
+  filename,
+  size,
+  onOpen,
+}: {
+  href: string;
+  filename: string;
+  size?: number;
+  onOpen: () => void;
+}) {
+  return (
+    <div
+      style={{
+        display: "block",
+        width: 190,
+        border: "1px solid " + cBord2,
+        borderRadius: 10,
+        overflow: "hidden",
+        background: "var(--surface)",
+      }}
+    >
+      <div style={{ position: "relative", height: 246, background: "#0b1220" }}>
+        <PdfFrame src={withParam(href, "inline=1")} filename={filename} height="100%" />
+        <button
+          type="button"
+          onClick={onOpen}
+          style={{
+            position: "absolute",
+            top: 6,
+            right: 6,
+            padding: "3px 7px",
+            borderRadius: 6,
+            border: "none",
+            background: "rgba(15,23,42,0.75)",
+            color: "#fff",
+            fontSize: 10,
+            fontWeight: 700,
+            cursor: "zoom-in",
+            fontFamily: "Inter, sans-serif",
+          }}
+        >
+          Preview
+        </button>
+      </div>
+      <span
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "6px 9px",
+          fontSize: 11,
+          fontWeight: 600,
+          color: cTxt2,
+        }}
+      >
+        <FileText size={11} style={{ flexShrink: 0 }} />
+        <span
+          title={filename}
+          style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+        >
+          {filename}
+        </span>
+        {size ? (
+          <span style={{ color: cTxt3, fontWeight: 400, marginLeft: "auto", flexShrink: 0 }}>
+            {fmtSize(size)}
+          </span>
+        ) : null}
+        <a
+          href={withParam(href, "download=1")}
+          title={"Download " + filename}
+          style={{
+            display: "inline-flex",
+            color: cTxt2,
+            flexShrink: 0,
+            marginLeft: size ? 2 : "auto",
+          }}
+        >
+          <Download size={12} />
+        </a>
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Full-size in-page preview. Overlay stays inside the message pane so the
+ * user never leaves the email page; Download saves the original.
+ */
+function PreviewModal({
+  item,
+  onClose,
+}: {
+  item: { href: string; filename: string; size?: number; kind: "image" | "pdf" };
+  onClose: () => void;
+}) {
+  useEffect(function () {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return function () {
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={function (e) {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+        background: "rgba(2,6,23,0.78)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          width: item.kind === "pdf" ? "min(920px, 94vw)" : "auto",
+          maxWidth: "94vw",
+          maxHeight: "92vh",
+          borderRadius: 12,
+          overflow: "hidden",
+          background: "var(--surface)",
+          border: "1px solid " + cBord2,
+          boxShadow: "0 24px 64px rgba(0,0,0,0.45)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "10px 14px",
+            borderBottom: "1px solid " + cBord,
+          }}
+        >
+          {item.kind === "pdf" ? (
+            <FileText size={14} style={{ color: cTxt2, flexShrink: 0 }} />
+          ) : (
+            <Paperclip size={14} style={{ color: cTxt2, flexShrink: 0 }} />
+          )}
+          <span
+            title={item.filename}
+            style={{
+              flex: 1,
+              minWidth: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              fontSize: 12,
+              fontWeight: 700,
+              color: cTxt,
+            }}
+          >
+            {item.filename}
+          </span>
+          {item.size ? (
+            <span style={{ fontSize: 11, color: cTxt3, flexShrink: 0 }}>
+              {fmtSize(item.size)}
+            </span>
+          ) : null}
+          <a
+            href={withParam(item.href, "download=1")}
+            title={"Download " + item.filename}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              padding: "5px 9px",
+              borderRadius: 7,
+              border: "1px solid " + cBord2,
+              color: cTxt2,
+              fontSize: 11,
+              fontWeight: 700,
+              textDecoration: "none",
+              flexShrink: 0,
+            }}
+          >
+            <Download size={12} /> Download
+          </a>
+          <button
+            type="button"
+            onClick={onClose}
+            title="Close preview"
+            aria-label="Close preview"
+            style={{
+              display: "inline-flex",
+              padding: 5,
+              border: "none",
+              borderRadius: 7,
+              background: "transparent",
+              color: cTxt2,
+              cursor: "pointer",
+            }}
+          >
+            <X size={15} />
+          </button>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "auto",
+            background: "#0b1220",
+          }}
+        >
+          {item.kind === "image" ? (
+            <img
+              src={item.href}
+              alt={item.filename}
+              style={{ display: "block", maxWidth: "100%", maxHeight: "78vh" }}
+            />
+          ) : (
+            <PdfFrame
+              src={withParam(item.href, "inline=1")}
+              filename={item.filename}
+              height="78vh"
+            />
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -344,7 +729,7 @@ function PendingAttachChip({ a, onRemove }: { a: any; onRemove: () => void }) {
           src={"/api/admin/email/attachment?path=" + encodeURIComponent(a.path)}
           filename={a.filename}
           size={a.size}
-          href={"/api/admin/email/attachment?path=" + encodeURIComponent(a.path) + "&inline=1"}
+          href={"/api/admin/email/attachment?path=" + encodeURIComponent(a.path)}
         />
         <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: cTxt3 }}>
           Ready to send {removeBtn}
@@ -384,80 +769,118 @@ function PendingAttachChip({ a, onRemove }: { a: any; onRemove: () => void }) {
 
 function AttachmentChips({ message }: { message: any }) {
   var files = parseAttachments(message.attachments_meta);
+  var [preview, setPreview] = useState<null | {
+    href: string;
+    filename: string;
+    size?: number;
+    kind: "image" | "pdf";
+  }>(null);
   if (files.length === 0) return null;
 
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
-      {files.map(function (f, i) {
-        var href = null;
-        if (message.direction === "in" && message.resend_id && f.id) {
-          href =
-            "/api/admin/email/attachment?email=" +
-            encodeURIComponent(message.resend_id) +
-            "&id=" +
-            encodeURIComponent(f.id);
-        } else if (f.path) {
-          href = "/api/admin/email/attachment?path=" + encodeURIComponent(f.path);
-        }
+    <>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+        {files.map(function (f, i) {
+          var href = null;
+          if (message.direction === "in" && message.resend_id && f.id) {
+            href =
+              "/api/admin/email/attachment?email=" +
+              encodeURIComponent(message.resend_id) +
+              "&id=" +
+              encodeURIComponent(f.id);
+          } else if (f.path) {
+            href = "/api/admin/email/attachment?path=" + encodeURIComponent(f.path);
+          }
 
-        // Images preview inline. Only when we can actually resolve the bytes —
-        // legacy sent rows store a bare filename with no storage path, and
-        // there is nothing to point an <img> at.
-        if (href && isImageAttachment(f)) {
-          return (
-            <AttachThumb
-              key={i}
-              src={href}
-              filename={f.filename}
-              size={f.size}
-              href={href + (href.indexOf("?") === -1 ? "?" : "&") + "inline=1"}
-            />
+          // Images and PDFs preview inline. Only when we can actually resolve
+          // the bytes — legacy sent rows store a bare filename with no storage
+          // path, and there is nothing to point the preview at.
+          if (href && isImageAttachment(f)) {
+            return (
+              <AttachThumb
+                key={i}
+                src={href}
+                filename={f.filename}
+                size={f.size}
+                href={href}
+                onOpen={function () {
+                  setPreview({ href: href!, filename: f.filename, size: f.size, kind: "image" });
+                }}
+              />
+            );
+          }
+
+          if (href && isPdfAttachment(f)) {
+            return (
+              <PdfThumb
+                key={i}
+                href={href}
+                filename={f.filename}
+                size={f.size}
+                onOpen={function () {
+                  setPreview({ href: href!, filename: f.filename, size: f.size, kind: "pdf" });
+                }}
+              />
+            );
+          }
+
+          // Everything else (DST, EMB, PES, …) is a download chip. download=1
+          // forces an attachment disposition rather than leaving it to the
+          // browser's guess at the stored MIME type.
+          var downloadHref = href ? withParam(href, "download=1") : null;
+
+          var inner = (
+            <>
+              <Paperclip size={12} />
+              <span
+                style={{
+                  maxWidth: 220,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {f.filename}
+              </span>
+              {f.size ? (
+                <span style={{ color: cTxt3, fontWeight: 400 }}>{fmtSize(f.size)}</span>
+              ) : null}
+              {downloadHref ? <Download size={12} style={{ opacity: 0.7 }} /> : null}
+            </>
           );
-        }
-
-        var inner = (
-          <>
-            <Paperclip size={12} />
-            <span
-              style={{
-                maxWidth: 220,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {f.filename}
+          var style: React.CSSProperties = {
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "7px 11px",
+            background: CLR.blue.bg,
+            borderRadius: 8,
+            border: "1px solid rgba(59,130,246,0.2)",
+            fontSize: 11,
+            color: CLR.blue.text,
+            fontWeight: 600,
+            textDecoration: "none",
+          };
+          return downloadHref ? (
+            <a key={i} href={downloadHref} title={"Download " + f.filename} style={style}>
+              {inner}
+            </a>
+          ) : (
+            <span key={i} style={style}>
+              {inner}
             </span>
-            {f.size ? (
-              <span style={{ color: cTxt3, fontWeight: 400 }}>{fmtSize(f.size)}</span>
-            ) : null}
-            {href ? <Download size={12} style={{ opacity: 0.7 }} /> : null}
-          </>
-        );
-        var style: React.CSSProperties = {
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-          padding: "7px 11px",
-          background: CLR.blue.bg,
-          borderRadius: 8,
-          border: "1px solid rgba(59,130,246,0.2)",
-          fontSize: 11,
-          color: CLR.blue.text,
-          fontWeight: 600,
-          textDecoration: "none",
-        };
-        return href ? (
-          <a key={i} href={href} style={style}>
-            {inner}
-          </a>
-        ) : (
-          <span key={i} style={style}>
-            {inner}
-          </span>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+      {preview ? (
+        <PreviewModal
+          item={preview}
+          onClose={function () {
+            setPreview(null);
+          }}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -1034,7 +1457,12 @@ export function EmailComposer({
           attachments_meta: ready.length
             ? JSON.stringify(
                 ready.map(function (a) {
-                  return { filename: a.filename, path: a.path, size: a.size };
+                  return {
+                    filename: a.filename,
+                    path: a.path,
+                    content_type: a.content_type,
+                    size: a.size,
+                  };
                 })
               )
             : null,
@@ -1184,7 +1612,12 @@ export function EmailComposer({
           attachments_meta: ready.length
             ? JSON.stringify(
                 ready.map(function (a) {
-                  return { filename: a.filename, path: a.path, size: a.size };
+                  return {
+                    filename: a.filename,
+                    path: a.path,
+                    content_type: a.content_type,
+                    size: a.size,
+                  };
                 })
               )
             : null,

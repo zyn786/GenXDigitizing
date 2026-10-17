@@ -29,7 +29,7 @@ import {
   hoursUntilDeadline,
   slaStatusColor,
 } from "@/lib/utils";
-import NextImage from "next/image";
+import { PdfPreviewFrame, previewKind, saveFile } from "@/components/file-preview";
 
 const FMTS = [
   "DST",
@@ -209,29 +209,31 @@ function SpecRow({ label, value, mono }: any) {
 function FileCard({ file, icon, onPreview, onDownload }: any) {
   const isArtwork = file.file_type === "artwork";
   const url = file.signed_url || file.file_url;
+  const kind = isArtwork ? previewKind(file.file_name) : null;
   return (
     <div
       className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3"
       style={{ background: "var(--elevated)", borderColor: "var(--border)" }}
     >
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        {isArtwork ? (
-          <div
+        {kind === "image" ? (
+          <button
+            type="button"
+            title={"Preview " + file.file_name}
             className="relative h-10 w-10 flex-shrink-0 cursor-pointer overflow-hidden rounded-lg"
-            style={{ background: "var(--elevated2)" }}
-            onClick={() => onPreview?.(url)}
+            style={{ background: "var(--elevated2)", padding: 0, border: "none" }}
+            onClick={() => onPreview?.(url, file.file_name, "image")}
           >
-            <NextImage
-              fill
+            <img
               src={url}
               alt={file.file_name}
-              className="object-cover"
+              className="h-full w-full object-cover"
+              loading="lazy"
               onError={(e: any) => {
                 e.target.style.display = "none";
               }}
-              sizes="(max-width: 768px) 100vw, 800px"
             />
-          </div>
+          </button>
         ) : (
           <span className="flex-shrink-0" style={{ color: txt2 }}>
             {icon}
@@ -251,17 +253,32 @@ function FileCard({ file, icon, onPreview, onDownload }: any) {
           </div>
         </div>
       </div>
-      <button
-        onClick={() => onDownload?.(url, file.file_name)}
-        className="inline-flex flex-shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[11px] font-semibold transition-all active:scale-95"
-        style={{
-          background: CLR.purple.bgSoft,
-          borderColor: CLR.purple.border,
-          color: CLR.purple.text,
-        }}
-      >
-        <Download size={11} /> Download
-      </button>
+      <div className="flex flex-shrink-0 items-center gap-1.5">
+        <button
+          onClick={() => onDownload?.(url, file.file_name)}
+          className="inline-flex flex-shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[11px] font-semibold transition-all active:scale-95"
+          style={{
+            background: CLR.purple.bgSoft,
+            borderColor: CLR.purple.border,
+            color: CLR.purple.text,
+          }}
+        >
+          <Download size={11} /> Download
+        </button>
+        {kind && (
+          <button
+            onClick={() => onPreview?.(url, file.file_name, kind)}
+            className="inline-flex flex-shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[11px] font-medium transition-all active:scale-95"
+            style={{
+              background: "var(--elevated)",
+              borderColor: "var(--border2)",
+              color: txt2,
+            }}
+          >
+            <FileText size={11} /> Preview
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -275,16 +292,16 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
   const [reviewText, setReviewText] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
   const [submittedReview, setSubmittedReview] = useState(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewFile, setPreviewFile] = useState<{
+    url: string;
+    name: string;
+    kind: "image" | "pdf";
+  } | null>(null);
+  const openPreview = (url: string, name: string, kind: "image" | "pdf") =>
+    setPreviewFile({ url, name, kind });
 
   function downloadFile(url: string, name: string) {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => document.body.removeChild(a), 100);
+    void saveFile(url, name);
   }
   // Fetch review from DB + localStorage on mount
   useEffect(() => {
@@ -824,7 +841,7 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
                     key={f.id}
                     file={f}
                     icon={<ImageIcon size={14} />}
-                    onPreview={setPreviewImage}
+                    onPreview={openPreview}
                     onDownload={downloadFile}
                   />
                 ))
@@ -891,7 +908,7 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
                               key={f.id}
                               file={f}
                               icon={<FileText size={14} />}
-                              onPreview={setPreviewImage}
+                              onPreview={openPreview}
                               onDownload={downloadFile}
                             />
                           ))}
@@ -1345,28 +1362,49 @@ export function OrderDetail({ order, userId, clientId, orderMessages }: any) {
         </div>
       </div>
 
-      {/* Preview overlay */}
-      {previewImage && (
+      {/* Preview overlay — stays on the page, never opens a new tab */}
+      {previewFile && (
         <div
           className="fixed inset-0 z-[80] flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.85)" }}
-          onClick={() => setPreviewImage(null)}
+          onClick={() => setPreviewFile(null)}
         >
+          <div className="absolute left-4 top-4 z-10 flex gap-2">
+            <button
+              onClick={() => saveFile(previewFile.url, previewFile.name)}
+              className="flex h-10 items-center gap-1.5 rounded-full px-4 text-xs font-semibold text-white"
+              style={{ background: "rgba(255,255,255,0.16)", border: "none", cursor: "pointer" }}
+            >
+              <Download size={13} /> Download
+            </button>
+          </div>
           <button
-            onClick={() => setPreviewImage(null)}
+            onClick={() => setPreviewFile(null)}
             className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full text-xl text-white"
             style={{ background: "rgba(255,255,255,0.1)", border: "none", cursor: "pointer" }}
           >
             ×
           </button>
-          <NextImage
-            src={previewImage}
-            alt="Preview"
-            width={1200}
-            height={900}
-            className="max-h-[90vh] max-w-full rounded-xl object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {previewFile.kind === "pdf" ? (
+            <div
+              className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-xl"
+              style={{ background: "#fff" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <PdfPreviewFrame
+                url={previewFile.url}
+                title={previewFile.name}
+                style={{ width: "100%", height: "85vh" }}
+              />
+            </div>
+          ) : (
+            <img
+              src={previewFile.url}
+              alt={previewFile.name}
+              className="max-h-[90vh] max-w-full rounded-xl object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
         </div>
       )}
     </div>
